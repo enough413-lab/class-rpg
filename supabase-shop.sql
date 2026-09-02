@@ -58,6 +58,11 @@ insert into public.item_catalog(id,name,slot,boy_image,girl_image,price,active,d
 on conflict(id) do update set name=excluded.name,slot=excluded.slot,boy_image=excluded.boy_image,
  girl_image=excluded.girl_image,price=excluded.price,active=true,default_owned=false,default_equipped=false;
 
+-- 기본 아이템 이름을 학생 화면에서 쓰는 말로 다듬습니다.
+update public.item_catalog set name='기본 흰색 상의' where id='basic_top';
+update public.item_catalog set name='기본 파란색 하의' where id='basic_bottom';
+update public.item_catalog set name='기본 운동화' where id='basic_shoes';
+
 insert into public.shop_products(id,category,kind,name,description,icon,image,price,item_id,sort_order,gender) values
  ('school-top-boy','top','wearable','남자 교복 상의','깔끔한 남색 반팔 교복 상의예요.','👔','3.top/top_boy_school.png',80,'school-top-boy',10,'boy'),
  ('school-top-girl','top','wearable','여자 교복 상의','리본이 달린 남색 반팔 교복 상의예요.','🎀','3.top/top_girl_school.png',80,'school-top-girl',20,'girl'),
@@ -70,10 +75,11 @@ on conflict(id) do update set category=excluded.category,kind=excluded.kind,name
 create or replace function public.student_shop(p_token text)
 returns table(product_id text,category text,kind text,name text,description text,icon text,image text,price integer,owned boolean)
 language plpgsql security definer set search_path=public stable as $$
-declare v_student public.students%rowtype;
+declare v_student public.students%rowtype; v_student_id bigint;
 begin
-  select * into v_student from public.student_for_token(p_token) limit 1;
-  if v_student.id is null then raise exception '로그인이 만료됐어요. 다시 로그인해 주세요.'; end if;
+  v_student_id:=public.student_for_token(p_token);
+  if v_student_id is null then raise exception '로그인이 만료됐어요. 다시 로그인해 주세요.'; end if;
+  select * into v_student from public.students where id=v_student_id;
   return query select p.id,p.category,p.kind,p.name,p.description,p.icon,p.image,p.price,
     case when p.kind='wearable' then exists(select 1 from public.student_items si where si.student_id=v_student.id and si.item_id=p.item_id)
          else exists(select 1 from public.shop_orders o where o.student_id=v_student.id and o.product_id=p.id and o.status='pending') end
@@ -87,10 +93,11 @@ grant execute on function public.student_shop(text) to anon,authenticated;
 
 create or replace function public.student_buy_product(p_token text,p_product_id text)
 returns jsonb language plpgsql security definer set search_path=public as $$
-declare v_student public.students%rowtype; v_product public.shop_products%rowtype; v_order_id bigint;
+declare v_student public.students%rowtype; v_student_id bigint; v_product public.shop_products%rowtype; v_order_id bigint;
 begin
-  select * into v_student from public.student_for_token(p_token) limit 1;
-  if v_student.id is null then raise exception '로그인이 만료됐어요. 다시 로그인해 주세요.'; end if;
+  v_student_id:=public.student_for_token(p_token);
+  if v_student_id is null then raise exception '로그인이 만료됐어요. 다시 로그인해 주세요.'; end if;
+  select * into v_student from public.students where id=v_student_id;
   select * into v_product from public.shop_products where id=p_product_id and active for update;
   if v_product.id is null then raise exception '판매하지 않는 상품이에요.'; end if;
   if v_product.gender is not null and v_product.gender<>v_student.gender then raise exception '내 캐릭터에게 맞지 않는 옷이에요.'; end if;
