@@ -26,7 +26,7 @@ function installBulkApproval(d,w){
     const s=d.createElement('style');s.id='bulkReviewStyle';s.textContent=`
       .bulk-review-bar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:9px 0 12px;padding:9px;border-radius:12px;background:#f7f6ff;border:1px solid #dedaff}
       .bulk-review-check{width:18px;height:18px;accent-color:#6c63ff;flex:0 0 auto}
-      .review-feedback-note{margin-top:7px;padding:7px 9px;border-radius:9px;background:#fff6dd;color:#795a00;font-size:12px;font-weight:800}
+      .quest-template-box{margin:12px 0;padding:11px;border:1px solid #dedaff;border-radius:13px;background:#faf9ff}.quest-template-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.quest-template-row select{flex:1;min-width:170px}.quest-template-row .btn{white-space:nowrap}
     `;d.head.appendChild(s);
   }
   if(!d.getElementById('bulkReviewBar')){
@@ -81,10 +81,28 @@ function installRejectReason(d,w){
   },true);
 }
 
+function installQuestTemplates(d,w){
+  if(d.getElementById('questTemplateBox'))return;
+  const title=d.getElementById('questTitle'),desc=d.getElementById('questDesc'),xp=d.getElementById('questXp'),gold=d.getElementById('questGold'),type=d.getElementById('questType');
+  if(!title||!desc||!xp||!gold||!type)return;
+  const card=title.closest('.card');if(!card)return;
+  const box=d.createElement('div');box.id='questTemplateBox';box.className='quest-template-box';
+  box.innerHTML='<b>⚡ 퀘스트 템플릿</b><div class="muted" style="margin:3px 0 8px">자주 쓰는 퀘스트를 저장해 두고 한 번에 불러와요.</div><div class="quest-template-row"><select id="questTemplateSelect"><option value="">저장된 템플릿 선택</option></select><button class="btn" id="loadQuestTemplate">불러오기</button><button class="btn good" id="saveQuestTemplate">현재 입력 저장</button><button class="btn danger" id="deleteQuestTemplate">삭제</button></div>';
+  const firstField=card.querySelector('.field');card.insertBefore(box,firstField);
+  const key='classRpgTeacherQuestTemplates_v1';
+  const read=()=>{try{return JSON.parse(w.localStorage.getItem(key)||'[]')}catch{return[]}};
+  const write=v=>w.localStorage.setItem(key,JSON.stringify(v));
+  const render=()=>{const items=read(),sel=box.querySelector('#questTemplateSelect');const chosen=sel.value;sel.innerHTML='<option value="">저장된 템플릿 선택</option>'+items.map((t,i)=>`<option value="${i}">${String(t.name||t.title||'템플릿')}</option>`).join('');if(chosen&&items[Number(chosen)])sel.value=chosen};
+  box.querySelector('#saveQuestTemplate').onclick=()=>{if(!title.value.trim()){w.alert('퀘스트 이름을 먼저 입력해 주세요.');return}const name=w.prompt('이 템플릿 이름을 정해 주세요.',title.value.trim());if(!name)return;const items=read();items.push({name,title:title.value,desc:desc.value,xp:xp.value,gold:gold.value,type:type.value});write(items.slice(-50));render()};
+  box.querySelector('#loadQuestTemplate').onclick=()=>{const i=Number(box.querySelector('#questTemplateSelect').value),t=read()[i];if(!t)return;title.value=t.title||'';desc.value=t.desc||'';xp.value=t.xp??10;gold.value=t.gold??10;type.value=t.type||'daily';type.dispatchEvent(new Event('change',{bubbles:true}))};
+  box.querySelector('#deleteQuestTemplate').onclick=()=>{const sel=box.querySelector('#questTemplateSelect'),i=Number(sel.value),items=read();if(!sel.value||!items[i])return;items.splice(i,1);write(items);render()};
+  render();
+}
+
 function enhanceTeacher(){
   const w=getTeacherCore(),d=w?.document;if(!w||!d||!w.db)return;
-  installRejectReason(d,w);installBulkApproval(d,w);
-  if(!d.__teacherEnhanceObserver){d.__teacherEnhanceObserver=new MutationObserver(()=>installBulkApproval(d,w));d.__teacherEnhanceObserver.observe(d.body,{childList:true,subtree:true})}
+  installRejectReason(d,w);installBulkApproval(d,w);installQuestTemplates(d,w);
+  if(!d.__teacherEnhanceObserver){d.__teacherEnhanceObserver=new MutationObserver(()=>{installBulkApproval(d,w);installQuestTemplates(d,w)});d.__teacherEnhanceObserver.observe(d.body,{childList:true,subtree:true})}
 }
 
 teacherFrame.addEventListener('load',()=>setTimeout(enhanceTeacher,500));
