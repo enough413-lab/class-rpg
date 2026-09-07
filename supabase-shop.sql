@@ -40,8 +40,8 @@ revoke all on public.shop_products,public.shop_orders from anon,authenticated;
 
 insert into public.shop_products(id,category,kind,name,description,icon,price,sort_order) values
  ('vitamin','misc','coupon','비타민','선생님께 비타민 1개를 받아요.','🍊',20,10),
- ('chromebook-pass','misc','coupon','크롬북 이용권','정해진 시간에 크롬북을 이용해요.','💻',60,20),
- ('music-choice','misc','coupon','교실 음악 신청권','쉬는 시간에 들을 음악 1곡을 신청해요.','🎵',30,30),
+ ('chromebook-pass','misc','coupon','크롬북 이용권','정해진 시간에 크롬북을 이용해요.','💻',300,20),
+ ('music-choice','misc','coupon','교실 음악 신청권','쉬는 시간에 들을 음악 1곡을 신청해요.','🎵',150,30),
  ('seat-choice','misc','coupon','자리 선택권','선생님과 상의해 원하는 자리를 골라요.','🪑',80,40),
  ('sticker','misc','coupon','칭찬 스티커','칭찬 스티커 1개와 교환해요.','⭐',40,50),
  ('nickname-change','misc','coupon','닉네임 변경권','RPG 캐릭터 닉네임을 한 번 바꿔요.','✏️',150,60)
