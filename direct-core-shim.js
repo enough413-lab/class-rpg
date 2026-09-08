@@ -1,0 +1,1 @@
+(()=>{const app=document.getElementById('app');function patch(){try{const d=app.contentDocument;if(!d||d.__directCoreShim)return;d.__directCoreShim=true;const base=d.getElementById.bind(d);d.getElementById=id=>id==='core'?{contentWindow:app.contentWindow}:base(id)}catch(e){console.warn(e)}}app?.addEventListener('load',patch);patch()})();
