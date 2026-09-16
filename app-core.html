@@ -98,7 +98,7 @@ document.querySelector('#classroomHub .hub-stage').insertAdjacentHTML('beforeend
 </form></section></div>
 <script>
 let changingPin=false;
-window.openChangePin=()=>{if(!current||!token)return;$('changePinForm').reset();err('changePinMsg','');$('changePinModal').classList.remove('hidden');$('currentPin').focus()};
+window.openChangePin=()=>{if(!localStorage.getItem('classRpgStudentToken'))return;$('changePinForm').reset();err('changePinMsg','');$('changePinModal').classList.remove('hidden');$('currentPin').focus()};
 window.closeChangePin=()=>{if(changingPin)return;$('changePinModal').classList.add('hidden');$('changePinForm').reset();document.querySelector('[onclick="openChangePin()"]')?.focus()};
 $('changePinForm').addEventListener('submit',async event=>{
   event.preventDefault();if(changingPin)return;
@@ -109,11 +109,11 @@ $('changePinForm').addEventListener('submit',async event=>{
   changingPin=true;$('changePinSave').disabled=true;$('changePinClose').disabled=true;
   err('changePinMsg','변경하는 중...',true);
   try{
-    const {data,error}=await db.rpc('student_change_pin',{p_token:token,p_current_pin:oldPin,p_new_pin:newPin});
+    const sessionToken=localStorage.getItem('classRpgStudentToken')||'';\n    const {data,error}=await db.rpc('student_change_pin',{p_token:sessionToken,p_current_pin:oldPin,p_new_pin:newPin});
     if(error){err('changePinMsg','변경하지 못했어요. 잠시 후 다시 시도해 주세요.');return}
     if(!data?.ok||!data?.session_token){err('changePinMsg',data?.message||'변경하지 못했어요. 다시 로그인해 주세요.');return}
-    token=data.session_token;localStorage.setItem('classRpgStudentToken',token);
-    $('changePinForm').reset();err('changePinMsg','비밀번호를 변경했어요! 다음부터 새 비밀번호로 로그인해 주세요.',true);
+    localStorage.setItem('classRpgStudentToken',data.session_token);
+    $('changePinForm').reset();err('changePinMsg','비밀번호를 변경했어요! 새 비밀번호로 다시 연결할게요.',true);setTimeout(()=>parent.location.reload(),800);
   }catch{err('changePinMsg','연결을 확인하고 다시 시도해 주세요.')}
   finally{changingPin=false;$('changePinSave').disabled=false;$('changePinClose').disabled=false}
 });
