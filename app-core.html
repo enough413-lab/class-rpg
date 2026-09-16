@@ -96,7 +96,8 @@ $('changePinForm').addEventListener('submit',async event=>{
   changingPin=true;$('changePinSave').disabled=true;$('changePinClose').disabled=true;
   err('changePinMsg','변경하는 중...',true);
   try{
-    const sessionToken=localStorage.getItem('classRpgStudentToken')||'';\n    const {data,error}=await db.rpc('student_change_pin',{p_token:sessionToken,p_current_pin:oldPin,p_new_pin:newPin});
+    const sessionToken=localStorage.getItem('classRpgStudentToken')||'';
+    const {data,error}=await db.rpc('student_change_pin',{p_token:sessionToken,p_current_pin:oldPin,p_new_pin:newPin});
     if(error){err('changePinMsg','변경하지 못했어요. 잠시 후 다시 시도해 주세요.');return}
     if(!data?.ok||!data?.session_token){err('changePinMsg',data?.message||'변경하지 못했어요. 다시 로그인해 주세요.');return}
     localStorage.setItem('classRpgStudentToken',data.session_token);
