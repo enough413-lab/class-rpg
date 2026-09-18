@@ -29,6 +29,7 @@ function installBulkApproval(d,w){
       .quest-template-box{margin:12px 0;padding:11px;border:1px solid #dedaff;border-radius:13px;background:#faf9ff}.quest-template-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.quest-template-row select{flex:1;min-width:170px}.quest-template-row .btn{white-space:nowrap}
     `;d.head.appendChild(s);
   }
+  if(root.dataset.questReviews === 'true')return;
   if(!d.getElementById('bulkReviewBar')){
     const bar=d.createElement('div');bar.id='bulkReviewBar';bar.className='bulk-review-bar';bar.innerHTML='<label style="display:flex;align-items:center;gap:6px;font-weight:800"><input id="bulkAll" class="bulk-review-check" type="checkbox"> 전체 선택</label><button id="bulkApprove" class="btn good">선택 일괄 승인</button><span id="bulkMsg" class="muted"></span>';
     root.parentElement?.insertBefore(bar,root);
