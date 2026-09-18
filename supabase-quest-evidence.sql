@@ -18,7 +18,7 @@ begin
   if q.id is null then raise exception '이 퀘스트를 찾을 수 없어요.'; end if;
   if q.quest_type<>'main' then raise exception '메인 퀘스트만 의뢰를 맡을 수 있어요.'; end if;
   pkey:=public.quest_period_key(q.quest_type);
-  update public.quest_submissions set status='accepted',submitted_at=null,report_text=null,evidence_image=null
+  update public.quest_submissions set status='accepted',submitted_at=now(),report_text=null,evidence_image=null
     where student_id=sid and quest_id=q.id and period_key=pkey and status in ('available','rejected');
   if not found then
     insert into public.quest_submissions(student_id,quest_id,period_key,status) values(sid,q.id,pkey,'accepted')
