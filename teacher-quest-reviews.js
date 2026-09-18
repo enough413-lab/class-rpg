@@ -28,7 +28,12 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   const style = doc.createElement('style');
   style.textContent = `
     .qr-banner{width:100%;display:flex;align-items:center;gap:12px;padding:16px;margin:10px 0;border:1px solid #dfdcf5;border-radius:15px;background:#faf9ff;text-align:left;color:#252736;font:inherit;cursor:pointer}
-    .qr-banner:hover{background:#f1eeff;border-color:#aca4ef}.qr-banner:focus-visible,.qr-dialog button:focus-visible{outline:3px solid #6c63ff;outline-offset:3px}
+    .qr-banner{background:#f8fafc;border-color:#e2e8f0}.qr-banner:hover{background:#f1f5f9;border-color:#cbd5e1}
+    .qr-banner .qr-count{background:#e9edf2;color:#596579}
+    .qr-banner.qr-pending{background:#fff7e8;border-color:#efb455;box-shadow:inset 5px 0 0 #e68a12}
+    .qr-banner.qr-pending:hover{background:#ffefd2;border-color:#d9860d}
+    .qr-banner.qr-pending .qr-count{background:#a94708;color:#fff;padding:5px 11px}
+    .qr-banner.qr-pending b{color:#713b12}.qr-banner:focus-visible,.qr-dialog button:focus-visible{outline:3px solid #6c63ff;outline-offset:3px}
     .qr-icon{font-size:27px}.qr-banner-main{flex:1;min-width:0;overflow-wrap:anywhere}.qr-banner b{display:block;font-size:16px}.qr-meta{font-size:14px;color:#62677a;line-height:1.5}.qr-count{display:inline-block;margin-top:5px;border-radius:20px;padding:3px 9px;background:#eae5ff;color:#5142a6;font-size:14px;font-weight:800}
     .qr-dialog{width:min(760px,calc(100% - 24px));max-height:90vh;padding:0;border:0;border-radius:20px;color:#252736;box-shadow:0 24px 70px #11142e40}.qr-dialog::backdrop{background:#14152788}
     .qr-head{padding:20px 22px 14px;border-bottom:1px solid #e7e8ef}.qr-head h2{margin:0 0 5px;font-size:22px;overflow-wrap:anywhere}.qr-head-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
@@ -84,7 +89,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   }
 
   function renderBanners() {
-    root.innerHTML = groups.length ? groups.map(g => `<button class="qr-banner" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `승인 대기 ${g.rows.length}건` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join('') : '<p class="qr-empty">진행 중인 퀘스트와 승인 대기 요청이 없어요.</p>';
+    root.innerHTML = groups.length ? groups.map(g => `<button class="qr-banner${g.rows.length ? ' qr-pending' : ''}" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `● 승인 대기 ${g.rows.length}건` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join('') : '<p class="qr-empty">진행 중인 퀘스트와 승인 대기 요청이 없어요.</p>';
   }
 
   async function pages(makeQuery) {
