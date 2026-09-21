@@ -143,7 +143,7 @@ function ensureCompletedRecord(){if($('completedRecordModal'))return;document.bo
 const ASSET_VERSION='20260902-school-shop',ASSET_ALIASES={'item-boy-top-basic.png':'3.top/top_boy_basic.png','item-girl-top-basic.png':'3.top/top_girl_basic.png','item-boy-bottom-basic.png':'4.bottom/bottom_boy_basic.png','item-girl-bottom-basic.png':'4.bottom/bottom_girl_basic.png','item-boy-shoes-basic.png':'7.shoes/shoes_boy_basic.png','item-girl-shoes-basic.png':'7.shoes/shoes_girl_basic.png'},assetUrl=image=>{const path=ASSET_ALIASES[image]||image;return path+(path.includes('?')?'&':'?')+'v='+ASSET_VERSION};
 function setOutfitLayer(layer,image){layer.src=assetUrl(image);layer.classList.remove('hidden')}
 // A hairstyle is one owned item with two render layers; its catalog image is only a preview.
-const HAIR_STYLES={'hanbok-hair-girl':{front:'2.hair/hair_girl_hanbok_front.png',back:'2.hair/hair_girl_hanbok_back.png'}};
+const HAIR_STYLES={'hanbok-hair-boy':{front:'2.hair/hair_boy_hanbok_front.png',back:'2.hair/hair_boy_hanbok_back.png'},'hanbok-hair-girl':{front:'2.hair/hair_girl_hanbok_front.png',back:'2.hair/hair_girl_hanbok_back.png'}};
 function equippedHair(){
  const item=inventory.find(i=>i.equipped&&i.slot==='hair');
  return HAIR_STYLES[item?.item_id]||(current?.gender==='girl'
