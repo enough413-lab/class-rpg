@@ -112,6 +112,17 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     .qr-student-content{border-top:1px dashed #d4cdda;padding:12px 5px 3px}.qr-student-content .qr-bubble{padding:8px 12px;font-size:14px;margin-bottom:8px}.qr-student-content .qr-record-actions{justify-content:flex-end}.qr-student-content .qr-record-actions .btn{flex:0 1 auto}
     @media(max-width:720px){.qr-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:430px){.qr-list{grid-template-columns:1fr;padding:10px}.qr-record .qr-mini-card{min-height:76px}.qr-record .qr-avatar{height:70px;width:56px;flex-basis:56px}}
+
+    .qr-dialog{width:min(1100px,calc(100% - 24px));max-height:94vh}
+    .qr-list{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:start}
+    .qr-record .qr-mini-card{width:100%;border:0;background:transparent;text-align:left;font:inherit;color:inherit;min-height:84px;padding:0;cursor:pointer}
+    .qr-record .qr-avatar{width:56px;flex-basis:56px;height:75px}.qr-mini-text strong{font-size:13px;line-height:1.4}.qr-mini-text .qr-status{font-size:11px;white-space:normal}
+    .qr-filter{font-size:13px;padding:7px 10px!important;border:1px solid #e4d8c1!important;background:#fff!important}.qr-filter[aria-pressed=true]{background:#74548f!important;color:white!important;border-color:#74548f!important}
+    .qr-detail-dialog{width:min(520px,calc(100% - 24px));max-height:85vh;border:2px solid #e8d6b2;border-radius:24px;background:#fffdf7;padding:20px;color:#49465a;box-sizing:border-box;overflow:auto}.qr-detail-dialog::backdrop{background:#29213588}
+    .qr-detail-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.qr-detail-head h3{margin:0;overflow-wrap:anywhere}.qr-detail-head button{flex-shrink:0}.qr-detail-identity{display:flex;align-items:center;gap:15px}.qr-detail-identity .qr-avatar{width:90px;height:115px;flex-basis:90px}.qr-detail-message{white-space:pre-wrap;font-size:13px}
+    @media(max-width:1050px){.qr-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    @media(max-width:820px){.qr-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:600px){.qr-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}.qr-record{padding:6px}.qr-record .qr-mini-card{min-height:90px;gap:4px}.qr-record .qr-avatar{width:42px;flex-basis:42px;height:64px}.qr-mini-text strong{font-size:12px}.qr-mini-text small{font-size:10px}.qr-card-check{right:5px;top:5px}.qr-head{padding:12px}.qr-head h2{font-size:19px}}
   `;
   doc.head.appendChild(style);
   const dialog = doc.createElement('dialog');
@@ -120,9 +131,13 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   dialog.innerHTML = `<div class="qr-head"><div class="qr-head-top"><div><h2 id="qrTitle"></h2><div class="qr-meta" id="qrSubtitle"></div></div><button class="btn" data-close>닫기</button></div><div class="qr-roster-summary" data-summary></div><div class="qr-toolbar"><label class="qr-check-label"><input type="checkbox" data-all> 승인 대기 전체 선택</label><select aria-label="제출 회차" data-period></select></div></div><div class="qr-list"></div><div class="qr-footer"><div class="qr-footer-actions"><b data-selection></b><button class="btn good" data-approve></button></div><p class="qr-message" role="status" aria-live="polite"></p></div>`;
   doc.body.appendChild(dialog);
   const find = selector => dialog.querySelector(selector);
+  let statusFilter='all', detailStudent=null;
+  const detail=doc.createElement('dialog');detail.className='qr-detail-dialog';detail.setAttribute('aria-label','학생 활동 내역');dialog.appendChild(detail);
+  detail.addEventListener('cancel',e=>{if(busy)e.preventDefault()});
+  detail.addEventListener('close',()=>{const id=detailStudent;detailStudent=null;dialog.querySelector(`[data-open-student="${id}"]`)?.focus()});
   let appearances = [], students = [], groups = [], currentId = null, period = '', selected = new Map(), busy = false, request = 0, message = '', failed = false;
   const current = () => groups.find(g => String(g.id) === currentId);
-  const visibleRows = () => (current()?.rows || []).filter(r => !period || String(r.period_key || '') === period).sort((a, b) => Number(a.students?.student_number || 0) - Number(b.students?.student_number || 0));
+  const visibleRows = () => (current()?.rows || []).filter(r => (statusFilter==='all'||statusFilter==='submitted'||statusFilter==='incomplete')&&(!period || String(r.period_key || '') === period)).sort((a, b) => Number(a.students?.student_number || 0) - Number(b.students?.student_number || 0));
 
   function controls() {
     const rows = visibleRows();
@@ -132,10 +147,12 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     find('[data-all]').disabled = busy || !rows.length;
     find('[data-period]').disabled = busy;
     find('[data-close]').disabled = busy;
+    dialog.querySelectorAll('[data-filter],[data-open-student],[data-detail-close]').forEach(el=>el.disabled=busy);
     find('[data-selection]').textContent = `${rows.length}건 중 ${count}건 선택`;
     find('[data-approve]').textContent = busy ? '처리 중…' : `${current()?.title || '퀘스트'} · 선택한 ${count}건 승인`;
     find('[data-approve]').disabled = busy || count === 0;
     find('.qr-message').textContent = message;
+    if(detail.open)detail.querySelector('.qr-detail-message').textContent=message;
     find('.qr-message').classList.toggle('qr-error', failed);
     dialog.querySelectorAll('[data-row], [data-single], [data-reject]').forEach(el => { el.disabled = busy; });
   }
@@ -151,21 +168,30 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     find('[data-period]').hidden = group?.quest_type === 'main' || (!periods.length && !period);
     const roster=questRoster(group,students,period);
     const count=status=>roster.filter(r=>r.status===status).length;
-    find('[data-summary]').innerHTML=`<span>전체 ${roster.length}명</span><span>🔔 요청 ${count('submitted')}명</span><span>✓ 완료 ${count('approved')}명</span><span>진행 중 ${count('accepted')+count('in_progress')}명</span><span>보완 ${count('rejected')}명</span><span>미시작 ${count('available')}명</span>`;
-    find('.qr-list').innerHTML=roster.length?roster.map(({student,row,status})=>{
-      const id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photo=imageUrl(row?.evidence_image),pending=status==='submitted';
+    const filters=[['all',`전체 ${roster.length}명`],['submitted',`🔔 요청 ${count('submitted')}명`],['approved',`✓ 완료 ${count('approved')}명`],['incomplete',`미완료 ${roster.filter(r=>!['approved','excluded'].includes(r.status)).length}명`]];
+    find('[data-summary]').innerHTML=filters.map(([key,label])=>`<button class="btn qr-filter" data-filter="${key}" aria-pressed="${statusFilter===key}">${label}</button>`).join('');
+    const shown=roster.filter(r=>statusFilter==='all'||r.status===statusFilter||(statusFilter==='incomplete'&&!['approved','excluded'].includes(r.status)));
+    find('.qr-list').innerHTML=shown.length?shown.map(({student,row,status})=>{
+      const id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,pending=status==='submitted';
       return `<article class="qr-record qr-state-${escape(status)}" data-student="${escape(student.id)}">
       ${pending?`<input class="qr-card-check" type="checkbox" aria-label="${escape(name)} 승인 선택" data-row="${id}" ${selected.has(String(row.id))?'checked':''}>`:''}
-      <details class="qr-student-detail"><summary class="qr-mini-card">${studentAvatar(student,appearances)}<span class="qr-mini-text"><strong>${escape(name)}</strong><span class="qr-status">${statusLabels[status]||'진행 중'}</span><small>활동 내역 보기 ▾</small></span></summary>
-      <div class="qr-student-content"><div class="qr-bubble">${speech[status]||speech.in_progress}</div>
+      <button type="button" class="qr-mini-card" data-open-student="${escape(student.id)}" aria-haspopup="dialog">${studentAvatar(student,appearances)}<span class="qr-mini-text"><strong>${escape(name)}</strong><span class="qr-status">${statusLabels[status]||'진행 중'}</span><small>활동 내역 보기 ›</small></span></button></article>`;
+    }).join(''):'<div class="qr-empty">해당하는 학생이 없어요.</div>';
+    if(detail.open)renderDetail();
+    controls();
+  }
+
+  function renderDetail(){
+    const entry=questRoster(current(),students,period).find(r=>String(r.student.id)===String(detailStudent));
+    if(!entry){detail.close();return}
+    const {student,row,status}=entry,id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photo=imageUrl(row?.evidence_image),pending=status==='submitted';
+    detail.innerHTML=`<div class="qr-detail-head"><h3>${escape(name)}</h3><button class="btn" data-detail-close>닫기</button></div><div class="qr-detail-identity">${studentAvatar(student,appearances)}<span class="qr-status">${statusLabels[status]||'진행 중'}</span></div><div class="qr-student-content"><div class="qr-bubble">${speech[status]||speech.in_progress}</div>
       ${row?.submitted_at?`<div class="qr-meta">제출 · ${escape(dateLabel(row.submitted_at))}</div>`:''}
       <p class="qr-report">${escape(row?.report_text||(row?'작성된 수행 내용이 없어요.':'아직 수행 기록이 없어요.'))}</p>
       ${status==='rejected'&&row?.rejection_reason?`<p class="qr-report">보완 요청: ${escape(row.rejection_reason)}</p>`:''}
       ${photo?`<button class="qr-photo" data-photo="${id}" aria-label="${escape(name)} 수행 사진 확대"><img src="${escape(photo)}" alt="학생 수행 사진" loading="lazy"></button>`:''}
       ${pending?`<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div>`:''}
-      </div></details></article>`;
-    }).join(''):'<div class="qr-empty">등록된 학생이 없어요.</div>';
-    controls();
+      </div><p class="qr-detail-message" role="status"></p>`;
   }
 
   function renderBanners() {
@@ -253,7 +279,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (event.target.closest('[data-retry]')) { load().catch(() => {}); return; }
     const button = event.target.closest('[data-quest]');
     if (!button || busy) return;
-    currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type); selected.clear(); message = ''; failed = false;
+    statusFilter='all';currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type); selected.clear(); message = ''; failed = false;
     dialog.showModal(); renderDialog(); find('[data-close]').focus();
   });
   dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
@@ -276,6 +302,9 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   dialog.addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button || busy) return;
+    if(button.matches('[data-detail-close]')){detail.close();return}
+    if(button.matches('[data-open-student]')){detailStudent=button.dataset.openStudent;renderDetail();detail.showModal();detail.querySelector('[data-detail-close]').focus();return}
+    if(button.matches('[data-filter]')){statusFilter=button.dataset.filter;selected.clear();message='';renderDialog();return}
     if (button.matches('[data-close]')) dialog.close();
     if (button.matches('[data-approve]')) review([...selected.keys()], true);
     if (button.matches('[data-single]')) review([button.dataset.single], true);
@@ -292,6 +321,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
 
 
 
