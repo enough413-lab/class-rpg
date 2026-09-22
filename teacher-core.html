@@ -30,7 +30,7 @@ select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;f
 <div id="accountModal" class="modal-backdrop hidden"><div class="modal"><h2 id="modalTitle">학생 계정 설정</h2><p id="modalDesc" class="muted"></p><div id="numberField" class="field"><label>학생 번호</label><input id="modalNumber" type="number" min="1" max="99" placeholder="1~99"></div><div class="field"><label>숫자 비밀번호 4자리</label><input id="modalPin" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리"></div><div class="field"><label>비밀번호 확인</label><input id="modalPinConfirm" type="password" inputmode="numeric" maxlength="4" placeholder="같은 번호를 한 번 더 입력"></div><div id="modalMsg" class="muted"></div><div class="row" style="margin-top:14px"><button class="btn" onclick="closeAccountModal()">취소</button><button id="modalSaveBtn" class="btn primary" onclick="saveAccountModal()">저장</button></div></div></div>
 <div id="rewardModal" class="modal-backdrop hidden"><div class="modal"><h2>XP·골드 지급</h2><p id="rewardStudent" class="muted"></p><div class="field"><label>지급할 XP</label><input id="rewardXp" type="number" min="0" value="10"></div><div class="field"><label>지급할 골드</label><input id="rewardGold" type="number" min="0" value="10"></div><div id="rewardMsg" class="muted"></div><div class="row" style="margin-top:14px"><button class="btn" onclick="closeRewardModal()">취소</button><button id="rewardSaveBtn" class="btn primary" onclick="saveReward()">지급하기</button></div></div></div>
 <script type="module">
-import { createQuestReviews } from './teacher-quest-reviews.js?v=20260922-compact';
+import { createQuestReviews } from './teacher-quest-reviews.js?v=20260922-grid';
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const URL='https://gcgjpfidppaioambcatq.supabase.co';const KEY='sb_publishable_qTRHSWCOYF2jUt3jesMkQQ_5DNavuiq';const db=createClient(URL,KEY);window.db=db;
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
@@ -78,6 +78,7 @@ async function loadShopOrders(){const{data,error}=await db.rpc('teacher_shop_ord
 window.resolveShopOrder=async(id,status)=>{const action=status==='used'?'교환을 완료':'요청을 취소하고 골드를 환불';if(!confirm(`${action}할까요?`))return;const{error}=await db.rpc('teacher_resolve_shop_order',{p_order_id:id,p_status:status});if(error)return alert(error.message);await Promise.all([loadShopOrders(),loadStudents()])};
 toggleMainQuestFields();db.channel('teacher-live').on('postgres_changes',{event:'*',schema:'public'},()=>refresh()).subscribe();start();
 </script></body></html>
+
 
 
 
