@@ -1,11 +1,11 @@
 // One selection scope: a quest and, optionally, one submission period.
 export function groupQuestReviews(quests, submissions) {
-  const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [] }]));
+  const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [], records: [] }]));
   for (const row of submissions) {
-    if (row.status !== 'submitted') continue;
     const key = String(row.quest_id);
-    if (!groups.has(key)) groups.set(key, { id: row.quest_id, ...row.quests, rows: [] });
-    groups.get(key).rows.push(row);
+    if (!groups.has(key)) groups.set(key, { id: row.quest_id, ...row.quests, rows: [], records: [] });
+    groups.get(key).records.push(row);
+    if(row.status === 'submitted') groups.get(key).rows.push(row);
   }
   return [...groups.values()].sort((a, b) => b.rows.length - a.rows.length || String(a.title).localeCompare(String(b.title), 'ko'));
 }
@@ -20,6 +20,22 @@ function imageUrl(value) {
   try { return /^https?:$/.test(new URL(value).protocol) || /^data:image\/(png|jpeg|webp|gif);base64,/i.test(value) ? value : ''; } catch { return ''; }
 }
 
+export function currentQuestPeriod(type, now = new Date()) {
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+  const get=k=>parts.find(p=>p.type===k).value;
+  const day=new Date(`${get('year')}-${get('month')}-${get('day')}T00:00:00Z`);
+  if(type==='weekly')day.setUTCDate(day.getUTCDate()-((day.getUTCDay()+6)%7));
+  return type==='main'?'once':day.toISOString().slice(0,10);
+}
+export function questRoster(group, students, period) {
+  const records=(group?.records||[]).filter(r=>String(r.period_key||'once')===period);
+  return students.map(student=>{
+    const row=records.filter(r=>String(r.student_id)===String(student.id)).sort((a,b)=>Number(b.id)-Number(a.id))[0];
+    const assigned=!group?.target_student_ids||group.target_student_ids.map(String).includes(String(student.id));
+    return {student,row,status:row?.status||(assigned?'available':'excluded')};
+  }).sort((a,b)=>Number(a.student.student_number)-Number(b.student.student_number));
+}
+const statusLabels={submitted:'🔔 완료 요청',approved:'✓ 완료',accepted:'✏️ 진행 중',in_progress:'✏️ 진행 중',rejected:'↩ 보완 요청',available:'○ 아직 시작 전',excluded:'대상 아님'};
 export function createQuestReviews({ root, db, refresh, onCount }) {
   const doc = root.ownerDocument;
   const win = doc.defaultView;
@@ -41,17 +57,17 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     .qr-dialog input[type=checkbox]{width:20px;height:20px;margin:0;accent-color:#6c63ff;flex:none}.qr-list{padding:4px 22px 18px}.qr-record{margin-top:14px;padding:16px;border:1px solid #e7e8ef;border-radius:14px;background:white}.qr-record:has(input:checked){border-color:#a699ee;background:#fcfbff}
     .qr-report{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0;font-size:16px;line-height:1.7;color:#252736}.qr-photo{display:block;padding:0;border:0;background:transparent;cursor:zoom-in}.qr-photo img{display:block;max-width:100%;max-height:180px;border-radius:10px}.qr-record-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
     .qr-footer{position:sticky;bottom:0;background:#fff;padding:14px 22px;border-top:1px solid #e7e8ef}.qr-footer-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.qr-message{margin:8px 0 0;font-size:14px;white-space:pre-wrap}.qr-empty{padding:26px 0;color:#62677a;font-size:15px}.qr-dialog button:disabled{opacity:.5;cursor:not-allowed}.qr-error{color:#a72e44}
-    .qr-zoom{width:min(1000px,calc(100% - 24px));padding:14px;border:0;border-radius:16px}.qr-zoom::backdrop{background:#111a}.qr-zoom img{display:block;max-width:100%;max-height:75vh;margin:12px auto 0}
+    .qr-status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:13px;font-weight:800;margin-top:8px}.qr-state-submitted{background:#fff1f2;border:2px solid #ee8495}.qr-state-submitted .qr-status{background:#b42342;color:white}.qr-state-approved{background:#f1f3f5;border-color:#dce0e5;color:#687181}.qr-state-approved .qr-status{background:#e1e5ea;color:#515966}.qr-state-available{background:#eff6ff;border-color:#a8c9ed}.qr-state-available .qr-status{color:#225fa2}.qr-state-accepted,.qr-state-in_progress{background:#f1f1ff;border-color:#bcb7eb}.qr-state-rejected{background:#fff7e6;border-color:#e6bd73}.qr-state-excluded{background:#f8fafc;color:#76808f}.qr-roster-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.qr-roster-summary span{font-size:13px;background:#f1f3f5;padding:5px 8px;border-radius:12px}.qr-zoom{width:min(1000px,calc(100% - 24px));padding:14px;border:0;border-radius:16px}.qr-zoom::backdrop{background:#111a}.qr-zoom img{display:block;max-width:100%;max-height:75vh;margin:12px auto 0}
     @media(max-width:480px){.qr-head,.qr-footer{padding:15px}.qr-list{padding:0 15px 15px}.qr-footer .btn{width:100%}.qr-toolbar{align-items:stretch;flex-direction:column}.qr-toolbar select{width:100%}}
   `;
   doc.head.appendChild(style);
   const dialog = doc.createElement('dialog');
   dialog.className = 'qr-dialog';
   dialog.setAttribute('aria-labelledby', 'qrTitle');
-  dialog.innerHTML = `<div class="qr-head"><div class="qr-head-top"><div><h2 id="qrTitle"></h2><div class="qr-meta" id="qrSubtitle"></div></div><button class="btn" data-close>닫기</button></div><div class="qr-toolbar"><label class="qr-check-label"><input type="checkbox" data-all> 승인 대기 전체 선택</label><select aria-label="제출 회차" data-period></select></div></div><div class="qr-list"></div><div class="qr-footer"><div class="qr-footer-actions"><b data-selection></b><button class="btn good" data-approve></button></div><p class="qr-message" role="status" aria-live="polite"></p></div>`;
+  dialog.innerHTML = `<div class="qr-head"><div class="qr-head-top"><div><h2 id="qrTitle"></h2><div class="qr-meta" id="qrSubtitle"></div></div><button class="btn" data-close>닫기</button></div><div class="qr-roster-summary" data-summary></div><div class="qr-toolbar"><label class="qr-check-label"><input type="checkbox" data-all> 승인 대기 전체 선택</label><select aria-label="제출 회차" data-period></select></div></div><div class="qr-list"></div><div class="qr-footer"><div class="qr-footer-actions"><b data-selection></b><button class="btn good" data-approve></button></div><p class="qr-message" role="status" aria-live="polite"></p></div>`;
   doc.body.appendChild(dialog);
   const find = selector => dialog.querySelector(selector);
-  let groups = [], currentId = null, period = '', selected = new Map(), busy = false, request = 0, message = '', failed = false;
+  let students = [], groups = [], currentId = null, period = '', selected = new Map(), busy = false, request = 0, message = '', failed = false;
   const current = () => groups.find(g => String(g.id) === currentId);
   const visibleRows = () => (current()?.rows || []).filter(r => !period || String(r.period_key || '') === period).sort((a, b) => Number(a.students?.student_number || 0) - Number(b.students?.student_number || 0));
 
@@ -74,22 +90,31 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   function renderDialog() {
     if (!dialog.open) return;
     const group = current();
-    const periods = [...new Set((group?.rows || []).map(r => String(r.period_key || '')).filter(Boolean))].sort().reverse();
+    const periods = [...new Set([currentQuestPeriod(group?.quest_type),...(group?.records || []).map(r => String(r.period_key || '')).filter(Boolean)])].sort().reverse();
     find('#qrTitle').textContent = group?.title || '퀘스트';
-    find('#qrSubtitle').textContent = `${typeNames[group?.quest_type] || '퀘스트'} · 수행 기록을 확인한 뒤 승인해 주세요.`;
-    find('[data-period]').innerHTML = `<option value="">모든 제출 회차</option>${[...new Set([...periods, ...(period ? [period] : [])])].map(p => `<option value="${escape(p)}">${escape(p)}</option>`).join('')}`;
+    find('#qrSubtitle').textContent = `${typeNames[group?.quest_type] || '퀘스트'} · 전체 학생의 진행 상태를 확인해요. 회차를 바꾸면 이전 기록도 볼 수 있어요.`;
+    find('[data-period]').innerHTML = ` ${periods.map(p => `<option value="${escape(p)}">${escape(p)}${p===currentQuestPeriod(group?.quest_type)?' (현재)':''} · 요청 ${(group?.rows||[]).filter(r=>r.period_key===p).length}건</option>`).join('')}`;
     find('[data-period]').value = period;
     find('[data-period]').hidden = group?.quest_type === 'main' || (!periods.length && !period);
-    const rows = visibleRows();
-    find('.qr-list').innerHTML = rows.length ? rows.map(row => {
-      const id = escape(row.id), student = `${row.students?.student_number ?? '?'}번 · ${row.students?.nickname || '닉네임 미설정'}`, photo = imageUrl(row.evidence_image);
-      return `<article class="qr-record"><label class="qr-check-label"><input type="checkbox" data-row="${id}" ${selected.has(String(row.id)) ? 'checked' : ''}><span>${escape(student)}</span></label><div class="qr-meta" style="margin-top:7px">${escape(dateLabel(row.submitted_at))}${row.period_key ? ` · 회차 ${escape(row.period_key)}` : ''}</div><p class="qr-report">${escape(row.report_text || '작성된 수행 기록이 없어요.')}</p>${photo ? `<button class="qr-photo" data-photo="${id}" aria-label="${escape(student)} 수행 사진 확대"><img src="${escape(photo)}" alt="학생 수행 사진" loading="lazy"></button>` : ''}<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div></article>`;
-    }).join('') : '<div class="qr-empty">이 퀘스트에 확인할 승인 대기 기록이 없어요.</div>';
+    const roster=questRoster(group,students,period);
+    const count=status=>roster.filter(r=>r.status===status).length;
+    find('[data-summary]').innerHTML=`<span>전체 ${roster.length}명</span><span>🔔 요청 ${count('submitted')}명</span><span>✓ 완료 ${count('approved')}명</span><span>진행 중 ${count('accepted')+count('in_progress')}명</span><span>보완 ${count('rejected')}명</span><span>미시작 ${count('available')}명</span>`;
+    find('.qr-list').innerHTML=roster.length?roster.map(({student,row,status})=>{
+      const id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photo=imageUrl(row?.evidence_image),pending=status==='submitted';
+      return `<article class="qr-record qr-state-${escape(status)}" data-student="${escape(student.id)}">
+      ${pending?`<label class="qr-check-label"><input type="checkbox" data-row="${id}" ${selected.has(String(row.id))?'checked':''}><span>${escape(name)}</span></label>`:`<strong>${escape(name)}</strong>`}
+      <div><span class="qr-status">${statusLabels[status]||'진행 중'}</span></div>
+      ${row?.submitted_at?`<div class="qr-meta">${escape(dateLabel(row.submitted_at))}</div>`:''}
+      ${row?.report_text?`<p class="qr-report">${escape(row.report_text)}</p>`:''}
+      ${status==='rejected'&&row?.rejection_reason?`<p class="qr-report">보완 요청: ${escape(row.rejection_reason)}</p>`:''}
+      ${photo?`<button class="qr-photo" data-photo="${id}" aria-label="${escape(name)} 수행 사진 확대"><img src="${escape(photo)}" alt="학생 수행 사진" loading="lazy"></button>`:''}
+      ${pending?`<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div>`:''}</article>`;
+    }).join(''):'<div class="qr-empty">등록된 학생이 없어요.</div>';
     controls();
   }
 
   function renderBanners() {
-    root.innerHTML = groups.length ? groups.map(g => `<button class="qr-banner${g.rows.length ? ' qr-pending' : ''}" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `● 승인 대기 ${g.rows.length}건` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join('') : '<p class="qr-empty">진행 중인 퀘스트와 승인 대기 요청이 없어요.</p>';
+    root.innerHTML = groups.length ? groups.map(g => `<button class="qr-banner${g.rows.length ? ' qr-pending' : ''}" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `🔔 요청 ${g.rows.length}건!` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join('') : '<p class="qr-empty">진행 중인 퀘스트와 승인 대기 요청이 없어요.</p>';
   }
 
   async function pages(makeQuery) {
@@ -105,24 +130,26 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   async function load() {
     const generation = ++request;
     try {
-      const [quests, rows] = await Promise.all([
-        pages(() => db.from('quests').select('id,title,quest_type,active').eq('active', true).order('id')),
-        pages(() => db.from('quest_submissions').select('id,quest_id,status,period_key,submitted_at,report_text,evidence_image,students(student_number,nickname),quests(title,quest_type,active)').eq('status', 'submitted').order('id'))
+      const [quests, rows, rosterStudents] = await Promise.all([
+        pages(() => db.from('quests').select('id,title,quest_type,active,target_student_ids').eq('active', true).order('id')),
+        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,rejection_reason,students(student_number,nickname),quests(title,quest_type,active)').order('id')),
+        pages(() => db.from('students').select('id,student_number,nickname').order('id'))
       ]);
       if (generation !== request) return;
-      groups = groupQuestReviews(quests, rows);
+      students=rosterStudents;
+      groups = groupQuestReviews(quests, rows).filter(g=>g.active!==false||g.rows.length);
       // Keep an open quest visible even after its last pending record is processed.
       if (currentId && !current()) groups.push({ id: currentId, title: find('#qrTitle').textContent, rows: [] });
       const versions = new Map(visibleRows().map(r => [String(r.id), rowVersion(r)]));
       for (const [id, version] of selected) if (versions.get(id) !== version) selected.delete(id);
-      onCount(rows.length);
+      onCount(rows.filter(r=>r.status==='submitted').length);
       renderBanners();
       renderDialog();
     } catch (error) {
       if (generation !== request) return;
       selected.clear();
       // A stale list must never remain actionable after a failed refresh.
-      groups = [];
+      groups = []; students = [];
       onCount(null);
       root.innerHTML = '<p class="qr-error" role="alert">승인 목록을 불러오지 못했어요.</p><button class="btn" data-retry>다시 불러오기</button>';
       message = '목록을 다시 불러온 뒤 승인해 주세요.';
@@ -164,7 +191,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (event.target.closest('[data-retry]')) { load().catch(() => {}); return; }
     const button = event.target.closest('[data-quest]');
     if (!button || busy) return;
-    currentId = button.dataset.quest; period = ''; selected.clear(); message = ''; failed = false;
+    currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type); selected.clear(); message = ''; failed = false;
     dialog.showModal(); renderDialog(); find('[data-close]').focus();
   });
   dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
@@ -192,7 +219,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (button.matches('[data-single]')) review([button.dataset.single], true);
     if (button.matches('[data-reject]')) review([button.dataset.reject], false);
     if (button.matches('[data-photo]')) {
-      const row = visibleRows().find(r => String(r.id) === button.dataset.photo);
+      const row = (current()?.records||[]).find(r => String(r.id) === button.dataset.photo);
       const url = imageUrl(row?.evidence_image);
       if (!url) return;
       const zoom = doc.createElement('dialog'); zoom.className = 'qr-zoom'; zoom.setAttribute('aria-label', '수행 사진 확대');
@@ -203,3 +230,5 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
+
