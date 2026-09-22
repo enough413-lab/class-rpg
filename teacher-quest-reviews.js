@@ -91,6 +91,15 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     .qr-status{font-size:12px}.qr-roster-summary span{background:#fff;border:1px solid #eddec7}.qr-record-actions{flex-wrap:wrap}.qr-record-actions .btn{border-radius:16px;font-size:13px;flex:1}
     .qr-record details{margin-top:10px;background:#ffffffaa;border-radius:14px;padding:10px;font-size:13px}.qr-record summary{cursor:pointer;font-weight:800;color:#6d617d}.qr-record .qr-report{font-size:14px}.qr-empty{grid-column:1/-1}
     @media(max-width:600px){.qr-list{grid-template-columns:1fr;padding:12px}.qr-scene{min-height:145px}.qr-avatar{height:140px}.qr-bubble{max-width:250px}}
+
+    .qr-category{border:2px solid #ede3c9;border-radius:20px;margin-top:14px;overflow:hidden;background:#fffdf8}
+    .qr-category>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px 12px;background:#fff2c9;cursor:pointer;list-style:none;font-weight:900;color:#755525;flex-wrap:wrap}
+    .qr-category>summary::-webkit-details-marker{display:none}.qr-category>summary:after{content:'＋';font-size:18px}.qr-category[open]>summary:after{content:'−'}
+    .qr-category>summary:focus-visible{outline:3px solid #6c63ff;outline-offset:-3px}.qr-category small{font-size:12px;font-weight:700;opacity:.75}
+    .qr-category-weekly{border-color:#d5e7f7}.qr-category-weekly>summary{background:#e6f3ff;color:#386186}
+    .qr-category-main{border-color:#e5dbf5}.qr-category-main>summary{background:#f0eaff;color:#715196}
+    .qr-category-count{font-size:12px;border-radius:18px;padding:5px 8px;background:#ffffffa8;white-space:nowrap;margin-left:auto}.qr-category-count.has-requests{background:#b73e5b;color:white}
+    .qr-category-list{padding:0 10px}.qr-category-empty{padding:8px 0;font-size:13px;color:#85818c;text-align:center}
   `;
   doc.head.appendChild(style);
   const dialog = doc.createElement('dialog');
@@ -148,7 +157,12 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   }
 
   function renderBanners() {
-    root.innerHTML = groups.length ? groups.map(g => `<button class="qr-banner${g.rows.length ? ' qr-pending' : ''}" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `🔔 요청 ${g.rows.length}건!` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join('') : '<p class="qr-empty">진행 중인 퀘스트와 승인 대기 요청이 없어요.</p>';
+    const collapsed=new Set([...root.querySelectorAll('.qr-category:not([open])')].map(el=>el.dataset.category));
+    root.innerHTML=['daily','weekly','main'].map(type=>{
+      const quests=groups.filter(g=>(g.quest_type||'main')===type);
+      const pending=quests.reduce((sum,g)=>sum+g.rows.length,0);
+      return `<details class="qr-category qr-category-${type}" data-category="${type}" ${collapsed.has(type)?'':'open'}><summary><span>${icons[type]} ${typeNames[type]} 퀘스트 <small>${quests.length}개</small></span><span class="qr-category-count ${pending?'has-requests':''}">${pending?`🔔 요청 ${pending}건!`:'요청 없음'}</span></summary><div class="qr-category-list">${quests.length?quests.map(g=>`<button class="qr-banner${g.rows.length ? ' qr-pending' : ''}" data-quest="${escape(g.id)}" aria-haspopup="dialog"><span class="qr-icon" aria-hidden="true">${icons[g.quest_type] || '📋'}</span><span class="qr-banner-main"><b>${escape(g.title || '이름 없는 퀘스트')}</b><span class="qr-meta">${typeNames[g.quest_type] || '퀘스트'}${g.active === false ? ' · 종료된 퀘스트' : ''}</span><br><span class="qr-count">${g.rows.length ? `🔔 요청 ${g.rows.length}건!` : '승인 대기 없음'}</span></span><span aria-hidden="true">›</span></button>`).join(''):'<p class="qr-category-empty">아직 등록된 퀘스트가 없어요 🌱</p>'}</div></details>`;
+    }).join('');
   }
 
   async function pages(makeQuery) {
@@ -266,6 +280,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
 
 
 
