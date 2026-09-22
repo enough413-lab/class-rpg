@@ -36,6 +36,20 @@ export function questRoster(group, students, period) {
   }).sort((a,b)=>Number(a.student.student_number)-Number(b.student.student_number));
 }
 const statusLabels={submitted:'🔔 완료 요청',approved:'✓ 완료',accepted:'✏️ 진행 중',in_progress:'✏️ 진행 중',rejected:'↩ 보완 요청',available:'○ 아직 시작 전',excluded:'대상 아님'};
+const speech={submitted:'다 했어요! 확인해 주세요 💌',approved:'참 잘했어요! 뿌듯해요 ✨',in_progress:'열심히 도전 중이에요! 💪',accepted:'열심히 도전 중이에요! 💪',rejected:'조금 더 다듬어 볼게요 🌱',available:'이제 도전해 볼까요? 🚀',excluded:'이번엔 응원할게요! 🎈'};
+function studentAvatar(student,appearances){
+ if(!student.gender)return '<div class="qr-avatar-placeholder" aria-label="캐릭터 설정 전">🥚</div>';
+ const gender=student.gender==='girl'?'girl':'boy';
+ const items=appearances.filter(i=>String(i.student_id)===String(student.id));
+ const hanbok=items.some(i=>i.slot==='hair'&&i.item_id==='hanbok-hair-'+gender);
+ const front=hanbok?`2.hair/hair_${gender}_hanbok_front.png`:gender==='girl'?'2.hair/hair_girl_default_front.png':'2.hair/hair_boy_default.png';
+ const back=hanbok?`2.hair/hair_${gender}_hanbok_back.png`:gender==='girl'?'2.hair/hair_girl_default_back.png':'';
+ const aliases={'item-boy-top-basic.png':'3.top/top_boy_basic.png','item-girl-top-basic.png':'3.top/top_girl_basic.png','item-boy-bottom-basic.png':'4.bottom/bottom_boy_basic.png','item-girl-bottom-basic.png':'4.bottom/bottom_girl_basic.png','item-boy-shoes-basic.png':'7.shoes/shoes_boy_basic.png','item-girl-shoes-basic.png':'7.shoes/shoes_girl_basic.png'};
+ const long=items.some(i=>i.slot==='bottom'&&i.image?.includes('_hanbok.png'));
+ const z={bottom:long?4:3,shoes:long?3:4,top:5,accessory:7,weapon:8};
+ const img=(src,layer)=>src?`<img src="${escape(aliases[src]||src)}" alt="" style="z-index:${layer}" loading="lazy">`:'';
+ return `<div class="qr-avatar" role="img" aria-label="${escape(student.nickname||'학생')}의 아바타">${img(back,0)}${img('1. character/character_'+gender+'.png',1)}${items.filter(i=>i.slot!=='hair').map(i=>img(i.image,z[i.slot]||6)).join('')}${img(front,6)}</div>`;
+}
 export function createQuestReviews({ root, db, refresh, onCount }) {
   const doc = root.ownerDocument;
   const win = doc.defaultView;
@@ -59,6 +73,24 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     .qr-footer{position:sticky;bottom:0;background:#fff;padding:14px 22px;border-top:1px solid #e7e8ef}.qr-footer-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.qr-message{margin:8px 0 0;font-size:14px;white-space:pre-wrap}.qr-empty{padding:26px 0;color:#62677a;font-size:15px}.qr-dialog button:disabled{opacity:.5;cursor:not-allowed}.qr-error{color:#a72e44}
     .qr-status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:13px;font-weight:800;margin-top:8px}.qr-state-submitted{background:#fff1f2;border:2px solid #ee8495}.qr-state-submitted .qr-status{background:#b42342;color:white}.qr-state-approved{background:#f1f3f5;border-color:#dce0e5;color:#687181}.qr-state-approved .qr-status{background:#e1e5ea;color:#515966}.qr-state-available{background:#eff6ff;border-color:#a8c9ed}.qr-state-available .qr-status{color:#225fa2}.qr-state-accepted,.qr-state-in_progress{background:#f1f1ff;border-color:#bcb7eb}.qr-state-rejected{background:#fff7e6;border-color:#e6bd73}.qr-state-excluded{background:#f8fafc;color:#76808f}.qr-roster-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.qr-roster-summary span{font-size:13px;background:#f1f3f5;padding:5px 8px;border-radius:12px}.qr-zoom{width:min(1000px,calc(100% - 24px));padding:14px;border:0;border-radius:16px}.qr-zoom::backdrop{background:#111a}.qr-zoom img{display:block;max-width:100%;max-height:75vh;margin:12px auto 0}
     @media(max-width:480px){.qr-head,.qr-footer{padding:15px}.qr-list{padding:0 15px 15px}.qr-footer .btn{width:100%}.qr-toolbar{align-items:stretch;flex-direction:column}.qr-toolbar select{width:100%}}
+
+    .qr-dialog{width:min(860px,calc(100% - 24px));background:#fffdf7;border:3px solid #f2dfba;border-radius:28px}
+    .qr-head{background:#fff8e9;border-bottom:2px dashed #ecdfc8}.qr-head h2{color:#705231}.qr-footer{background:#fffaf0;border-top:2px dashed #ecdfc8}
+    .qr-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:18px;align-items:start}
+    .qr-record{margin:0;border-radius:24px;padding:16px;border-width:2px;box-shadow:0 5px 0 #d7c7a51c;min-width:0;background:#f0f7ff}
+    .qr-student-name{font-size:15px;min-height:22px;display:flex;align-items:center;gap:8px;color:#49465a}
+    .qr-scene{display:flex;align-items:center;gap:8px;min-height:158px;padding:10px 0 2px}
+    .qr-avatar{width:116px;height:146px;position:relative;flex:0 0 116px;isolation:isolate;background:radial-gradient(ellipse at 50% 90%,#a5bed72a 0 30%,transparent 32%)}
+    .qr-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+    .qr-avatar-placeholder{font-size:65px;width:116px;text-align:center}
+    .qr-head-top>[data-close]{flex-shrink:0;white-space:nowrap}.qr-bubble{word-break:keep-all;position:relative;background:white;border:2px solid #d7e5fa;border-radius:20px 20px 20px 5px;padding:13px 11px;color:#49678e;font-size:15px;font-weight:800;line-height:1.55;flex:1;overflow-wrap:anywhere}
+    .qr-state-submitted{background:#fff0f2;border-color:#f2a1af}.qr-state-submitted .qr-bubble{color:#ab3655;border-color:#f0b5c2}
+    .qr-state-approved{background:#f2f3f4;border-color:#d9dddf}.qr-state-approved .qr-bubble{color:#687677;border-color:#d9dfe0}.qr-state-approved .qr-avatar{opacity:.8}
+    .qr-state-rejected{background:#fff5df}.qr-state-rejected .qr-bubble{color:#95632b;border-color:#ead4a7}
+    .qr-state-in_progress,.qr-state-accepted{background:#f3eeff}.qr-state-in_progress .qr-bubble,.qr-state-accepted .qr-bubble{color:#7253a0;border-color:#d9c8ef}
+    .qr-status{font-size:12px}.qr-roster-summary span{background:#fff;border:1px solid #eddec7}.qr-record-actions{flex-wrap:wrap}.qr-record-actions .btn{border-radius:16px;font-size:13px;flex:1}
+    .qr-record details{margin-top:10px;background:#ffffffaa;border-radius:14px;padding:10px;font-size:13px}.qr-record summary{cursor:pointer;font-weight:800;color:#6d617d}.qr-record .qr-report{font-size:14px}.qr-empty{grid-column:1/-1}
+    @media(max-width:600px){.qr-list{grid-template-columns:1fr;padding:12px}.qr-scene{min-height:145px}.qr-avatar{height:140px}.qr-bubble{max-width:250px}}
   `;
   doc.head.appendChild(style);
   const dialog = doc.createElement('dialog');
@@ -67,7 +99,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   dialog.innerHTML = `<div class="qr-head"><div class="qr-head-top"><div><h2 id="qrTitle"></h2><div class="qr-meta" id="qrSubtitle"></div></div><button class="btn" data-close>닫기</button></div><div class="qr-roster-summary" data-summary></div><div class="qr-toolbar"><label class="qr-check-label"><input type="checkbox" data-all> 승인 대기 전체 선택</label><select aria-label="제출 회차" data-period></select></div></div><div class="qr-list"></div><div class="qr-footer"><div class="qr-footer-actions"><b data-selection></b><button class="btn good" data-approve></button></div><p class="qr-message" role="status" aria-live="polite"></p></div>`;
   doc.body.appendChild(dialog);
   const find = selector => dialog.querySelector(selector);
-  let students = [], groups = [], currentId = null, period = '', selected = new Map(), busy = false, request = 0, message = '', failed = false;
+  let appearances = [], students = [], groups = [], currentId = null, period = '', selected = new Map(), busy = false, request = 0, message = '', failed = false;
   const current = () => groups.find(g => String(g.id) === currentId);
   const visibleRows = () => (current()?.rows || []).filter(r => !period || String(r.period_key || '') === period).sort((a, b) => Number(a.students?.student_number || 0) - Number(b.students?.student_number || 0));
 
@@ -102,12 +134,14 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     find('.qr-list').innerHTML=roster.length?roster.map(({student,row,status})=>{
       const id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photo=imageUrl(row?.evidence_image),pending=status==='submitted';
       return `<article class="qr-record qr-state-${escape(status)}" data-student="${escape(student.id)}">
-      ${pending?`<label class="qr-check-label"><input type="checkbox" data-row="${id}" ${selected.has(String(row.id))?'checked':''}><span>${escape(name)}</span></label>`:`<strong>${escape(name)}</strong>`}
-      <div><span class="qr-status">${statusLabels[status]||'진행 중'}</span></div>
+      ${pending?`<label class="qr-check-label qr-student-name"><input type="checkbox" data-row="${id}" ${selected.has(String(row.id))?'checked':''}><span>${escape(name)}</span></label>`:`<strong class="qr-student-name">${escape(name)}</strong>`}
+      <div class="qr-scene">${studentAvatar(student,appearances)}<div class="qr-bubble">${speech[status]||speech.in_progress}</div></div><div><span class="qr-status">${statusLabels[status]||'진행 중'}</span></div>
+      ${row?.report_text||photo||row?.rejection_reason?'<details><summary>📝 수행 기록 보기</summary>':''}
       ${row?.submitted_at?`<div class="qr-meta">${escape(dateLabel(row.submitted_at))}</div>`:''}
       ${row?.report_text?`<p class="qr-report">${escape(row.report_text)}</p>`:''}
       ${status==='rejected'&&row?.rejection_reason?`<p class="qr-report">보완 요청: ${escape(row.rejection_reason)}</p>`:''}
       ${photo?`<button class="qr-photo" data-photo="${id}" aria-label="${escape(name)} 수행 사진 확대"><img src="${escape(photo)}" alt="학생 수행 사진" loading="lazy"></button>`:''}
+      ${row?.report_text||photo||row?.rejection_reason?'</details>':''}
       ${pending?`<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div>`:''}</article>`;
     }).join(''):'<div class="qr-empty">등록된 학생이 없어요.</div>';
     controls();
@@ -130,13 +164,15 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   async function load() {
     const generation = ++request;
     try {
-      const [quests, rows, rosterStudents] = await Promise.all([
+      const [quests, rows, rosterStudents, looks] = await Promise.all([
         pages(() => db.from('quests').select('id,title,quest_type,active,target_student_ids').eq('active', true).order('id')),
         pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,rejection_reason,students(student_number,nickname),quests(title,quest_type,active)').order('id')),
-        pages(() => db.from('students').select('id,student_number,nickname').order('id'))
+        pages(() => db.from('students').select('id,student_number,nickname,gender').order('id')),
+        db.rpc('teacher_student_appearances')
       ]);
       if (generation !== request) return;
-      students=rosterStudents;
+      if(looks.error)throw looks.error;
+      appearances=looks.data||[];students=rosterStudents;
       groups = groupQuestReviews(quests, rows).filter(g=>g.active!==false||g.rows.length);
       // Keep an open quest visible even after its last pending record is processed.
       if (currentId && !current()) groups.push({ id: currentId, title: find('#qrTitle').textContent, rows: [] });
@@ -230,5 +266,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
+
 
 
