@@ -195,6 +195,9 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   }
 
   function renderBanners() {
+    const participated=new Set(groups.filter(g=>g.active!==false).flatMap(g=>questRoster(g,students,currentQuestPeriod(g.quest_type)).filter(r=>r.row).map(r=>String(r.student.id))));
+    root.dataset.participants=String(participated.size);
+
     const collapsed=new Set([...root.querySelectorAll('.qr-category:not([open])')].map(el=>el.dataset.category));
     root.innerHTML=['daily','weekly','main'].map(type=>{
       const quests=groups.filter(g=>(g.quest_type||'main')===type);
@@ -237,7 +240,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
       if (generation !== request) return;
       selected.clear();
       // A stale list must never remain actionable after a failed refresh.
-      groups = []; students = [];
+      groups = []; students = [];delete root.dataset.participants;
       onCount(null);
       root.innerHTML = '<p class="qr-error" role="alert">승인 목록을 불러오지 못했어요.</p><button class="btn" data-retry>다시 불러오기</button>';
       message = '목록을 다시 불러온 뒤 승인해 주세요.';
@@ -321,6 +324,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
 
 
 
