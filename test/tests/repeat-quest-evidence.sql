@@ -14,7 +14,12 @@ begin
   if r.status<>'submitted' or r.report_text<>'설명 저장 검사' or r.evidence_image is null or r.period_key<>public.quest_period_key(kind) then raise exception 'Save failed: %',kind; end if;
   blocked:=false;
   begin perform public.student_submit_quest_evidence(t,qid,'overwrite',null); exception when others then blocked:=true; end;
-  if not blocked then raise exception 'Duplicate allowed: %',kind; end if;
+  if kind='main' and not blocked then raise exception 'Main duplicate allowed'; end if;
+  if kind<>'main' then
+   if blocked then raise exception 'Pending amendment blocked'; end if;
+   if (select count(*) from public.quest_submissions where student_id=sid and quest_id=qid)<>1 then raise exception 'Duplicate row created'; end if;
+   if public.student_repeat_quest_record(t,qid)->>'report_text'<>'overwrite' then raise exception 'Pending amendment not stored'; end if;
+  end if;
   if kind<>'main' then
    update public.quest_submissions set status='rejected',rejection_reason='retry' where id=r.id;
    perform public.student_submit_quest_evidence(t,qid,'',null);
