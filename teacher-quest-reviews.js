@@ -1,3 +1,4 @@
+import {readEvidenceImages} from './quest-photos.js?v=20260928-multi-photo';
 // One selection scope: a quest and, optionally, one submission period.
 export function groupQuestReviews(quests, submissions) {
   const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [], records: [] }]));
@@ -15,11 +16,6 @@ const typeNames = { daily: '일일', weekly: '주간', main: '메인' };
 const icons = { daily: '☀️', weekly: '📅', main: '🏆' };
 const rowVersion = r => JSON.stringify([r.status, r.submitted_at, r.report_text, r.evidence_image, r.period_key]);
 const dateLabel = value => value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '제출 날짜 없음';
-function imageUrl(value) {
-  if (!value) return '';
-  try { return /^https?:$/.test(new URL(value).protocol) || /^data:image\/(png|jpeg|webp|gif);base64,/i.test(value) ? value : ''; } catch { return ''; }
-}
-
 export function currentQuestPeriod(type, now = new Date()) {
   const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
   const get=k=>parts.find(p=>p.type===k).value;
@@ -69,7 +65,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     .qr-head{padding:20px 22px 14px;border-bottom:1px solid #e7e8ef}.qr-head h2{margin:0 0 5px;font-size:22px;overflow-wrap:anywhere}.qr-head-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
     .qr-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px}.qr-toolbar select{width:auto;max-width:100%;flex:1;min-width:160px}.qr-check-label{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;cursor:pointer}
     .qr-dialog input[type=checkbox]{width:20px;height:20px;margin:0;accent-color:#6c63ff;flex:none}.qr-list{padding:4px 22px 18px}.qr-record{margin-top:14px;padding:16px;border:1px solid #e7e8ef;border-radius:14px;background:white}.qr-record:has(input:checked){border-color:#a699ee;background:#fcfbff}
-    .qr-report{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0;font-size:16px;line-height:1.7;color:#252736}.qr-photo{display:block;padding:0;border:0;background:transparent;cursor:zoom-in}.qr-photo img{display:block;max-width:100%;max-height:180px;border-radius:10px}.qr-record-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+    .qr-report{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0;font-size:16px;line-height:1.7;color:#252736}.qr-photos{display:flex;flex-wrap:wrap;gap:12px}.qr-photo{display:block;padding:0;border:0;background:transparent;cursor:zoom-in}.qr-photo img{display:block;max-width:100%;max-height:180px;border-radius:10px}.qr-record-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
     .qr-footer{position:sticky;bottom:0;background:#fff;padding:14px 22px;border-top:1px solid #e7e8ef}.qr-footer-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.qr-message{margin:8px 0 0;font-size:14px;white-space:pre-wrap}.qr-empty{padding:26px 0;color:#62677a;font-size:15px}.qr-dialog button:disabled{opacity:.5;cursor:not-allowed}.qr-error{color:#a72e44}
     .qr-status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:13px;font-weight:800;margin-top:8px}.qr-state-submitted{background:#fff1f2;border:2px solid #ee8495}.qr-state-submitted .qr-status{background:#b42342;color:white}.qr-state-approved{background:#f1f3f5;border-color:#dce0e5;color:#687181}.qr-state-approved .qr-status{background:#e1e5ea;color:#515966}.qr-state-available{background:#eff6ff;border-color:#a8c9ed}.qr-state-available .qr-status{color:#225fa2}.qr-state-accepted,.qr-state-in_progress{background:#f1f1ff;border-color:#bcb7eb}.qr-state-rejected{background:#fff7e6;border-color:#e6bd73}.qr-state-excluded{background:#f8fafc;color:#76808f}.qr-roster-summary{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.qr-roster-summary span{font-size:13px;background:#f1f3f5;padding:5px 8px;border-radius:12px}.qr-zoom{width:min(1000px,calc(100% - 24px));padding:14px;border:0;border-radius:16px}.qr-zoom::backdrop{background:#111a}.qr-zoom img{display:block;max-width:100%;max-height:75vh;margin:12px auto 0}
     @media(max-width:480px){.qr-head,.qr-footer{padding:15px}.qr-list{padding:0 15px 15px}.qr-footer .btn{width:100%}.qr-toolbar{align-items:stretch;flex-direction:column}.qr-toolbar select{width:100%}}
@@ -184,12 +180,12 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   function renderDetail(){
     const entry=questRoster(current(),students,period).find(r=>String(r.student.id)===String(detailStudent));
     if(!entry){detail.close();return}
-    const {student,row,status}=entry,id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photo=imageUrl(row?.evidence_image),pending=status==='submitted';
+    const {student,row,status}=entry,id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,photos=readEvidenceImages(row?.evidence_image),pending=status==='submitted';
     detail.innerHTML=`<div class="qr-detail-head"><h3>${escape(name)}</h3><button class="btn" data-detail-close>닫기</button></div><div class="qr-detail-identity">${studentAvatar(student,appearances)}<span class="qr-status">${statusLabels[status]||'진행 중'}</span></div><div class="qr-student-content"><div class="qr-bubble">${speech[status]||speech.in_progress}</div>
       ${row?.submitted_at?`<div class="qr-meta">제출 · ${escape(dateLabel(row.submitted_at))}</div>`:''}
       <p class="qr-report">${escape(row?.report_text||(row?'작성된 수행 내용이 없어요.':'아직 수행 기록이 없어요.'))}</p>
       ${status==='rejected'&&row?.rejection_reason?`<p class="qr-report">보완 요청: ${escape(row.rejection_reason)}</p>`:''}
-      ${photo?`<button class="qr-photo" data-photo="${id}" aria-label="${escape(name)} 수행 사진 확대"><img src="${escape(photo)}" alt="학생 수행 사진" loading="lazy"></button>`:''}
+      ${photos.length?`<p class="qr-meta">첨부 사진 ${photos.length}장 · 누르면 크게 보여요</p><div class="qr-photos">${photos.map((photo,i)=>`<button class="qr-photo" data-photo="${id}" data-photo-index="${i}" aria-label="${escape(name)} 수행 사진 ${i+1} 확대"><img src="${escape(photo)}" alt="학생 수행 사진 ${i+1}" loading="lazy"></button>`).join('')}</div>`:''}
       ${pending?`<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div>`:''}
       </div><p class="qr-detail-message" role="status"></p>`;
   }
@@ -314,7 +310,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (button.matches('[data-reject]')) review([button.dataset.reject], false);
     if (button.matches('[data-photo]')) {
       const row = (current()?.records||[]).find(r => String(r.id) === button.dataset.photo);
-      const url = imageUrl(row?.evidence_image);
+      const url = readEvidenceImages(row?.evidence_image)[Number(button.dataset.photoIndex)];
       if (!url) return;
       const zoom = doc.createElement('dialog'); zoom.className = 'qr-zoom'; zoom.setAttribute('aria-label', '수행 사진 확대');
       zoom.innerHTML = `<button class="btn">사진 닫기</button><img src="${escape(url)}" alt="학생 수행 사진 확대">`;

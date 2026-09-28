@@ -32,7 +32,7 @@ select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;f
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="teacher-dashboard.css?v=20260928-release"><link rel="stylesheet" href="teacher-theme.css?v=20260928-release"><script src="teacher-dashboard.js?v=20260928-release"></script>
 <script src="teacher-refinements.js?v=20260928-release"></script>
 <script type="module">
-import { createQuestReviews } from './teacher-quest-reviews.js?v=20260922-refine';
+import { createQuestReviews } from './teacher-quest-reviews.js?v=20260928-multi-photo';
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const URL='https://dgqtxavsymvwjeyyyjle.supabase.co';const KEY='sb_publishable_-Cdj1Dj-KY3PsZxCcpM7Lg_etojZrmL';const db=createClient(URL,KEY);window.db=db;
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));

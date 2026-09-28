@@ -59,8 +59,8 @@ begin
     'quest_id',q.id,
     'title',q.title,
     'description',q.description,
-    'xp',q.xp,
-    'gold',q.gold,
+    'xp',q.xp_reward,
+    'gold',q.gold_reward,
     'report_text',s.report_text,
     'evidence_image',s.evidence_image,
     'submitted_at',s.submitted_at
