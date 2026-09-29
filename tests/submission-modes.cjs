@@ -46,6 +46,39 @@ const server=http.createServer((req,res)=>{
   await frame.evaluate(()=>editQuest(2));await frame.locator('#editQuestSubmissionMode').selectOption('photo');await frame.locator('#editQuestDetails [data-cancel]').click();assert.equal(await frame.evaluate(()=>questRows[1].submission_mode),'text');
   await frame.evaluate(()=>editQuest(2));await frame.locator('#editQuestSubmissionMode').selectOption('photo');await frame.evaluate(()=>window.failSave=true);await frame.locator('#editQuestDetails [data-save]').click();await frame.waitForFunction(()=>document.querySelector('#editQuestMessage').textContent.includes('테스트 저장 실패'));assert(await frame.locator('#editQuestDetails').isVisible());assert.equal(await frame.locator('#editQuestSubmissionMode').inputValue(),'photo');await frame.evaluate(()=>window.failSave=false);await frame.locator('#editQuestDetails [data-save]').click();await frame.locator('#editQuestDetails').waitFor({state:'detached'});
   await frame.evaluate(()=>{questRows.push({id:4,title:'기존 퀘스트',description:'기존 설명',submission_mode:null});});await frame.evaluate(()=>editQuest(4));assert.equal(await frame.locator('#editQuestSubmissionMode').inputValue(),'');await frame.locator('#editQuestDetails [data-save]').click();await frame.locator('#editQuestDetails').waitFor({state:'detached'});assert.equal(await frame.evaluate(()=>questRows[3].submission_mode),null);
+
+  assert.equal(await frame.locator('#weeklyResetField').isVisible(),false);
+  await frame.locator('#questType').selectOption('weekly');
+  assert.equal(await frame.locator('#weeklyResetField').isVisible(),true);
+  assert.equal(await frame.locator('#questWeeklyResetDay').inputValue(),'1');
+  await frame.locator('#questWeeklyResetDay').selectOption('2');
+  await frame.locator('#questTitle').fill('화요일 받아쓰기');
+  await frame.locator('#questSubmissionMode').selectOption('text');
+  await frame.evaluate(()=>addQuest());
+  assert.equal(await frame.evaluate(()=>writes.at(-1).payload.weekly_reset_day),2);
+  assert.match(await frame.locator('#quests').textContent(),/매주 화요일 0시/);
+  await frame.evaluate(()=>editQuest(5));
+  assert.equal(await frame.locator('#editQuestWeeklyResetDay').inputValue(),'2');
+  await frame.locator('#editQuestWeeklyResetDay').selectOption('7');
+  await frame.locator('#editQuestDetails [data-save]').click();
+  await frame.locator('#editQuestDetails').waitFor({state:'detached'});
+  assert.equal(await frame.evaluate(()=>questRows[4].weekly_reset_day),7);
+  await frame.evaluate(()=>editQuest(5));
+  assert.equal(await frame.locator('#editQuestWeeklyResetDay').inputValue(),'7');
+  await frame.locator('#editQuestWeeklyResetDay').selectOption('3');
+  await frame.locator('#editQuestDetails [data-cancel]').click();
+  assert.equal(await frame.evaluate(()=>questRows[4].weekly_reset_day),7);
+  await frame.evaluate(()=>editQuest(1));
+  assert.equal(await frame.locator('#editQuestWeeklyResetDay').count(),0);
+  await frame.locator('#editQuestDetails [data-cancel]').click();
+  await frame.locator('#questType').selectOption('daily');
+  assert.equal(await frame.locator('#weeklyResetField').isVisible(),false);
+  const schedule=await page.evaluate(async()=>{
+   const m=await import('/quest-schedule.js');
+   return [m.questPeriod('weekly',2,new Date('2026-09-28T14:59:59Z')),m.questPeriod('weekly',2,new Date('2026-09-28T15:00:00Z')),m.questPeriod('weekly',1,new Date('2026-09-28T14:59:59Z')),m.questPeriod('weekly',7,new Date('2026-01-03T15:00:00Z')),m.questPeriod('daily',2,new Date('2026-09-28T15:00:00Z'))];
+  });
+  assert.deepEqual(schedule,['2026-09-22','2026-09-29','2026-09-28','2026-01-04','2026-09-29']);
+  console.log('PASS: weekly create Tuesday; edit Sunday; cancel; daily hidden; Seoul midnight boundaries; year rollover.');
   assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: 9 student mode/type combinations; visibility/required fields; photo-only omits stale text; multiple photos; teacher creation through gameplay override; edit/cancel/save failure; legacy mode preserved.');
  }finally{await browser.close();server.closeAllConnections();server.close()}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
