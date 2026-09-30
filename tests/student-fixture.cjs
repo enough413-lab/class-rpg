@@ -71,6 +71,7 @@ const createClient=()=>({
  if(name==='student_achievements')return {data:{items:[],notifications:[]}};
  if(name==='student_claim_class_goal_reward'||name==='student_claim_level_rewards')return {data:{gold:0,levels:[]}};
  if(name==='student_titles')return {data:{titles:[]}};
+ if(name==='student_ack_notification'){m.rewardNotifications=(m.rewardNotifications||[]).filter(n=>n.id!==args.p_id||n.kind!==args.p_kind);return {data:null}};
  return {data:[],error:null};
  },
  from(){const q={select(){return q},eq(){return q},order(){return q},then(resolve){return resolve({data:[]})}};return q}

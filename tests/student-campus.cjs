@@ -48,7 +48,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.locator('.campus-tori').click();await page.screenshot({path:path.join(shots,'mobile-campus-tori.png'),fullPage:true});assert(await f.locator('#campusGuide').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
   await page.keyboard.press('Escape');assert(await f.locator('#classroomHub').isVisible());
   await f.locator('[data-campus=home]').focus();await page.keyboard.press('Enter');assert(!(await f.locator('#classroomHub').isVisible()));
-  await f.evaluate(()=>enterHubScene('library'));await f.locator('[data-campus=map]').click();assert(await f.locator('#studentAdventureDialog').isVisible());assert(!(await f.locator('#classroomHub').isVisible()));
+  await f.evaluate(()=>enterHubScene('library'));await f.locator('[data-campus=map]').click();assert(await f.locator('#studentAdventureDialog').isVisible());assert(await f.locator('#classroomHub').isVisible());
   await page.keyboard.press('Escape');await f.evaluate(()=>enterHubScene('classroom'));
   await f.locator('#campusTitle').focus();await page.keyboard.press('Shift+Tab');assert.equal(await f.evaluate(()=>document.activeElement.dataset.campus),'use');
   await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('#hubPlayer').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');

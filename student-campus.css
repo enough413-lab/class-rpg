@@ -56,3 +56,34 @@ body:has(#classroomHub:not(.hidden)) .sa-mobile-nav{visibility:hidden}
  #classroomHub.campus-side .hub-help{padding:12px 16px}.campus-side .campus-routes{padding-bottom:10px}.campus-side .campus-controller{margin:12px 0;gap:14px}.campus-side .campus-how{font-size:12px}.campus-side .campus-pad{grid-template-columns:repeat(2,52px);grid-template-rows:54px;gap:6px}.campus-side .campus-pad button{min-height:54px}
 }
 @media(prefers-reduced-motion:reduce){#classroomHub.campus-side .hub-stage,#classroomHub.campus-side .hub-player{transition:none}.campus-side .walking .campus-part{animation:none}}
+
+/* A small illustrated directory makes off-screen objects discoverable on phones. */
+.campus-menu [data-campus=find]{background:#fff0ce;border-color:#d7bb79}
+.campus-wayfinder{width:min(680px,calc(100% - 24px));max-height:92dvh;overflow:auto;border:3px solid #d0bb90;border-radius:26px;padding:22px;background:#fffdf5;color:#4b513d;box-shadow:0 24px 70px #303b3933}
+.campus-wayfinder::backdrop{background:#28392e99}
+.campus-wayfinder>header{position:sticky;top:-22px;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;background:#fffdf5}
+.campus-wayfinder header span{font-size:13px;color:#8b7754;font-weight:700}
+.campus-wayfinder h2{font:30px SchoolJua,sans-serif;margin:4px 0}
+.campus-wayfinder button{min-width:44px;min-height:48px;border:1px solid #d2d9c2;border-radius:14px;padding:11px 14px;background:#f4f1e5;color:#40513b;font:700 16px/1.4 system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.campus-wayfinder button:focus-visible{outline:3px solid #6a8554;outline-offset:3px}
+.finder-intro{font-size:16px;line-height:1.7;margin:6px 0 18px;word-break:keep-all}
+.finder-rooms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.finder-rooms button{padding:5px 5px 10px;background:#fffdf7;overflow:hidden;word-break:keep-all;border:2px solid #ded8c8;font-size:15px}
+.finder-rooms button::before{content:'';display:block;height:78px;margin-bottom:9px;border-radius:9px;background:center/cover no-repeat url('maps/classroom-side-v1.webp')}
+.finder-rooms [data-finder-room=hallway]::before{background-image:url('maps/hallway-side-v1.webp')}
+.finder-rooms [data-finder-room=library]::before{background-image:url('maps/library-side-v1.webp')}
+.finder-rooms button[aria-pressed=true]{border-color:#6d8c53;background:#eef4e4;box-shadow:0 3px 0 #adbd98}
+.finder-current{font-size:14px;font-weight:800;margin:22px 0 10px;color:#657651}
+.finder-places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.finder-places button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;background:#fff;border:1px solid #e0d7c4;padding:14px}
+.finder-places strong{font:20px/1.35 SchoolJua,sans-serif}.finder-places span{font-size:14px;font-weight:400;line-height:1.6;word-break:keep-all}.finder-places small{font-size:13px;margin-top:auto;padding-top:5px;color:#6b7f53}
+.finder-note{font-size:13px;line-height:1.7;color:#81785f;background:#f4efdf;padding:12px;border-radius:14px;margin:18px 0 0;word-break:keep-all}
+#classroomHub.campus-side .campus-place.is-destination{border-color:#b88028;box-shadow:0 0 0 4px #ffe39a;background:#fff4c9}
+.campus-near [data-state=walking]{background:#fff0cf;border-color:#d0b978}
+@media(max-width:600px){
+ .campus-side .campus-menu{gap:6px}.campus-side .campus-menu button{padding:10px 8px;font-size:15px;white-space:nowrap}
+ .campus-wayfinder{padding:16px;border-radius:22px}.campus-wayfinder>header{top:-16px;padding-top:8px}.campus-wayfinder h2{font-size:26px}
+ .finder-intro{font-size:15px;margin-bottom:14px}.finder-rooms{gap:6px}.finder-rooms button{font-size:13px}.finder-rooms button::before{height:54px}
+ .finder-places{gap:8px}.finder-places button{padding:12px 10px}.finder-places strong{font-size:18px}.finder-places span{font-size:14px}
+}
+@media(max-width:350px){.finder-places{grid-template-columns:1fr}.campus-side .campus-menu button{font-size:14px;padding-inline:7px}}

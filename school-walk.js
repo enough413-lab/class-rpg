@@ -1,6 +1,6 @@
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
- classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 아이템'},{kind:'quests',x:48,label:'📋 오늘 할 일'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
+ classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
  hallway:[{kind:'classroom',x:16,label:'🏫 우리 교실'},{kind:'library',x:85,label:'📚 도서관'}],
  library:[{kind:'hallway',x:7,label:'🚪 복도'},{kind:'reading',x:28,label:'✍️ 독서 기록'},{kind:'tori',x:58,label:'책지기 토리'},{kind:'portfolio',x:82,label:'📖 나의 독후감'}]
 };
@@ -9,7 +9,7 @@ export function installSchoolWalk(ctx){
  const viewport=doc.createElement('div');viewport.className='campus-viewport';stage.before(viewport);viewport.append(stage);
  const status=doc.createElement('div');status.className='campus-scene-status';status.setAttribute('role','status');viewport.append(status);
  hub.classList.add('campus-side');
- let frame=0,target=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
+ let frame=0,target=null,destination=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
  const currentPlaces=()=>PLACES[ctx.getScene()]||PLACES.classroom;
@@ -17,8 +17,17 @@ export function installSchoolWalk(ctx){
   const width=stage.clientWidth,view=viewport.clientWidth,offset=Math.max(0,Math.min(width-view,width*x/100-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
  }
- function stop(){cancelAnimationFrame(frame);frame=0;target=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking')}
- function nearby(){const x=ctx.getPosition().x;return currentPlaces().find(p=>Math.abs(p.x-x)<8)||null}
+ function stop(){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');objects.querySelector('.is-destination')?.classList.remove('is-destination');if(wasGuided)ctx.onPosition()}
+ function nearest(){const x=ctx.getPosition().x;return currentPlaces().reduce((a,b)=>Math.abs(a.x-x)<=Math.abs(b.x-x)?a:b)}
+ function nearby(){const closest=nearest();return Math.abs(closest.x-ctx.getPosition().x)<8?closest:null}
+ function goTo(kind){
+  const place=currentPlaces().find(p=>p.kind===kind);if(!place||!canWalk())return false;
+  stop();destination=place;target=place.x;
+  objects.querySelector('[data-place="'+kind+'"]')?.classList.add('is-destination');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop()}
+  else{frame=requestAnimationFrame(tick);ctx.onPosition()}
+  return true;
+ }
  function renderPosition(x){
   const previous=ctx.getPosition().x;ctx.setPosition(Math.max(4,Math.min(96,x)),77);
   if(x!==previous)player.dataset.facing=x<previous?'left':'right';
@@ -74,5 +83,5 @@ export function installSchoolWalk(ctx){
  new ResizeObserver(()=>camera()).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
- return {syncScene,nearby,stop,camera};
+ return {syncScene,nearby,nearest,stop,camera,goTo,destination:()=>destination,places:room=>PLACES[room]||[]};
 }
