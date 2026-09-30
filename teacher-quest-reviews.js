@@ -1,4 +1,5 @@
-import {readEvidenceImages} from './quest-photos.js?v=20260928-multi-photo';
+import {questPeriod} from './quest-schedule.js?v=20260930-release';
+import {readEvidenceImages} from './quest-photos.js?v=20260930-release';
 // One selection scope: a quest and, optionally, one submission period.
 export function groupQuestReviews(quests, submissions) {
   const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [], records: [] }]));
@@ -16,13 +17,7 @@ const typeNames = { daily: '일일', weekly: '주간', main: '메인' };
 const icons = { daily: '☀️', weekly: '📅', main: '🏆' };
 const rowVersion = r => JSON.stringify([r.status, r.submitted_at, r.report_text, r.evidence_image, r.period_key]);
 const dateLabel = value => value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '제출 날짜 없음';
-export function currentQuestPeriod(type, now = new Date()) {
-  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
-  const get=k=>parts.find(p=>p.type===k).value;
-  const day=new Date(`${get('year')}-${get('month')}-${get('day')}T00:00:00Z`);
-  if(type==='weekly')day.setUTCDate(day.getUTCDate()-((day.getUTCDay()+6)%7));
-  return type==='main'?'once':day.toISOString().slice(0,10);
-}
+export function currentQuestPeriod(type, now = new Date(), weekday = 1) {return questPeriod(type,weekday,now)}
 export function questRoster(group, students, period) {
   const records=(group?.records||[]).filter(r=>String(r.period_key||'once')===period);
   return students.map(student=>{
@@ -156,10 +151,10 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   function renderDialog() {
     if (!dialog.open) return;
     const group = current();
-    const periods = [...new Set([currentQuestPeriod(group?.quest_type),...(group?.records || []).map(r => String(r.period_key || '')).filter(Boolean)])].sort().reverse();
+    const periods = [...new Set([currentQuestPeriod(group?.quest_type,new Date(),group?.weekly_reset_day),...(group?.records || []).map(r => String(r.period_key || '')).filter(Boolean)])].sort().reverse();
     find('#qrTitle').textContent = group?.title || '퀘스트';
     find('#qrSubtitle').textContent = `${typeNames[group?.quest_type] || '퀘스트'} · 전체 학생의 진행 상태를 확인해요. 회차를 바꾸면 이전 기록도 볼 수 있어요.`;
-    find('[data-period]').innerHTML = ` ${periods.map(p => `<option value="${escape(p)}">${escape(p)}${p===currentQuestPeriod(group?.quest_type)?' (현재)':''} · 요청 ${(group?.rows||[]).filter(r=>r.period_key===p).length}건</option>`).join('')}`;
+    find('[data-period]').innerHTML = ` ${periods.map(p => `<option value="${escape(p)}">${escape(p)}${p===currentQuestPeriod(group?.quest_type,new Date(),group?.weekly_reset_day)?' (현재)':''} · 요청 ${(group?.rows||[]).filter(r=>r.period_key===p).length}건</option>`).join('')}`;
     find('[data-period]').value = period;
     find('[data-period]').hidden = group?.quest_type === 'main' || (!periods.length && !period);
     const roster=questRoster(group,students,period);
@@ -191,7 +186,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   }
 
   function renderBanners() {
-    const participated=new Set(groups.filter(g=>g.active!==false).flatMap(g=>questRoster(g,students,currentQuestPeriod(g.quest_type)).filter(r=>r.row).map(r=>String(r.student.id))));
+    const participated=new Set(groups.filter(g=>g.active!==false).flatMap(g=>questRoster(g,students,currentQuestPeriod(g.quest_type,new Date(),g.weekly_reset_day)).filter(r=>r.row).map(r=>String(r.student.id))));
     root.dataset.participants=String(participated.size);
 
     const collapsed=new Set([...root.querySelectorAll('.qr-category:not([open])')].map(el=>el.dataset.category));
@@ -216,8 +211,8 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     const generation = ++request;
     try {
       const [quests, rows, rosterStudents, looks] = await Promise.all([
-        pages(() => db.from('quests').select('id,title,quest_type,active,target_student_ids').eq('active', true).order('id')),
-        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,rejection_reason,students(student_number,nickname),quests(title,quest_type,active)').order('id')),
+        pages(() => db.from('quests').select('id,title,quest_type,weekly_reset_day,active,target_student_ids').eq('active', true).order('id')),
+        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,rejection_reason,students(student_number,nickname),quests(title,quest_type,weekly_reset_day,active)').order('id')),
         pages(() => db.from('students').select('id,student_number,nickname,gender').order('id')),
         db.rpc('teacher_student_appearances')
       ]);
@@ -278,7 +273,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (event.target.closest('[data-retry]')) { load().catch(() => {}); return; }
     const button = event.target.closest('[data-quest]');
     if (!button || busy) return;
-    statusFilter='all';currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type); selected.clear(); message = ''; failed = false;
+    statusFilter='all';currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type,new Date(),current()?.weekly_reset_day); selected.clear(); message = ''; failed = false;
     dialog.showModal(); renderDialog(); find('[data-close]').focus();
   });
   dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
@@ -320,3 +315,11 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
+
+
+
+
+
+
+
+
