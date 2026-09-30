@@ -81,7 +81,9 @@ const {server,shots}=require('./student-fixture.cjs');
  const callsBefore=await f.evaluate(()=>mockRpg.calls.filter(x=>x==='student_dashboard').length);
  await f.evaluate(()=>{mockRpg.rewardNotifications=[{status:'approved',xp:211}];const reward=document.createElement('div');reward.id='fixtureReward';reward.className='reward-notice-backdrop';document.body.append(reward)});
  await f.waitForFunction(before=>mockRpg.calls.filter(x=>x==='student_dashboard').length>before,callsBefore);
- await f.evaluate(()=>document.getElementById('fixtureReward').remove());
+ // Clear the synthetic payload as soon as the observer has read it, so the
+ // periodic notification poll cannot display the same fixture a second time.
+ await f.evaluate(()=>{mockRpg.rewardNotifications=[];document.getElementById('fixtureReward').remove()});
  await f.locator('.levelup-news').waitFor();
  assert.equal(await f.locator('.levelup-news li').count(),5);
  assert.match(await f.locator('.levelup-news').textContent(),/별빛 복도[\s\S]*운동장[\s\S]*50 골드/);
@@ -89,7 +91,8 @@ const {server,shots}=require('./student-fixture.cjs');
  await f.evaluate(()=>mockRpg.rewardNotifications=[]);
  await f.locator('.sa-shortcuts [data-sa=inventory]').click();
  await f.waitForFunction(()=>document.querySelector('#inventoryModal').contains(document.activeElement));
- const inventoryItems=f.locator('#inventoryModal button:not([disabled])');
+ await f.waitForFunction(()=>document.getElementById('inventoryModal').getAttribute('aria-busy')==='false');
+ const inventoryItems=f.locator('#inventoryModal button:visible:not([disabled])');
  await inventoryItems.first().focus();await inventoryItems.first().press('Shift+Tab');
  assert(await inventoryItems.last().evaluate(el=>el===document.activeElement));
  await inventoryItems.last().press('Escape');
