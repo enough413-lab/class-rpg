@@ -1,0 +1,6 @@
+Original music classroom illustration for the Lv.13 student sound activity.
+Generated 2026-09-30 with the built-in image_gen tool; no existing game's assets copied.
+Source: exec-b6b72db6-1844-48b1-9cee-b8e967811882.png (1672 x 941).
+Delivered asset: music-room-v1.webp, 1200 x 675, 110796 bytes, sharp WebP quality 83.
+Prompt:
+Create an original cozy 2D side-view elementary-school music classroom background for a gentle children's school RPG, whimsical storybook game illustration, warm cream walls and honey wood floor, rounded clean shapes and soft outlines, pastel mint and peach accents. Wide horizontal landscape composition with most furniture at the back and the lower quarter a clear wooden floor. Left: sunlit arched windows with green trees outside, a small wooden xylophone and music stand. Center: upright wooden piano with a closed stool, tiny hanging musical ornaments. Right: low shelves with neatly arranged hand drums, tambourine, triangles and maracas, a cheerful plant. Inviting polished game art with layered depth, warm afternoon light, detailed but calm and readable at small sizes. NO people, NO characters, NO text, NO letters, NO numbers, NO logos, NO UI, NO buttons. Original art only; do not reproduce any existing game's assets. Output a wide 16:9 illustration.

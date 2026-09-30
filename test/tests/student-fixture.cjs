@@ -28,6 +28,14 @@ const createClient=()=>({
   return {data:null};
  }
  if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_music_room'){
+  m.musicSaves=(m.musicSaves||0)+1;await new Promise(r=>setTimeout(r,m.musicDelay||30));
+  if(m.failMusic)return {error:{message:'Offline'}};
+  if(args.p_choice!=={'music-room-1':1,'music-room-2':0,'music-room-3':2}[args.p_step])return {data:{correct:false}};
+  m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  if(m.dropMusicReply){m.dropMusicReply=false;return {error:{message:'Network request failed'}}}
+  return {data:{correct:true,step_id:args.p_step}};
+ }
  if(name==='student_library_evidence'){
   if(m.failEvidence)return {error:{message:'Offline'}};
   const expected={'library-evidence-1':[1,1],'library-evidence-2':[0,2],'library-evidence-3':[2,0]}[args.p_case];

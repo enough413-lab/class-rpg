@@ -4,6 +4,7 @@ import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progr
 import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20260930-workshop';
 import {CHAPTER_PROMISES,CHAPTER_ONE_MILESTONE,chapterOneView,profileMemento} from './school-chapter.js?v=20260930-chapter';
 import {LIBRARY_MILESTONE,LIBRARY_CASES,evidenceView,libraryBookmarkView} from './library-evidence.js?v=20260930-evidence';
+import {MUSIC_MILESTONE,MUSIC_STEPS,musicView,musicBadgeView,createMusicPlayer} from './music-room.js?v=20260930-music';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(action,label,kind='',attrs='')=>'<button class="sa-button '+kind+'" data-sa="'+action+'" '+attrs+'>'+label+'</button>';
@@ -19,8 +20,18 @@ export function installStudentAdventure(ctx){
  const dashboard=byId('dashboard');
  if(!dashboard||byId('studentAdventureHome'))return;
  let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set(),endingPromise='';
- const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE];
+ const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE,MUSIC_MILESTONE];
  let libraryIndex=0,libraryChoice={claim:null,evidence:null},librarySolved=false;
+ let musicIndex=0,musicChoice=null,musicSolved=false;
+ const musicPlayer=createMusicPlayer(state=>{
+  const status=byId('saMusicAudioStatus');if(!status)return;
+  const playing=state==='playing';
+  status.textContent=playing?'소리를 차례로 듣고 있어요. 멈추고 싶으면 ■ 버튼을 눌러요.':state==='unavailable'?'이 기기에서 소리를 켜지 못했어요. 아래 그림으로 똑같이 탐험할 수 있어요.':'소리가 멈췄어요. 다시 듣거나 그림으로 골라 보세요.';
+  dialog.querySelector('[data-music-stop]').disabled=!playing;
+ });
+ window.addEventListener('blur',()=>musicPlayer.stop());
+ window.addEventListener('pagehide',()=>musicPlayer.stop());
+ doc.addEventListener('visibilitychange',()=>{if(doc.hidden)musicPlayer.stop()});
  const home=doc.createElement('div');home.id='studentAdventureHome';home.className='sa-home';
  home.innerHTML='<div class="sa-topbar"><div class="sa-brand"><span class="sa-brand-mark" aria-hidden="true">✦</span>우리반 모험학교</div><div class="sa-top-actions"><span class="sa-small" id="saDate"></span>'+button('help','도움말')+'</div></div>'+
  '<div id="saNetwork" class="sa-offline" role="status" hidden></div>'+
@@ -36,6 +47,8 @@ export function installStudentAdventure(ctx){
  const dialog=doc.createElement('dialog');dialog.className='sa-dialog';dialog.id='studentAdventureDialog';dialog.setAttribute('aria-labelledby','saDialogTitle');
  dialog.innerHTML='<header class="sa-dialog-head"><div><h2 id="saDialogTitle"></h2><p id="saDialogSubtitle"></p></div>'+button('close','닫기','', 'aria-label="창 닫기"')+'</header><div class="sa-dialog-body" id="saDialogBody"></div>';
  doc.body.append(dialog);
+ dialog.addEventListener('close',()=>musicPlayer.stop());
+ dialog.addEventListener('input',e=>{if(e.target.id==='saMusicVolume')musicPlayer.setVolume(e.target.value)});
  dialog.addEventListener('cancel',e=>{if(saving)e.preventDefault();else viewRequest++});
  const say=text=>{byId('saStatus').textContent=text};
  const network=()=>{byId('saNetwork').hidden=navigator.onLine;if(!navigator.onLine)byId('saNetwork').textContent='인터넷 연결이 끊겼어요. 작성 중인 글은 닫기 전에 저장하고, 다시 연결되면 이어서 해요.'};
@@ -102,6 +115,7 @@ export function installStudentAdventure(ctx){
   await task;if(journalTask===task)journalTask=null;
  }
  function open(title,subtitle,html){
+  musicPlayer.stop();
   byId('saDialogTitle').textContent=title;byId('saDialogSubtitle').textContent=subtitle;
   byId('saDialogBody').innerHTML=html;
   if(!dialog.open)dialog.showModal();
@@ -122,7 +136,7 @@ export function installStudentAdventure(ctx){
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
  }
  async function workshop(kind){
   const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
@@ -130,15 +144,47 @@ export function installStudentAdventure(ctx){
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
   if(request!==viewRequest||!dialog.open)return;
   if(!journal){open(m.label,'연결을 확인하고 다시 시도해 주세요.',errorView('retry-map'));return}
-  const earned=kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id));
+  const earned=kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id))||kind==='music-room'&&MUSIC_STEPS.some(s=>completed().has(s.id));
   if(lv<m.level&&!earned){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
-  if(kind==='library-evidence'){libraryIndex=LIBRARY_CASES.findIndex(s=>!completed().has(s.id));renderEvidence()}
+  if(kind==='music-room'){musicIndex=MUSIC_STEPS.findIndex(s=>!completed().has(s.id));renderMusic()}
+  else if(kind==='library-evidence'){libraryIndex=LIBRARY_CASES.findIndex(s=>!completed().has(s.id));renderEvidence()}
   else if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
   else if(kind==='garden'){gardenChoices=new Set();open(m.label,'자세히 보고, 달라진 것을 찾아요.',gardenView(gardenChoices,journal.workshop?.garden_complete)+'<p>'+button('map','← 탐험 지도')+'</p>')}
   else open(m.label,'탐험 도장이 새로운 표지가 돼요.',coverView({cover:journal.workshop?.cover,stamps:stampCount(),nickname:student().nickname||'모험가'},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
  }
  function showChapterOne(){
   open('첫 모험 기념식','학교에서 배운 마음을 다음 모험으로 가져가요.',chapterOneView({chapters:SCHOOL_CHAPTERS,completed:completed(),workshop:journal.workshop,nickname:student().nickname||'모험가',promise:endingPromise},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
+ }
+ function musicLabel(level){
+  const n=MUSIC_STEPS.filter(s=>completed().has(s.id)).length;
+  return n===3?'✓ 소리 배지 모음 · 다시 해 보기':n?'소리 '+n+' / 3 발견 · 이어 하기':level<13?'🔒 Lv. 13에 열려요':'새로운 소리 만나기';
+ }
+ function renderMusic(){
+  musicChoice=null;musicSolved=false;
+  const step=MUSIC_STEPS[musicIndex];
+  open(step?'음악실 소리 탐험':'나의 소리 발견 배지',step?'소리를 발견하는 데 시간제한은 없어요.':'학교에서 만날 음악이 더 궁금해져요.',(step?musicView(step,musicIndex,esc):musicBadgeView(esc))+'<p>'+button('map','← 탐험 지도')+'</p>');
+  musicPlayer.setVolume(30);
+ }
+ function selectMusic(value){
+  const step=MUSIC_STEPS[musicIndex];if(musicSolved||!step||!Number.isInteger(value)||!step.labels[value])return;
+  musicChoice=value;dialog.querySelectorAll('[data-music-choice]').forEach(b=>{const selected=Number(b.dataset.musicChoice)===value;b.setAttribute('aria-pressed',String(selected));b.querySelector('small').textContent=selected?'✓ 고른 소리':'이 소리 고르기'});
+  byId('saMusicSelection').textContent=(value+1)+'번을 골랐어요.';byId('saMusicFeedback').textContent='';
+ }
+ async function saveMusic(){
+  const step=MUSIC_STEPS[musicIndex],feedback=byId('saMusicFeedback');if(saving||musicSolved||!step||!feedback)return;
+  if(musicChoice===null){feedback.textContent='그림을 살펴보고 답 하나를 골라 주세요.';return}
+  musicPlayer.stop();const requestedOwner=student().id,token=ctx.getToken(),choice=musicChoice;
+  saving=true;const buttons=[...dialog.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);feedback.textContent='발견한 소리를 수첩에 담고 있어요…';
+  try{
+   const {data,error}=await ctx.db.rpc('student_music_room',{p_token:token,p_step:step.id,p_choice:choice});if(error||!data)throw error||Error('Missing music result');
+   if(requestedOwner!==student().id||token!==ctx.getToken())return;
+   if(!data.correct){feedback.textContent='다시 살펴볼까요? '+step.hint;return}
+   if(data.step_id!==step.id)throw Error('Unexpected music result');
+   journal.exploration=[...new Set([...journal.exploration,step.id])];loadedAt=Date.now();musicSolved=true;render();
+   feedback.innerHTML='<b>새로운 소리를 발견했어요! ♪</b><p>'+esc(step.explanation)+'</p><div class="sa-real-mission"><strong>음악 시간에도 해 볼까요?</strong><p>'+esc(step.real)+'</p></div><p>'+button('next-music',musicIndex===2?'소리 발견 배지 보기':'다음 소리 →','primary')+'</p>';
+   feedback.querySelector('button').focus({preventScroll:true});
+  }catch{if(requestedOwner===student().id&&token===ctx.getToken())feedback.textContent='아직 저장을 확인하지 못했어요. 고른 답은 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
+  finally{saving=false;buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled||musicSolved&&b.matches('[data-music-choice],[data-sa=check-music]')})}
  }
  function renderEvidence(){
   libraryChoice={claim:null,evidence:null};librarySolved=false;
@@ -269,6 +315,10 @@ export function installStudentAdventure(ctx){
  }
  async function action(event){
   if(saving)return;
+  if(event.target.closest('[data-music-play]')){const step=MUSIC_STEPS[musicIndex];if(step)await musicPlayer.play(step.notes);return}
+  if(event.target.closest('[data-music-stop]')){musicPlayer.stop();return}
+  const musicAnswer=event.target.closest('[data-music-choice]');if(musicAnswer){selectMusic(Number(musicAnswer.dataset.musicChoice));return}
+  const musicReplay=event.target.closest('[data-music-replay]');if(musicReplay){const index=Number(musicReplay.dataset.musicReplay);if(MUSIC_STEPS[index]&&completed().has(MUSIC_STEPS[index].id)){musicIndex=index;renderMusic()}return}
   const evidenceLine=event.target.closest('[data-evidence-line]');if(evidenceLine){selectEvidence('evidence',Number(evidenceLine.dataset.evidenceLine));return}
   const evidenceClaim=event.target.closest('[data-evidence-claim]');if(evidenceClaim){selectEvidence('claim',Number(evidenceClaim.dataset.evidenceClaim));return}
   const evidenceReplay=event.target.closest('[data-evidence-replay]');if(evidenceReplay){
@@ -295,6 +345,8 @@ export function installStudentAdventure(ctx){
   if(a==='roadmap'){roadmap();return}
   if(a==='finish-chapter'){await saveChapterOne();return}
   if(a==='check-evidence'){await saveEvidence();return}
+  if(a==='check-music'){await saveMusic();return}
+  if(a==='next-music'&&musicSolved){musicIndex++;renderMusic();return}
   if(a==='next-evidence'&&librarySolved){libraryIndex++;renderEvidence();return}
   if(a==='check-garden'){await saveWorkshop('garden',JSON.stringify([...gardenChoices].sort()));return}
   if(a==='visit-chapter'){
