@@ -11,6 +11,8 @@ Completed 2026-09-30:
 - New staging migration: supabase/migrations/20260930012523_student_school_adventure.sql.
 
 Next independent improvement batches, in order:
+Mandatory user direction added 2026-09-30: level-based unlocks and long-term anticipation must guide every batch. Read PROGRESSION_BALANCE.md for the level-by-level Lv.1-30 plan and mandatory combat balance acceptance criteria. Do not treat planned maps, cosmetics or monsters as implemented. Preserve already-unlocked content. Keep school activities as the main source of progress. Before adding combat, simulate every level and difficulty band, validate rewards and server authority, and record evidence. Apply these constraints within the four batches below; do not silently extend the automatic run indefinitely.
+Completed follow-up: next unlock and remaining XP on the home screen; growth guide with actual exploration unlocks and existing Lv.5/10/15/20/25/30 gifts; multi-level celebration lists unlocks. Shared XP curve fixes the teacher/student level discrepancy. Staging database reward/XP rules are unchanged. tests/progression.cjs compares 3,306 XP values with the server reference.
 1. Audit all older student dialogs for keyboard focus/escape, scrolling, mobile text clipping, save feedback and retry behavior. Fix demonstrated issues and retain all existing capabilities.
 2. Improve reading and wardrobe/shop journeys with a consistent visual system, clear empty states, confirmation for purchases, and useful teacher feedback. Preserve balances and reward rules.
 3. Extend campus connections to existing classroom/library walking scenes; add meaningful NPC guidance and school-life observation activities. Keep mini experiences short, accessible by touch, and tied to real school actions.

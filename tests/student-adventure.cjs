@@ -8,7 +8,7 @@ const createClient=()=>({
  rpc:async(name,args)=>{
  const m=window.mockRpg;m.calls.push(name);
  if(name==='student_login_options')return {data:[{student_number:1,login_id:'ym01',nickname:'별나래'}]};
- if(name==='student_dashboard')return m.failDashboard?{error:{message:'Network request failed'}}:{data:{student:m.student,inventory:[{item_id:'shirt',slot:'top',name:'교복 상의',image:'3.top/top_girl_basic.png',equipped:true},{item_id:'skirt',slot:'bottom',name:'교복 치마',image:'4.bottom/bottom_girl_basic.png',equipped:true},{item_id:'shoes',slot:'shoes',name:'운동화',image:'7.shoes/shoes_girl_basic.png',equipped:true}],reward_notifications:[],quests:[
+ if(name==='student_dashboard')return m.failDashboard?{error:{message:'Network request failed'}}:{data:{student:m.student,inventory:[{item_id:'shirt',slot:'top',name:'교복 상의',image:'3.top/top_girl_basic.png',equipped:true},{item_id:'skirt',slot:'bottom',name:'교복 치마',image:'4.bottom/bottom_girl_basic.png',equipped:true},{item_id:'shoes',slot:'shoes',name:'운동화',image:'7.shoes/shoes_girl_basic.png',equipped:true}],reward_notifications:m.rewardNotifications||[],quests:[
  {id:11,title:'내 책상은 내가 정리해요',description:'책과 필통을 가지런히 두고, 내 주변을 살펴봐요.',quest_type:'daily',category:'organizing',difficulty:'easy',submission_mode:'photo',status:'available',xp:10,gold:10},
  {id:12,title:'받아쓰기, 한 번 더 도전!',description:'틀린 낱말을 살펴보고 바르게 다시 써 보세요.',quest_type:'weekly',weekly_reset_day:2,category:'learning',difficulty:'normal',submission_mode:'both',status:'available',xp:20,gold:15},
  {id:13,title:'친구에게 건네는 따뜻한 말',description:'도움이 필요한 친구에게 먼저 다가가 보세요.',quest_type:'main',category:'kindness',difficulty:'easy',submission_mode:'text',status:'accepted',xp:15,gold:10},
@@ -54,12 +54,24 @@ const server=http.createServer((req,res)=>{
  await page.waitForTimeout(1200);
  assert(await f.locator('#studentAdventureHome').isVisible());
  assert.match(await f.locator('#saQuestList').textContent(),/매주 화요일 0시/);
+ assert.match(await f.locator('#saNextGoal').textContent(),/Lv. 6[\s\S]*호기심 연못[\s\S]*90 경험치/);
+ await f.locator('#saNextGoal [data-sa=roadmap]').click();
+ assert.equal(await f.locator('.sa-milestone[aria-current=step]').count(),1);
+ assert.match(await f.locator('.sa-milestone[aria-current=step]').textContent(),/Lv. 6/);
+ assert.match(await f.locator('.sa-roadmap').textContent(),/Lv. 30/);
+ assert.equal(await f.locator('.sa-milestone:not(.reached) [data-go-chapter]').count(),0);
+ await page.screenshot({path:path.join(shots,'desktop-roadmap.png'),fullPage:true});
+ await f.locator('[data-go-chapter=classroom]').click();
+ await f.locator('#saQuestion').waitFor();
+ assert(await f.evaluate(()=>mockRpg.calls.includes('student_learning_journal')));
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await page.screenshot({path:path.join(shots,'desktop-home.png'),fullPage:true});
  await f.locator('.sa-hero [data-sa=map]').click();
  await f.locator('.sa-world').waitFor();
  await page.screenshot({path:path.join(shots,'desktop-map.png'),fullPage:true});
  await f.locator('.sa-map-pin[data-chapter=pond]').click();
  assert.match(await f.locator('#saDialogSubtitle').textContent(),/Lv. 6/);
+ assert.match(await f.locator('#saDialogBody').textContent(),/90 경험치/);
  await f.locator('#saDialogBody [data-sa=map]').click();await f.locator('.sa-world').waitFor();
  await f.locator('.sa-map-pin[data-chapter=classroom]').click();
  await f.locator('[data-choice="1"]').click();assert.match(await f.locator('#saFeedback').textContent(),/다시 생각/);
@@ -99,9 +111,28 @@ const server=http.createServer((req,res)=>{
  assert(await f.locator('#saNetwork').isVisible());
  await f.evaluate(()=>mockRpg.failDashboard=false);
  await f.evaluate(()=>loadDashboard());
+ for(const [xp,expected] of [[0,/Lv. 2[\s\S]*별빛 복도[\s\S]*50 경험치/],[349,/호기심 연못[\s\S]*1 경험치/],[350,/Lv. 10[\s\S]*50 골드/],[3155,/나의 배움은 계속돼요/]]){
+  await f.evaluate(async xp=>{mockRpg.student.xp=xp;await loadDashboard()},xp);
+  assert.match(await f.locator('#saNextGoal').textContent(),expected);
+ }
+ await f.evaluate(async()=>{mockRpg.student.xp=260;await loadDashboard()});
+ // Exercise the real reward observer across a multi-level jump, not just a helper.
+ const callsBefore=await f.evaluate(()=>mockRpg.calls.filter(x=>x==='student_dashboard').length);
+ await f.evaluate(()=>{mockRpg.rewardNotifications=[{status:'approved',xp:211}];const reward=document.createElement('div');reward.id='fixtureReward';reward.className='reward-notice-backdrop';document.body.append(reward)});
+ await f.waitForFunction(before=>mockRpg.calls.filter(x=>x==='student_dashboard').length>before,callsBefore);
+ await f.evaluate(()=>document.getElementById('fixtureReward').remove());
+ await f.locator('.levelup-news').waitFor();
+ assert.equal(await f.locator('.levelup-news li').count(),5);
+ assert.match(await f.locator('.levelup-news').textContent(),/별빛 복도[\s\S]*운동장[\s\S]*50 골드/);
+ await f.locator('#levelupBackdrop button').click();
+ await f.evaluate(()=>mockRpg.rewardNotifications=[]);
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:path.join(shots,'mobile-home.png'),fullPage:true});
  assert.equal(await f.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await f.locator('#saNextGoal [data-sa=roadmap]').click();
+ await page.screenshot({path:path.join(shots,'mobile-roadmap.png'),fullPage:true});
+ assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await f.locator('.sa-mobile-nav [data-sa=map]').click();await f.locator('.sa-world').waitFor();
  await page.screenshot({path:path.join(shots,'mobile-map.png'),fullPage:true});
  assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
@@ -109,7 +140,7 @@ const server=http.createServer((req,res)=>{
  await f.locator('[data-sa=replay]').click();
  await page.screenshot({path:path.join(shots,'mobile-story.png'),fullPage:true});
  assert.equal(errors.length,0,errors.join('\n'));
- console.log('PASS: full student shell; mobile layout; Tuesday text; map locks; wrong answers; network retry; saved/reloaded stamps; growth; scene navigation; typing does not move avatar; transient failure preserves login. Screenshots: '+shots);
+ console.log('PASS: student shell and mobile layout; next goals at level boundaries and cap; roadmap entry loads saved progress; multi-level celebration; Tuesday text; map locks; wrong answers; retry; saved stamps; growth; scene navigation; typing; transient failure preserves login. Screenshots: '+shots);
  }finally{await browser.close();server.closeAllConnections();server.close()}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
 
