@@ -127,11 +127,11 @@ export function installStudentAdventure(ctx){
  async function workshop(kind){
   const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
   const request=++viewRequest,lv=ctx.levelInfo(student().xp||0).level;
-  const earned=kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id));
-  if(lv<m.level&&!earned){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
   if(request!==viewRequest||!dialog.open)return;
   if(!journal){open(m.label,'연결을 확인하고 다시 시도해 주세요.',errorView('retry-map'));return}
+  const earned=kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id));
+  if(lv<m.level&&!earned){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
   if(kind==='library-evidence'){libraryIndex=LIBRARY_CASES.findIndex(s=>!completed().has(s.id));renderEvidence()}
   else if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
   else if(kind==='garden'){gardenChoices=new Set();open(m.label,'자세히 보고, 달라진 것을 찾아요.',gardenView(gardenChoices,journal.workshop?.garden_complete)+'<p>'+button('map','← 탐험 지도')+'</p>')}
@@ -335,6 +335,7 @@ export function installStudentAdventure(ctx){
   const editable=event.target.closest('input,textarea,select,[contenteditable="true"]');
   const overlay=doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
   if(editable||overlay){event.stopImmediatePropagation();return}
+  if(key==='enter'&&event.target.closest('button,a[href]')){event.stopImmediatePropagation();return}
   event.preventDefault();event.stopImmediatePropagation();
   if(directions[key]){if(hubOpen)window.moveHub(...directions[key]);else window.moveExplorer?.(...directions[key])}
   else if(key==='escape'){if(hubOpen)window.closeClassroomHub();else window.closeSchoolExplorer?.()}
@@ -343,5 +344,5 @@ export function installStudentAdventure(ctx){
  window.openAdventureMap=()=>map();
  doc.addEventListener('student-dashboard-updated',render);
  render();
- return {render,map,growth,roadmap,unlocksBetween};
+ return {render,map,growth,roadmap,unlocksBetween,workshop};
 }
