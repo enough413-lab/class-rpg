@@ -1,0 +1,30 @@
+Student RPG development — staging only
+User direction: build a polished, child-friendly school-life growth RPG inspired by cozy school and adventure games. Continue independently while the user is away. Preserve the teacher experience. Do not publish production without a new explicit user approval.
+
+Completed 2026-09-30:
+- Student home with character, growth progress, today/weekly/main/completed quest filters, preserved wardrobe/shop/titles/reading/achievements.
+- Original campus illustration, locally hosted Jua heading font, large touch targets, mobile navigation.
+- Six exploration chapters, eighteen school-life scenarios, server-validated answers, sequential and level gates, persistent stamps, replay without XP/gold farming.
+- Six growth categories calculated from teacher-approved quests and reading records.
+- Fixed fixed-Monday copy, library scene reset, typing/multiple movement event conflicts, transient network logout, heavy PNG map override.
+- Tests: tests/student-adventure.cjs, tests/submission-modes.cjs, tests/multi-photo.cjs; SQL staging-only tests/student-adventure.sql.
+- New staging migration: supabase/migrations/20260930012523_student_school_adventure.sql.
+
+Next independent improvement batches, in order:
+1. Audit all older student dialogs for keyboard focus/escape, scrolling, mobile text clipping, save feedback and retry behavior. Fix demonstrated issues and retain all existing capabilities.
+2. Improve reading and wardrobe/shop journeys with a consistent visual system, clear empty states, confirmation for purchases, and useful teacher feedback. Preserve balances and reward rules.
+3. Extend campus connections to existing classroom/library walking scenes; add meaningful NPC guidance and school-life observation activities. Keep mini experiences short, accessible by touch, and tied to real school actions.
+4. Review loading/network behavior on slower Chromebook-like hardware, remove proven redundant calls without breaking notifications, and verify accessibility and reduced-motion behavior.
+
+For each batch: inspect current upstream main and staging, read AGENTS.md, pick one useful bounded change, implement, run targeted tests and visual QA at 390px and desktop, then publish staging and update only main/test. Preserve all main files outside test with exact blob SHAs. Never overwrite concurrent changes or clone production student records to test. Record discoveries, completed batch and concrete next work here. If everything above is done, stop automatic feature expansion and request user review with a concise completion note.
+
+Working checkout: C:/Users/USER/Documents/Codex/2026-09-30/a/work/weekly-reset
+Test site: https://enough413-lab.github.io/class-rpg/test/
+Staging DB: gcgjpfidppaioambcatq
+Production DB: dgqtxavsymvwjeyyyjle — no development writes.
+
+Artwork provenance:
+maps/school-campus-v2.webp is an original image generated using the built-in image_gen tool, converted locally to WebP. No game artwork was copied.
+Prompt:
+Use case: stylized-concept. Asset type: wide 16:9 2D illustrated school exploration map background for a Korean elementary school learning RPG, polished premium children's game art. Create an original warm hand-painted fantasy campus viewed from elevated three-quarter perspective, soft crisp outlines, appealing storybook game environments, rounded shapes, lush mint and moss green trees, warm cream paths and peach terracotta roofs, gentle morning sunshine. A beautiful friendly small school with a clock tower is centered upper middle; a cozy book library on the left, a garden/greenhouse lower left, a small school gym/playground on the right, a blue pond lower right. Winding broad ivory paths connect these four destinations around a generous open central grassy plaza with a star compass mosaic. Believable school objects: school gate, little benches, tidy flowerbeds, basketball hoop, books visible in library windows. Subtle magical touches such as tiny star lanterns and glowing book emblem, but still clearly a real school reimagined as a child's adventure. No characters, no lettering, no text, no UI, no numbers, no logos. Frame the full campus comfortably; leave edges uncluttered. Landscape 1536x1024 or similar wide aspect. Art should feel inviting and carefully crafted, not plastic 3D and not pixel art. Intended as low-contrast background under HTML interactive location labels.
+Font: Jua by Woowahan Brothers, official Google Fonts repository; OFL license in fonts/Jua-OFL.txt. Converted locally to WOFF2.
