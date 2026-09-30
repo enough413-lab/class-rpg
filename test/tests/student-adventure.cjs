@@ -2,7 +2,7 @@ const fs=require('fs'),http=require('http'),path=require('path'),assert=require(
 const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..'),shots=path.resolve(root,'../student-screenshots');
 const mock=String.raw`
-window.mockRpg={calls:[],failSave:false,failJournal:false,failDashboard:false,student:{id:987,number:1,nickname:'별나래',gender:'girl',xp:260,gold:180,setup_complete:true},exploration:JSON.parse(localStorage.getItem('fixtureExploration')||'[]')};
+window.mockRpg={calls:[],failSave:false,failJournal:false,failDashboard:false,student:{id:987,number:1,nickname:'별나래',gender:'girl',xp:260,gold:180,setup_complete:true},exploration:JSON.parse(localStorage.getItem('fixtureExploration')||'[]'),workshop:JSON.parse(localStorage.getItem('fixtureWorkshop')||'{"cover":"paper","garden_complete":false}')};
 localStorage.setItem('classRpgStudentToken','fixture');
 const createClient=()=>({
  rpc:async(name,args)=>{
@@ -15,10 +15,19 @@ const createClient=()=>({
  {id:14,title:'매일 10분 책 읽기',description:'좋아하는 책을 읽고 마음에 남는 장면을 적어요.',quest_type:'daily',category:'reading',submission_mode:'text',status:'submitted',xp:10,gold:10},
  {id:15,title:'함께 꾸민 우리 교실',description:'서로 도와 교실을 꾸몄어요.',quest_type:'main',category:'helper',status:'approved',xp:20,gold:20}
  ]}};
- if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_school_workshop'){
+  if(m.failWorkshop)return {error:{message:'Offline'}};
+  if(args.p_action==='garden'){
+   const correct=args.p_choice==='["can","flower","leaves"]';if(!correct)return {data:{correct:false}};
+   m.workshop.garden_complete=true;localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{correct:true,garden_complete:true}};
+  }
+  m.workshop.cover=args.p_choice;localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{cover:args.p_choice}};
+ }
+ if(name==='student_shop'&&m.failShop)return {error:{message:'Offline'}};
  if(name==='student_explore_school'){
  if(m.failSave)return {error:{message:'Offline'}};
- const correct={'classroom-1':0,'classroom-2':1,'classroom-3':2}[args.p_step]===args.p_choice;
+ const correct={'classroom-1':0,'classroom-2':1,'classroom-3':2,'cafeteria-1':1,'cafeteria-2':2,'cafeteria-3':0}[args.p_step]===args.p_choice;
  if(correct){m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration))}
  return {data:{correct}};
  }
@@ -88,7 +97,7 @@ const server=http.createServer((req,res)=>{
  await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.querySelector('#saProfileTitle')?.textContent.includes('별나래'));
  await f.locator('.sa-hero [data-sa=map]').click();await f.locator('.sa-world').waitFor();
- assert.match(await f.locator('.sa-passport').textContent(),/1 \/ 6/);
+ assert.match(await f.locator('.sa-passport').textContent(),/1 \/ 7/);
  await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await f.locator('.sa-shortcuts [data-sa=growth]').click();
  assert.equal(await f.locator('.sa-growth-card').count(),6);
@@ -111,7 +120,7 @@ const server=http.createServer((req,res)=>{
  assert(await f.locator('#saNetwork').isVisible());
  await f.evaluate(()=>mockRpg.failDashboard=false);
  await f.evaluate(()=>loadDashboard());
- for(const [xp,expected] of [[0,/Lv. 2[\s\S]*별빛 복도[\s\S]*50 경험치/],[349,/호기심 연못[\s\S]*1 경험치/],[350,/Lv. 10[\s\S]*50 골드/],[3155,/나의 배움은 계속돼요/]]){
+ for(const [xp,expected] of [[0,/Lv. 2[\s\S]*별빛 복도[\s\S]*50 경험치/],[349,/호기심 연못[\s\S]*1 경험치/],[350,/Lv. 7[\s\S]*변화 찾기/],[440,/Lv. 8[\s\S]*수첩 꾸미기/],[535,/Lv. 9[\s\S]*급식실/],[3155,/나의 배움은 계속돼요/]]){
   await f.evaluate(async xp=>{mockRpg.student.xp=xp;await loadDashboard()},xp);
   assert.match(await f.locator('#saNextGoal').textContent(),expected);
  }
@@ -126,6 +135,49 @@ const server=http.createServer((req,res)=>{
  assert.match(await f.locator('.levelup-news').textContent(),/별빛 복도[\s\S]*운동장[\s\S]*50 골드/);
  await f.locator('#levelupBackdrop button').click();
  await f.evaluate(()=>mockRpg.rewardNotifications=[]);
+ await f.locator('.sa-shortcuts [data-sa=inventory]').click();
+ await f.waitForFunction(()=>document.querySelector('#inventoryModal').contains(document.activeElement));
+ const inventoryItems=f.locator('#inventoryModal button:not([disabled])');
+ await inventoryItems.first().focus();await inventoryItems.first().press('Shift+Tab');
+ assert(await inventoryItems.last().evaluate(el=>el===document.activeElement));
+ await inventoryItems.last().press('Escape');
+ assert.equal(await f.locator('#inventoryModal').isVisible(),false);
+ assert(await f.locator('.sa-shortcuts [data-sa=inventory]').evaluate(el=>el===document.activeElement));
+ await f.evaluate(()=>mockRpg.failShop=true);await f.locator('.sa-shortcuts [data-sa=shop]').click();
+ await f.waitForFunction(()=>document.getElementById('shopMsg').textContent.includes('불러오지 못'));
+ assert.match(await f.locator('#shopMsg').textContent(),/불러오지 못/);assert.doesNotMatch(await f.locator('#shopMsg').textContent(),/Supabase/);
+ await f.locator('#shopModal button[aria-label="상점 닫기"]').press('Escape');await f.evaluate(()=>mockRpg.failShop=false);
+ await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=garden]').click();
+ assert.match(await f.locator('#saDialogSubtitle').textContent(),/Lv. 7/);
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
+ await f.evaluate(async()=>{mockRpg.student.xp=440;await loadDashboard()});
+ await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=garden]').click();
+ await page.screenshot({path:path.join(shots,'desktop-garden.png'),fullPage:true});
+ for(const id of ['leaves','flower','bench'])await f.locator('[data-garden='+id+']').click();
+ await f.locator('[data-sa=check-garden]').click();assert.match(await f.locator('#saWorkshopFeedback').textContent(),/다시 살펴/);
+ await f.locator('[data-garden=bench]').click();await f.locator('[data-garden=can]').click();await f.evaluate(()=>mockRpg.failWorkshop=true);
+ await f.locator('[data-sa=check-garden]').click();assert.match(await f.locator('#saWorkshopFeedback').textContent(),/아직 저장하지/);
+ assert.equal(await f.locator('[data-garden][aria-pressed=true]').count(),3);
+ await f.evaluate(()=>mockRpg.failWorkshop=false);await f.locator('[data-sa=check-garden]').click();
+ assert.match(await f.locator('#saWorkshopFeedback').textContent(),/세 가지 변화를 모두/);
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
+ await f.evaluate(async()=>{mockRpg.student.xp=535;await loadDashboard()});
+ await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=covers]').click();
+ assert.equal(await f.locator('[data-cover-choice=story]').isDisabled(),true);
+ await f.evaluate(()=>mockRpg.failWorkshop=true);await f.locator('[data-cover-choice=sprout]').click();
+ assert.equal(await f.locator('[data-cover-choice=paper]').getAttribute('aria-pressed'),'true');
+ await f.evaluate(()=>mockRpg.failWorkshop=false);await f.locator('[data-cover-choice=sprout]').click();
+ assert.match(await f.locator('#saWorkshopFeedback').textContent(),/표지를 저장/);
+ await page.screenshot({path:path.join(shots,'desktop-covers.png'),fullPage:true});
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
+ await f.evaluate(async()=>{mockRpg.student.xp=630;await loadDashboard()});
+ await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-chapter=cafeteria]').first().click();
+ for(const i of [1,2,0]){await f.locator('[data-choice="'+i+'"]').click();await f.locator('[data-sa=next]').click()}
+ assert.match(await f.locator('#saDialogBody').textContent(),/탐험 도장을 모았어요/);
+ await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));
+ await f.waitForFunction(()=>document.querySelector('#studentAdventureHome')?.dataset.cover==='sprout');
+ assert.equal(await f.evaluate(()=>mockRpg.workshop.garden_complete),true);
+ await f.evaluate(async()=>{mockRpg.student.xp=535;await loadDashboard()});
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:path.join(shots,'mobile-home.png'),fullPage:true});
  assert.equal(await f.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -133,14 +185,24 @@ const server=http.createServer((req,res)=>{
  await page.screenshot({path:path.join(shots,'mobile-roadmap.png'),fullPage:true});
  assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
  await f.locator('#studentAdventureDialog [data-sa=close]').click();
+ await f.locator('.sa-mobile-nav [data-sa=map]').click();await f.locator('[data-workshop=garden]').click();
+ await page.screenshot({path:path.join(shots,'mobile-garden.png'),fullPage:true});
+ assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
+ await f.locator('.sa-mobile-nav [data-sa=map]').click();await f.locator('[data-workshop=covers]').click();
+ await page.screenshot({path:path.join(shots,'mobile-covers.png'),fullPage:true});
+ assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+ await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await f.locator('.sa-mobile-nav [data-sa=map]').click();await f.locator('.sa-world').waitFor();
  await page.screenshot({path:path.join(shots,'mobile-map.png'),fullPage:true});
+ const overlappingPins=await f.locator('.sa-map-pin').evaluateAll(pins=>{const r=pins.map(p=>({id:p.dataset.chapter,b:p.getBoundingClientRect()}));return r.flatMap((a,i)=>r.slice(i+1).filter(c=>a.b.left<c.b.right&&a.b.right>c.b.left&&a.b.top<c.b.bottom&&a.b.bottom>c.b.top).map(c=>a.id+'/'+c.id))});
+ assert.deepEqual(overlappingPins,[],'Mobile map labels overlap');
  assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
  await f.locator('.sa-map-pin[data-chapter=classroom]').click();
  await f.locator('[data-sa=replay]').click();
  await page.screenshot({path:path.join(shots,'mobile-story.png'),fullPage:true});
  assert.equal(errors.length,0,errors.join('\n'));
- console.log('PASS: student shell and mobile layout; next goals at level boundaries and cap; roadmap entry loads saved progress; multi-level celebration; Tuesday text; map locks; wrong answers; retry; saved stamps; growth; scene navigation; typing; transient failure preserves login. Screenshots: '+shots);
+ console.log('PASS: Lv7 observation/wrong answer/retry; Lv8 stamp-gated cover/save failure/reload; Lv9 cafeteria; dialog focus/Tab/Escape; friendly shop error; mobile labels/layout; growth boundaries and cap; multi-level celebration; existing quests/stamps/scene/typing/network. Screenshots: '+shots);
  }finally{await browser.close();server.closeAllConnections();server.close()}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
 
