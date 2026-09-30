@@ -18,6 +18,14 @@ const createClient=()=>({
  {id:15,title:'함께 꾸민 우리 교실',description:'서로 도와 교실을 꾸몄어요.',quest_type:'main',category:'helper',status:'approved',xp:20,gold:20}
  ]}};
  if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_library_evidence'){
+  if(m.failEvidence)return {error:{message:'Offline'}};
+  const expected={'library-evidence-1':[1,1],'library-evidence-2':[0,2],'library-evidence-3':[2,0]}[args.p_case];
+  if(args.p_claim!==expected[0])return {data:{correct:false,reason:'claim'}};
+  if(args.p_evidence!==expected[1])return {data:{correct:false,reason:'evidence'}};
+  m.exploration=[...new Set([...m.exploration,args.p_case])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  return {data:{correct:true,step_id:args.p_case}};
+ }
  if(name==='student_complete_school_chapter'){
   if(m.failChapter)return {error:{message:'Offline'}};
   m.workshop={...m.workshop,chapter_one_complete:true,chapter_one_promise:args.p_promise,chapter_one_badge:args.p_badge};localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{...m.workshop}};
