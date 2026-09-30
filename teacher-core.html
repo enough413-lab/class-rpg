@@ -34,7 +34,7 @@ select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;f
 <script type="module">
 import {weeklyResetLabel,resetDayOptions} from './quest-schedule.js?v=20260930-weekday';
 import {submissionLabels,editQuestDetails} from './quest-submission.js?v=20260930-weekday';
-import { createQuestReviews } from './teacher-quest-reviews.js?v=20260928-multi-photo';
+import { createQuestReviews } from './teacher-quest-reviews.js?v=20260930-weekday';
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const URL='https://gcgjpfidppaioambcatq.supabase.co';const KEY='sb_publishable_qTRHSWCOYF2jUt3jesMkQQ_5DNavuiq';const db=createClient(URL,KEY);window.db=db;
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));

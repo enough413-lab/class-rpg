@@ -78,6 +78,8 @@ const server=http.createServer((req,res)=>{
    return [m.questPeriod('weekly',2,new Date('2026-09-28T14:59:59Z')),m.questPeriod('weekly',2,new Date('2026-09-28T15:00:00Z')),m.questPeriod('weekly',1,new Date('2026-09-28T14:59:59Z')),m.questPeriod('weekly',7,new Date('2026-01-03T15:00:00Z')),m.questPeriod('daily',2,new Date('2026-09-28T15:00:00Z'))];
   });
   assert.deepEqual(schedule,['2026-09-22','2026-09-29','2026-09-28','2026-01-04','2026-09-29']);
+  const reviewPeriod=await page.evaluate(async()=>{const m=await import('/teacher-quest-reviews.js');return m.currentQuestPeriod('weekly',new Date('2026-09-28T14:59:59Z'),2)});
+  assert.equal(reviewPeriod,'2026-09-22');
   console.log('PASS: weekly create Tuesday; edit Sunday; cancel; daily hidden; Seoul midnight boundaries; year rollover.');
   assert.equal(errors.length,0,errors.join('\n'));console.log('PASS: 9 student mode/type combinations; visibility/required fields; photo-only omits stale text; multiple photos; teacher creation through gameplay override; edit/cancel/save failure; legacy mode preserved.');
  }finally{await browser.close();server.closeAllConnections();server.close()}
