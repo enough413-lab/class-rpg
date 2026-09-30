@@ -2,6 +2,7 @@ import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=2026093
 import {weeklyResetLabel} from './quest-schedule.js?v=20260930-workshop';
 import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progression';
 import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20260930-workshop';
+import {CHAPTER_PROMISES,CHAPTER_ONE_MILESTONE,chapterOneView,profileMemento} from './school-chapter.js?v=20260930-chapter';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(action,label,kind='',attrs='')=>'<button class="sa-button '+kind+'" data-sa="'+action+'" '+attrs+'>'+label+'</button>';
@@ -16,7 +17,8 @@ export function installStudentAdventure(ctx){
  const doc=document,byId=id=>doc.getElementById(id);
  const dashboard=byId('dashboard');
  if(!dashboard||byId('studentAdventureHome'))return;
- let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set();
+ let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set(),endingPromise='';
+ const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE];
  const home=doc.createElement('div');home.id='studentAdventureHome';home.className='sa-home';
  home.innerHTML='<div class="sa-topbar"><div class="sa-brand"><span class="sa-brand-mark" aria-hidden="true">✦</span>우리반 모험학교</div><div class="sa-top-actions"><span class="sa-small" id="saDate"></span>'+button('help','도움말')+'</div></div>'+
  '<div id="saNetwork" class="sa-offline" role="status" hidden></div>'+
@@ -43,7 +45,7 @@ export function installStudentAdventure(ctx){
   if(owner!==s.id){owner=s.id;journal=null;journalError='';loadedAt=0;queueMicrotask(()=>loadJournal())}
   const lv=ctx.levelInfo(s.xp||0),all=ctx.getQuests()||[];
   renderNextGoal(lv.level,s.xp||0);
-  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>';
+  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>'+profileMemento(journal?.workshop);
   byId('saProfileProgress').innerHTML='<div class="sa-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+lv.pct+'"><span style="width:'+lv.pct+'%"></span></div><div class="sa-small">'+(lv.max?'최고 레벨에 도착했어요!':'다음 레벨까지 <b>'+(lv.need-lv.cur)+' 경험치</b>')+'</div><div class="sa-currency"><span>🪙 <b>'+Number(s.gold||0)+'</b> 골드</span><span>✨ '+Number(s.xp||0)+' 경험치</span></div>';
   const needs=all.filter(q=>!['approved','submitted'].includes(q.status)).length,waiting=all.filter(q=>q.status==='submitted').length;
   byId('saQuestSummary').textContent=needs?'도전할 일 '+needs+'개'+(waiting?' · 선생님 확인 중 '+waiting+'개':''):waiting?'보낸 기록 '+waiting+'개를 선생님이 확인하고 있어요.':'오늘도 나의 속도로 한 걸음씩!';
@@ -58,7 +60,7 @@ export function installStudentAdventure(ctx){
  function milestones(){
   const entries=SCHOOL_CHAPTERS.map(c=>({level:c.level,label:c.icon+' '+c.name+' 이야기',chapter:c.id,description:c.subtitle}));
   entries.push(...LEVEL_GIFTS.map(level=>({level,label:'🎁 레벨 달성 선물 · 50 골드',description:'이 레벨의 선물은 한 번 받아요.'})));
-  entries.push(...WORKSHOP_MILESTONES);
+  entries.push(...workshopMilestones);
   return entries.sort((a,b)=>a.level-b.level);
  }
  function unlocksBetween(from,to){return milestones().filter(m=>m.level>from&&m.level<=to).map(m=>'Lv. '+m.level+' · '+m.label)}
@@ -101,7 +103,7 @@ export function installStudentAdventure(ctx){
   byId('saDialogTitle').textContent=title;byId('saDialogSubtitle').textContent=subtitle;
   byId('saDialogBody').innerHTML=html;
   if(!dialog.open)dialog.showModal();
-  byId('saDialogBody').scrollTop=0;
+  byId('saDialogBody').scrollTop=0;dialog.scrollTop=0;
  }
  function errorView(retry){return '<div class="sa-empty" role="status"><p>'+esc(journalError||'기록을 불러오는 중이에요…')+'</p>'+button(retry,'다시 불러오기')+'</div>'}
  async function map(force=false){
@@ -118,17 +120,36 @@ export function installStudentAdventure(ctx){
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+WORKSHOP_MILESTONES.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
  }
  async function workshop(kind){
-  const m=WORKSHOP_MILESTONES.find(x=>x.activity===kind);if(!m)return;
+  const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
   const request=++viewRequest,lv=ctx.levelInfo(student().xp||0).level;
-  if(lv<m.level){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
+  if(lv<m.level&&!(kind==='chapter-one'&&journal?.workshop?.chapter_one_complete)){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
   if(request!==viewRequest||!dialog.open)return;
   if(!journal){open(m.label,'연결을 확인하고 다시 시도해 주세요.',errorView('retry-map'));return}
-  if(kind==='garden'){gardenChoices=new Set();open(m.label,'자세히 보고, 달라진 것을 찾아요.',gardenView(gardenChoices,journal.workshop?.garden_complete)+'<p>'+button('map','← 탐험 지도')+'</p>')}
+  if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
+  else if(kind==='garden'){gardenChoices=new Set();open(m.label,'자세히 보고, 달라진 것을 찾아요.',gardenView(gardenChoices,journal.workshop?.garden_complete)+'<p>'+button('map','← 탐험 지도')+'</p>')}
   else open(m.label,'탐험 도장이 새로운 표지가 돼요.',coverView({cover:journal.workshop?.cover,stamps:stampCount(),nickname:student().nickname||'모험가'},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
+ }
+ function showChapterOne(){
+  open('첫 모험 기념식','학교에서 배운 마음을 다음 모험으로 가져가요.',chapterOneView({chapters:SCHOOL_CHAPTERS,completed:completed(),workshop:journal.workshop,nickname:student().nickname||'모험가',promise:endingPromise},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
+ }
+ async function saveChapterOne(badge=journal?.workshop?.chapter_one_badge!==false){
+  const feedback=byId('saChapterFeedback');if(saving||!feedback)return;
+  if(!CHAPTER_PROMISES.some(p=>p.id===endingPromise)){feedback.textContent='내가 이어 갈 작은 약속을 하나 골라 주세요.';return}
+  const requestedOwner=student().id;
+  saving=true;const buttons=[...dialog.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);
+  feedback.textContent='나의 첫 모험을 수첩에 담고 있어요…';
+  try{
+   const {data,error}=await ctx.db.rpc('student_complete_school_chapter',{p_token:ctx.getToken(),p_promise:endingPromise,p_badge:badge});
+   if(error||!data?.chapter_one_complete)throw error||Error('Unconfirmed chapter');
+   if(requestedOwner!==student().id)return;
+   journal.workshop={...journal.workshop,...data};loadedAt=Date.now();render();showChapterOne();
+   byId('saChapterFeedback').textContent=badge?'✓ 학교 탐험가 휘장과 작은 약속을 저장했어요!':'✓ 휘장을 수첩에 보관했어요. 언제든 다시 달 수 있어요.';
+  }catch{if(requestedOwner===student().id)feedback.textContent='아직 저장하지 못했어요. 고른 약속은 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
+  finally{saving=false;buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled})}
  }
  async function saveWorkshop(action,choice){
   if(saving)return;
@@ -209,6 +230,11 @@ export function installStudentAdventure(ctx){
  }
  async function action(event){
   if(saving)return;
+  const promiseButton=event.target.closest('[data-promise]');if(promiseButton){
+   if(!CHAPTER_PROMISES.some(p=>p.id===promiseButton.dataset.promise))return;
+   endingPromise=promiseButton.dataset.promise;dialog.querySelectorAll('[data-promise]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.promise===endingPromise)));byId('saChapterFeedback').textContent='이 약속을 골랐어요. 아래 버튼을 눌러 저장해요.';return;
+  }
+  const badgeButton=event.target.closest('[data-chapter-badge]');if(badgeButton){await saveChapterOne(badgeButton.dataset.chapterBadge==='true');return}
   const workshopButton=event.target.closest('[data-workshop]');if(workshopButton){await workshop(workshopButton.dataset.workshop);return}
   const coverButton=event.target.closest('[data-cover-choice]');if(coverButton&&!coverButton.disabled){await saveWorkshop('cover',coverButton.dataset.coverChoice);return}
   const gardenButton=event.target.closest('[data-garden]');if(gardenButton){
@@ -223,6 +249,7 @@ export function installStudentAdventure(ctx){
   const a=b.dataset.sa;
   if(a==='close'){viewRequest++;dialog.close();return}
   if(a==='roadmap'){roadmap();return}
+  if(a==='finish-chapter'){await saveChapterOne();return}
   if(a==='check-garden'){await saveWorkshop('garden',JSON.stringify([...gardenChoices].sort()));return}
   if(a==='visit-chapter'){
    const id=b.dataset.goChapter,request=++viewRequest;

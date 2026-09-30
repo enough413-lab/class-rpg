@@ -18,6 +18,10 @@ const createClient=()=>({
  {id:15,title:'함께 꾸민 우리 교실',description:'서로 도와 교실을 꾸몄어요.',quest_type:'main',category:'helper',status:'approved',xp:20,gold:20}
  ]}};
  if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_complete_school_chapter'){
+  if(m.failChapter)return {error:{message:'Offline'}};
+  m.workshop={...m.workshop,chapter_one_complete:true,chapter_one_promise:args.p_promise,chapter_one_badge:args.p_badge};localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{...m.workshop}};
+ }
  if(name==='student_school_workshop'){
   if(m.failWorkshop)return {error:{message:'Offline'}};
   if(args.p_action==='garden'){
