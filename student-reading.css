@@ -1,0 +1,37 @@
+#readingPortfolioModal .inventory-modal{width:min(820px,100%);background:#fffcf4;border:2px solid #e8deca;border-radius:26px;padding:24px;color:#34483d}
+#readingPortfolioModal .inventory-top{align-items:flex-start;gap:12px;margin-bottom:20px}
+#readingPortfolioModal h2,#readingPortfolioModal h3,#readingPortfolioModal h4,.student-purchase-dialog h2{font-family:SchoolJua,sans-serif;font-weight:400;line-height:1.35}
+#readingPortfolioModal h2{font-size:28px}#readingPortfolioModal h3{font-size:22px;margin:0}#readingPortfolioModal h4{font-size:21px;margin:0}
+#readingPortfolioModal .btn,.student-purchase-dialog .btn,#shopRecovery .btn{min-height:46px;font-size:16px;padding:11px 16px;border-radius:14px;font-weight:700}
+#readingPortfolioModal .reading-form{display:block;background:#fff;border:1px solid #e4e9da;border-radius:20px;padding:22px}
+.reading-welcome{display:flex;gap:14px;padding:18px;background:#eaf5ec;border-radius:16px;margin-bottom:22px;line-height:1.65}
+.reading-welcome>span{font-size:36px}.reading-welcome b{font-size:19px}.reading-welcome p{margin:6px 0 0;font-size:15px;color:#46604f}
+.reading-context,.reading-history-heading,.reading-entry-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.reading-book-row{display:grid;grid-template-columns:1fr 170px;gap:18px}
+#readingEntryForm .field{margin:0 0 21px;display:flex;flex-direction:column;gap:8px}
+#readingEntryForm label{font-size:18px;font-weight:750;line-height:1.5}
+#readingEntryForm .field>p{font-size:14px;color:#667365;margin:0;line-height:1.65}
+#readingEntryForm input,#readingEntryForm textarea,#readingEntryForm select{width:100%;box-sizing:border-box;font:inherit;font-size:17px;line-height:1.7;color:#304539;padding:12px 14px;border:1.5px solid #cdd9ca;background:#fffefa;border-radius:12px}
+#readingEntryForm textarea{min-height:120px;resize:vertical}#readingEntryForm #readingRecommendation{min-height:95px}
+#readingEntryForm input:focus,#readingEntryForm textarea:focus,#readingEntryForm select:focus{outline:3px solid #a0c8b0;outline-offset:2px}
+#readingEntryForm :disabled{opacity:.8;cursor:wait}#readingSubmit{width:100%;background:#285e48;color:white;border:0}
+.reading-draft-status{font-size:14px;color:#526e56;margin:12px 0 22px;line-height:1.6}
+.reading-draft-hint{font-size:13px;color:#6e786d;margin:13px 0 0;line-height:1.7}
+#readingHistory{display:grid;gap:15px;margin-top:26px}.reading-history-heading{margin:0 0 3px}
+#readingHistory .reading-entry{border:1px solid #e2dfd0;background:white;border-radius:18px;padding:20px;display:block;overflow-wrap:anywhere}
+.reading-state{padding:6px 10px;font-size:13px;border-radius:9px;background:#fff0c9;color:#795e16}.reading-state.approved{background:#e6f4e9;color:#315e42}.reading-state.rejected{background:#f5eaff;color:#695081}
+.reading-entry-date{font-size:14px;color:#788373;margin:8px 0 13px}.reading-entry details summary{min-height:40px;line-height:40px;cursor:pointer;font-weight:700;color:#335d49}.reading-entry details p{white-space:pre-wrap;line-height:1.85;font-size:16px}
+.reading-teacher-note{padding:14px 16px;background:#f5f0fd;border-radius:12px;color:#665076;font-size:16px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.reading-empty{text-align:center;padding:28px 18px;border:1px dashed #c9d4c3;border-radius:18px;background:#f4f8f0;line-height:1.75}.reading-empty>span{display:block;font-size:36px;margin-bottom:9px}.reading-empty b{display:block;font-size:18px}.reading-empty p{color:#647360}
+#readingPortfolioMsg{line-height:1.75;margin-bottom:14px;font-size:16px}
+.student-purchase-dialog{width:min(410px,calc(100vw - 32px));box-sizing:border-box;border:2px solid #e9dbbd;border-radius:26px;padding:26px;background:#fffcf4;color:#34483d;text-align:center;max-height:90dvh;overflow:auto;box-shadow:0 18px 80px #172d3c33}
+.student-purchase-dialog::backdrop{background:#1d354a77}.purchase-icon{font-size:44px}.student-purchase-dialog h2{font-size:27px;margin:12px 0}#purchaseProduct{font-size:20px;font-weight:750;overflow-wrap:anywhere}
+#purchaseBalance{display:grid;gap:12px;background:white;border:1px solid #e8e1d3;border-radius:16px;padding:18px;font-size:16px}#purchaseBalance>div{display:flex;justify-content:space-between;gap:14px}#purchaseBalance b{color:#32614c}
+#purchaseHint,#purchaseMessage{font-size:15px;line-height:1.8}#purchaseMessage{color:#9a433f}.purchase-buttons{display:flex;gap:10px}.purchase-buttons>button{flex:1}.student-purchase-dialog .good{background:#285e48;color:white}
+#shopRecovery{background:#fff3d3;border:1px solid #dec987;border-radius:15px;padding:15px;margin:12px 0;color:#715322;line-height:1.7}#shopRecovery p{margin:0 0 12px}
+@media(max-width:600px){#readingPortfolioModal{padding:9px}#readingPortfolioModal .inventory-modal{padding:15px;border-radius:20px;max-height:94dvh}#readingPortfolioModal h2{font-size:25px}#readingPortfolioModal .reading-form{padding:15px}.reading-welcome{padding:13px;gap:9px}.reading-welcome>span{font-size:29px}.reading-book-row{grid-template-columns:1fr;gap:0}#readingPortfolioModal .inventory-top .btn{padding:9px 12px}.reading-welcome b{font-size:18px}#readingHistory .reading-entry{padding:16px}}
+
+body .modal-backdrop{z-index:300}
+#readingPortfolioModal .inventory-top{position:sticky;top:-24px;background:#fffcf4;z-index:2;padding:12px 0;margin-top:-12px}
+#shopModal .inventory-top>.btn{flex-shrink:0;min-width:62px;white-space:nowrap}
+@media(max-width:600px){#readingPortfolioModal .inventory-top{top:-15px}body:has(.modal-backdrop:not(.hidden)) .sa-mobile-nav{visibility:hidden}}
