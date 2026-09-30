@@ -77,18 +77,20 @@ const {server,shots}=require('./student-fixture.cjs');
   assert.match(await f.locator('#saNextGoal').textContent(),expected);
  }
  await f.evaluate(async()=>{mockRpg.student.xp=260;await loadDashboard()});
- // Exercise the real reward observer across a multi-level jump, not just a helper.
+ // Exercise the real reward queue and observer, including acknowledgement.
+ // A synthetic backdrop can race the actual notification poll after a reload.
+ await f.waitForFunction(()=>document.__levelObserver);
  const callsBefore=await f.evaluate(()=>mockRpg.calls.filter(x=>x==='student_dashboard').length);
- await f.evaluate(()=>{mockRpg.rewardNotifications=[{status:'approved',xp:211}];const reward=document.createElement('div');reward.id='fixtureReward';reward.className='reward-notice-backdrop';document.body.append(reward)});
+ await f.evaluate(()=>{mockRpg.rewardNotifications=[{kind:'quest',id:701,status:'approved',xp:211,gold:0,title:'학교 기록 확인'}]});
+ await page.evaluate(()=>{pollRewardNotices()});
+ await f.locator('.reward-notice-backdrop .reward-confirm').waitFor();
  await f.waitForFunction(before=>mockRpg.calls.filter(x=>x==='student_dashboard').length>before,callsBefore);
- // Clear the synthetic payload as soon as the observer has read it, so the
- // periodic notification poll cannot display the same fixture a second time.
- await f.evaluate(()=>{mockRpg.rewardNotifications=[];document.getElementById('fixtureReward').remove()});
+ await f.locator('.reward-notice-backdrop .reward-confirm').click();
  await f.locator('.levelup-news').waitFor();
  assert.equal(await f.locator('.levelup-news li').count(),5);
  assert.match(await f.locator('.levelup-news').textContent(),/별빛 복도[\s\S]*운동장[\s\S]*50 골드/);
  await f.locator('#levelupBackdrop button').click();
- await f.evaluate(()=>mockRpg.rewardNotifications=[]);
+ assert.equal(await f.evaluate(()=>mockRpg.rewardNotifications.length),0);
  await f.locator('.sa-shortcuts [data-sa=inventory]').click();
  await f.waitForFunction(()=>document.querySelector('#inventoryModal').contains(document.activeElement));
  await f.waitForFunction(()=>document.getElementById('inventoryModal').getAttribute('aria-busy')==='false');
