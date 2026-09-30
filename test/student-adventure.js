@@ -3,6 +3,7 @@ import {weeklyResetLabel} from './quest-schedule.js?v=20260930-workshop';
 import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progression';
 import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20260930-workshop';
 import {CHAPTER_PROMISES,CHAPTER_ONE_MILESTONE,chapterOneView,profileMemento} from './school-chapter.js?v=20260930-chapter';
+import {LIBRARY_MILESTONE,LIBRARY_CASES,evidenceView,libraryBookmarkView} from './library-evidence.js?v=20260930-evidence';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(action,label,kind='',attrs='')=>'<button class="sa-button '+kind+'" data-sa="'+action+'" '+attrs+'>'+label+'</button>';
@@ -18,7 +19,8 @@ export function installStudentAdventure(ctx){
  const dashboard=byId('dashboard');
  if(!dashboard||byId('studentAdventureHome'))return;
  let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set(),endingPromise='';
- const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE];
+ const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE];
+ let libraryIndex=0,libraryChoice={claim:null,evidence:null},librarySolved=false;
  const home=doc.createElement('div');home.id='studentAdventureHome';home.className='sa-home';
  home.innerHTML='<div class="sa-topbar"><div class="sa-brand"><span class="sa-brand-mark" aria-hidden="true">✦</span>우리반 모험학교</div><div class="sa-top-actions"><span class="sa-small" id="saDate"></span>'+button('help','도움말')+'</div></div>'+
  '<div id="saNetwork" class="sa-offline" role="status" hidden></div>'+
@@ -120,21 +122,58 @@ export function installStudentAdventure(ctx){
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
  }
  async function workshop(kind){
   const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
   const request=++viewRequest,lv=ctx.levelInfo(student().xp||0).level;
-  if(lv<m.level&&!(kind==='chapter-one'&&journal?.workshop?.chapter_one_complete)){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
+  const earned=kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id));
+  if(lv<m.level&&!earned){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
   if(request!==viewRequest||!dialog.open)return;
   if(!journal){open(m.label,'연결을 확인하고 다시 시도해 주세요.',errorView('retry-map'));return}
-  if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
+  if(kind==='library-evidence'){libraryIndex=LIBRARY_CASES.findIndex(s=>!completed().has(s.id));renderEvidence()}
+  else if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
   else if(kind==='garden'){gardenChoices=new Set();open(m.label,'자세히 보고, 달라진 것을 찾아요.',gardenView(gardenChoices,journal.workshop?.garden_complete)+'<p>'+button('map','← 탐험 지도')+'</p>')}
   else open(m.label,'탐험 도장이 새로운 표지가 돼요.',coverView({cover:journal.workshop?.cover,stamps:stampCount(),nickname:student().nickname||'모험가'},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
  }
  function showChapterOne(){
   open('첫 모험 기념식','학교에서 배운 마음을 다음 모험으로 가져가요.',chapterOneView({chapters:SCHOOL_CHAPTERS,completed:completed(),workshop:journal.workshop,nickname:student().nickname||'모험가',promise:endingPromise},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
+ }
+ function renderEvidence(){
+  libraryChoice={claim:null,evidence:null};librarySolved=false;
+  const story=LIBRARY_CASES[libraryIndex];
+  open(story?'도서관 단서 탐험':'나의 단서 책갈피',story?'글 속 문장과 내 생각을 연결해 봐요.':'책을 읽는 또 하나의 힘을 발견했어요.',(story?evidenceView(story,libraryIndex,libraryChoice,esc):libraryBookmarkView(esc))+'<p>'+button('map','← 탐험 지도')+'</p>');
+ }
+ function libraryLabel(level){
+  const n=LIBRARY_CASES.filter(s=>completed().has(s.id)).length;
+  return n===3?'✓ 단서 책갈피 모음 · 다시 읽기':n?'이야기 '+n+' / 3 완료 · 이어 읽기':level<11?'🔒 Lv. 11에 열려요':'새로운 세 이야기 만나기';
+ }
+ function selectEvidence(type,value){
+  if(librarySolved||!Number.isInteger(value)||value<0||value>2)return;
+  libraryChoice[type]=value;
+  dialog.querySelectorAll('[data-evidence-'+(type==='claim'?'claim':'line')+']').forEach(b=>{
+   const selected=Number(type==='claim'?b.dataset.evidenceClaim:b.dataset.evidenceLine)===value;b.setAttribute('aria-pressed',String(selected));
+   if(type==='evidence')b.querySelector('small').textContent=selected?'✓ 고른 단서':'단서로 고르기';
+  });
+  byId('saEvidenceSelection').textContent='문장 단서 '+(libraryChoice.evidence===null?'0':'1')+'개 · 내 생각 '+(libraryChoice.claim===null?'0':'1')+'개를 골랐어요.';
+  byId('saEvidenceFeedback').textContent='';
+ }
+ async function saveEvidence(){
+  const story=LIBRARY_CASES[libraryIndex],feedback=byId('saEvidenceFeedback');if(saving||librarySolved||!story||!feedback)return;
+  if(libraryChoice.claim===null||libraryChoice.evidence===null){feedback.textContent='내 생각 하나와, 글 속 문장 단서 하나를 골라 주세요.';return}
+  const requestedOwner=student().id,choice={...libraryChoice};
+  saving=true;const buttons=[...dialog.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);feedback.textContent='생각과 단서를 함께 살펴보고 있어요…';
+  try{
+   const {data,error}=await ctx.db.rpc('student_library_evidence',{p_token:ctx.getToken(),p_case:story.id,p_claim:choice.claim,p_evidence:choice.evidence});if(error||!data)throw error||Error('Missing evidence result');
+   if(requestedOwner!==student().id)return;
+   if(!data.correct){feedback.textContent='다시 읽어 볼까요? '+(data.reason==='evidence'?story.evidenceHint:story.claimHint);return}
+   if(data.step_id!==story.id)throw Error('Unexpected evidence result');
+   journal.exploration=[...new Set([...journal.exploration,story.id])];loadedAt=Date.now();librarySolved=true;render();
+   feedback.innerHTML='<b>단서와 생각이 이어졌어요! ✦</b><p>'+esc(story.explanation)+'</p><div class="sa-real-mission"><strong>진짜 학교에서도 해 볼까요?</strong><p>'+esc(story.real)+'</p></div><p>'+button('next-evidence',libraryIndex===2?'단서 책갈피 보기':'다음 이야기 →','primary')+'</p>';
+   feedback.querySelector('button').focus({preventScroll:true});
+  }catch{if(requestedOwner===student().id)feedback.textContent='아직 저장하지 못했어요. 고른 생각과 단서는 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
+  finally{saving=false;buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled||librarySolved&&b.matches('[data-evidence-line],[data-evidence-claim],[data-sa=check-evidence]')})}
  }
  async function saveChapterOne(badge=journal?.workshop?.chapter_one_badge!==false){
   const feedback=byId('saChapterFeedback');if(saving||!feedback)return;
@@ -230,6 +269,11 @@ export function installStudentAdventure(ctx){
  }
  async function action(event){
   if(saving)return;
+  const evidenceLine=event.target.closest('[data-evidence-line]');if(evidenceLine){selectEvidence('evidence',Number(evidenceLine.dataset.evidenceLine));return}
+  const evidenceClaim=event.target.closest('[data-evidence-claim]');if(evidenceClaim){selectEvidence('claim',Number(evidenceClaim.dataset.evidenceClaim));return}
+  const evidenceReplay=event.target.closest('[data-evidence-replay]');if(evidenceReplay){
+   const index=Number(evidenceReplay.dataset.evidenceReplay);if(LIBRARY_CASES[index]&&completed().has(LIBRARY_CASES[index].id)){libraryIndex=index;renderEvidence()}return;
+  }
   const promiseButton=event.target.closest('[data-promise]');if(promiseButton){
    if(!CHAPTER_PROMISES.some(p=>p.id===promiseButton.dataset.promise))return;
    endingPromise=promiseButton.dataset.promise;dialog.querySelectorAll('[data-promise]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.promise===endingPromise)));byId('saChapterFeedback').textContent='이 약속을 골랐어요. 아래 버튼을 눌러 저장해요.';return;
@@ -250,6 +294,8 @@ export function installStudentAdventure(ctx){
   if(a==='close'){viewRequest++;dialog.close();return}
   if(a==='roadmap'){roadmap();return}
   if(a==='finish-chapter'){await saveChapterOne();return}
+  if(a==='check-evidence'){await saveEvidence();return}
+  if(a==='next-evidence'&&librarySolved){libraryIndex++;renderEvidence();return}
   if(a==='check-garden'){await saveWorkshop('garden',JSON.stringify([...gardenChoices].sort()));return}
   if(a==='visit-chapter'){
    const id=b.dataset.goChapter,request=++viewRequest;
