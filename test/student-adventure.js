@@ -1,5 +1,6 @@
 import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20260930-adventure';
 import {weeklyResetLabel} from './quest-schedule.js?v=20260930-adventure';
+import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progression';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(action,label,kind='',attrs='')=>'<button class="sa-button '+kind+'" data-sa="'+action+'" '+attrs+'>'+label+'</button>';
@@ -20,7 +21,7 @@ export function installStudentAdventure(ctx){
  '<div id="saNetwork" class="sa-offline" role="status" hidden></div>'+
  '<section class="sa-hero" aria-labelledby="saWelcome"><div class="sa-hero-art" aria-hidden="true"></div><div class="sa-hero-content"><span class="sa-eyebrow">우리의 학교가 모험이 되는 곳</span><h1 id="saWelcome">오늘의 작은 도전,<br>한 뼘 더 자라는 나!</h1><p>배우고, 도와주고, 함께 해내며<br>나만의 모험 이야기를 채워요.</p>'+button('map','학교 탐험 떠나기 <span aria-hidden="true">→</span>','primary')+'</div></section>'+
  '<div class="sa-layout"><aside class="sa-side"><section class="sa-panel sa-profile" aria-label="나의 모험가 정보"><div class="sa-profile-title" id="saProfileTitle"></div><div class="sa-profile-avatar" id="saAvatar"></div><div class="sa-profile-progress" id="saProfileProgress"></div><div class="sa-shortcuts">'+button('inventory','🎒 옷장')+button('shop','🪙 상점')+button('growth','🌱 성장')+button('titles','🏅 칭호')+button('reading','📚 독서')+button('achievements','🏆 업적')+'</div></section><section class="sa-panel sa-note"><strong>학교에서 해낸 일이 내 힘이 돼요</strong><p>퀘스트를 실천하고 기록을 보내요.<br>선생님이 확인하면 경험치와 골드를 받아요.</p>'+button('parent','보호자와 함께 읽기')+'</section></aside>'+
- '<div class="sa-main"><section class="sa-panel" aria-labelledby="saQuestHeading"><div class="sa-panel-head"><div><h2 id="saQuestHeading">오늘의 모험 수첩</h2><p class="sa-small" id="saQuestSummary"></p></div>'+button('refresh','↻','', 'aria-label="퀘스트 새로고침"')+'</div><div class="sa-tabs" aria-label="퀘스트 종류">'+[['todo','할 일'],['daily','매일'],['weekly','이번 주'],['main','의뢰'],['done','완료']].map(x=>'<button class="sa-tab" data-filter="'+x[0]+'" aria-pressed="false">'+x[1]+'</button>').join('')+'</div><div id="saQuestList" class="sa-quest-list"></div></section>'+
+ '<div class="sa-main"><section class="sa-panel sa-next-goal" id="saNextGoal" aria-label="다음 성장 목표"></section><section class="sa-panel" aria-labelledby="saQuestHeading"><div class="sa-panel-head"><div><h2 id="saQuestHeading">오늘의 모험 수첩</h2><p class="sa-small" id="saQuestSummary"></p></div>'+button('refresh','↻','', 'aria-label="퀘스트 새로고침"')+'</div><div class="sa-tabs" aria-label="퀘스트 종류">'+[['todo','할 일'],['daily','매일'],['weekly','이번 주'],['main','의뢰'],['done','완료']].map(x=>'<button class="sa-tab" data-filter="'+x[0]+'" aria-pressed="false">'+x[1]+'</button>').join('')+'</div><div id="saQuestList" class="sa-quest-list"></div></section>'+
  '<section class="sa-panel sa-map-teaser"><img class="sa-map-thumb" src="maps/school-campus-v2.webp" alt="학교와 도서관, 정원이 이어진 모험 지도" loading="lazy"><div><span class="sa-eyebrow">학교 탐험 수첩</span><h2>익숙한 학교, 새로운 발견</h2><p id="saExploreSummary">교실에서 시작해 여섯 장소의 이야기를 만나 보세요.</p>'+button('map','탐험 지도 펼치기')+'</div></section></div></div>'+
  '<nav class="sa-mobile-nav" aria-label="빠른 메뉴"><button data-sa="home"><span aria-hidden="true">🏡</span>오늘</button><button data-sa="map"><span aria-hidden="true">🗺️</span>탐험</button><button data-sa="growth"><span aria-hidden="true">🌱</span>성장</button><button data-sa="inventory"><span aria-hidden="true">🎒</span>옷장</button></nav><div id="saStatus" class="sa-sr-only" role="status" aria-live="polite"></div>';
  dashboard.prepend(home);
@@ -40,6 +41,7 @@ export function installStudentAdventure(ctx){
   const s=student();if(!s.id)return;
   if(owner!==s.id){owner=s.id;journal=null;journalError='';loadedAt=0}
   const lv=ctx.levelInfo(s.xp||0),all=ctx.getQuests()||[];
+  renderNextGoal(lv.level,s.xp||0);
   byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>';
   byId('saProfileProgress').innerHTML='<div class="sa-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+lv.pct+'"><span style="width:'+lv.pct+'%"></span></div><div class="sa-small">'+(lv.max?'최고 레벨에 도착했어요!':'다음 레벨까지 <b>'+(lv.need-lv.cur)+' 경험치</b>')+'</div><div class="sa-currency"><span>🪙 <b>'+Number(s.gold||0)+'</b> 골드</span><span>✨ '+Number(s.xp||0)+' 경험치</span></div>';
   const needs=all.filter(q=>!['approved','submitted'].includes(q.status)).length,waiting=all.filter(q=>q.status==='submitted').length;
@@ -48,6 +50,23 @@ export function installStudentAdventure(ctx){
   const items=all.filter(q=>filter==='todo'?q.status!=='approved':filter==='done'?q.status==='approved':q.quest_type===filter).sort((a,b)=>(a.status==='submitted')-(b.status==='submitted'));
   byId('saQuestList').innerHTML=items.length?items.map(card).join(''):'<div class="sa-empty"><span class="sa-empty-icon" aria-hidden="true">'+(filter==='done'?'🌱':'☀️')+'</span><b>'+(filter==='done'?'첫 번째 성장을 기다리고 있어요.':'지금은 등록된 할 일이 없어요.')+'</b><p>'+(filter==='done'?'학교에서 실천한 일을 선생님께 보내 보세요.':'탐험 수첩을 펼치거나, 읽은 책을 기록해 볼까요?')+'</p>'+button('map','학교 탐험하기')+'</div>';
   if(journal){const stars=SCHOOL_CHAPTERS.filter(c=>c.steps.every(s=>completed().has(s.id))).length;byId('saExploreSummary').textContent='발견한 탐험 도장 '+stars+' / 6개 · 다음 이야기를 이어 가요.'}
+ }
+ function milestones(){
+  const entries=SCHOOL_CHAPTERS.map(c=>({level:c.level,label:c.icon+' '+c.name+' 이야기',chapter:c.id,description:c.subtitle}));
+  entries.push(...LEVEL_GIFTS.map(level=>({level,label:'🎁 레벨 달성 선물 · 50 골드',description:'이 레벨의 선물은 한 번 받아요.'})));
+  return entries.sort((a,b)=>a.level-b.level);
+ }
+ function unlocksBetween(from,to){return milestones().filter(m=>m.level>from&&m.level<=to).map(m=>'Lv. '+m.level+' · '+m.label)}
+ function renderNextGoal(level,xp){
+  const entries=milestones(),next=entries.find(m=>m.level>level),soon=next?entries.filter(m=>m.level===next.level):[];
+  byId('saNextGoal').innerHTML='<div><span class="sa-eyebrow">'+(next?'다음에 만날 즐거움':'Lv. 30 · 멋지게 자랐어요!')+'</span><h2>'+(next?'Lv. '+next.level+'에서 만나요':'나의 배움은 계속돼요')+'</h2><p>'+(next?soon.map(m=>esc(m.label)).join('<br>'):'탐험 도장을 모으고, 학교에서 해낸 일을 성장 나무에 남겨요.')+'</p>'+(next?'<strong class="sa-goal-xp">'+experienceUntil(xp,next.level)+' 경험치 더 모으면 도착!</strong>':'')+'</div>'+button('roadmap','성장 길잡이 →');
+ }
+ function roadmap(){
+  ++viewRequest;
+  const xp=student().xp||0,level=ctx.levelInfo(xp).level,entries=milestones(),next=entries.find(m=>m.level>level)?.level;
+  const levels=[...new Set(entries.map(m=>m.level))];
+  open('나의 성장 길잡이','다음 모험과 선물을 한눈에 살펴봐요.',
+   '<div class="sa-real-mission"><b>지금 Lv. '+level+' · '+Number(xp)+' 경험치</b><p>학교에서 실천하고 선생님께 확인받으며 자라요. 서두르지 않아도 괜찮아요.</p></div><ol class="sa-roadmap">'+levels.map(lv=>'<li class="sa-milestone '+(lv<=level?'reached':lv===next?'up-next':'')+'"'+(lv===next?' aria-current="step"':'')+'><div class="sa-milestone-head"><b>Lv. '+lv+'</b><span>'+(lv<=level?'✓ 레벨 달성':lv===next?'다음 목표':'앞으로 만나요')+'</span></div>'+entries.filter(m=>m.level===lv).map(m=>'<div class="sa-milestone-content"><strong>'+esc(m.label)+'</strong><p>'+esc(m.description)+'</p>'+(m.chapter&&lv<=level?button('visit-chapter','이야기 만나기','','data-go-chapter="'+m.chapter+'"'):'')+'</div>').join('')+(lv>level?'<small>'+experienceUntil(xp,lv)+' 경험치 남았어요.</small>':'')+'</li>').join('')+'</ol><p class="sa-note">도서관 탐험이 열리기 전에도 독서 기록과 학교생활 퀘스트는 할 수 있어요. 레벨 선물은 이미 받은 경우 다시 지급되지 않아요.</p>');
  }
  function card(q){
   const a=questAction(q),mode={photo:'사진 1장 이상',text:'글',both:'글 + 사진 1장 이상'}[q.submission_mode]||'글·사진으로 기록';
@@ -88,7 +107,7 @@ export function installStudentAdventure(ctx){
   const lv=ctx.levelInfo(student().xp||0).level,done=completed(),stamps=SCHOOL_CHAPTERS.filter(c=>c.steps.every(s=>done.has(s.id))).length;
   const label=c=>c.steps.every(s=>done.has(s.id))?'✓ 탐험 도장 획득':lv<c.level?'Lv. '+c.level+'에 열려요':c.steps.filter(s=>done.has(s.id)).length+' / 3 이야기';
   open('학교 탐험 수첩','장소를 눌러 이야기 속 선택을 해 보세요.',
-   '<div class="sa-passport"><div><b>나의 탐험 도장 '+stamps+' / 6</b><br><span class="sa-small">지금 Lv. '+lv+' · 골드 없이 탐험해요.</span></div>'+button('classroom','교실에서 걷기')+'</div>'+
+   '<div class="sa-passport"><div><b>나의 탐험 도장 '+stamps+' / 6</b><br><span class="sa-small">지금 Lv. '+lv+' · 골드 없이 탐험해요.</span></div><div class="sa-passport-actions">'+button('roadmap','성장 길잡이')+button('classroom','교실에서 걷기')+'</div></div>'+
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
@@ -97,7 +116,7 @@ export function installStudentAdventure(ctx){
  function chapter(id,again=false){
   const c=SCHOOL_CHAPTERS.find(x=>x.id===id);if(!c)return;
   const lv=ctx.levelInfo(student().xp||0).level;
-  if(lv<c.level){open(c.icon+' '+c.name,'Lv. '+c.level+'에 열리는 다음 모험','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>조금 더 자라서 만나요!</h3><p>지금은 Lv. '+lv+'예요.<br>학교에서 퀘스트를 실천하고 경험치를 모으면<br>'+c.name+'의 이야기가 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
+  if(lv<c.level){open(c.icon+' '+c.name,'Lv. '+c.level+'에 열리는 다음 모험','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>조금 더 자라서 만나요!</h3><p>지금은 Lv. '+lv+'예요.<br><b>'+experienceUntil(student().xp||0,c.level)+' 경험치</b>를 더 모으면<br>'+c.name+'의 이야기가 열려요.</p><p>'+esc(c.subtitle)+'</p>'+button('map','지도로 돌아가기')+'</div>');return}
   activeChapter=c;replay=again;stepIndex=again?0:c.steps.findIndex(s=>!completed().has(s.id));
   renderChapter();
  }
@@ -156,6 +175,15 @@ export function installStudentAdventure(ctx){
   const b=event.target.closest('[data-sa]');if(!b||saving)return;
   const a=b.dataset.sa;
   if(a==='close'){viewRequest++;dialog.close();return}
+  if(a==='roadmap'){roadmap();return}
+  if(a==='visit-chapter'){
+   const id=b.dataset.goChapter,request=++viewRequest;
+   open('탐험 이야기','내가 모은 기록을 확인하고 있어요.',errorView('retry-map'));
+   await loadJournal();
+   if(request!==viewRequest||!dialog.open)return;
+   if(!journal){open('탐험 이야기','잠깐, 연결을 확인하고 있어요.',errorView('retry-map'));return}
+   chapter(id);return;
+  }
   if(a==='map'||a==='retry-map'){await map(a==='retry-map');return}
   if(a==='growth'||a==='retry-growth'){await growth(a==='retry-growth');return}
   if(a==='next'){stepIndex++;renderChapter();return}
@@ -194,5 +222,5 @@ export function installStudentAdventure(ctx){
  window.openAdventureMap=()=>map();
  doc.addEventListener('student-dashboard-updated',render);
  render();
- return {render,map,growth};
+ return {render,map,growth,roadmap,unlocksBetween};
 }

@@ -2,13 +2,13 @@ const fs=require('fs'),http=require('http'),path=require('path'),assert=require(
 const {chromium}=require('playwright');const root=path.resolve(__dirname,'..');
 const studentMock=`const createClient=()=>({rpc:async(name,args)=>{if(name==='student_submit_quest_evidence'){window.calls.push(args);return {error:null}}return {data:[],error:null}}});window.calls=[];`;
 const studentFixture=`current={id:987,nickname:'테스트'};token='fixture';dashboardQuests=[];for(const kind of ['daily','weekly','main'])for(const mode of ['photo','text','both'])dashboardQuests.push({id:101+dashboardQuests.length,title:kind+' '+mode,quest_type:kind,submission_mode:mode,status:kind==='main'?'accepted':'available'});loadDashboard=async()=>{};window.fixtureQuests=dashboardQuests;window.testReady=true;`;
-const teacherMock=`window.questRows=[];window.writes=[];window.failSave=false;
+const teacherMock=`window.questRows=[];window.writes=[];window.failSave=false;window.studentRows=[{id:901,student_number:1,login_id:'fixture1',nickname:'첫성장',xp:50,gold:0,setup_complete:true},{id:902,student_number:2,login_id:'fixture2',nickname:'성장중',xp:260,gold:0,setup_complete:true},{id:903,student_number:3,login_id:'fixture3',nickname:'완주',xp:3155,gold:0,setup_complete:true}];
 const createClient=()=>({
  auth:{getUser:async()=>({data:{user:{id:'teacher-fixture'}}}),getSession:async()=>({data:{session:null}})},
  channel(){const c={on(){return c},subscribe(){return c}};return c},rpc:async()=>({data:[],error:null}),
- from(table){let op='select',payload=null,id=null;const q={select(){return q},eq(k,v){if(k==='id')id=v;return q},order(){return q},range(){return q},insert(v){op='insert';payload=v;return q},update(v){op='update';payload=v;return q},single(){return Promise.resolve({data:window.questRows.find(r=>r.id===id),error:null})},then(resolve){if(op!=='select'){if(window.failSave)return resolve({error:{message:'테스트 저장 실패'}});window.writes.push({op,payload,id});if(op==='insert')window.questRows.push({id:window.questRows.length+1,active:true,...payload});else Object.assign(window.questRows.find(r=>r.id===id),payload);}return resolve({data:table==='quests'?window.questRows:[],error:null})}};return q}
+ from(table){let op='select',payload=null,id=null;const q={select(){return q},eq(k,v){if(k==='id')id=v;return q},order(){return q},range(){return q},insert(v){op='insert';payload=v;return q},update(v){op='update';payload=v;return q},single(){return Promise.resolve({data:window.questRows.find(r=>r.id===id),error:null})},then(resolve){if(op!=='select'){if(window.failSave)return resolve({error:{message:'테스트 저장 실패'}});window.writes.push({op,payload,id});if(op==='insert')window.questRows.push({id:window.questRows.length+1,active:true,...payload});else Object.assign(window.questRows.find(r=>r.id===id),payload);}return resolve({data:table==='quests'?window.questRows:table==='students'?window.studentRows:[],error:null})}};return q}
 });`;
-const teacherFixture=`loadSubmissions=async()=>{};$('authCard').classList.add('hidden');$('app').classList.remove('hidden');window.testReady=true;`;
+const teacherFixture=`loadSubmissions=async()=>{};$('authCard').classList.add('hidden');$('app').classList.remove('hidden');await loadStudents();window.testReady=true;`;
 const server=http.createServer((req,res)=>{
  const pathname=new URL(req.url,'http://localhost').pathname;
  if(pathname==='/teacher-test'){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end('<iframe id="core" src="teacher-core.html" style="width:100%;height:95vh;border:0"></iframe><script src="teacher-gameplay.js"></script>');}
@@ -36,6 +36,8 @@ const server=http.createServer((req,res)=>{
    if(q.submission_mode==='text')assert.equal(call.p_image,null);else assert.equal(JSON.parse(call.p_image).length,2);
   }
   await page.goto(base+'/teacher-test');const frame=page.frames().find(f=>f.url().includes('teacher-core.html'));await frame.waitForFunction(()=>window.testReady&&window.__directQuestAddInstalled);
+  const displayedLevels=await frame.locator('#students').textContent();
+  assert.match(displayedLevels,/Lv.2 · 50XP/);assert.match(displayedLevels,/Lv.5 · 260XP/);assert.match(displayedLevels,/Lv.30 · 3155XP/);
   await frame.locator('#questTitle').fill('방식 선택 검사');await frame.evaluate(()=>addQuest());assert.equal(await frame.evaluate(()=>writes.length),0);assert.match(await frame.locator('#questMsg').textContent(),/제출방식/);
   for(const mode of ['photo','text','both']){
    await frame.locator('#questTitle').fill('퀘스트 '+mode);await frame.locator('#questSubmissionMode').selectOption(mode);await frame.evaluate(()=>addQuest());
