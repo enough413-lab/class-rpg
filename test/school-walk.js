@@ -1,4 +1,4 @@
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261002-npcs';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261002-space';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
@@ -6,6 +6,7 @@ const PLACES={
  library:[{kind:'hallway',x:7,label:'🚪 복도'},{kind:'reading',x:28,label:'✍️ 독서 기록'},{kind:'tori',x:58,label:'책지기 토리'},{kind:'portfolio',x:82,label:'📖 나의 독후감'}]
 };
 export function installSchoolWalk(ctx){
+ const GROUND=80;
  const {hub,stage,objects}=ctx,doc=hub.ownerDocument,player=doc.getElementById('hubPlayer');
  const viewport=doc.createElement('div');viewport.className='campus-viewport';stage.before(viewport);viewport.append(stage);
  const status=doc.createElement('div');status.className='campus-scene-status';status.setAttribute('role','status');viewport.append(status);
@@ -31,7 +32,7 @@ export function installSchoolWalk(ctx){
   return true;
  }
  function renderPosition(x){
-  const previous=ctx.getPosition().x;ctx.setPosition(Math.max(4,Math.min(96,x)),77);
+  const previous=ctx.getPosition().x;ctx.setPosition(Math.max(4,Math.min(96,x)),GROUND);
   if(x!==previous)player.dataset.facing=x<previous?'left':'right';
   player.classList.add('walking');clearTimeout(walkEnd);walkEnd=setTimeout(()=>player.classList.remove('walking'),180);
   markPlaces();
@@ -55,14 +56,14 @@ export function installSchoolWalk(ctx){
   player.replaceChildren(body);const name=doc.createElement('span');name.className='campus-player-name';name.textContent=ctx.getStudent()?.nickname||'나의 모험가';player.append(name);
  }
  function background(){
-  const room=ctx.getScene(),request=++imageRequest,url='maps/'+room+'-side-'+(room==='classroom'?'v2':'v1')+'.webp',img=new Image();
+  const room=ctx.getScene(),request=++imageRequest,url='maps/'+room+'-tall-v1.webp',img=new Image();
   status.hidden=false;status.textContent='학교 풍경을 펼치는 중…';
   img.onload=()=>{if(request!==imageRequest)return;stage.style.backgroundImage='url("'+url+'")';stage.style.setProperty('--campus-room-art','url("'+url+'")');status.hidden=true};
   img.onerror=()=>{if(request!==imageRequest)return;status.innerHTML='<span>풍경을 아직 불러오지 못했어요.</span><button type="button">다시 보기</button>';status.querySelector('button').onclick=background};img.src=url;
  }
  function syncScene(){
   const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();camera();markPlaces();return}
-  stop();scene=next;ctx.setPosition(44,77);objects.replaceChildren();
+  stop();scene=next;ctx.setPosition(44,GROUND);objects.replaceChildren();
   for(const p of currentPlaces()){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
    decorateCampusObject(b,p,next,ctx.tori);
@@ -77,7 +78,7 @@ export function installSchoolWalk(ctx){
  };
  stage.addEventListener('click',e=>{
   if(e.target.closest('button')||!canWalk())return;const rect=stage.getBoundingClientRect();
-  if(e.clientY<rect.top+rect.height*.60)return;
+  if(e.clientY<rect.top+rect.height*.75)return;
   stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));frame=requestAnimationFrame(tick);
  });
  stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p)camera(Number(p.dataset.walkX))});
