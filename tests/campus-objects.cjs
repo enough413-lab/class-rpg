@@ -24,6 +24,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.evaluate(()=>enterHubScene('classroom'));await f.locator('.campus-scene-status').waitFor({state:'hidden'});await page.screenshot({path:path.join(shots,'desktop-classroom-objects.png'),fullPage:true});
   for(const width of [390,320]){
    await page.setViewportSize({width,height:844});await f.evaluate(()=>enterHubScene('classroom'));await readable();
+   await f.waitForFunction(()=>{const p=document.getElementById('hubPlayer').getBoundingClientRect(),s=document.querySelector('.hub-stage').getBoundingClientRect();return Math.abs(p.x+p.width/2-s.x-s.width*.44)<1});
    assert(await f.evaluate(()=>{
     const name=document.querySelector('.campus-player-name').getBoundingClientRect();return [...document.querySelectorAll('.campus-object-caption')].every(el=>{const r=el.getBoundingClientRect();return name.right<=r.left||name.left>=r.right||name.bottom<=r.top||name.top>=r.bottom});
    }),'Avatar name must not obscure an action label');
