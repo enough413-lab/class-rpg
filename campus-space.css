@@ -1,0 +1,41 @@
+/* A 4:3 room keeps the ceiling visible without stretching people or furniture. */
+#classroomHub.campus-side .hub-stage{width:max(100%,640px);aspect-ratio:4/3;margin-top:0}
+#classroomHub.campus-side .campus-viewport{height:auto;align-self:start}
+#classroomHub.campus-side .campus-tori{top:80%}
+#classroomHub.campus-side .campus-sprite{bottom:20%}
+#classroomHub.campus-side .campus-character .campus-object-caption{top:calc(100% + 8px);bottom:auto;transform:translateX(-50%)}
+#classroomHub.campus-side .campus-character .campus-object-caption::after{display:none}
+#classroomHub.campus-side .campus-player-name{top:auto;bottom:100%}
+.campus-side .campus-near p,.campus-side .campus-how{word-break:keep-all;overflow-wrap:break-word}
+.finder-rooms button::before{background-image:url('maps/classroom-tall-v1.webp')}
+.finder-rooms [data-finder-room=hallway]::before{background-image:url('maps/hallway-tall-v1.webp')}
+.finder-rooms [data-finder-room=library]::before{background-image:url('maps/library-tall-v1.webp')}
+@media(min-width:850px){
+ #classroomHub.campus-side .hub-player{min-width:188px}
+ #classroomHub.campus-side .hub-shell{display:grid;grid-template-columns:minmax(0,1fr) 240px;width:min(100%,calc((100dvh - 190px)*4/3 + 240px));max-width:1240px;align-items:start}
+ .campus-side .campus-header{grid-column:1/-1;padding:12px 20px;gap:12px}
+ .campus-side .campus-eyebrow{display:none}.campus-side .campus-header h2{font-size:28px;line-height:1.2;margin:0 0 4px}.campus-side .campus-header p{font-size:15px;margin-bottom:5px}
+ #classroomHub.campus-side .hub-help{padding:14px;border-left:1px solid #d3ddc8}
+ .campus-side .campus-controller{flex-direction:column;gap:12px;margin:14px 0}
+ .campus-side .campus-near{width:100%}.campus-side .campus-routes{gap:6px}.campus-side .campus-routes button{flex:1;white-space:nowrap;font-size:15px;padding-inline:8px}
+ .campus-side .campus-how{font-size:13px}.campus-side .campus-menu button{padding-inline:12px;font-size:15px}
+}
+@media(max-width:849px){
+ #classroomHub.campus-side{padding:0;place-items:start;background:#fffdf4}
+ #classroomHub.campus-side .hub-shell{display:block;width:100%;max-width:none;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none}
+ #classroomHub.campus-side .hub-stage{width:clamp(480px,calc((100dvh - 244px)*4/3),740px)}
+ #classroomHub.campus-side .hub-player{width:163px;min-width:163px;max-width:163px}
+ .campus-side .campus-header{display:block;padding:8px 12px}
+ .campus-side .campus-eyebrow,.campus-side .campus-header p{display:none}
+ .campus-side .campus-header h2{font-size:24px;line-height:1.2;margin:0 0 2px}
+ #classroomHub.campus-side .hub-status{font-size:12px;line-height:1.4}
+ .campus-side .campus-menu{margin-top:5px;gap:6px}.campus-side .campus-menu button{flex:1;min-height:44px;padding:8px;font-size:14px;white-space:nowrap}
+ #classroomHub.campus-side .hub-help{padding:8px 12px;border-left:0}
+ .campus-side .campus-routes{padding-bottom:6px;gap:6px}.campus-side .campus-routes button{flex:1;min-height:44px;padding:8px;font-size:14px}
+ .campus-side .campus-controller{flex-direction:row;gap:12px;margin:8px 0 0;align-items:center}
+ .campus-side .campus-pad{grid-template-columns:repeat(2,52px);grid-template-rows:54px;gap:6px}.campus-side .campus-pad button{min-height:54px}
+ .campus-side .campus-near{max-width:none}.campus-side .campus-near p{position:absolute;width:1px;height:1px;min-height:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
+ .campus-side .campus-near button{min-height:50px;font-size:14px;padding:8px;word-break:keep-all}
+ .campus-side .campus-how{display:none}
+}
+@media(max-width:849px) and (max-height:600px){#classroomHub.campus-side .hub-help{position:sticky;bottom:0;z-index:26;box-shadow:0 -3px 12px #405b3522}}

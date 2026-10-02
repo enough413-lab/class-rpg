@@ -1,9 +1,9 @@
 // Bounds follow the existing painted props, in percent of the whole room.
 // Reusing the room texture keeps every crop aligned with the original artwork.
 const PROPS={
- classroom:{titles:[1,29,11.5,41.5],inventory:[13,41,19,29.5],quests:[32,29,34,33],teacher:[58,56,17,14.5],shop:[75,34,13,36.5],hallway:[90,33,9.5,37.5]},
- hallway:{classroom:[8.5,30,13,39],library:[82,32.5,13,36.5]},
- library:{hallway:[.5,33,11,37.5],reading:[13,55,19,15.5],portfolio:[66,25,33.5,45.5]}
+ classroom:{hallway:[89,48,10.5,27.5]},
+ hallway:{classroom:[8.3,45.5,13,29.5],library:[80.7,46,13,29]},
+ library:{hallway:[.5,48,11,27],reading:[13,62,19.5,13],portfolio:[66,42,33.5,33]}
 };
 const verbs={titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
 const SPRITES={
@@ -19,7 +19,7 @@ export function decorateCampusObject(button,place,room,tori){
  caption.append(name,action);button.dataset.walkX=place.x;button.setAttribute('aria-label',place.label.replace(/^\p{Extended_Pictographic}\ufe0f?\s*/u,'')+' · '+verbs[place.kind]);
  const sprite=room==='classroom'&&SPRITES[place.kind];
  if(sprite){
-  button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height+'%';
+  button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
   if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+' · '+place.label+' · 이야기하기')}
   const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+'-v1.webp';art.alt='';art.draggable=false;
   art.onerror=()=>{art.hidden=true;button.classList.add('art-missing')};
