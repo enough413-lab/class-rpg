@@ -6,11 +6,26 @@ const PROPS={
  library:{hallway:[.5,33,11,37.5],reading:[13,55,19,15.5],portfolio:[66,25,33.5,45.5]}
 };
 const verbs={titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
+const SPRITES={
+ titles:{art:'titles',x:8,width:14,height:34},inventory:{art:'wardrobe',x:25,width:17,height:32},
+ quests:{art:'teacher',x:54,width:14,height:37,name:'새봄 선생님'},
+ teacher:{art:'records',x:68,width:14,height:24},
+ shop:{art:'shopkeeper',x:82,width:15,height:32,name:'문구지기 모모'}
+};
 export function decorateCampusObject(button,place,room,tori){
  const doc=button.ownerDocument,caption=doc.createElement('span');caption.className='campus-object-caption';
  const name=doc.createElement('b');name.textContent=place.label;
  const action=doc.createElement('small');action.className='campus-object-action';action.textContent='↗ '+verbs[place.kind];
  caption.append(name,action);button.dataset.walkX=place.x;button.setAttribute('aria-label',place.label.replace(/^\p{Extended_Pictographic}\ufe0f?\s*/u,'')+' · '+verbs[place.kind]);
+ const sprite=room==='classroom'&&SPRITES[place.kind];
+ if(sprite){
+  button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height+'%';
+  if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+' · '+place.label+' · 이야기하기')}
+  const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+'-v1.webp';art.alt='';art.draggable=false;
+  art.onerror=()=>{art.hidden=true;button.classList.add('art-missing')};
+  const missing=doc.createElement('span');missing.className='campus-sprite-missing';missing.textContent='그림을 못 불러왔어요. 이름을 눌러 이용해요.';missing.setAttribute('aria-hidden','true');
+  button.append(art,missing,caption);return;
+ }
  if(place.kind==='tori'){
   button.innerHTML=tori;button.classList.add('campus-character');button.append(caption);return;
  }
@@ -25,5 +40,5 @@ export function decorateCampusObject(button,place,room,tori){
 }
 export function markCampusObject(button,{near=false,guided=false}={}){
  button.classList.toggle('is-near',near);button.classList.toggle('is-destination',guided);
- const action=button.querySelector('.campus-object-action');if(action)action.textContent=(guided?'◆ 가는 곳 · ':near?'✓ ':'↗ ')+verbs[button.dataset.place];
+ const action=button.querySelector('.campus-object-action'),text=(guided?'◆ 가는 곳 · ':near?'✓ ':'↗ ')+(button.dataset.action||verbs[button.dataset.place]);if(action&&action.textContent!==text)action.textContent=text;
 }
