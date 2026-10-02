@@ -1,3 +1,4 @@
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261002-objects';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
@@ -17,13 +18,14 @@ export function installSchoolWalk(ctx){
   const width=stage.clientWidth,view=viewport.clientWidth,offset=Math.max(0,Math.min(width-view,width*x/100-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
  }
- function stop(){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');objects.querySelector('.is-destination')?.classList.remove('is-destination');if(wasGuided)ctx.onPosition()}
+ function markPlaces(){const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))markCampusObject(b,{near:b.dataset.place===near?.kind,guided:b.dataset.place===destination?.kind})}
+ function stop(){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');markPlaces();if(wasGuided)ctx.onPosition()}
  function nearest(){const x=ctx.getPosition().x;return currentPlaces().reduce((a,b)=>Math.abs(a.x-x)<=Math.abs(b.x-x)?a:b)}
  function nearby(){const closest=nearest();return Math.abs(closest.x-ctx.getPosition().x)<8?closest:null}
  function goTo(kind){
   const place=currentPlaces().find(p=>p.kind===kind);if(!place||!canWalk())return false;
   stop();destination=place;target=place.x;
-  objects.querySelector('[data-place="'+kind+'"]')?.classList.add('is-destination');
+  markPlaces();
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop()}
   else{frame=requestAnimationFrame(tick);ctx.onPosition()}
   return true;
@@ -32,7 +34,7 @@ export function installSchoolWalk(ctx){
   const previous=ctx.getPosition().x;ctx.setPosition(Math.max(4,Math.min(96,x)),77);
   if(x!==previous)player.dataset.facing=x<previous?'left':'right';
   player.classList.add('walking');clearTimeout(walkEnd);walkEnd=setTimeout(()=>player.classList.remove('walking'),180);
-  const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))b.classList.toggle('is-near',b.dataset.place===near?.kind);
+  markPlaces();
   camera();ctx.onPosition();
  }
  function tick(time){
@@ -55,19 +57,18 @@ export function installSchoolWalk(ctx){
  function background(){
   const request=++imageRequest,url='maps/'+ctx.getScene()+'-side-v1.webp',img=new Image();
   status.hidden=false;status.textContent='학교 풍경을 펼치는 중…';
-  img.onload=()=>{if(request!==imageRequest)return;stage.style.backgroundImage='url("'+url+'")';status.hidden=true};
+  img.onload=()=>{if(request!==imageRequest)return;stage.style.backgroundImage='url("'+url+'")';stage.style.setProperty('--campus-room-art','url("'+url+'")');status.hidden=true};
   img.onerror=()=>{if(request!==imageRequest)return;status.innerHTML='<span>풍경을 아직 불러오지 못했어요.</span><button type="button">다시 보기</button>';status.querySelector('button').onclick=background};img.src=url;
  }
  function syncScene(){
-  const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();camera();return}
+  const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();camera();markPlaces();return}
   stop();scene=next;ctx.setPosition(44,77);objects.replaceChildren();
   for(const p of currentPlaces()){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
-   b.setAttribute('aria-label',p.kind==='tori'?'책지기 토리와 이야기하기':p.label.replace(/^\S+ /,''));
-   if(p.kind==='tori')b.innerHTML=ctx.tori+'<span>'+p.label+'</span>';else b.textContent=p.label;
+   decorateCampusObject(b,p,next,ctx.tori);
    b.onclick=()=>{stop();ctx.interact(p.kind)};objects.append(b);
   }
-  rig();background();camera();ctx.onPosition();
+  rig();background();camera();markPlaces();ctx.onPosition();
  }
  window.moveHub=(dx,dy)=>{
   if(!canWalk())return;stop();
@@ -79,7 +80,7 @@ export function installSchoolWalk(ctx){
   if(e.clientY<rect.top+rect.height*.60)return;
   stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));frame=requestAnimationFrame(tick);
  });
- stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p)camera(Number.parseFloat(p.style.left))});
+ stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p)camera(Number(p.dataset.walkX))});
  new ResizeObserver(()=>camera()).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);

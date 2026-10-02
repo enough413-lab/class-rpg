@@ -1,0 +1,26 @@
+/* Furniture is actionable at its actual position, not at the distant window. */
+#classroomHub.campus-side .hub-stage::before{content:'';position:absolute;inset:0;z-index:1;background:#fff9e5;opacity:.24;pointer-events:none}
+#classroomHub.campus-side .campus-object{z-index:14;min-height:44px;padding:0;border:0;border-radius:7px;background:none;box-shadow:none;white-space:normal;overflow:visible}
+.campus-prop-art,.campus-prop-outline{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.campus-prop-art{background-image:var(--campus-room-art);background-size:var(--prop-size);background-position:var(--prop-position);background-repeat:no-repeat;border-radius:6px}
+.campus-prop-outline{overflow:visible;filter:drop-shadow(0 2px 1px #654d2c80)}
+.campus-prop-outline rect{fill:none;stroke:#fffae8;stroke-width:2.5px;transition:stroke .15s,stroke-width .15s}
+#classroomHub.campus-side .campus-object-caption{position:absolute;left:50%;top:0;bottom:auto;transform:translate(-50%,-65%);display:flex;flex-direction:column;gap:3px;min-width:100px;width:max-content;max-width:145px;white-space:nowrap;padding:7px 10px;border:2px solid #b3945f;border-radius:12px;background:#fffbed;color:#354c3d;box-shadow:0 3px 0 #6c58372e;font:16px/1.4 SchoolJua,sans-serif;pointer-events:auto}
+.campus-object-caption::after{content:'';position:absolute;left:calc(50% - 5px);bottom:-7px;width:10px;height:10px;transform:rotate(45deg);background:#fffbed;border-right:2px solid #b3945f;border-bottom:2px solid #b3945f}
+.campus-object-caption b{font-weight:400}.campus-object-caption small{font:13px/1.4 system-ui,sans-serif;color:#697759}
+#classroomHub.campus-side .campus-object.is-near,#classroomHub.campus-side .campus-object.is-destination{background:none;box-shadow:none;border:0}
+#classroomHub.campus-side .campus-place:is(:hover,:focus-visible,.is-near,.is-destination) .campus-prop-outline rect{stroke:#457357;stroke-width:4px}
+#classroomHub.campus-side .campus-place:is(:hover,:focus-visible,.is-near) .campus-object-caption{border-color:#457357;background:#f2ffe9}
+#classroomHub.campus-side .campus-place:is(:hover,:focus-visible,.is-near) .campus-object-caption::after{border-color:#457357;background:#f2ffe9}
+#classroomHub.campus-side .campus-place.is-destination .campus-object-caption{border-color:#966620;background:#fff0c5}
+#classroomHub.campus-side .campus-place.is-destination .campus-object-caption::after{border-color:#966620;background:#fff0c5}
+#classroomHub.campus-side .campus-character>svg{filter:drop-shadow(2px 0 0 #fff9e5) drop-shadow(-2px 0 0 #fff9e5) drop-shadow(0 2px 0 #fff9e5)}
+#classroomHub.campus-side .campus-character .campus-object-caption{top:-6px;bottom:auto;transform:translate(-50%,-100%)}
+#classroomHub.campus-side .campus-player-name{top:101%;bottom:auto}
+#classroomHub.campus-side .campus-header h2:focus{outline:none}
+#classroomHub.campus-side .campus-character.is-near{border:0;background:none;box-shadow:none}
+@media(max-width:600px){
+ #classroomHub.campus-side .campus-object-caption{min-width:94px;max-width:126px;font-size:15px;padding:6px 8px;gap:2px}
+ .campus-object-caption small{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.campus-prop-outline rect{transition:none}}
