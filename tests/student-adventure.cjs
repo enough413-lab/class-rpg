@@ -57,7 +57,7 @@ const {server,shots}=require('./student-fixture.cjs');
  await f.evaluate(()=>enterHubScene('library'));
  assert(await f.locator('#classroomHub').isVisible());
  await f.locator('.campus-scene-status').waitFor({state:'hidden'});
- assert.match(await f.locator('#classroomHub .hub-stage').evaluate(el=>el.style.backgroundImage),/library-tall-v1.webp/);
+ assert.match(await f.locator('#classroomHub .hub-stage').evaluate(el=>el.style.backgroundImage),/library-tall-v2.webp/);
  await f.evaluate(()=>openProgressQuest(13));
  await f.locator('#progressQuestText').fill('배려하고 서로 도와요');
  const positionBefore=await f.locator('#hubPlayer').getAttribute('style');

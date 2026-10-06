@@ -1,8 +1,8 @@
-import {installSchoolWalk} from './school-walk.js?v=20261002-space';
-import {installCampusNpcs} from './campus-npcs.js?v=20261002-space';
+import {installSchoolWalk} from './school-walk.js?v=20261007-library';
+import {installCampusNpcs} from './campus-npcs.js?v=20261007-library';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20260930-wayfinder';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
-const TORI=`<svg viewBox="0 0 120 130" aria-hidden="true"><ellipse cx="60" cy="119" rx="36" ry="7" fill="#3c615b" opacity=".16"/><path d="M25 55 19 19 45 31Q60 22 75 31L101 19 95 55Q113 106 78 114H42Q7 106 25 55Z" fill="#bdcfa4" stroke="#486754" stroke-width="3"/><path d="M31 60Q29 36 47 39L60 49 73 39Q94 35 89 63L81 96H39Z" fill="#fff5d9"/><circle cx="45" cy="59" r="16" fill="#fffdf5" stroke="#637b60" stroke-width="2"/><circle cx="75" cy="59" r="16" fill="#fffdf5" stroke="#637b60" stroke-width="2"/><path d="M60 57h-1" stroke="#637b60" stroke-width="3"/><circle cx="46" cy="59" r="4" fill="#344c40"/><circle cx="74" cy="59" r="4" fill="#344c40"/><path d="m55 72 5 7 5-7" fill="#e5a448"/><path d="M29 85Q43 80 60 89Q76 80 91 85L88 110Q74 106 60 115Q45 106 32 110Z" fill="#eac691" stroke="#795e41" stroke-width="2"/><path d="M60 90v23M38 93l14 4M68 97l14-4M38 100l14 4" fill="none" stroke="#fff5d9" stroke-width="3"/><path d="M23 80q-10 18 12 21M97 80q10 18-12 21" fill="#a7c198" stroke="#486754" stroke-width="3"/></svg>`;
+const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';
 const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도 가기']]},hallway:{name:'별빛 복도',hint:'가고 싶은 문을 누르거나 가까이 걸어가 보세요.',routes:[['classroom','🏫 교실 가기'],['library','📚 도서관 가기']]},library:{name:'이야기 도서관',hint:'책지기 토리와 오늘 읽은 이야기를 나눠요.',routes:[['hallway','🚪 복도 가기'],['reading','✍️ 독서 기록 열기']]}};
 export function installStudentCampus(ctx){
  const doc=document,hub=doc.getElementById('classroomHub');if(!hub)return;
@@ -14,6 +14,7 @@ export function installStudentCampus(ctx){
  const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span></p>';
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 읽은 책 이야기 남기기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="evidence"><b>🔎 단서 탐험 살펴보기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
+ guide.querySelector('.campus-portrait img').onerror=()=>{guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const people=installCampusNpcs({hub});
  let timer=null,held=null,returnFocus=null,lastScene='',isOpen=false;

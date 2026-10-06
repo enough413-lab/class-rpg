@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict'),fs=require('fs'),path=require('path'),sharp=require('sharp');
+const {chromium}=require('playwright'),{server,shots}=require('./student-fixture.cjs');
+(async()=>{
+ for(const id of ['tori','reading-desk','journal-shelf']){const stats=await sharp(path.join(__dirname,'../maps/npcs/'+id+'-v1.webp')).stats();assert.equal(stats.channels.length,4);assert.equal(stats.channels[3].min,0);assert.equal(stats.channels[3].max,255)}
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({channel:'msedge',headless:true});
+ try{
+  const page=await browser.newPage({viewport:{width:1440,height:1050},hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);let f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>window.studentCampus);
+  const ready=async()=>{await f.locator('.campus-scene-status').waitFor({state:'hidden'});await f.waitForFunction(()=>[...document.querySelectorAll('.campus-sprite-art')].every(i=>i.complete&&i.naturalWidth>0));await f.waitForFunction(()=>[...document.querySelectorAll('.hub-stage,#hubPlayer')].every(el=>el.getAnimations().every(a=>a.playState!=='running')))};
+  const pos=()=>f.locator('#hubPlayer').getAttribute('style');
+  await f.evaluate(()=>enterHubScene('library'));await ready();assert.equal(await f.locator('.campus-sprite').count(),3);assert.equal(await f.locator('[data-place=reading] .campus-prop-art,[data-place=portfolio] .campus-prop-art').count(),0);
+  assert.match(await f.locator('.hub-stage').evaluate(el=>el.style.backgroundImage),/library-tall-v2.webp/);assert(!(await f.locator('.campus-tori .campus-sprite-missing').isVisible()));
+  for(const kind of ['reading','portfolio']){const p=await pos(),b=f.locator('[data-place='+kind+']'),r=await b.boundingBox();await b.click({position:{x:r.width/2,y:r.height*.7}});assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await pos(),p)}
+  await f.locator('.campus-tori').focus();await page.keyboard.press('Enter');assert(await f.locator('#campusGuide').isVisible());assert.match(await f.locator('.campus-portrait img').getAttribute('src'),/tori-v1.webp/);await f.locator('[data-guide=reading]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');
+  fs.mkdirSync(shots,{recursive:true});
+  for(const [width,height] of [[1440,1050],[1366,768],[700,900],[390,844],[320,640]]){
+   await page.setViewportSize({width,height});await f.evaluate(()=>{enterHubScene('hallway');enterHubScene('library')});await ready();
+   const layout=await f.evaluate(()=>{const stage=document.querySelector('.hub-stage').getBoundingClientRect(),p=document.getElementById('hubPlayer').getBoundingClientRect();return {floor:stage.y+.8*stage.height,player:p.bottom,feet:[...document.querySelectorAll('.campus-sprite')].map(el=>el.getBoundingClientRect().bottom),overflow:document.getElementById('classroomHub').scrollWidth>innerWidth+1,use:document.querySelector('[data-campus=use]').getBoundingClientRect().bottom,screen:innerHeight}});
+   assert(!layout.overflow);assert(layout.use<=layout.screen+1);assert(Math.abs(layout.player-layout.floor)<1);assert(layout.feet.every(y=>Math.abs(y-layout.floor)<1),'All foreground feet must share the walkable floor');
+   assert(await f.locator('.campus-object-caption').evaluateAll(es=>es.every(el=>{const a=el.querySelector('b').getBoundingClientRect(),b=el.querySelector('small').getBoundingClientRect();return a.bottom<=b.top+1&&b.height>=14})));
+   await page.screenshot({path:path.join(shots,'library-foreground-'+width+'.png'),fullPage:true});
+   await f.locator('.campus-tori').tap();assert(await f.locator('#campusGuide').isVisible());assert(await f.locator('#campusGuide').evaluate(el=>el.scrollWidth<=el.clientWidth+1));for(const b of await f.locator('#campusGuide button').all()){const r=await b.boundingBox();assert(r.width>=44&&r.height>=44)}await page.screenshot({path:path.join(shots,'library-tori-dialog-'+width+'.png'),fullPage:true});await f.locator('.campus-return').tap();
+  }
+  await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('.campus-tori img').evaluate(el=>getComputedStyle(el).animationName),'none');
+  await page.route('**/maps/npcs/tori-v1.webp',r=>r.abort());await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>window.studentCampus&&document.getElementById('saProfileTitle')?.textContent.includes(mockRpg.student.nickname));await f.evaluate(()=>enterHubScene('library'));await f.locator('.campus-tori.art-missing').waitFor();await f.locator('.campus-scene-status').waitFor({state:'hidden'});await f.waitForFunction(()=>document.querySelector('.hub-stage').getAnimations().every(a=>a.playState!=='running'));assert(await f.locator('.campus-tori .campus-sprite-missing').isVisible());await f.locator('.campus-tori').tap();await f.locator('#campusGuide').waitFor();assert(!(await f.locator('.campus-portrait').isVisible()));assert(await f.locator('[data-guide=reading]').isEnabled());await page.keyboard.press('Escape');
+  assert.deepEqual(await f.evaluate(()=>[mockRpg.student.xp,mockRpg.student.gold]),[260,180]);assert.deepEqual(errors,[]);
+  console.log('PASS: transparent independent library assets, desk/shelf body clicks, Tori keyboard/touch/reading links, floor and readable captions at 5 sizes, reduced motion, image failure, unchanged economy.');
+ }finally{await browser.close();server.close()}
+})().catch(e=>{console.error(e);server.close();process.exitCode=1});

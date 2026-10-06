@@ -3,7 +3,7 @@
 const PROPS={
  classroom:{hallway:[89,48,10.5,27.5]},
  hallway:{classroom:[8.3,45.5,13,29.5],library:[80.7,46,13,29]},
- library:{hallway:[.5,48,11,27],reading:[13,62,19.5,13],portfolio:[66,42,33.5,33]}
+ library:{hallway:[.5,48,11,27]}
 };
 const verbs={titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
 const SPRITES={
@@ -12,15 +12,20 @@ const SPRITES={
  teacher:{art:'records',x:68,width:14,height:24},
  shop:{art:'shopkeeper',x:82,width:15,height:32,name:'문구지기 모모'}
 };
+const LIBRARY_SPRITES={
+ reading:{art:'reading-desk',x:27,width:24,height:32},
+ portfolio:{art:'journal-shelf',x:82,width:25,height:46},
+ tori:{art:'tori',x:58,width:17,height:35,name:'책지기 토리'}
+};
 export function decorateCampusObject(button,place,room,tori){
  const doc=button.ownerDocument,caption=doc.createElement('span');caption.className='campus-object-caption';
  const name=doc.createElement('b');name.textContent=place.label;
  const action=doc.createElement('small');action.className='campus-object-action';action.textContent='↗ '+verbs[place.kind];
  caption.append(name,action);button.dataset.walkX=place.x;button.setAttribute('aria-label',place.label.replace(/^\p{Extended_Pictographic}\ufe0f?\s*/u,'')+' · '+verbs[place.kind]);
- const sprite=room==='classroom'&&SPRITES[place.kind];
+ const sprite=(room==='classroom'?SPRITES:room==='library'?LIBRARY_SPRITES:{})[place.kind];
  if(sprite){
   button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
-  if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+' · '+place.label+' · 이야기하기')}
+  if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+(sprite.name===place.label?'':' · '+place.label)+' · 이야기하기')}
   const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+'-v1.webp';art.alt='';art.draggable=false;
   art.onerror=()=>{art.hidden=true;button.classList.add('art-missing')};
   const missing=doc.createElement('span');missing.className='campus-sprite-missing';missing.textContent='그림을 못 불러왔어요. 이름을 눌러 이용해요.';missing.setAttribute('aria-hidden','true');

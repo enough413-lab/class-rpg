@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('fs'),path=require('path'),sharp=require('sharp');
 const {chromium}=require('playwright');const {server,shots}=require('./student-fixture.cjs');
 (async()=>{
- for(const room of ['classroom','hallway','library']){const m=await sharp(path.join(__dirname,'../maps/'+room+'-tall-v1.webp')).metadata();assert.equal(m.width,1440);assert.equal(m.height,1080)}
+ for(const room of ['classroom','hallway','library']){const m=await sharp(path.join(__dirname,'../maps/'+room+'-tall-'+(room==='library'?'v2':'v1')+'.webp')).metadata();assert.equal(m.width,1440);assert.equal(m.height,1080)}
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({headless:true,channel:'msedge'});
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1050}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);
@@ -22,7 +22,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await page.setViewportSize({width:390,height:844});await f.evaluate(()=>enterHubScene('library'));await settled();
   const stage=await f.locator('.hub-stage').boundingBox(),x=()=>f.locator('#hubPlayer').evaluate(el=>parseFloat(el.style.left));const start=await x();
   await page.mouse.click(stage.x+stage.width*.4,stage.y+stage.height*.25);assert.equal(await x(),start,'Looking at the upper wall should not start walking');
-  const floorX=Math.round(stage.x+stage.width*.38),target=(floorX-stage.x)/stage.width*100;
+  const floorX=Math.round(stage.x+stage.width*.46),target=(floorX-stage.x)/stage.width*100;
   await page.mouse.click(floorX,stage.y+stage.height*.795);await f.waitForFunction(target=>Math.abs(parseFloat(document.getElementById('hubPlayer').style.left)-target)<.06,target);
   const arrived=await x();await f.locator('[data-place=reading]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await x(),arrived);
   await f.locator('.campus-tori').click();assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape');
