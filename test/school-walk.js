@@ -1,4 +1,4 @@
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261002-space';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-library';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
@@ -56,7 +56,7 @@ export function installSchoolWalk(ctx){
   player.replaceChildren(body);const name=doc.createElement('span');name.className='campus-player-name';name.textContent=ctx.getStudent()?.nickname||'나의 모험가';player.append(name);
  }
  function background(){
-  const room=ctx.getScene(),request=++imageRequest,url='maps/'+room+'-tall-v1.webp',img=new Image();
+  const room=ctx.getScene(),request=++imageRequest,url='maps/'+room+'-tall-'+(room==='library'?'v2':'v1')+'.webp',img=new Image();
   status.hidden=false;status.textContent='학교 풍경을 펼치는 중…';
   img.onload=()=>{if(request!==imageRequest)return;stage.style.backgroundImage='url("'+url+'")';stage.style.setProperty('--campus-room-art','url("'+url+'")');status.hidden=true};
   img.onerror=()=>{if(request!==imageRequest)return;status.innerHTML='<span>풍경을 아직 불러오지 못했어요.</span><button type="button">다시 보기</button>';status.querySelector('button').onclick=background};img.src=url;
@@ -81,7 +81,8 @@ export function installSchoolWalk(ctx){
   if(e.clientY<rect.top+rect.height*.75)return;
   stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));frame=requestAnimationFrame(tick);
  });
- stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p)camera(Number(p.dataset.walkX))});
+ // Pointer focus must not move a target out from under the pending tap/click.
+ stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p?.matches(':focus-visible'))camera(Number(p.dataset.walkX))});
  new ResizeObserver(()=>camera()).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
