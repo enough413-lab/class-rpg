@@ -1,4 +1,4 @@
-import {resetDayOptions} from './quest-schedule.js?v=20260930-release';
+import {resetDayOptions} from './quest-schedule.js?v=20261007-release';
 export const submissionLabels = { photo: '사진만', text: '글만', both: '글과 사진 둘 다' };
 export function submissionRules(quest) {
   const mode = quest.submission_mode;

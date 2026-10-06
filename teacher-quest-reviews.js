@@ -1,5 +1,5 @@
-import {questPeriod} from './quest-schedule.js?v=20260930-release';
-import {readEvidenceImages} from './quest-photos.js?v=20260930-release';
+import {questPeriod} from './quest-schedule.js?v=20261007-release';
+import {readEvidenceImages} from './quest-photos.js?v=20261007-release';
 // One selection scope: a quest and, optionally, one submission period.
 export function groupQuestReviews(quests, submissions) {
   const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [], records: [] }]));
@@ -315,11 +315,3 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
   });
   return { load };
 }
-
-
-
-
-
-
-
-

@@ -1,0 +1,37 @@
+const assert=require('node:assert/strict'),fs=require('fs'),path=require('path');
+const {chromium}=require('playwright');const {server,shots}=require('./student-fixture.cjs');
+(async()=>{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
+ fs.mkdirSync(shots,{recursive:true});const browser=await chromium.launch({headless:true,channel:'msedge'});
+ try{
+  const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());
+  async function ready(){const f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.getElementById('saProfileTitle')?.textContent.includes('별나래'));return f}
+  async function enter(f){await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=music-room]').click()}
+  await page.goto(base);let f=await ready();
+  await f.evaluate(async()=>{mockRpg.student.xp=1034;await loadDashboard()});assert.match(await f.locator('#saNextGoal').textContent(),/Lv. 13[\s\S]*음악실[\s\S]*1 경험치/);
+  await enter(f);assert.match(await f.locator('#saDialogBody').textContent(),/1 경험치/);assert.equal(await f.locator('[data-music-play]').count(),0);
+  await f.locator('[data-sa=close]').click();await f.evaluate(async()=>{mockRpg.student.xp=1035;await loadDashboard()});await enter(f);
+  assert(await f.locator('[data-music-stop]').isDisabled());assert.equal(await f.evaluate(()=>mockRpg.musicSaves||0),0);
+  await f.locator('[data-music-play]').click();await f.waitForFunction(()=>!document.querySelector('[data-music-stop]').disabled);assert.equal(await f.evaluate(()=>mockRpg.musicSaves||0),0);
+  await f.locator('[data-music-stop]').click();assert(await f.locator('[data-music-stop]').isDisabled());
+  await f.locator('[data-music-play]').click();await f.waitForFunction(()=>!document.querySelector('[data-music-stop]').disabled);await f.evaluate(()=>window.dispatchEvent(new Event('blur')));assert(await f.locator('[data-music-stop]').isDisabled());
+  await f.locator('[data-sa=check-music]').click();assert.match(await f.locator('#saMusicFeedback').textContent(),/답 하나/);
+  await f.locator('[data-music-choice="0"]').click();await f.locator('[data-sa=check-music]').click();await f.waitForFunction(()=>document.getElementById('saMusicFeedback').textContent.includes('다시 살펴'));assert.equal(await f.evaluate(()=>mockRpg.exploration.length),0);
+  await f.locator('[data-music-choice="1"]').click();await f.evaluate(()=>mockRpg.failMusic=true);await f.locator('[data-sa=check-music]').click();await f.waitForFunction(()=>document.getElementById('saMusicFeedback').textContent.includes('아직 저장'));assert.equal(await f.locator('[data-music-choice="1"]').getAttribute('aria-pressed'),'true');
+  await f.evaluate(()=>{mockRpg.failMusic=false;mockRpg.dropMusicReply=true;mockRpg.musicDelay=500});await f.locator('[data-sa=check-music]').click();await page.keyboard.press('Escape');assert(await f.locator('#studentAdventureDialog').isVisible());await f.waitForFunction(()=>document.getElementById('saMusicFeedback').textContent.includes('아직 저장'));assert.equal(await f.evaluate(()=>mockRpg.exploration.length),1);
+  const saves=await f.evaluate(()=>mockRpg.musicSaves);await f.locator('[data-sa=check-music]').evaluate(b=>{b.click();b.click()});await f.locator('[data-sa=next-music]').waitFor();assert.equal(await f.evaluate(()=>mockRpg.musicSaves),saves+1);assert.equal(await f.evaluate(()=>mockRpg.exploration.length),1);
+  await f.locator('[data-sa=next-music]').click();assert.match(await f.locator('#saMusicQuestion').textContent(),/오래/);await page.screenshot({path:path.join(shots,'desktop-music-room.png'),fullPage:true});
+  await page.reload();f=await ready();await enter(f);assert.match(await f.locator('#saMusicQuestion').textContent(),/오래/);
+  // Unsupported sound still has every visual clue and can finish the same activity.
+  await f.evaluate(()=>{window.AudioContext=undefined;window.webkitAudioContext=undefined});await f.locator('[data-music-play]').click();assert.match(await f.locator('#saMusicAudioStatus').textContent(),/그림으로 똑같이/);
+  await page.setViewportSize({width:390,height:844});await f.locator('#studentAdventureDialog').evaluate(d=>d.scrollTop=0);await page.screenshot({path:path.join(shots,'mobile-music-room.png'),fullPage:true});
+  await f.locator('[data-music-choice="0"]').click();await f.locator('[data-sa=check-music]').click();await f.locator('[data-sa=next-music]').click();assert.equal(await f.locator('[data-music-choice]').count(),4);
+  for(const width of [390,320]){await page.setViewportSize({width,height:844});await f.evaluate(()=>{const d=document.getElementById('studentAdventureDialog');d.scrollTop+=document.getElementById('saMusicQuestion').getBoundingClientRect().top-d.querySelector('header').getBoundingClientRect().bottom-12});assert(await f.evaluate(()=>{const d=document.getElementById('studentAdventureDialog');return d.scrollWidth<=d.clientWidth+1}));await page.screenshot({path:path.join(shots,`mobile-music-choices-${width}.png`),fullPage:true});for(const box of await f.locator('[data-music-choice]').evaluateAll(xs=>xs.map(x=>({w:x.getBoundingClientRect().width,h:x.getBoundingClientRect().height}))))assert(box.w>=44&&box.h>=44)}
+  await f.locator('[data-music-choice="2"]').focus();await page.keyboard.press('Enter');assert.equal(await f.locator('[data-music-choice="2"]').getAttribute('aria-pressed'),'true');await f.locator('[data-sa=check-music]').click();await f.locator('[data-sa=next-music]').click();assert(await f.locator('.sa-music-finish').isVisible());assert.equal(await f.locator('[data-music-replay]').count(),3);
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(shots,'mobile-music-badge.png'),fullPage:true});
+  await f.locator('[data-music-replay="0"]').click();await f.locator('[data-music-choice="1"]').click();await f.locator('[data-sa=check-music]').click();await f.locator('[data-sa=next-music]').waitFor();assert.equal(await f.evaluate(()=>mockRpg.exploration.length),3);assert.deepEqual(await f.evaluate(()=>({xp:mockRpg.student.xp,gold:mockRpg.student.gold})),{xp:260,gold:180});
+  await f.locator('#studentAdventureDialog [data-sa=map]').click();assert.match(await f.locator('.sa-passport').textContent(),/0 \/ 7/);assert.match(await f.locator('[data-workshop=music-room]').textContent(),/소리 배지/);
+  await page.setViewportSize({width:1366,height:768});await f.locator('[data-workshop=music-room]').click();await f.locator('[data-music-replay="0"]').click();await page.screenshot({path:path.join(shots,'laptop-music-room.png'),fullPage:true});
+  assert.deepEqual(errors,[]);console.log('PASS: Lv13 goal/gate, opt-in audio/stop/blur, visual fallback, hints, retry/lost reply/double-click, Escape save guard, reload/XP-correction continuity, badge/replay, unchanged stamps/economy, keyboard and 390/320 layouts');
+ }finally{await browser.close();server.close()}
+})().catch(e=>{console.error(e);server.close();process.exitCode=1});
