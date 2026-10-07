@@ -1,6 +1,6 @@
-import {ART_MILESTONE,installArtPostcard} from './art-postcard.js?v=20261007-art';
+import {ART_MILESTONE,installArtPostcard} from './art-postcard.js?v=20261007-world';
 import {PARCEL_MILESTONE} from './parcel-adventure.js?v=20261007-parcel';
-import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261007-kindness';
+import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261007-world';
 import {SEQUENCE_MILESTONE,installMusicSequence} from './music-sequence.js?v=20261007-sequence';
 import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20260930-workshop';
 import {weeklyResetLabel} from './quest-schedule.js?v=20260930-workshop';
@@ -138,7 +138,7 @@ export function installStudentAdventure(ctx){
   if(!journal){open('학교 탐험 수첩','잠깐, 연결을 확인하고 있어요.',errorView('retry-map'));return}
   const lv=ctx.levelInfo(student().xp||0).level,done=completed(),stamps=SCHOOL_CHAPTERS.filter(c=>c.steps.every(s=>done.has(s.id))).length;
   const label=c=>c.steps.every(s=>done.has(s.id))?'✓ 탐험 도장 획득':lv<c.level?'Lv. '+c.level+'에 열려요':c.steps.filter(s=>done.has(s.id)).length+' / 3 이야기';
-  open('학교 탐험 수첩','장소를 눌러 이야기 속 선택을 해 보세요.',
+  open('학교 탐험 수첩','장소를 고르면 그곳에서 걸으며 둘러봐요.',
    '<div class="sa-passport"><div><b>나의 탐험 도장 '+stamps+' / '+SCHOOL_CHAPTERS.length+'</b><br><span class="sa-small">지금 Lv. '+lv+' · 골드 없이 탐험해요.</span></div><div class="sa-passport-actions">'+button('roadmap','성장 길잡이')+button('classroom','교실에서 걷기')+'</div></div>'+
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
@@ -270,6 +270,7 @@ export function installStudentAdventure(ctx){
   }catch{feedback.textContent='아직 저장하지 못했어요. 선택은 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
   finally{saving=false;buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled})}
  }
+ function visitPlace(id){const c=SCHOOL_CHAPTERS.find(x=>x.id===id);if(!c)return;if(ctx.levelInfo(student().xp||0).level<c.level){chapter(id);return}dialog.close();window.enterHubScene(id)}
  function chapter(id,again=false){
   const c=SCHOOL_CHAPTERS.find(x=>x.id===id);if(!c)return;
   const lv=ctx.levelInfo(student().xp||0).level;
@@ -348,7 +349,7 @@ export function installStudentAdventure(ctx){
    if(gardenChoices.has(id))gardenChoices.delete(id);else if(gardenChoices.size<3)gardenChoices.add(id);else{byId('saWorkshopFeedback').textContent='세 가지를 골랐어요. 바꾸려면 고른 것을 한 번 더 눌러 주세요.';return}
    gardenButton.setAttribute('aria-pressed',String(gardenChoices.has(id)));byId('saGardenSelection').textContent=gardenChoices.size+' / 3개 골랐어요.';byId('saWorkshopFeedback').textContent='';return;
   }
-  const chapterButton=event.target.closest('[data-chapter]');if(chapterButton){if(!saving)chapter(chapterButton.dataset.chapter);return}
+  const chapterButton=event.target.closest('[data-chapter]');if(chapterButton){if(!saving)visitPlace(chapterButton.dataset.chapter);return}
   const choice=event.target.closest('[data-choice]');if(choice){await answer(Number(choice.dataset.choice));return}
   const tab=event.target.closest('[data-filter]');if(tab){filter=tab.dataset.filter;render();return}
   const b=event.target.closest('[data-sa]');if(!b||saving)return;
@@ -409,5 +410,5 @@ export function installStudentAdventure(ctx){
  doc.addEventListener('student-dashboard-updated',render);
  doc.addEventListener('student-parcel-updated',()=>{loadedAt=0});
  render();
- return {render,map,growth,roadmap,unlocksBetween,workshop};
+ return {render,map,growth,roadmap,unlocksBetween,workshop,chapter:id=>{chapter(id)}};
 }
