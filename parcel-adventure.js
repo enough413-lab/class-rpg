@@ -32,7 +32,7 @@ export function installParcelAdventure(c){
   if(level()<16&&!phase()){open('리본 꾸러미가 기다리고 있어요','Lv.16에 시작하는 산책 의뢰','<div class="parcel-intro"><img src="maps/npcs/parcel-v1.webp" alt="책 봉인과 잎 장식이 달린 리본 꾸러미"><h3>이 꾸러미는 누구에게 가는 걸까요?</h3><p>학교생활로 조금 더 성장하면 교실에서 단서를 찾아볼 수 있어요.<br>옷장과 독서 기록은 지금도 쓸 수 있어요.</p></div>');return}
   if(phase()===3){finish();return}
   const destinations=[['classroom','parcel','교실의 꾸러미로 걷기'],['hallway','notice','복도의 안내판으로 걷기'],['library','tori','토리에게 걸어가기']][phase()];
-  open('책 향기가 나는 꾸러미','발자국 '+phase()+' / 3 · '+goal(),'<div class="parcel-intro"><img src="maps/npcs/parcel-v1.webp" alt="책 향기 꾸러미"><p>새봄 선생님: “주인을 찾지 못한 작은 꾸러미가 있네. 물건에 남은 표식을 따라 누구에게 가는지 알아볼까?”</p><div class="parcel-goal"><b>지금 찾을 단서</b><p>'+goal()+'</p></div></div><button class="parcel-primary" data-parcel-go="'+destinations[0]+'" data-target="'+destinations[1]+'">'+destinations[2]+'</button><p class="parcel-note">교실·복도·도서관은 실제 걷기 화면으로 이어져요. 돌아오면 완료한 단서부터 계속해요.</p>');
+  open('책 향기가 나는 꾸러미','발자국 '+phase()+' / 3 · '+goal(),'<div class="parcel-intro"><img src="maps/npcs/parcel-v1.webp" alt="책 향기 꾸러미"><p>담임선생님: “주인을 찾지 못한 작은 꾸러미가 있네. 물건에 남은 표식을 따라 누구에게 가는지 알아볼까?”</p><div class="parcel-goal"><b>지금 찾을 단서</b><p>'+goal()+'</p></div></div><button class="parcel-primary" data-parcel-go="'+destinations[0]+'" data-target="'+destinations[1]+'">'+destinations[2]+'</button><p class="parcel-note">교실·복도·도서관은 실제 걷기 화면으로 이어져요. 돌아오면 완료한 단서부터 계속해요.</p>');
  }
  async function inspect(kind){if(busy||!await prepare())return;if(level()<16&&!phase())return start();
   if(phase()===3)return finish();

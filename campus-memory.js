@@ -1,5 +1,5 @@
 // A local camera/walking preference only. Quest progress is still server-owned.
-const ROOMS=new Set(['classroom','hallway','library']);
+const ROOMS=new Set(['classroom','hallway','library','garden','playground','pond','cafeteria']);
 export function installCampusMemory({getStudent,getSpot,restore,doc=document}){
  let owner='',ready=false,restoring=false,timer=0,pending=null;
  const id=()=>String(getStudent()?.id??getStudent()?.student_id??'');

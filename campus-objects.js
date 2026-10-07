@@ -8,7 +8,7 @@ const PROPS={
 const verbs={parcel:'봉인 살펴보기',notice:'단서 읽기',titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
 const SPRITES={
  parcel:{art:'parcel',x:38,width:13,height:18},titles:{art:'titles',x:8,width:14,height:34},inventory:{art:'wardrobe',x:25,width:17,height:32},
- quests:{art:'teacher',x:54,width:14,height:37,name:'새봄 선생님'},
+ quests:{art:'teacher',x:54,width:14,height:37,name:'담임선생님'},
  teacher:{art:'records',x:68,width:14,height:24},
  shop:{art:'shopkeeper',x:82,width:15,height:32,name:'문구지기 모모'}
 };

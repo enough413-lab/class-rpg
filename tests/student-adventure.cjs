@@ -33,7 +33,7 @@ const {server,shots}=require('./student-fixture.cjs');
  assert.match(await f.locator('#saDialogSubtitle').textContent(),/Lv. 6/);
  assert.match(await f.locator('#saDialogBody').textContent(),/90 경험치/);
  await f.locator('#saDialogBody [data-sa=map]').click();await f.locator('.sa-world').waitFor();
- await f.locator('.sa-map-pin[data-chapter=classroom]').click();
+ await f.locator('.sa-map-pin[data-chapter=classroom]').click();await f.locator('[data-route=story]').click();
  await f.locator('[data-choice="1"]').click();assert.match(await f.locator('#saFeedback').textContent(),/다시 생각/);
  assert.equal(await f.evaluate(()=>mockRpg.exploration.length),0);
  await f.evaluate(()=>mockRpg.failSave=true);
@@ -128,7 +128,7 @@ const {server,shots}=require('./student-fixture.cjs');
  await page.screenshot({path:path.join(shots,'desktop-covers.png'),fullPage:true});
  await f.locator('#studentAdventureDialog [data-sa=close]').click();
  await f.evaluate(async()=>{mockRpg.student.xp=630;await loadDashboard()});
- await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-chapter=cafeteria]').first().click();
+ await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-chapter=cafeteria]').first().click();await f.locator('[data-route=story]').click();
  for(const i of [1,2,0]){await f.locator('[data-choice="'+i+'"]').click();await f.locator('[data-sa=next]').click()}
  assert.match(await f.locator('#saDialogBody').textContent(),/탐험 도장을 모았어요/);
  await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));
@@ -155,11 +155,10 @@ const {server,shots}=require('./student-fixture.cjs');
  const overlappingPins=await f.locator('.sa-map-pin').evaluateAll(pins=>{const r=pins.map(p=>({id:p.dataset.chapter,b:p.getBoundingClientRect()}));return r.flatMap((a,i)=>r.slice(i+1).filter(c=>a.b.left<c.b.right&&a.b.right>c.b.left&&a.b.top<c.b.bottom&&a.b.bottom>c.b.top).map(c=>a.id+'/'+c.id))});
  assert.deepEqual(overlappingPins,[],'Mobile map labels overlap');
  assert.equal(await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollWidth>el.clientWidth),false);
- await f.locator('.sa-map-pin[data-chapter=classroom]').click();
+ await f.locator('.sa-map-pin[data-chapter=classroom]').click();await f.locator('[data-route=story]').click();
  await f.locator('[data-sa=replay]').click();
  await page.screenshot({path:path.join(shots,'mobile-story.png'),fullPage:true});
  assert.equal(errors.length,0,errors.join('\n'));
  console.log('PASS: Lv7 observation/wrong answer/retry; Lv8 stamp-gated cover/save failure/reload; Lv9 cafeteria; dialog focus/Tab/Escape; friendly shop error; mobile labels/layout; growth boundaries and cap; multi-level celebration; existing quests/stamps/scene/typing/network. Screenshots: '+shots);
  }finally{await browser.close();server.closeAllConnections();server.close()}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close()});
-
