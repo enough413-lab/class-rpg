@@ -1,4 +1,5 @@
-import {installParcelAdventure} from './parcel-adventure.js?v=20261007-parcel';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261007-story';
+import {installCampusStory} from './campus-story.js?v=20261007-story';
 import {installSchoolWalk} from './school-walk.js?v=20261007-journey';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261007-art';
@@ -18,6 +19,7 @@ export function installStudentCampus(ctx){
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 읽은 책 이야기 남기기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 향기 꾸러미 의뢰</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="evidence"><b>🔎 단서 탐험 살펴보기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
  guide.querySelector('.campus-portrait img').onerror=()=>{guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
+ const story=installCampusStory({objects,guide});
  const people=installCampusNpcs({hub});
  let timer=null,held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
@@ -56,7 +58,7 @@ export function installStudentCampus(ctx){
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
- parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:()=>{if(parcel)syncNear()}});
+ parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);if(parcel)syncNear()}});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
  const openCampus=window.openClassroomHub;
