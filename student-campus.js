@@ -1,3 +1,4 @@
+import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261007-world';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261007-world';
@@ -18,7 +19,7 @@ export function installStudentCampus(ctx){
  shell.prepend(header);header.firstElementChild.append(doc.getElementById('hubStatus'));hub.querySelector('.hub-top').remove();
  const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
- guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 책 이야기 기록하기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 꾸러미 의뢰 듣기</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="evidence"><b>🔎 책 속 단서 찾기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
+ guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 책 이야기 기록하기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 꾸러미 의뢰 듣기</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="letter"><b>🌿 새싹의 비밀 알아보기</b><span>Lv.19부터 · 정원에서 관찰 편지를 만들어요.</span></button><button data-guide="evidence"><b>🔎 책 속 단서 찾기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
  guide.querySelector('.campus-portrait img').onerror=()=>{guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
@@ -44,16 +45,16 @@ export function installStudentCampus(ctx){
   walk.syncScene();
   if(open()&&lastScene!==scene)doc.getElementById('campusTitle').focus({preventScroll:true});lastScene=scene;syncNear();
  }
- function talk(){stop();guide.dataset.inspection='false';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();if(open()&&!guide.open)guide.showModal()}
+ function talk(){stop();guide.querySelector('.letter-inspect-link')?.remove();guide.dataset.inspection='false';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();letter.refreshTori();if(open()&&!guide.open)guide.showModal()}
  function syncOpen(){
   if(isOpen===open())return;isOpen=open();stop();walk.stop();
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null;
+ let parcel=null,letter=null;
  function interact(kind){
   if(kind==='story'){stop();walk.stop();window.studentAdventure.chapter(ctx.getScene());return}
-  if(kind.startsWith('look-')){stop();walk.stop();guide.dataset.inspection='true';const room=ctx.getScene(),i=Number(kind.slice(5));doc.getElementById('campusGuideTitle').textContent=EXTRA_ROOMS[room].props[i];guide.querySelector('.campus-greeting p').textContent=WORLD_DETAILS[room][i];guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent=SCENES[room].name;guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.showModal();return}
+  if(kind.startsWith('look-')){stop();walk.stop();guide.dataset.inspection='true';const room=ctx.getScene(),i=Number(kind.slice(5));doc.getElementById('campusGuideTitle').textContent=EXTRA_ROOMS[room].props[i];guide.querySelector('.campus-greeting p').textContent=WORLD_DETAILS[room][i];guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent=SCENES[room].name;guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();if(room==='garden'&&i===0){const b=doc.createElement('button');b.className='campus-return letter-inspect-link';b.dataset.guide='letter-garden';b.textContent='🌿 새싹 관찰 편지 · Lv.19';guide.querySelector('.campus-greeting').after(b)}guide.showModal();return}
   if(['parcel','notice'].includes(kind))return parcel.inspect(kind);
   if(kind==='tori')return talk();
   if(['quests','shop'].includes(kind))return people.talk(kind);
@@ -63,7 +64,8 @@ export function installStudentCampus(ctx){
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
- parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);if(parcel)syncNear()}});
+ parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
+ letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
  const openCampus=window.openClassroomHub;
@@ -92,6 +94,8 @@ export function installStudentCampus(ctx){
   const action=event.target.closest('[data-guide]')?.dataset.guide;if(!action)return;guide.close();
   if(action==='reading')window.openReadingDesk();
   if(action==='parcel')parcel.inspect('tori');
+  if(action==='letter')letter.start('tori');
+  if(action==='letter-garden')letter.start('garden');
   if(action==='evidence')window.studentAdventure.workshop('library-evidence');
  });
  // Keep keyboard focus in the walking scene, while leaving nested dialogs in charge.
@@ -107,5 +111,5 @@ export function installStudentCampus(ctx){
  new MutationObserver(syncNear).observe(doc.getElementById('hubPlayer'),{attributes:true,attributeFilter:['style']});
  new MutationObserver(syncOpen).observe(hub,{attributes:true,attributeFilter:['class']});
  syncScene();syncOpen();
- return {talk,find:wayfinder.open,parcel};
+ return {talk,find:wayfinder.open,parcel,letter};
 }
