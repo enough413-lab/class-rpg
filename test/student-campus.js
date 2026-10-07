@@ -1,6 +1,7 @@
-import {installSchoolWalk} from './school-walk.js?v=20261007-library';
-import {installCampusNpcs} from './campus-npcs.js?v=20261007-kindness';
-import {installCampusWayfinder} from './campus-wayfinder.js?v=20260930-wayfinder';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261007-parcel';
+import {installSchoolWalk} from './school-walk.js?v=20261007-parcel';
+import {installCampusNpcs} from './campus-npcs.js?v=20261007-parcel';
+import {installCampusWayfinder} from './campus-wayfinder.js?v=20261007-parcel';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';
 const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도 가기']]},hallway:{name:'별빛 복도',hint:'가고 싶은 문을 누르거나 가까이 걸어가 보세요.',routes:[['classroom','🏫 교실 가기'],['library','📚 도서관 가기']]},library:{name:'이야기 도서관',hint:'책지기 토리와 오늘 읽은 이야기를 나눠요.',routes:[['hallway','🚪 복도 가기'],['reading','✍️ 독서 기록 열기']]}};
@@ -13,7 +14,7 @@ export function installStudentCampus(ctx){
  shell.prepend(header);header.firstElementChild.append(doc.getElementById('hubStatus'));hub.querySelector('.hub-top').remove();
  const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span></p>';
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
- guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 읽은 책 이야기 남기기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="evidence"><b>🔎 단서 탐험 살펴보기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
+ guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 읽은 책 이야기 남기기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 향기 꾸러미 의뢰</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="evidence"><b>🔎 단서 탐험 살펴보기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
  guide.querySelector('.campus-portrait img').onerror=()=>{guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const people=installCampusNpcs({hub});
@@ -43,14 +44,17 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
+ let parcel=null;
  function interact(kind){
+  if(['parcel','notice'].includes(kind))return parcel.inspect(kind);
   if(kind==='tori')return talk();
   if(['quests','shop'].includes(kind))return people.talk(kind);
   if(['classroom','hallway','library'].includes(kind))return window.enterHubScene(kind);
   if(['reading','portfolio'].includes(kind))return window.openReadingPortfolio();
   return window.hubInteract(kind);
  }
- const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear});
+ const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
+ parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:()=>{if(parcel)syncNear()}});
  const wayfinder=installCampusWayfinder({rooms:SCENES,walk,stop,getScene:ctx.getScene,isOpen:open});
  window.hubUseNearby=()=>{const near=walk.nearby();if(near){stop();walk.stop();interact(near.kind)}};
  hub.addEventListener('click',event=>{
@@ -73,6 +77,7 @@ export function installStudentCampus(ctx){
  guide.addEventListener('click',event=>{
   const action=event.target.closest('[data-guide]')?.dataset.guide;if(!action)return;guide.close();
   if(action==='reading')window.openReadingPortfolio();
+  if(action==='parcel')parcel.inspect('tori');
   if(action==='evidence')window.studentAdventure.workshop('library-evidence');
  });
  // Keep keyboard focus in the walking scene, while leaving nested dialogs in charge.
@@ -88,5 +93,5 @@ export function installStudentCampus(ctx){
  new MutationObserver(syncNear).observe(doc.getElementById('hubPlayer'),{attributes:true,attributeFilter:['style']});
  new MutationObserver(syncOpen).observe(hub,{attributes:true,attributeFilter:['class']});
  syncScene();syncOpen();
- return {talk,find:wayfinder.open};
+ return {talk,find:wayfinder.open,parcel};
 }

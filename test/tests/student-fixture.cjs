@@ -36,6 +36,12 @@ const createClient=()=>({
   else {const n=Number(args.p_step.split('-')[1]);if(n===2&&args.p_choice!=='library')return {data:{correct:false}};if(n>m.kindness.phase){m.kindness.choices.push(args.p_choice);m.kindness.phase=n;if(n===4){m.kindness.pin=args.p_choice;m.kindness.wearing=true}}}
   localStorage.setItem('fixtureKindness',JSON.stringify(m.kindness));if(m.dropKindnessReply){m.dropKindnessReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.kindness}};
  }
+ if(name==='student_parcel_adventure'){
+  m.parcelSaves=(m.parcelSaves||0)+1;await new Promise(r=>setTimeout(r,m.parcelDelay||30));if(m.failParcel)return {error:{message:'Offline'}};
+  const expected={'parcel-1':['book','leaf'],'parcel-2':['library'],'parcel-3':['tori']}[args.p_step];
+  if(JSON.stringify([...args.p_clues].sort())!==JSON.stringify(expected))return {data:{correct:false}};
+  m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));if(m.dropParcelReply){m.dropParcelReply=false;return {error:{message:'Network request failed'}}}return {data:{correct:true,step_id:args.p_step}};
+ }
  if(name==='student_music_sequence'){
   m.sequenceSaves=(m.sequenceSaves||0)+1;await new Promise(r=>setTimeout(r,m.sequenceDelay||30));
   if(m.failSequence)return {error:{message:'Offline'}};

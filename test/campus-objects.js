@@ -5,13 +5,14 @@ const PROPS={
  hallway:{classroom:[8.3,45.5,13,29.5],library:[80.7,46,13,29]},
  library:{hallway:[.5,48,11,27]}
 };
-const verbs={titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
+const verbs={parcel:'봉인 살펴보기',notice:'단서 읽기',titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
 const SPRITES={
- titles:{art:'titles',x:8,width:14,height:34},inventory:{art:'wardrobe',x:25,width:17,height:32},
+ parcel:{art:'parcel',x:38,width:13,height:18},titles:{art:'titles',x:8,width:14,height:34},inventory:{art:'wardrobe',x:25,width:17,height:32},
  quests:{art:'teacher',x:54,width:14,height:37,name:'새봄 선생님'},
  teacher:{art:'records',x:68,width:14,height:24},
  shop:{art:'shopkeeper',x:82,width:15,height:32,name:'문구지기 모모'}
 };
+const HALLWAY_SPRITES={notice:{art:'records',x:51,width:19,height:28}};
 const LIBRARY_SPRITES={
  reading:{art:'reading-desk',x:27,width:24,height:32},
  portfolio:{art:'journal-shelf',x:82,width:25,height:46},
@@ -22,7 +23,7 @@ export function decorateCampusObject(button,place,room,tori){
  const name=doc.createElement('b');name.textContent=place.label;
  const action=doc.createElement('small');action.className='campus-object-action';action.textContent='↗ '+verbs[place.kind];
  caption.append(name,action);button.dataset.walkX=place.x;button.setAttribute('aria-label',place.label.replace(/^\p{Extended_Pictographic}\ufe0f?\s*/u,'')+' · '+verbs[place.kind]);
- const sprite=(room==='classroom'?SPRITES:room==='library'?LIBRARY_SPRITES:{})[place.kind];
+ const sprite=(room==='classroom'?SPRITES:room==='library'?LIBRARY_SPRITES:room==='hallway'?HALLWAY_SPRITES:{})[place.kind];
  if(sprite){
   button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
   if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+(sprite.name===place.label?'':' · '+place.label)+' · 이야기하기')}

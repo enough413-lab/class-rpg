@@ -7,7 +7,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
  try{
   fs.mkdirSync(shots,{recursive:true});const page=await browser.newPage({viewport:{width:1440,height:1050},hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);
   const f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>window.studentCampus);await f.evaluate(()=>enterHubScene('classroom'));await f.locator('.campus-scene-status').waitFor({state:'hidden'});
-  await f.waitForFunction(()=>[...document.querySelectorAll('.campus-sprite-art')].length===5&&[...document.querySelectorAll('.campus-sprite-art')].every(i=>i.complete&&i.naturalWidth>0));
+  await f.waitForFunction(()=>[...document.querySelectorAll('.campus-sprite-art')].length===6&&[...document.querySelectorAll('.campus-sprite-art')].every(i=>i.complete&&i.naturalWidth>0));
   const pos=()=>f.locator('#hubPlayer').getAttribute('style');const start=await pos();
   await f.locator('[data-place=quests]').focus();await page.keyboard.press('Enter');await f.locator('#campusNpcDialog[open]').waitFor();assert.match(await f.locator('#campusNpcName').textContent(),/새봄/);
   await page.keyboard.press('ArrowRight');assert.equal(await pos(),start);
