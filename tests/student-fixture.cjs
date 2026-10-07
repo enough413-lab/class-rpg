@@ -28,6 +28,15 @@ const createClient=()=>({
   return {data:null};
  }
  if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_music_sequence'){
+  m.sequenceSaves=(m.sequenceSaves||0)+1;await new Promise(r=>setTimeout(r,m.sequenceDelay||30));
+  if(m.failSequence)return {error:{message:'Offline'}};
+  const expected={'music-sequence-1':['low','middle','high'],'music-sequence-2':['short','rest','long'],'music-sequence-3':['low','high','rest','middle']}[args.p_step];
+  if(JSON.stringify(args.p_order)!==JSON.stringify(expected))return {data:{correct:false}};
+  m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  if(m.dropSequenceReply){m.dropSequenceReply=false;return {error:{message:'Network request failed'}}}
+  return {data:{correct:true,step_id:args.p_step}};
+ }
  if(name==='student_music_room'){
   m.musicSaves=(m.musicSaves||0)+1;await new Promise(r=>setTimeout(r,m.musicDelay||30));
   if(m.failMusic)return {error:{message:'Offline'}};
