@@ -9,7 +9,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.evaluate(async()=>{mockRpg.student.xp=0;await loadDashboard();enterHubScene('classroom')});
   const position=()=>f.locator('#hubPlayer').evaluate(el=>parseFloat(el.style.left));
   const arrive=async x=>{await f.waitForFunction(x=>Math.abs(parseFloat(document.getElementById('hubPlayer').style.left)-x)<.06,x);await f.waitForFunction(()=>document.querySelector('[data-campus=use]').dataset.state==='arrived')};
-  await f.locator('[data-campus=find]').click();assert(await f.locator('#campusWayfinder').isVisible());assert.equal(await f.locator('[data-finder-place]').count(),6);
+  await f.locator('[data-campus=find]').click();assert(await f.locator('#campusWayfinder').isVisible());assert.equal(await f.locator('[data-finder-place]').count(),7);
   await page.screenshot({path:path.join(shots,'desktop-wayfinder.png'),fullPage:true});
   // The real keyboard keeps focus in the directory and leaves the room stationary.
   const held=await position();await page.keyboard.press('ArrowLeft');assert.equal(await position(),held);
@@ -31,7 +31,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=portfolio]').click();await f.waitForFunction(()=>document.querySelector('[data-campus=use]').dataset.state==='walking');await f.locator('#campusTitle').press('ArrowLeft');const manual=await position();await page.waitForTimeout(220);assert.equal(await position(),manual);assert.equal(await f.locator('.is-destination').count(),0);
   await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=portfolio]').click();await f.waitForFunction(()=>document.querySelector('[data-campus=use]').dataset.state==='walking');await f.evaluate(()=>openReadingPortfolio());await page.waitForTimeout(100);const paused=await position();await page.waitForTimeout(200);assert.equal(await position(),paused);await page.keyboard.press('Escape');assert.notEqual(await f.locator('[data-campus=use]').getAttribute('data-state'),'walking');
   // Far from an object, the nearest direction is actionable instead of disabled.
-  await f.evaluate(()=>enterHubScene('hallway'));await f.locator('[data-campus=use][data-state=guide]').waitFor();assert.match(await f.locator('#campusNear').textContent(),/왼쪽/);await f.locator('[data-campus=use]').click();await arrive(16);
+  await f.evaluate(()=>enterHubScene('hallway'));await f.locator('[data-place=notice]').waitFor();await f.evaluate(()=>{for(let i=0;i<5;i++)moveHub(-1,0)});await f.locator('[data-campus=use][data-state=guide]').waitFor();assert.match(await f.locator('#campusNear').textContent(),/왼쪽/);await f.locator('[data-campus=use]').click();await arrive(16);
   await page.setViewportSize({width:1366,height:768});assert(await f.locator('[data-campus=use]').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight));
   await page.setViewportSize({width:390,height:844});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-room=classroom]').click();await page.screenshot({path:path.join(shots,'mobile-wayfinder.png'),fullPage:true});
   assert(await f.locator('#campusWayfinder').evaluate(el=>el.scrollWidth<=el.clientWidth+1));

@@ -1,0 +1,7 @@
+Provider: built-in image_gen (imagegen skill). Transparent-background generation, no CLI/API fallback.
+Final prompt:
+Create one original transparent-background foreground game sprite for a cozy Korean elementary-school fantasy RPG. A small, irresistibly cute lost parcel: softly painted cream gift box, rounded corners, wide dusty lavender fabric ribbon and a neat blue wax seal embossed with a simple open-book symbol (no letters). A tiny mint leaf charm hangs from the bow. Warm storybook 2D painted game art, gentle hand-painted shading, readable chunky silhouette, a slightly elevated frontal view showing front and right side, soft warm outlines. Fits original cozy school furnishings and illustrated owl/raccoon NPCs. Entire box and bow visible, centered, generous transparent margin, true alpha background. No people, no scenery, no ground plane, no text, no UI, no logo, no sparkles outside the object, no checkerboard pattern. This is a production collectible/interactive object sprite, not concept-art scene.
+
+Saved original: parcel-original.png (1312x1199 RGBA).
+Game asset: parcel-v1.webp (480x381, alpha, 59282 bytes). Only transparent margin trimming and resize/WebP compression were performed with Sharp; no original subject repainting.
+Consumed by the student test game's classroom foreground, clue inspection, request tracker and delivery scene.

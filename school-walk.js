@@ -1,8 +1,8 @@
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-library';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-parcel';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
- classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
- hallway:[{kind:'classroom',x:16,label:'🏫 우리 교실'},{kind:'library',x:85,label:'📚 도서관'}],
+ classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
+ hallway:[{kind:'classroom',x:16,label:'🏫 우리 교실'},{kind:'notice',x:51,label:'📜 도서 안내판'},{kind:'library',x:85,label:'📚 도서관'}],
  library:[{kind:'hallway',x:7,label:'🚪 복도'},{kind:'reading',x:28,label:'✍️ 독서 기록'},{kind:'tori',x:58,label:'책지기 토리'},{kind:'portfolio',x:82,label:'📖 나의 독후감'}]
 };
 export function installSchoolWalk(ctx){
@@ -14,7 +14,7 @@ export function installSchoolWalk(ctx){
  let frame=0,target=null,destination=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
- const currentPlaces=()=>PLACES[ctx.getScene()]||PLACES.classroom;
+ const currentPlaces=()=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.());
  function camera(x=ctx.getPosition().x){
   const width=stage.clientWidth,view=viewport.clientWidth,offset=Math.max(0,Math.min(width-view,width*x/100-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
@@ -86,5 +86,5 @@ export function installSchoolWalk(ctx){
  new ResizeObserver(()=>camera()).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
- return {syncScene,nearby,nearest,stop,camera,goTo,destination:()=>destination,places:room=>PLACES[room]||[]};
+ return {syncScene,nearby,nearest,stop,camera,goTo,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.())};
 }
