@@ -44,6 +44,16 @@ const createClient=()=>({
   if(args.p_action==='mix'){if(m.art.phase===0)m.art.phase=1}else m.art={...m.art,phase:2,cells:[...args.p_cells],stamp:args.p_stamp};
   localStorage.setItem('fixtureArt',JSON.stringify(m.art));if(m.dropArtReply){m.dropArtReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.art,cells:[...m.art.cells]}};
  }
+ if(name==='student_garden_letter'){
+  m.letterSaves=(m.letterSaves||0)+1;await new Promise(r=>setTimeout(r,m.letterDelay||30));if(m.failLetter)return {error:{message:'Offline'}};
+  const expected={'letter-1':['leaf','stem','light'],'letter-2':['leaf','light','grow'],'letter-3':['tori']}[args.p_step];
+  const got=args.p_clues;if(!expected||got?.length!==expected.length||new Set(got).size!==expected.length)return {error:{message:'Bad clues'}};
+  const correct=args.p_step==='letter-2'?JSON.stringify(got)===JSON.stringify(expected):expected.every(x=>got.includes(x));if(!correct)return {data:{correct:false}};
+  const i=Number(args.p_step.slice(-1));if(Array.from({length:i-1},(_,n)=>'letter-'+(n+1)).some(x=>!m.exploration.includes(x)))return {error:{message:'Sequence'}};
+  if(m.student.xp<1700&&!m.exploration.includes('letter-1'))return {error:{message:'Level'}};
+  const fresh=!m.exploration.includes(args.p_step);m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  if(m.dropLetterReply){m.dropLetterReply=false;return {error:{message:'Offline'}}}return {data:{correct:true,new:fresh,step_id:args.p_step}};
+ }
  if(name==='student_parcel_adventure'){
   m.parcelSaves=(m.parcelSaves||0)+1;await new Promise(r=>setTimeout(r,m.parcelDelay||30));if(m.failParcel)return {error:{message:'Offline'}};
   const expected={'parcel-1':['book','leaf'],'parcel-2':['library'],'parcel-3':['tori']}[args.p_step];
