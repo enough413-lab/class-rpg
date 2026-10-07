@@ -1,4 +1,5 @@
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-parcel';
+import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
@@ -11,6 +12,10 @@ export function installSchoolWalk(ctx){
  const viewport=doc.createElement('div');viewport.className='campus-viewport';stage.before(viewport);viewport.append(stage);
  const status=doc.createElement('div');status.className='campus-scene-status';status.setAttribute('role','status');viewport.append(status);
  hub.classList.add('campus-side');
+ const waypoint=installCampusWaypoint(stage);
+ // A real pointer target keeps mobile tap adjustment from choosing a nearby NPC.
+ // Keyboard and assistive-technology users already have the movement controls.
+ const floor=doc.createElement('button');floor.type='button';floor.className='campus-floor-target';floor.tabIndex=-1;floor.setAttribute('aria-hidden','true');stage.prepend(floor);
  let frame=0,target=null,destination=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
@@ -20,14 +25,14 @@ export function installSchoolWalk(ctx){
   stage.style.transform='translateX('+(-offset)+'px)';
  }
  function markPlaces(){const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))markCampusObject(b,{near:b.dataset.place===near?.kind,guided:b.dataset.place===destination?.kind})}
- function stop(){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');markPlaces();if(wasGuided)ctx.onPosition()}
+ function stop(arrived=false){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
  function nearest(){const x=ctx.getPosition().x;return currentPlaces().reduce((a,b)=>Math.abs(a.x-x)<=Math.abs(b.x-x)?a:b)}
  function nearby(){const closest=nearest();return Math.abs(closest.x-ctx.getPosition().x)<8?closest:null}
  function goTo(kind){
   const place=currentPlaces().find(p=>p.kind===kind);if(!place||!canWalk())return false;
-  stop();destination=place;target=place.x;
+  stop();destination=place;target=place.x;waypoint.show(target);
   markPlaces();
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop()}
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}
   else{frame=requestAnimationFrame(tick);ctx.onPosition()}
   return true;
  }
@@ -43,7 +48,7 @@ export function installSchoolWalk(ctx){
   const dt=lastAt?Math.min((time-lastAt)/1000,.05):0;lastAt=time;
   const x=ctx.getPosition().x,diff=target-x,step=Math.sign(diff)*Math.min(Math.abs(diff),dt*25);
   renderPosition(x+step);
-  if(Math.abs(target-ctx.getPosition().x)<.05){stop();return}frame=requestAnimationFrame(tick);
+  if(Math.abs(target-ctx.getPosition().x)<.05){stop(true);return}frame=requestAnimationFrame(tick);
  }
  function rig(){
   if(player.querySelector('.campus-rig'))return;
@@ -77,9 +82,10 @@ export function installSchoolWalk(ctx){
   else if(dy<0)window.hubUseNearby();
  };
  stage.addEventListener('click',e=>{
-  if(e.target.closest('button')||!canWalk())return;const rect=stage.getBoundingClientRect();
+  if(e.target.closest('button')&&e.target!==floor||!canWalk())return;const rect=stage.getBoundingClientRect();
   if(e.clientY<rect.top+rect.height*.75)return;
-  stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));frame=requestAnimationFrame(tick);
+  stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));waypoint.show(target);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else frame=requestAnimationFrame(tick);
  });
  // Pointer focus must not move a target out from under the pending tap/click.
  stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p?.matches(':focus-visible'))camera(Number(p.dataset.walkX))});

@@ -1,5 +1,6 @@
 import {installParcelAdventure} from './parcel-adventure.js?v=20261007-parcel';
-import {installSchoolWalk} from './school-walk.js?v=20261007-parcel';
+import {installSchoolWalk} from './school-walk.js?v=20261007-journey';
+import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261007-parcel';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261007-parcel';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
@@ -12,18 +13,19 @@ export function installStudentCampus(ctx){
  const header=doc.createElement('header');header.className='campus-header';
  header.innerHTML='<div><span class="campus-eyebrow">우리 학교 산책</span><h2 id="campusTitle" tabindex="-1"></h2><p id="campusHint"></p></div><div class="campus-menu"><button data-campus="find">길 찾기</button><button data-campus="map">탐험 지도</button><button data-campus="home">내 화면으로</button></div>';
  shell.prepend(header);header.firstElementChild.append(doc.getElementById('hubStatus'));hub.querySelector('.hub-top').remove();
- const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span></p>';
+ const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><div class="campus-portrait">'+TORI+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>책 속에서 마음에 남은 장면이 있니?<br>왜 그 장면이 좋았는지 함께 생각해 보자.</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 읽은 책 이야기 남기기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 향기 꾸러미 의뢰</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="evidence"><b>🔎 단서 탐험 살펴보기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">도서관으로 돌아가기</button>';
  guide.querySelector('.campus-portrait img').onerror=()=>{guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const people=installCampusNpcs({hub});
- let timer=null,held=null,returnFocus=null,lastScene='',isOpen=false;
+ let timer=null,held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  function stop(){clearInterval(timer);timer=null;held=null}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=walk.nearest(),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
+  memory?.capture();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
@@ -41,8 +43,8 @@ export function installStudentCampus(ctx){
  function talk(){stop();if(open()&&!guide.open)guide.showModal()}
  function syncOpen(){
   if(isOpen===open())return;isOpen=open();stop();walk.stop();
-  if(isOpen){returnFocus=doc.activeElement;syncScene();doc.getElementById('campusTitle').focus({preventScroll:true})}
-  else{if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
+  if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
+  else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
  let parcel=null;
  function interact(kind){
@@ -55,6 +57,11 @@ export function installStudentCampus(ctx){
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:()=>{if(parcel)syncNear()}});
+ memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
+ // A direct room/quest link keeps its destination. Only the general walk entry resumes.
+ const openCampus=window.openClassroomHub;
+ window.openClassroomHub=(...args)=>{memory.flush();openCampus(...args);syncScene();memory.resume(true,true)};
+ doc.addEventListener('student-dashboard-updated',()=>{memory.activate();if(open())memory.resume()});
  const wayfinder=installCampusWayfinder({rooms:SCENES,walk,stop,getScene:ctx.getScene,isOpen:open});
  window.hubUseNearby=()=>{const near=walk.nearby();if(near){stop();walk.stop();interact(near.kind)}};
  hub.addEventListener('click',event=>{

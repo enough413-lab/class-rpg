@@ -1,0 +1,8 @@
+#classroomHub.campus-side .campus-floor-target{position:absolute;left:0;top:75%;width:100%;height:25%;min-height:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;z-index:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#classroomHub.campus-side .campus-waypoint{position:absolute;top:80%;width:38px;height:48px;transform:translate(-50%,-100%);pointer-events:none;z-index:9;filter:drop-shadow(0 2px 2px #59432166)}
+#classroomHub.campus-side .campus-waypoint[hidden]{display:none}
+.campus-waypoint svg{display:block;width:100%;height:100%;overflow:visible;fill:#ffe499;stroke:#75542b;stroke-width:2.5px;stroke-linejoin:round}
+.campus-waypoint .waypoint-star{fill:#fff9dc;stroke:#b78323;stroke-width:1.5px}
+.campus-waypoint span{position:absolute;bottom:-4px;left:-3px;width:44px;height:10px;border:2px solid #b28232;border-radius:50%;background:#fff2ad99}
+.campus-waypoint[data-state=arrived] svg{fill:#d4edbc;stroke:#47714c}.campus-waypoint[data-state=arrived] span{border-color:#47714c;background:#d4edbc99}
+@media(prefers-reduced-motion:no-preference){.campus-waypoint[data-state=walking] svg{animation:campusPinHover 1.1s ease-in-out infinite}@keyframes campusPinHover{50%{transform:translateY(-5px)}}}
