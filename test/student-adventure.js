@@ -1,3 +1,4 @@
+import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261007-kindness';
 import {SEQUENCE_MILESTONE,installMusicSequence} from './music-sequence.js?v=20261007-sequence';
 import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20260930-workshop';
 import {weeklyResetLabel} from './quest-schedule.js?v=20260930-workshop';
@@ -21,7 +22,7 @@ export function installStudentAdventure(ctx){
  const dashboard=byId('dashboard');
  if(!dashboard||byId('studentAdventureHome'))return;
  let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set(),endingPromise='';
- const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE,MUSIC_MILESTONE,SEQUENCE_MILESTONE];
+ const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE,MUSIC_MILESTONE,SEQUENCE_MILESTONE,KINDNESS_MILESTONE];
  let libraryIndex=0,libraryChoice={claim:null,evidence:null},librarySolved=false;
  let musicIndex=0,musicChoice=null,musicSolved=false;
  const musicPlayer=createMusicPlayer(state=>{
@@ -48,6 +49,7 @@ export function installStudentAdventure(ctx){
  const dialog=doc.createElement('dialog');dialog.className='sa-dialog';dialog.id='studentAdventureDialog';dialog.setAttribute('aria-labelledby','saDialogTitle');
  dialog.innerHTML='<header class="sa-dialog-head"><div><h2 id="saDialogTitle"></h2><p id="saDialogSubtitle"></p></div>'+button('close','닫기','', 'aria-label="창 닫기"')+'</header><div class="sa-dialog-body" id="saDialogBody"></div>';
  doc.body.append(dialog);
+ const kindness=installKindnessChapter({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
  const sequence=installMusicSequence({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
  dialog.addEventListener('close',()=>musicPlayer.stop());
  dialog.addEventListener('input',e=>{if(e.target.id==='saMusicVolume')musicPlayer.setVolume(e.target.value)});
@@ -62,7 +64,7 @@ export function installStudentAdventure(ctx){
   if(owner!==s.id){owner=s.id;journal=null;journalError='';loadedAt=0;queueMicrotask(()=>loadJournal())}
   const lv=ctx.levelInfo(s.xp||0),all=ctx.getQuests()||[];
   renderNextGoal(lv.level,s.xp||0);
-  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>'+profileMemento(journal?.workshop);
+  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>'+profileMemento(journal?.workshop)+kindnessProfile(journal?.kindness);
   byId('saProfileProgress').innerHTML='<div class="sa-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+lv.pct+'"><span style="width:'+lv.pct+'%"></span></div><div class="sa-small">'+(lv.max?'최고 레벨에 도착했어요!':'다음 레벨까지 <b>'+(lv.need-lv.cur)+' 경험치</b>')+'</div><div class="sa-currency"><span>🪙 <b>'+Number(s.gold||0)+'</b> 골드</span><span>✨ '+Number(s.xp||0)+' 경험치</span></div>';
   const needs=all.filter(q=>!['approved','submitted'].includes(q.status)).length,waiting=all.filter(q=>q.status==='submitted').length;
   byId('saQuestSummary').textContent=needs?'도전할 일 '+needs+'개'+(waiting?' · 선생님 확인 중 '+waiting+'개':''):waiting?'보낸 기록 '+waiting+'개를 선생님이 확인하고 있어요.':'오늘도 나의 속도로 한 걸음씩!';
@@ -138,7 +140,7 @@ export function installStudentAdventure(ctx){
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='kindness-chapter'?kindness.label(lv):m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
  }
  async function workshop(kind){
   const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
@@ -146,9 +148,10 @@ export function installStudentAdventure(ctx){
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
   if(request!==viewRequest||!dialog.open)return;
   if(!journal){open(m.label,'연결을 확인하고 다시 시도해 주세요.',errorView('retry-map'));return}
-  const earned=kind==='music-sequence'&&sequence.hasStarted()||kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id))||kind==='music-room'&&MUSIC_STEPS.some(s=>completed().has(s.id));
+  const earned=kind==='kindness-chapter'&&kindness.hasStarted()||kind==='music-sequence'&&sequence.hasStarted()||kind==='chapter-one'&&journal?.workshop?.chapter_one_complete||kind==='library-evidence'&&LIBRARY_CASES.some(s=>completed().has(s.id))||kind==='music-room'&&MUSIC_STEPS.some(s=>completed().has(s.id));
   if(lv<m.level&&!earned){open(m.label,'Lv. '+m.level+'에 열리는 새로운 즐거움','<div class="sa-stamp"><div class="sa-stamp-medal">🔒</div><h3>'+esc(m.description)+'</h3><p>'+experienceUntil(student().xp||0,m.level)+' 경험치를 더 모으면 열려요.</p>'+button('map','지도로 돌아가기')+'</div>');return}
-  if(kind==='music-sequence'){sequence.start()}
+  if(kind==='kindness-chapter'){kindness.start()}
+  else if(kind==='music-sequence'){sequence.start()}
   else if(kind==='music-room'){musicIndex=MUSIC_STEPS.findIndex(s=>!completed().has(s.id));renderMusic()}
   else if(kind==='library-evidence'){libraryIndex=LIBRARY_CASES.findIndex(s=>!completed().has(s.id));renderEvidence()}
   else if(kind==='chapter-one'){endingPromise=journal.workshop?.chapter_one_promise||'';showChapterOne()}
