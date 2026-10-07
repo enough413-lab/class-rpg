@@ -1,11 +1,11 @@
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261007-world';
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-world';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261007-shelf';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
  hallway:[{kind:'classroom',x:16,label:'🏫 우리 교실'},{kind:'notice',x:51,label:'📜 도서 안내판'},{kind:'library',x:85,label:'📚 도서관'}],
- library:[{kind:'hallway',x:7,label:'🚪 복도'},{kind:'reading',x:28,label:'✍️ 독서 기록'},{kind:'tori',x:58,label:'책지기 토리'},{kind:'portfolio',x:82,label:'📖 나의 독후감'}]
+ library:[{kind:'hallway',x:7,label:'🚪 복도'},{kind:'reading',x:28,label:'✍️ 독후감 쓰기'},{kind:'tori',x:58,label:'책지기 토리'},{kind:'portfolio',x:82,label:'📖 독후감 책장'}]
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[{kind:'hallway',x:7,label:'🚪 복도로 돌아가기'},...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:91,label:'📖 이곳의 이야기'}];
 export function installSchoolWalk(ctx){
