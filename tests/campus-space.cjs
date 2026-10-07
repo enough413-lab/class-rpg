@@ -15,7 +15,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
     assert(Math.abs(box.stage.w/box.stage.h-4/3)<.002);assert(Math.abs(box.view.h-box.stage.h)<1);assert(Math.abs(box.view.y-box.stage.y)<1,'Never crop the ceiling with a negative margin');assert(!box.overflow);assert(box.use.bottom<=box.screen+1,`Movement/use controls must stay visible: ${width}x${height} ${room} ${JSON.stringify(box)}`);
     assert(Math.abs(box.player.bottom-(box.stage.y+box.stage.h*.8))<1,'Feet stay on the new floor');
     if(width===390)assert(box.view.h>=520,'Phone scene must be taller than the previous 350px viewport');
-    if(width<850)assert(Math.abs(box.player.w-163)<1);else assert(box.player.w>=188);
+    assert(Math.abs(box.player.w/box.stage.w-.17)<.002,'Avatar shares the NPC room scale');assert(box.stage.w>=box.view.w-1,'Room fills viewport without a blank strip');
     await page.screenshot({path:path.join(shots,`space-${room}-${width}.png`),fullPage:true});
    }
   }
