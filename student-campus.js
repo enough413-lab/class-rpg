@@ -1,5 +1,5 @@
 import {installSchoolWalk} from './school-walk.js?v=20261007-library';
-import {installCampusNpcs} from './campus-npcs.js?v=20261007-library';
+import {installCampusNpcs} from './campus-npcs.js?v=20261007-kindness';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20260930-wayfinder';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';

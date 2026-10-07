@@ -1,5 +1,5 @@
 const PEOPLE={
- quests:{name:'새봄 선생님',role:'학교 의뢰 안내',art:'teacher',greeting:'학교에서 해 볼 작은 도전을 함께 찾아볼까?',note:'실제로 해 본 일을 기록하면 선생님이 확인해 주실 거야.',choices:[['quests','선생님 의뢰 보기'],['teacher','내가 해낸 일 보기']]},
+ quests:{name:'새봄 선생님',role:'학교 의뢰 안내',art:'teacher',greeting:'학교에서 해 볼 작은 도전을 함께 찾아볼까?',note:'실제로 해 본 일을 기록하면 선생님이 확인해 주실 거야.',choices:[['quests','선생님 의뢰 보기'],['teacher','내가 해낸 일 보기'],['kindness','새 친구 나루의 길 안내 · Lv.15']]},
  shop:{name:'문구지기 모모',role:'우리 교실 상점',art:'shopkeeper',greeting:'어서 와! 차곡차곡 모은 골드로 무엇을 골라볼까?',note:'마음에 드는 물건과 필요한 골드를 살펴봐. 구경만 해도 좋아!',choices:[['shop','상점 둘러보기']]}
 };
 export function installCampusNpcs({hub}){
@@ -15,7 +15,7 @@ export function installCampusNpcs({hub}){
   const button=event.target.closest('button');if(!button)return;
   if(button.hasAttribute('data-npc-close'))dialog.close();
   const action=button.dataset.npcAction;
-  if(action&&current?.choices.some(([key])=>key===action)){dialog.close();window.hubInteract(action)}
+  if(action&&current?.choices.some(([key])=>key===action)){dialog.close();if(action==='kindness')window.studentAdventure.workshop('kindness-chapter');else window.hubInteract(action)}
  });
  dialog.addEventListener('close',()=>{if(opener?.isConnected&&!hub.classList.contains('hidden')&&!doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal):not(#classroomHub)'))opener.focus({preventScroll:true})});
  new MutationObserver(()=>{if(hub.classList.contains('hidden')&&dialog.open)dialog.close()}).observe(hub,{attributes:true,attributeFilter:['class']});
