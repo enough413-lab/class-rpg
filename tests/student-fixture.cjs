@@ -5,6 +5,7 @@ const mock=String.raw`
 window.mockRpg={calls:[],failSave:false,failJournal:false,failDashboard:false,student:{id:987,number:1,nickname:'별나래',gender:'girl',xp:260,gold:180,setup_complete:true},exploration:JSON.parse(localStorage.getItem('fixtureExploration')||'[]'),workshop:JSON.parse(localStorage.getItem('fixtureWorkshop')||'{"cover":"paper","garden_complete":false}')};
 localStorage.setItem('classRpgStudentToken','fixture');
 mockRpg.art=JSON.parse(localStorage.getItem('fixtureArt')||'null')||{phase:0,cells:Array(25).fill('empty'),stamp:'leaf'};
+Object.assign(mockRpg.art,JSON.parse(localStorage.getItem('fixtureFrame')||'null')||{background:'cream',frame:'wood',ornament:'leaf',placement:'bottom-right',decorated_at:null});
 mockRpg.kindness=JSON.parse(localStorage.getItem('fixtureKindness')||'{"phase":0,"choices":[],"pin":null,"wearing":false}');
 mockRpg.reviews=JSON.parse(localStorage.getItem('fixtureReviews')||'null')||[{review_id:47,book_title:'구름 학교',read_date:'2026-09-28',summary:'구름이 친구를 만나요.',thoughts:'서로 도우면 좋겠어요.',recommendation_rating:5,recommendation_reason:'따뜻한 이야기예요.',status:'rejected',rejection_reason:'친구를 도운 장면을 한 가지 더 적어 볼까요?'},{review_id:48,book_title:'작은 정원',read_date:'2026-09-27',summary:'씨앗이 자랐어요.',thoughts:'매일 돌봐 주고 싶어요.',recommendation_rating:4,recommendation_reason:'식물을 좋아하는 친구에게 추천해요.',status:'approved'}];
 mockRpg.receipts=JSON.parse(localStorage.getItem('fixtureReceipts')||'{}');mockRpg.purchases=Number(localStorage.getItem('fixturePurchases')||0);mockRpg.student.gold=180-mockRpg.purchases*40;
@@ -37,9 +38,10 @@ const createClient=()=>({
   else {const n=Number(args.p_step.split('-')[1]);if(n===2&&args.p_choice!=='library')return {data:{correct:false}};if(n>m.kindness.phase){m.kindness.choices.push(args.p_choice);m.kindness.phase=n;if(n===4){m.kindness.pin=args.p_choice;m.kindness.wearing=true}}}
   localStorage.setItem('fixtureKindness',JSON.stringify(m.kindness));if(m.dropKindnessReply){m.dropKindnessReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.kindness}};
  }
+ if(name==='student_art_frame'){m.frameSaves=(m.frameSaves||0)+1;if(m.failFrame)return {error:{message:'offline'}};Object.assign(m.art,{background:args.p_background,frame:args.p_frame,ornament:args.p_ornament,placement:args.p_placement,decorated_at:m.art.decorated_at||'2026-10-07T00:00:00Z'});localStorage.setItem('fixtureFrame',JSON.stringify(m.art));if(m.loseFrameReply){m.loseFrameReply=false;return {error:{message:'lost reply'}}}return {data:structuredClone(m.art)}}
  if(name==='student_art_postcard'){
   m.artSaves=(m.artSaves||0)+1;await new Promise(r=>setTimeout(r,m.artDelay||30));if(m.failArt)return {error:{message:'Offline'}};
-  if(args.p_action==='mix'){if(m.art.phase===0)m.art.phase=1}else m.art={phase:2,cells:[...args.p_cells],stamp:args.p_stamp};
+  if(args.p_action==='mix'){if(m.art.phase===0)m.art.phase=1}else m.art={...m.art,phase:2,cells:[...args.p_cells],stamp:args.p_stamp};
   localStorage.setItem('fixtureArt',JSON.stringify(m.art));if(m.dropArtReply){m.dropArtReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.art,cells:[...m.art.cells]}};
  }
  if(name==='student_parcel_adventure'){
