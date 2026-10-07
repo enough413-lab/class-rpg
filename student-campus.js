@@ -1,7 +1,7 @@
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261007-world';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261007-world';
-import {installSchoolWalk} from './school-walk.js?v=20261007-world';
+import {installSchoolWalk} from './school-walk.js?v=20261007-shelf';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261007-frame';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261007-parcel';
@@ -44,7 +44,7 @@ export function installStudentCampus(ctx){
   walk.syncScene();
   if(open()&&lastScene!==scene)doc.getElementById('campusTitle').focus({preventScroll:true});lastScene=scene;syncNear();
  }
- function talk(){stop();guide.dataset.inspection='false';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';guide.querySelector('.campus-portrait').hidden=false;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();if(open()&&!guide.open)guide.showModal()}
+ function talk(){stop();guide.dataset.inspection='false';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();if(open()&&!guide.open)guide.showModal()}
  function syncOpen(){
   if(isOpen===open())return;isOpen=open();stop();walk.stop();
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
@@ -58,7 +58,8 @@ export function installStudentCampus(ctx){
   if(kind==='tori')return talk();
   if(['quests','shop'].includes(kind))return people.talk(kind);
   if(['classroom','hallway','library'].includes(kind))return window.enterHubScene(kind);
-  if(['reading','portfolio'].includes(kind))return window.openReadingPortfolio();
+  if(kind==='reading')return window.openReadingDesk();
+  if(kind==='portfolio')return window.openReadingShelf();
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
@@ -73,7 +74,7 @@ export function installStudentCampus(ctx){
  hub.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;
   if(b.dataset.move&&event.detail===0&&!overlay())window.moveHub(...b.dataset.move.split(',').map(Number));
-  const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingPortfolio();else window.enterHubScene(route)}
+  const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else window.enterHubScene(route)}
   if(b.dataset.campus==='use'){stop();if(walk.destination())walk.stop();else if(walk.nearby())window.hubUseNearby();else walk.goTo(walk.nearest().kind)}
   if(b.dataset.campus==='find')wayfinder.open();
   if(b.dataset.campus==='home')window.closeClassroomHub();
@@ -89,7 +90,7 @@ export function installStudentCampus(ctx){
  window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
  guide.addEventListener('click',event=>{
   const action=event.target.closest('[data-guide]')?.dataset.guide;if(!action)return;guide.close();
-  if(action==='reading')window.openReadingPortfolio();
+  if(action==='reading')window.openReadingDesk();
   if(action==='parcel')parcel.inspect('tori');
   if(action==='evidence')window.studentAdventure.workshop('library-evidence');
  });

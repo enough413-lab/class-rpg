@@ -9,7 +9,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   const pos=()=>f.locator('#hubPlayer').getAttribute('style');
   await f.evaluate(()=>enterHubScene('library'));await ready();assert.equal(await f.locator('.campus-sprite').count(),3);assert.equal(await f.locator('[data-place=reading] .campus-prop-art,[data-place=portfolio] .campus-prop-art').count(),0);
   assert.match(await f.locator('.hub-stage').evaluate(el=>el.style.backgroundImage),/library-tall-v2.webp/);assert(!(await f.locator('.campus-tori .campus-sprite-missing').isVisible()));
-  for(const kind of ['reading','portfolio']){const p=await pos(),b=f.locator('[data-place='+kind+']'),r=await b.boundingBox();await b.click({position:{x:r.width/2,y:r.height*.7}});assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await pos(),p)}
+  for(const kind of ['reading','portfolio']){const p=await pos(),b=f.locator('[data-place='+kind+']'),r=await b.boundingBox();await b.click({position:{x:r.width/2,y:r.height*.7}});assert(await f.locator(kind==='reading'?'#readingPortfolioModal':'#readingShelf').isVisible());await page.keyboard.press('Escape');assert.equal(await pos(),p)}
   await f.locator('.campus-tori').focus();await page.keyboard.press('Enter');assert(await f.locator('#campusGuide').isVisible());assert.match(await f.locator('.campus-portrait img').getAttribute('src'),/tori-v1.webp/);await f.locator('[data-guide=reading]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');
   fs.mkdirSync(shots,{recursive:true});
   for(const [width,height] of [[1440,1050],[1366,768],[700,900],[390,844],[320,640]]){

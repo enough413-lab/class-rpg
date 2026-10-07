@@ -1,3 +1,4 @@
+import {installReadingShelf} from './reading-shelf.js?v=20261007-shelf';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ids={book_title:'readingBookTitle',read_date:'readingDate',summary:'readingSummary',thoughts:'readingThought',recommendation_rating:'readingRating',recommendation_reason:'readingRecommendation'};
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -6,6 +7,7 @@ const hasWriting=data=>['book_title','summary','thoughts','recommendation_reason
 
 export function installStudentReading(ctx){
  const $=id=>document.getElementById(id);
+ const shelf=installReadingShelf({...ctx,write:id=>openDesk(id)});
  let owner='',state=null,context='new',busy=false,historyVersion=0,reviews=[];
  const identity=()=>String(ctx.getStudent()?.id||'');
  const key=id=>'classRpgReadingDraft:v1:'+location.pathname+':'+id;
@@ -32,7 +34,7 @@ export function installStudentReading(ctx){
   $('readingEntryForm').addEventListener('input',capture);
   $('readingEntryForm').addEventListener('change',capture);
   $('readingEntryForm').addEventListener('submit',e=>{e.preventDefault();save()});
-  $('readingNew').onclick=()=>switchContext('new');
+  $('readingNew').onclick=()=>switchContext('new');const shelfButton=document.createElement('button');shelfButton.type='button';shelfButton.className='btn reading-shelf-link';shelfButton.textContent='📚 책장에서 나와 친구들의 글 읽기';shelfButton.onclick=()=>{close();shelf.open()};modal.querySelector('.reading-form').append(shelfButton);
   $('readingHistory').addEventListener('click',e=>{
    if(e.target.closest('[data-reading-reload]'))loadHistory();
    const button=e.target.closest('[data-reading-retry]');if(button&&!busy&&!state.pending)switchContext(button.dataset.readingRetry);
@@ -95,11 +97,12 @@ export function installStudentReading(ctx){
    if(same(id)&&version===historyVersion){$('readingPortfolioCount').textContent='기록을 아직 불러오지 못했어요.';$('readingHistory').innerHTML='<div class="reading-empty"><b>예전 글을 불러오지 못했어요</b><p>지금 쓰는 글은 그대로 있어요. 연결을 확인하고 다시 눌러 주세요.</p><button class="btn" data-reading-reload>기록 다시 불러오기</button></div>'}
   }finally{if(same(id)&&version===historyVersion)$('readingHistory').removeAttribute('aria-busy')}
  }
- async function open(){
-  const id=identity();if(!id)return;ensure();if(busy&&owner!==id){$('readingPortfolioModal').classList.add('hidden');return}
+ async function open(mode='combined'){
+  const id=identity();if(!id)return;ensure();$('readingPortfolioModal').classList.toggle('reading-desk',mode==='desk');$('readingJournalTitle').textContent=mode==='desk'?'책상에서 독후감 쓰기':'나의 책 이야기';if(busy&&owner!==id){$('readingPortfolioModal').classList.add('hidden');return}
   if(!busy){capture();reviews=[];loadState(id);message('');renderForm()}
   $('readingPortfolioModal').classList.remove('hidden');await loadHistory();
  }
+ async function openDesk(reviewId=null){await open('desk');if(reviewId&&same(owner)&&!busy&&!state.pending){if(reviews.some(r=>String(r.review_id)===String(reviewId)))switchContext(reviewId);else message('수정할 글을 아직 불러오지 못했어요. 연결을 확인하고 책장에서 다시 펼쳐 주세요.');}const form=$('readingEntryForm');form?.scrollIntoView({block:'nearest'})}
  function close(){capture();$('readingPortfolioModal')?.classList.add('hidden')}
  async function save(){
   if(busy||!same(owner))return;
@@ -128,6 +131,6 @@ export function installStudentReading(ctx){
   }finally{busy=false;if(same(id))syncBusy()}
  }
  window.addEventListener('pagehide',capture);
- window.openReadingPortfolio=open;window.closeReadingPortfolio=close;window.saveReadingEntry=save;
+ window.openReadingPortfolio=open;window.openReadingDesk=openDesk;window.closeReadingPortfolio=close;window.saveReadingEntry=save;
  return {open,close};
 }

@@ -5,7 +5,7 @@ const PROPS={
  hallway:{classroom:[8.3,45.5,13,29.5],library:[80.7,46,13,29]},
  library:{hallway:[.5,48,11,27]}
 };
-const verbs={parcel:'봉인 살펴보기',notice:'단서 읽기',titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'책 이야기 쓰기',portfolio:'기록 펼치기',tori:'이야기하기'};
+const verbs={parcel:'봉인 살펴보기',notice:'단서 읽기',titles:'살펴보기',inventory:'옷 갈아입기',quests:'의뢰 보기',teacher:'기록 보기',shop:'상점 열기',hallway:'이동하기',classroom:'들어가기',library:'들어가기',reading:'독후감 쓰기',portfolio:'독후감 읽기',tori:'이야기하기'};
 const SPRITES={
  parcel:{art:'parcel',x:38,width:13,height:18},titles:{art:'titles',x:8,width:14,height:34},inventory:{art:'wardrobe',x:25,width:17,height:32},
  quests:{art:'teacher',x:54,width:14,height:37,name:'담임선생님'},

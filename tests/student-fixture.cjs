@@ -87,6 +87,7 @@ const createClient=()=>({
   }
   m.workshop.cover=args.p_choice;localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{cover:args.p_choice}};
  }
+ if(name==='student_reading_shelf'){if(m.failShelf)return {error:{message:'offline'}};let rows=args.p_scope==='mine'?m.reviews.map(r=>({...r,author_nickname:m.student.nickname,mine:true})):m.shelfReviews||[{review_id:60,book_title:'친구의 작은 숲',read_date:'2026-10-07',summary:'친구가 나무를 돌봐요.',thoughts:'함께 돌보면 좋겠어요.',recommendation_rating:5,recommendation_reason:'따뜻한 이야기예요.',status:'approved',author_nickname:'초록별',mine:false}];if(args.p_before_id)rows=rows.filter(r=>r.review_id<args.p_before_id);rows=rows.sort((a,b)=>b.review_id-a.review_id);const page=rows.slice(0,20);return {data:{reviews:page,has_more:rows.length>20,next_before_id:page.at(-1)?.review_id||null}}}
  if(name==='student_reading_journal')return m.failReadingHistory?{error:{message:'Offline'}}:{data:{reviews:m.reviews,weekly_count:m.reviews.length}};
  if(name==='student_safe_action'){
   m.actionCalls=(m.actionCalls||[]).concat([{...args}]);await new Promise(r=>setTimeout(r,m.actionDelay||300));
