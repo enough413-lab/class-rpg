@@ -3,6 +3,7 @@ import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-pat
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261008-paths';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
+import {installCampusNameplates} from './campus-nameplates.js?v=20261008-names';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
@@ -15,6 +16,7 @@ export function installSchoolWalk(ctx){
  const GROUND=80,WALK_SPEED=100;
  const {hub,stage,objects}=ctx,doc=hub.ownerDocument,player=doc.getElementById('hubPlayer');
  const viewport=doc.createElement('div');viewport.className='campus-viewport';stage.before(viewport);viewport.append(stage);
+ const nameplates=installCampusNameplates({hub,stage,viewport,player,objects});
  const status=doc.createElement('div');status.className='campus-scene-status';status.setAttribute('role','status');viewport.append(status);
  hub.classList.add('campus-side');
  const waypoint=installCampusWaypoint(stage);
@@ -30,6 +32,7 @@ export function installSchoolWalk(ctx){
  function camera(x=ctx.getPosition().x){
   const width=stage.clientWidth,view=viewport.clientWidth,offset=Math.max(0,Math.min(width-view,width*x/100-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
+  nameplates.schedule();
  }
  function markPlaces(){const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))markCampusObject(b,{near:b.dataset.place===near?.kind,guided:b.dataset.place===destination?.kind})}
  function stop(arrived=false){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;heldDirections.clear();movementOwner=null;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
@@ -85,7 +88,7 @@ export function installSchoolWalk(ctx){
    const piece=doc.createElement('div');piece.className='campus-part campus-'+part;
    for(const layer of layers)piece.append(layer.cloneNode(true));body.append(piece);
   }
-  player.replaceChildren(body);const name=doc.createElement('span');name.className='campus-player-name';name.textContent=ctx.getStudent()?.nickname||'나의 모험가';player.append(name);
+  player.replaceChildren(body);const name=doc.createElement('span');name.className='campus-player-name';name.textContent=ctx.getStudent()?.nickname||'나의 모험가';name.title=name.textContent;player.append(name);nameplates.schedule();
  }
  function background(){
   const room=ctx.getScene(),request=++imageRequest,url=PAINTED_PLACES[room]?.background||(room==='library'?'maps/library-panorama-v1.webp':EXTRA_ROOMS[room]?'maps/'+room+'-walk.svg':'maps/'+room+'-tall-'+(room==='library'?'v2':'v1')+'.webp'),img=new Image();
