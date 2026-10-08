@@ -8,6 +8,12 @@
 #classroomHub.campus-painted-place [data-art=playground-mat]{width:170px;height:93px}
 #classroomHub.campus-painted-place [data-art=playground-bench]{width:215px;height:138px}
 #classroomHub.campus-painted-place [data-art=playground-balls]{width:165px;height:150px}
+#classroomHub.campus-painted-place [data-art=garden-sprout]{width:175px;height:165px}
+#classroomHub.campus-painted-place [data-art=garden-flowers]{width:200px;height:148px}
+#classroomHub.campus-painted-place [data-art=garden-bench]{width:220px;height:138px}
+#classroomHub.campus-painted-place [data-art=pond-fence]{width:190px;height:140px}
+#classroomHub.campus-painted-place [data-art=pond-viewer]{width:132px;height:168px}
+#classroomHub.campus-painted-place [data-art=pond-notebook]{width:165px;height:150px}
 #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{top:-9px;padding:5px 10px;min-width:0;max-width:155px;border-width:1px;border-radius:6px 6px 11px 11px;box-shadow:0 2px 0 #98794360;font-size:16px;white-space:nowrap}
 #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption::after{display:none}
 #classroomHub.campus-painted-place [data-art=playground-mat] .campus-object-caption{top:-46px}
@@ -19,6 +25,8 @@
 #classroomHub.campus-painted-place .campus-world-object[data-place=story]::after{height:16px;width:3px;left:50%;top:auto;bottom:100%;background:#b99c68}
 .finder-rooms [data-finder-room=cafeteria]::before,#studentAdventureDialog .sa-map-pin[data-chapter=cafeteria] .sa-pin-emblem{background-image:url('maps/cafeteria-panorama-v1.webp')}
 .finder-rooms [data-finder-room=playground]::before,#studentAdventureDialog .sa-map-pin[data-chapter=playground] .sa-pin-emblem{background-image:url('maps/playground-panorama-v1.webp')}
+.finder-rooms [data-finder-room=garden]::before,#studentAdventureDialog .sa-map-pin[data-chapter=garden] .sa-pin-emblem{background-image:url('maps/garden-panorama-v1.webp')}
+.finder-rooms [data-finder-room=pond]::before,#studentAdventureDialog .sa-map-pin[data-chapter=pond] .sa-pin-emblem{background-image:url('maps/pond-panorama-v1.webp')}
 #campusGuide[data-inspection=true] .campus-greeting h2{display:block}
 @media(max-width:849px){
  #classroomHub.campus-painted-place .hub-stage{width:1260px;height:420px}
@@ -29,6 +37,12 @@
  #classroomHub.campus-painted-place [data-art=playground-mat]{width:146px;height:80px}
  #classroomHub.campus-painted-place [data-art=playground-bench]{width:184px;height:119px}
  #classroomHub.campus-painted-place [data-art=playground-balls]{width:142px;height:129px}
+ #classroomHub.campus-painted-place [data-art=garden-sprout]{width:150px;height:142px}
+ #classroomHub.campus-painted-place [data-art=garden-flowers]{width:172px;height:127px}
+ #classroomHub.campus-painted-place [data-art=garden-bench]{width:189px;height:119px}
+ #classroomHub.campus-painted-place [data-art=pond-fence]{width:163px;height:120px}
+ #classroomHub.campus-painted-place [data-art=pond-viewer]{width:114px;height:144px}
+ #classroomHub.campus-painted-place [data-art=pond-notebook]{width:142px;height:129px}
  #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:15px}
 }
 @media(max-height:700px) and (max-width:849px){
@@ -40,5 +54,11 @@
  #classroomHub.campus-painted-place [data-art=playground-mat]{width:122px;height:67px}
  #classroomHub.campus-painted-place [data-art=playground-bench]{width:154px;height:100px}
  #classroomHub.campus-painted-place [data-art=playground-balls]{width:119px;height:108px}
+ #classroomHub.campus-painted-place [data-art=garden-sprout]{width:126px;height:119px}
+ #classroomHub.campus-painted-place [data-art=garden-flowers]{width:144px;height:107px}
+ #classroomHub.campus-painted-place [data-art=garden-bench]{width:158px;height:100px}
+ #classroomHub.campus-painted-place [data-art=pond-fence]{width:137px;height:101px}
+ #classroomHub.campus-painted-place [data-art=pond-viewer]{width:95px;height:121px}
+ #classroomHub.campus-painted-place [data-art=pond-notebook]{width:119px;height:108px}
  #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:14px;padding:4px 8px}
 }

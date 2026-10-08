@@ -1,7 +1,9 @@
 // Original painted scenery and independent props for already-open places.
 export const PAINTED_PLACES={
  cafeteria:{background:'maps/cafeteria-panorama-v1.webp',props:['cafeteria-sink','cafeteria-table','cafeteria-trays']},
- playground:{background:'maps/playground-panorama-v1.webp',props:['playground-mat','playground-bench','playground-balls']}
+ playground:{background:'maps/playground-panorama-v1.webp',props:['playground-mat','playground-bench','playground-balls']},
+ garden:{background:'maps/garden-panorama-v1.webp',props:['garden-sprout','garden-flowers','garden-bench']},
+ pond:{background:'maps/pond-panorama-v1.webp',props:['pond-fence','pond-viewer','pond-notebook']}
 };
 export function decoratePlaceProp(button,place,room){
  const art=PAINTED_PLACES[room]?.props[Number(place.kind.slice(5))];if(!place.kind.startsWith('look-')||!art)return false;
