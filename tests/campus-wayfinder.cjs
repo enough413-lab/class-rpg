@@ -19,12 +19,12 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   assert(!(await f.locator('#inventoryModal').isVisible()),'Arrival must not unexpectedly open an activity');
   await f.locator('[data-campus=use]').click();assert(await f.locator('#inventoryModal').isVisible());await f.waitForFunction(()=>document.getElementById('inventoryModal').getAttribute('aria-busy')==='false');await page.keyboard.press('Escape');assert.equal(await position(),24);
   // Cross-room guidance only lists implemented walking rooms, including Lv.1 reading.
-  await f.locator('[data-campus=find]').click();await f.locator('[data-finder-room=library]').click();assert.equal(await f.locator('[data-finder-place]').count(),4);
-  await f.locator('[data-finder-place=reading]').click();await arrive(28);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);await f.locator('[data-campus=use]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await position(),28);
+  await f.locator('[data-campus=find]').click();await f.locator('[data-finder-room=library]').click();assert.equal(await f.locator('[data-finder-place]').count(),6);
+  await f.locator('[data-finder-place=reading]').click();await arrive(22);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);await f.locator('[data-campus=use]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await position(),22);
   // The notebook and locked story feedback return to the same room, position and map button.
   await f.locator('[data-campus=map]').click();await f.locator('.sa-world').waitFor();assert(await f.locator('#classroomHub').isVisible());
   await f.locator('.sa-map-pin[data-chapter=library]').click();assert.match(await f.locator('#saDialogBody').textContent(),/110 경험치/);await page.keyboard.press('Escape');
-  assert.equal(await position(),28);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);assert.equal(await f.evaluate(()=>document.activeElement.dataset.campus),'map');
+  assert.equal(await position(),22);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);assert.equal(await f.evaluate(()=>document.activeElement.dataset.campus),'map');
   // Cancel, manual direction, floor clicks and overlay interruption all stop the guided destination.
   await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=portfolio]').click();await f.waitForFunction(()=>document.querySelector('[data-campus=use]').dataset.state==='walking');
   await f.locator('[data-campus=use]').click();const cancelled=await position();await page.waitForTimeout(200);assert.equal(await position(),cancelled);

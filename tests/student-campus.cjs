@@ -27,7 +27,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   const released=await pos();const distance=(pointerStart[0]-released[0])*await f.locator('.hub-stage').evaluate(el=>el.clientWidth)/100;assert(distance>20&&distance<50);assert.equal(released[1],80);await page.waitForTimeout(220);assert.deepEqual(await pos(),released);
   await page.mouse.down();await up.dispatchEvent('pointercancel',{pointerId:1});const cancelled=await pos();await page.waitForTimeout(200);assert.deepEqual(await pos(),cancelled);await page.mouse.up();
   // Near-NPC keyboard interaction and native dialog buttons are distinct actions.
-  await f.evaluate(()=>{enterHubScene('library')});await f.locator('.campus-tori').waitFor();await f.evaluate(()=>{for(let i=0;i<3;i++)moveHub(1,0)});await f.locator('#campusTitle').focus();await page.keyboard.press('e');assert(await f.locator('#campusGuide').isVisible());
+  await f.evaluate(()=>{enterHubScene('library')});await f.locator('.campus-tori').waitFor();await f.evaluate(()=>{moveHub(1,0)});await f.locator('#campusTitle').focus();await page.keyboard.press('e');assert(await f.locator('#campusGuide').isVisible());
   const frozen=await pos();await page.keyboard.press('ArrowDown');assert.deepEqual(await pos(),frozen);
   await f.locator('[data-guide=reading]').focus();await page.keyboard.press('Enter');assert(await f.locator('#readingPortfolioModal').isVisible());
   await page.keyboard.press('Escape');assert(!(await f.locator('#readingPortfolioModal').isVisible()));assert.deepEqual(await pos(),frozen);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);
@@ -39,7 +39,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   assert(await f.locator('[data-campus=use]').evaluate(el=>el.getBoundingClientRect().bottom<innerHeight));assert(await f.locator('#campusTitle').evaluate(el=>el.getBoundingClientRect().top>=0));
   await page.setViewportSize({width:1440,height:1100});
   await f.locator('.campus-tori').click();await page.screenshot({path:path.join(shots,'desktop-campus-tori.png'),fullPage:true});await page.keyboard.press('Escape');
-  await f.locator('[data-route=reading]').click();await page.keyboard.press('Escape');
+  await f.locator('.campus-tori').click();await f.locator('[data-guide=reading]').click();await page.keyboard.press('Escape');
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(shots,'mobile-campus-library.png'),fullPage:true});
   assert(await f.locator('.campus-viewport').evaluate(el=>el.scrollWidth>el.clientWidth));
   const cameraBefore=await f.locator('.hub-stage').evaluate(el=>el.style.transform);await f.evaluate(()=>moveHub(1,0));assert.notEqual(await f.locator('.hub-stage').evaluate(el=>el.style.transform),cameraBefore);assert.equal((await pos())[1],80);
@@ -55,9 +55,9 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   assert.equal(await f.locator('.campus-viewport').evaluate(el=>el.scrollLeft),0);
   await f.evaluate(()=>moveHub(1,0));assert(await f.evaluate(()=>{const a=document.getElementById('hubPlayer').getBoundingClientRect(),v=document.querySelector('.campus-viewport').getBoundingClientRect();return Math.abs(a.x+a.width/2-v.x-v.width/2)<3}));
   await f.locator('.campus-scene-status').waitFor({state:'hidden'});await page.screenshot({path:path.join(shots,'mobile-side-classroom.png'),fullPage:true});
-  const touchPage=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await touchPage.route('https://**',r=>r.abort());await touchPage.route('**/maps/library-tall-v2.webp',r=>r.abort());touchPage.on('pageerror',e=>errors.push(e.message));await touchPage.goto(base);
+  const touchPage=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await touchPage.route('https://**',r=>r.abort());await touchPage.route('**/maps/library-panorama-v1.webp',r=>r.abort());touchPage.on('pageerror',e=>errors.push(e.message));await touchPage.goto(base);
   const touchFrame=touchPage.frames().find(f=>f.url().includes('app-core.html'));await touchFrame.waitForFunction(()=>window.studentCampus);await touchFrame.evaluate(()=>enterHubScene('library'));
-  await touchFrame.locator('.campus-scene-status button').waitFor();await touchPage.unroute('**/maps/library-tall-v2.webp');await touchFrame.locator('.campus-scene-status button').tap();await touchFrame.locator('.campus-scene-status').waitFor({state:'hidden'});
+  await touchFrame.locator('.campus-scene-status button').waitFor();await touchPage.unroute('**/maps/library-panorama-v1.webp');await touchFrame.locator('.campus-scene-status button').tap();await touchFrame.locator('.campus-scene-status').waitFor({state:'hidden'});
   const touchPos=()=>touchFrame.locator('#hubPlayer').evaluate(el=>parseFloat(el.style.left));const originalX=await touchPos();await touchFrame.locator('[data-move="-1,0"]').tap();const touchEnd=await touchPos();assert(touchEnd<originalX&&touchEnd>originalX-2);await page.waitForTimeout(220);assert.equal(await touchPos(),touchEnd);await touchFrame.locator('.campus-tori').tap();assert(await touchFrame.locator('#campusGuide').isVisible());await touchPage.close();
   assert.deepEqual(await f.evaluate(()=>({xp:mockRpg.student.xp,gold:mockRpg.student.gold})),{xp:260,gold:180});assert.deepEqual(errors,[]);
   console.log('PASS: scene routes, focused-button Enter, duration-based keyboard movement, hold/release/cancel, NPC E, dialog movement guard, reading return position, level gate/retained evidence, 390px touch/layout, map/home return, focus containment, reduced motion, no XP/gold changes');

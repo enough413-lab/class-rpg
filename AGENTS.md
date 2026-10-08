@@ -7,3 +7,4 @@ Never mutate production DB while developing. Never copy real student records int
 To publish a test revision, update only the test/ subtree on main with the reviewed staging tree. All other main paths must retain their exact blob SHAs. Do not merge staging into main: it contains test connection settings.
 On an explicitly approved production release: port only reviewed feature changes, retain production connection settings, omit test-environment.js and test banners. Review DB migrations separately; never copy test rows. Record previous main SHA and verify deployment.
 Test credentials are stored locally, never commit them.
+Latest user direction (2026-10-08): pause new level activities and chapters. Improve the graphics, environment, walking space and physical connections of already-open places first. Preserve constant 100 CSS px/s held movement, below-feet player names and existing earned content. Resume the level backlog only when the user changes this direction.

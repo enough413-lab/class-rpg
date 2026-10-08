@@ -416,7 +416,7 @@ export function installStudentAdventure(ctx){
    else if(hubOpen)window.moveHub(...directions[key]);else window.moveExplorer?.(...directions[key]);
   }
   else if(key==='escape'){if(hubOpen)window.closeClassroomHub();else window.closeSchoolExplorer?.()}
-  else{if(hubOpen)window.hubUseNearby();else window.interactExplorer?.()}
+  else if(!event.repeat){if(hubOpen)window.hubUseNearby();else window.interactExplorer?.()}
  },true);
  window.openAdventureMap=()=>map();
  doc.addEventListener('student-dashboard-updated',render);
