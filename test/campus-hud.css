@@ -8,6 +8,10 @@
 #classroomHub.campus-side .campus-eyebrow,#classroomHub.campus-side #campusHint{display:none}
 #classroomHub.campus-side .hub-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .campus-wallet{display:block;font:14px/1.3 SchoolJua,system-ui;color:#f6dea4;white-space:nowrap}
+/* Keep the player's name at their feet; nearby resident labels can step aside. */
+#classroomHub.campus-side[data-scene] :is(.campus-player-name,.campus-npc .campus-object-caption,[data-place=parcel] .campus-object-caption){transform:translate(calc(-50% + var(--campus-name-x,0px)),var(--campus-name-y,0px))}
+#classroomHub.campus-side[data-scene] .campus-player-name{max-width:min(240px,calc(100vw - 24px));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#classroomHub.campus-side[data-scene] :is(.campus-npc,[data-place=parcel]) .campus-object-caption small{display:none}
 #classroomHub.campus-side .campus-menu{display:flex;gap:6px;margin:0;flex:0 0 auto}
 #classroomHub.campus-side .campus-menu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:54px;min-width:44px;min-height:50px;margin:0;padding:4px;border:1px solid #f3e2b4;border-radius:17px;background:#f9edce;color:#365340;box-shadow:0 3px #213e2a;font:12px/1.2 SchoolJua,system-ui;white-space:nowrap}
 .campus-menu .hud-icon{display:block;font:22px/1.1 system-ui,sans-serif}
@@ -27,6 +31,7 @@
 #classroomHub.campus-side .campus-routes button{flex:1;min-width:44px;max-width:160px;min-height:44px;padding:5px 7px;border:1px solid #b8a277;border-radius:14px;background:#fff7e2;color:#615439;box-shadow:0 2px #c1aa7e;font:15px/1.3 SchoolJua,system-ui;white-space:nowrap}
 #classroomHub.campus-side .campus-how{display:block;grid-column:1/-1;font:13px/1.4 SchoolJua,system-ui;color:#6f7257;margin:4px 0 0;text-align:left}
 @media(max-width:849px){
+ #classroomHub.campus-side[data-scene=classroom] [data-place=titles] .campus-object-caption{max-width:80px;white-space:normal;text-align:center;word-break:keep-all}
  #classroomHub.campus-side{padding:0;place-items:safe start center;background:#e7d6ac}
  #classroomHub.campus-side .hub-shell,#classroomHub.campus-wide .hub-shell,#classroomHub.campus-library-wide .hub-shell{width:100%;border-width:0;border-radius:0;box-shadow:none}
  #classroomHub.campus-side .campus-header{gap:6px;min-height:68px;padding:8px}
