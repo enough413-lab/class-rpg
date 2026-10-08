@@ -19,7 +19,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   }
   for(const [width,height] of [[1366,768],[390,844],[320,640]]){
    await page.setViewportSize({width,height});await f.evaluate(()=>{enterHubScene('hallway');enterHubScene('library')});await ready();
-   assert(await f.locator('.hub-stage').evaluate(el=>el.clientWidth>el.parentElement.clientWidth*1.9));
+   assert(await f.locator('.hub-stage').evaluate(el=>el.clientWidth-el.parentElement.clientWidth>500),'The wider HUD viewport still has scenery to uncover');
    await navigate('hallway');await page.screenshot({path:path.join(shots,'paths-library-left-'+width+'.png'),fullPage:true});
    const left=await f.locator('.hub-stage').evaluate(el=>el.getBoundingClientRect().left);await navigate('nook');const right=await f.locator('.hub-stage').evaluate(el=>el.getBoundingClientRect().left);assert(left-right>450,'Walking reveals a different portion of one continuous room');
    await f.locator('[data-campus=use]').tap();assert.match(await f.locator('#campusGuide').textContent(),/학교 정원/);assert(!await f.locator('.campus-guide-choices').isVisible());await page.keyboard.press('Escape');

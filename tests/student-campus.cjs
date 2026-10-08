@@ -50,7 +50,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.locator('[data-campus=home]').focus();await page.keyboard.press('Enter');assert(!(await f.locator('#classroomHub').isVisible()));
   await f.evaluate(()=>enterHubScene('library'));await f.locator('[data-campus=map]').click();assert(await f.locator('#studentAdventureDialog').isVisible());assert(await f.locator('#classroomHub').isVisible());
   await page.keyboard.press('Escape');await f.evaluate(()=>enterHubScene('classroom'));
-  await f.locator('#campusTitle').focus();await page.keyboard.press('Shift+Tab');assert.equal(await f.evaluate(()=>document.activeElement.dataset.campus),'use');
+  await f.locator('#campusTitle').focus();await page.keyboard.press('Shift+Tab');assert(await f.evaluate(()=>document.activeElement===[...document.getElementById('classroomHub').querySelectorAll('button')].filter(el=>!el.disabled&&el.getClientRects().length).at(-1)),'Shift+Tab wraps to the last visible control');
   await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await f.locator('#hubPlayer').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
   assert.equal(await f.locator('.campus-viewport').evaluate(el=>el.scrollLeft),0);
   await f.evaluate(()=>moveHub(1,0));assert(await f.evaluate(()=>{const a=document.getElementById('hubPlayer').getBoundingClientRect(),v=document.querySelector('.campus-viewport').getBoundingClientRect();return Math.abs(a.x+a.width/2-v.x-v.width/2)<3}));

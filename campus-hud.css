@@ -1,0 +1,44 @@
+/* Compact game frame: scenery first, readable controls below the feet. */
+#classroomHub.campus-side{padding:12px;background:radial-gradient(ellipse at 50% 30%,#aabfa0,#5c7864);place-items:safe center}
+#classroomHub.campus-side .hub-shell{display:block;width:min(100%,700px);max-width:none;margin:0;border:4px solid #80684a;border-radius:22px;background:#e7d6ac;box-shadow:0 0 0 2px #d8bf87,0 14px 48px #183e344d;overflow:hidden}
+#classroomHub.campus-wide .hub-shell,#classroomHub.campus-library-wide .hub-shell{width:min(100%,900px)}
+#classroomHub.campus-side .campus-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#365943;color:#fff5d5;border-bottom:3px solid #ad8d56;min-height:70px}
+.campus-header>div:first-child{min-width:0}
+#classroomHub.campus-side .campus-header h2{font:25px/1.2 SchoolJua,system-ui;margin:0 0 4px;color:#fff5d5;text-shadow:0 2px #193e2b}
+#classroomHub.campus-side .campus-eyebrow,#classroomHub.campus-side #campusHint{display:none}
+#classroomHub.campus-side .hub-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.campus-wallet{display:block;font:14px/1.3 SchoolJua,system-ui;color:#f6dea4;white-space:nowrap}
+#classroomHub.campus-side .campus-menu{display:flex;gap:6px;margin:0;flex:0 0 auto}
+#classroomHub.campus-side .campus-menu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:54px;min-width:44px;min-height:50px;margin:0;padding:4px;border:1px solid #f3e2b4;border-radius:17px;background:#f9edce;color:#365340;box-shadow:0 3px #213e2a;font:12px/1.2 SchoolJua,system-ui;white-space:nowrap}
+.campus-menu .hud-icon{display:block;font:22px/1.1 system-ui,sans-serif}
+#classroomHub.campus-side .campus-menu [data-campus=home]{background:#e5ecd6}
+#classroomHub.campus-side .campus-menu button:focus-visible{outline:3px solid #ffdf87;outline-offset:3px}
+#classroomHub.campus-side .campus-viewport{align-self:auto}
+#classroomHub.campus-side .hub-help{display:grid;grid-template-columns:340px minmax(0,1fr);align-items:center;gap:4px 12px;padding:8px 12px;background:linear-gradient(#f1e6c8,#e6d5af);border:0;border-top:3px solid #a88752;box-shadow:inset 0 2px #fff5d6;position:relative}
+#classroomHub.campus-side .campus-controller{display:flex;flex-direction:row;align-items:center;gap:10px;margin:0;min-width:0}
+#classroomHub.campus-side .campus-pad{grid-template-columns:repeat(2,48px);grid-template-rows:52px;gap:7px}
+#classroomHub.campus-side .campus-pad button{min-height:52px;padding:0;border:2px solid #8ca274;border-radius:50%;box-shadow:0 3px #7a8d63;background:#f1f6df;color:#3c644a;font:28px SchoolJua,system-ui}
+#classroomHub.campus-side .campus-pad button:active{box-shadow:0 1px #7a8d63;background:#d6e6b9}
+#classroomHub.campus-side .campus-near{flex:1;max-width:none;min-width:0;width:auto}
+#classroomHub.campus-side .campus-near p{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#classroomHub.campus-side .campus-near button{min-height:52px;padding:7px 10px;border:2px solid #6e9362;border-radius:25px;background:#dcebc6;color:#2e5338;font:17px/1.25 SchoolJua,system-ui;box-shadow:0 3px #99ad7c;word-break:keep-all}
+#classroomHub.campus-side .campus-near [data-state=walking]{background:#ffe5a8;border-color:#bd9857}
+#classroomHub.campus-side .campus-routes{display:flex;gap:5px;flex-wrap:nowrap;border:0;padding:0;margin:0;min-width:0;justify-content:flex-end}
+#classroomHub.campus-side .campus-routes button{flex:1;min-width:44px;max-width:160px;min-height:44px;padding:5px 7px;border:1px solid #b8a277;border-radius:14px;background:#fff7e2;color:#615439;box-shadow:0 2px #c1aa7e;font:15px/1.3 SchoolJua,system-ui;white-space:nowrap}
+#classroomHub.campus-side .campus-how{display:block;grid-column:1/-1;font:13px/1.4 SchoolJua,system-ui;color:#6f7257;margin:4px 0 0;text-align:left}
+@media(max-width:849px){
+ #classroomHub.campus-side{padding:0;place-items:safe start center;background:#e7d6ac}
+ #classroomHub.campus-side .hub-shell,#classroomHub.campus-wide .hub-shell,#classroomHub.campus-library-wide .hub-shell{width:100%;border-width:0;border-radius:0;box-shadow:none}
+ #classroomHub.campus-side .campus-header{gap:6px;min-height:68px;padding:8px}
+ #classroomHub.campus-side .campus-header h2{font-size:20px;word-break:keep-all;margin-bottom:3px}
+ .campus-wallet{font-size:13px}
+ #classroomHub.campus-side .campus-menu{gap:4px}
+ #classroomHub.campus-side .campus-menu button{width:44px;min-height:48px;border-radius:15px;padding:3px 1px;font-size:12px}
+ .campus-menu .hud-icon{font-size:20px}
+ #classroomHub.campus-side .hub-help{display:flex;flex-direction:column;gap:8px;padding:9px 10px 11px}
+ #classroomHub.campus-side .campus-controller,#classroomHub.campus-side .campus-routes{width:100%}
+ #classroomHub.campus-side .campus-routes{justify-content:center}
+ #classroomHub.campus-side .campus-routes button{max-width:none;font-size:14px}
+ #classroomHub.campus-side .campus-how{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
+ #classroomHub.campus-side .campus-near button{font-size:16px}
+}
