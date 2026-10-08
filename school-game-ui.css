@@ -1,0 +1,105 @@
+/* Scene-first UI. Original school art remains the stage; controls read as game objects. */
+#studentAdventureDialog[data-view=map]{width:min(1020px,calc(100% - 28px));max-width:none;max-height:calc(100dvh - 24px);border:5px solid #80623f;border-radius:30px;background:#efe0b9;box-shadow:0 0 0 3px #e7cc8e,0 20px 70px #182d2b80;overflow:auto}
+#studentAdventureDialog[data-view=map] .sa-dialog-head{position:sticky;top:0;padding:10px 20px 4px;border:0;background:#efe0b9}
+#studentAdventureDialog[data-view=map] .sa-dialog-head h2{font:26px SchoolJua,system-ui;color:#56452d;text-shadow:0 2px #fff8df}
+#studentAdventureDialog[data-view=map] .sa-dialog-head p{display:none}
+#studentAdventureDialog[data-view=map] [data-sa=close]{width:44px;min-height:44px;padding:0;font-size:14px;border:2px solid #9a784a;border-radius:50%;background:#fff4d6;box-shadow:0 3px #bca273}
+#studentAdventureDialog[data-view=map] .sa-dialog-body{padding:0 12px 10px}
+.sa-map-tabs{position:sticky;top:58px;z-index:5;display:flex;justify-content:center;gap:8px;padding:3px 0 9px;background:#efe0b9}
+.sa-map-tabs button{min-height:44px;padding:8px 22px;border:0;border-radius:20px 20px 6px 6px;background:#dac99d;color:#69583c;font:17px SchoolJua,system-ui;box-shadow:inset 0 -3px #bca77c}
+.sa-map-tabs button[aria-pressed=true]{background:#577461;color:#fffbed;box-shadow:inset 0 -3px #3a5948}
+[data-map-panel][hidden]{display:none!important}
+.sa-map-canvas{position:relative;border:3px solid #c4a16a;border-radius:20px;overflow:hidden;background:#c9dfb0;isolation:isolate}
+#studentAdventureDialog .sa-world{height:min(61dvh,520px);min-height:360px;aspect-ratio:auto;border-radius:16px;background-position:center;box-shadow:inset 0 0 36px #32583766}
+.sa-world::before{content:'';position:absolute;inset:0;background:linear-gradient(#16423705,#16352c10 75%,#25432970);pointer-events:none}
+.sa-map-paths{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.sa-map-paths path{fill:none;stroke:#ffefbd;stroke-width:.65;stroke-dasharray:1 1.2;filter:drop-shadow(0 1px 1px #39482d);opacity:.85}
+#studentAdventureDialog .sa-map-pin{left:var(--map-x)!important;top:var(--map-y)!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:110px;height:98px;min-height:44px;padding:0;border:0;background:none;box-shadow:none;white-space:nowrap;transform:translate(-50%,-50%);overflow:visible;color:#3a4e39}
+#studentAdventureDialog .sa-map-pin .sa-pin-emblem{position:relative;display:block;width:58px;height:58px;border:3px solid #fff4c7;border-radius:50%;background:center/cover url('maps/classroom-tall-v1.webp');box-shadow:0 3px 0 #866943,0 5px 12px #24492d66;transition:transform .15s}
+#studentAdventureDialog .sa-map-pin[data-chapter=hallway] .sa-pin-emblem{background-image:url('maps/hallway-tall-v1.webp')}
+#studentAdventureDialog .sa-map-pin[data-chapter=library] .sa-pin-emblem{background-image:url('maps/library-tall-v2.webp')}
+#studentAdventureDialog .sa-map-pin[data-chapter=garden] .sa-pin-emblem{background-image:url('maps/garden-walk.svg')}
+#studentAdventureDialog .sa-map-pin[data-chapter=pond] .sa-pin-emblem{background-image:url('maps/pond-walk.svg')}
+#studentAdventureDialog .sa-map-pin[data-chapter=playground] .sa-pin-emblem{background-image:url('maps/playground-walk.svg')}
+#studentAdventureDialog .sa-map-pin[data-chapter=cafeteria] .sa-pin-emblem{background-image:url('maps/cafeteria-walk.svg')}
+#studentAdventureDialog .sa-map-pin b{position:relative;margin-top:-4px;padding:4px 12px;border-radius:5px 5px 12px 12px;border:1px solid #bd985e;background:#fff0c5;box-shadow:0 3px 0 #81633d;font:16px/1.2 SchoolJua,system-ui;z-index:1}
+#studentAdventureDialog .sa-map-pin .sa-pin-state{display:block;min-height:17px;margin-top:6px;color:#fffdf3;font:12px/1.3 SchoolJua,system-ui;text-shadow:0 1px 3px #153c22,0 0 4px #153c22}
+.sa-pin-emblem i{position:absolute;right:-7px;top:-7px;color:#9a6719;background:#ffdf79;border-radius:50%;font:18px/25px system-ui;min-width:25px;box-shadow:0 2px #96733a}
+.sa-pin-emblem i:empty{display:none}
+#studentAdventureDialog .sa-map-pin.current .sa-pin-emblem{outline:3px solid #89e4bc;outline-offset:4px}
+#studentAdventureDialog .sa-map-pin.locked .sa-pin-emblem{filter:saturate(.4)}
+#studentAdventureDialog .sa-map-pin.locked b{background:#e7dfc9;color:#5c614e}
+#studentAdventureDialog .sa-map-pin:is(:hover,:focus-visible) .sa-pin-emblem{transform:translateY(-4px)}
+#studentAdventureDialog .sa-map-pin:focus-visible{outline:3px dashed #fff5b5;outline-offset:3px;border-radius:20px}
+.sa-map-compass{position:absolute;top:13px;right:15px;z-index:2;color:#fff7ce;font:44px/1 Georgia;text-shadow:0 2px 4px #334b36;pointer-events:none}
+.sa-map-compass small{position:absolute;left:17px;top:-6px;font:12px Georgia}
+.sa-map-canvas .sa-passport{position:absolute;left:12px;top:12px;display:flex;gap:7px;margin:0;padding:7px 12px;border:1px solid #f4e4b5;border-radius:22px;background:#344f3dda;color:#fff8dd;box-shadow:0 3px 8px #233f3533;pointer-events:none}
+.sa-map-canvas .sa-passport b{font:15px SchoolJua,system-ui}.sa-map-canvas .sa-passport div>span{display:block;font:11px/1.5 system-ui;color:#e0e8d0}.sa-map-stamp{font-size:28px;color:#ffdd8a}
+.sa-map-hint{position:absolute;bottom:9px;left:0;right:0;margin:0;color:#fff8dc;text-align:center;font:15px SchoolJua,system-ui;text-shadow:0 2px 5px #1b3027;pointer-events:none}
+.sa-map-tools{display:flex;justify-content:space-between;gap:8px;padding-top:9px}
+.sa-map-tools .sa-button{min-height:44px;padding:7px 18px;border:0;border-radius:20px;background:#f9edcd;box-shadow:0 3px #c2a675;color:#5e4f35;font:16px SchoolJua,system-ui}
+.sa-map-notebook{min-height:340px;padding:20px 22px 25px;border-radius:12px;background:repeating-linear-gradient(#fff9e7 0 31px,#d8d3b2 32px,#fff9e7 33px);box-shadow:inset 8px 0 #ddc89f;color:#554a33}
+.sa-map-notebook h3{font:25px SchoolJua,system-ui;margin:0 0 8px}.sa-map-notebook>p{font-size:14px;margin:0 0 15px}.sa-map-notebook .sa-destination{background:#fffcefbd;border:0;border-left:4px solid #7c9b72;border-radius:4px 18px 18px 4px;box-shadow:0 3px 0 #d1c6a5}
+
+/* A character's voice sits over the walking scene, with a small response balloon. */
+#campusGuide,#campusNpcDialog{inset:auto 0 20px;width:min(970px,calc(100% - 36px));max-height:calc(100dvh - 36px);margin:auto;padding:42px 8px 8px;border:0;border-radius:0;background:none;box-shadow:none;overflow:auto;color:#4f4c36}
+#campusGuide[open],#campusNpcDialog[open]{display:grid;grid-template-columns:minmax(0,1fr) 310px;column-gap:20px;row-gap:12px;align-items:end}
+#campusGuide::backdrop,#campusNpcDialog::backdrop{background:linear-gradient(#172a3010 20%,#172a3033 70%,#172a3070);backdrop-filter:none}
+#campusGuide .campus-guide-top,#campusNpcDialog header{grid-column:1/-1;display:flex;justify-content:flex-end;align-items:center;position:absolute;right:8px;top:0;width:auto;z-index:3}
+#campusGuide .campus-guide-top>span,#campusNpcDialog header>span{display:none}
+#campusGuide .campus-guide-top button,#campusNpcDialog header button{border:0;border-radius:22px;background:#fff5da;color:#596447;min-width:60px;min-height:44px;padding:7px 15px;box-shadow:0 3px #aa956d;font:15px SchoolJua,system-ui}
+#campusGuide .campus-greeting,#campusNpcDialog .npc-conversation{position:relative;grid-column:1;grid-row:2;display:block;min-height:145px;padding:32px 24px 24px 122px;margin:0;border:3px solid #f0dbaa;border-radius:38px 48px 36px 42px;background:#fff7dc;box-shadow:0 6px 0 #90754d44;isolation:isolate}
+.game-speaker-name{position:absolute;left:100px;top:-21px;display:block;padding:9px 24px;border-radius:24px 16px 24px 14px;background:#719777;color:#fffbed;font:20px/1 SchoolJua,system-ui;transform:rotate(-3deg);box-shadow:0 3px #42664f;white-space:nowrap;z-index:3}
+#campusGuide .campus-portrait,#campusNpcDialog .npc-conversation>img{position:absolute;left:8px;bottom:8px;width:102px;height:155px;max-height:none;object-fit:contain;filter:drop-shadow(0 4px 1px #66503244)}
+#campusGuide .campus-portrait img{width:100%;height:100%;max-height:none;object-fit:contain}
+#campusGuide .campus-greeting h2,#campusNpcDialog .npc-conversation h2{margin:0 0 9px;font:21px/1.3 SchoolJua,system-ui;color:#557352}
+#campusGuide .campus-greeting p,#campusNpcDialog .npc-conversation p{margin:0;font:18px/1.7 SchoolJua,system-ui;letter-spacing:.1px;color:#524e36;word-break:keep-all}
+#campusNpcDialog .npc-conversation h2,#campusNpcDialog .npc-note{display:none}
+#campusGuide .campus-guide-choices,#campusNpcDialog .npc-choices{position:relative;grid-column:2;grid-row:1/3;display:grid;gap:2px;padding:17px 13px;border:3px solid #f5e0aa;border-radius:32px 38px 30px 8px;background:#fff1bd;box-shadow:0 5px 0 #97784444}
+#campusGuide .campus-guide-choices::after,#campusNpcDialog .npc-choices::after{content:'';position:absolute;left:-16px;bottom:30px;width:26px;height:22px;background:#fff1bd;clip-path:polygon(100% 0,100% 100%,0 100%)}
+#campusGuide .campus-guide-choices button,#campusNpcDialog .npc-choices button{position:relative;display:block;min-height:46px;width:100%;padding:10px 10px 10px 24px;border:0;border-radius:18px;background:transparent;box-shadow:none;text-align:left;font:17px/1.45 SchoolJua,system-ui;color:#5b5033}
+#campusGuide .campus-guide-choices button b{font:inherit}
+#campusGuide .campus-guide-choices button span{display:none}
+#campusNpcDialog .npc-choices button small{font:11px/1.4 system-ui;color:#776a47;margin-left:5px;white-space:nowrap}
+#campusGuide .campus-guide-choices button:is(:hover,:focus-visible),#campusNpcDialog .npc-choices button:is(:hover,:focus-visible){background:#f6d76e;outline:0;color:#473b24}
+#campusGuide .campus-guide-choices button:is(:hover,:focus-visible)::before,#campusNpcDialog .npc-choices button:is(:hover,:focus-visible)::before{content:'▸';position:absolute;left:7px;font-size:21px;line-height:1}
+#campusNpcDialog .npc-choices button>span{display:none}
+#campusGuide .campus-return,#campusNpcDialog .npc-return{grid-column:1/-1;justify-self:end;width:auto;min-height:44px;max-width:100%;margin:0;padding:8px 18px;border:0!important;border-radius:24px;background:#fff7dc!important;box-shadow:0 3px #aa956d66;color:#5b6249;font:15px SchoolJua,system-ui!important}
+#campusGuide[data-inspection=true] .campus-greeting{grid-column:1/-1;padding:26px;min-height:0}
+#campusGuide[data-inspection=true] .game-speaker-name{display:none}
+#campusGuide .letter-inspect-link{grid-column:1/-1;grid-row:auto;justify-self:end}
+#campusGuide[data-inspection=true] .campus-guide-choices{display:none}
+@media(max-width:620px){
+ #studentAdventureDialog[data-view=map]{width:calc(100% - 12px);max-height:calc(100dvh - 14px);border-width:3px;border-radius:23px}
+ #studentAdventureDialog[data-view=map] .sa-dialog-head{padding:8px 10px 3px}.sa-map-tabs{padding-bottom:7px;gap:6px}.sa-map-tabs button{font-size:16px;padding:8px 18px}
+ #studentAdventureDialog[data-view=map] .sa-dialog-head h2{font-size:21px}#studentAdventureDialog[data-view=map] .sa-dialog-body{padding:0 5px 9px}
+ #studentAdventureDialog .sa-world{height:min(59dvh,480px);min-height:355px}
+ #studentAdventureDialog .sa-map-pin{width:82px;height:82px}
+ #studentAdventureDialog .sa-map-pin .sa-pin-emblem{width:45px;height:45px}
+ #studentAdventureDialog .sa-map-pin b{font-size:14px;padding:4px 8px}
+ #studentAdventureDialog .sa-map-pin .sa-pin-state{font-size:11px;min-height:15px;margin-top:5px}
+ .sa-map-canvas .sa-passport{left:7px;top:7px;padding:5px 9px;gap:5px}.sa-map-canvas .sa-passport b{font-size:13px}.sa-map-canvas .sa-passport div>span{font-size:10px}.sa-map-stamp{font-size:22px}.sa-map-compass{right:10px;top:12px;font-size:32px}.sa-map-compass small{left:11px;font-size:10px}
+ .sa-map-tools{gap:6px;padding-top:7px}.sa-map-tools .sa-button{font-size:14px;padding:7px 11px}.sa-map-hint{font-size:13px;bottom:7px}.sa-map-notebook{padding:18px 13px}.sa-map-notebook .sa-workshop-links{grid-template-columns:1fr}
+ #campusGuide,#campusNpcDialog{inset:auto 0 10px;width:calc(100% - 14px);max-height:calc(100dvh - 20px);padding:42px 5px 6px}
+ #campusGuide[open],#campusNpcDialog[open]{grid-template-columns:1fr;row-gap:12px}
+ #campusGuide .campus-greeting,#campusNpcDialog .npc-conversation{grid-column:1;grid-row:1;padding:28px 16px 18px 96px;min-height:132px;border-radius:32px 38px 29px 34px}
+ .game-speaker-name{left:81px;padding:8px 19px;font-size:18px;top:-18px}
+ #campusGuide .campus-portrait,#campusNpcDialog .npc-conversation>img{left:3px;bottom:9px;width:84px;height:130px}
+ #campusGuide .campus-greeting h2{font-size:19px;margin-bottom:5px}
+ #campusGuide .campus-greeting p,#campusNpcDialog .npc-conversation p{font-size:16px;line-height:1.65}
+ #campusGuide .campus-guide-choices,#campusNpcDialog .npc-choices{grid-row:2;grid-column:1;justify-self:end;width:calc(100% - 20px);padding:10px 9px;border-width:2px;border-radius:26px 31px 27px 7px;gap:0}
+ #campusGuide .campus-guide-choices button,#campusNpcDialog .npc-choices button{min-height:44px;font-size:16px;padding:8px 8px 8px 22px}
+ #campusNpcDialog[data-person=quests] .npc-choices{display:grid;grid-template-columns:1fr 1fr;width:100%}
+ #campusNpcDialog[data-person=quests] .npc-choices button{font-size:14px;word-break:keep-all}
+ #campusGuide .campus-guide-choices::after,#campusNpcDialog .npc-choices::after{left:19px;top:-17px;bottom:auto;transform:rotate(90deg)}
+ #campusGuide .campus-return,#campusNpcDialog .npc-return{font-size:14px!important;min-height:44px;padding:7px 15px}
+}
+@media(prefers-reduced-motion:reduce){#studentAdventureDialog .sa-pin-emblem{transition:none}}
+@media(max-width:360px){
+ #campusGuide .campus-greeting h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ #campusGuide .campus-greeting{padding-left:82px;padding-right:10px;min-height:128px}
+ #campusGuide .campus-portrait{width:74px;height:114px}
+ #campusGuide .campus-guide-choices{grid-template-columns:1fr 1fr;width:100%;padding:10px 6px}
+ #campusGuide .campus-guide-choices button{font-size:14px;padding:8px 5px 8px 17px;word-break:keep-all}
+ #campusNpcDialog .npc-choices button small{display:block;margin-left:0}
+}

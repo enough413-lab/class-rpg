@@ -1,3 +1,4 @@
+import {schoolMapView} from './school-map-ui.js?v=20261008-game-ui';
 import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261007-finale';
 import {LETTER_MILESTONE} from './garden-letter.js?v=20261007-letter';
 import {FRAME_MILESTONE,installArtFrame} from './art-frame.js?v=20261007-frame';
@@ -127,6 +128,7 @@ export function installStudentAdventure(ctx){
   await task;if(journalTask===task)journalTask=null;
  }
  function open(title,subtitle,html){
+  dialog.dataset.view='content';
   musicPlayer.stop();sequence.stop();
   byId('saDialogTitle').textContent=title;byId('saDialogSubtitle').textContent=subtitle;
   byId('saDialogBody').innerHTML=html;
@@ -143,12 +145,14 @@ export function installStudentAdventure(ctx){
   if(!journal){open('학교 탐험 수첩','잠깐, 연결을 확인하고 있어요.',errorView('retry-map'));return}
   const lv=ctx.levelInfo(student().xp||0).level,done=completed(),stamps=SCHOOL_CHAPTERS.filter(c=>c.steps.every(s=>done.has(s.id))).length;
   const label=c=>c.steps.every(s=>done.has(s.id))?'✓ 탐험 도장 획득':lv<c.level?'Lv. '+c.level+'에 열려요':c.steps.filter(s=>done.has(s.id)).length+' / 3 이야기';
-  open('학교 탐험 수첩','장소를 고르면 그곳에서 걸으며 둘러봐요.',
-   '<div class="sa-passport"><div><b>나의 탐험 도장 '+stamps+' / '+SCHOOL_CHAPTERS.length+'</b><br><span class="sa-small">지금 Lv. '+lv+' · 골드 없이 탐험해요.</span></div><div class="sa-passport-actions">'+button('roadmap','성장 길잡이')+button('classroom','교실에서 걷기')+'</div></div>'+
+  const hub=byId('classroomHub'),current=hub&&!hub.classList.contains('hidden')?hub.dataset.scene:null;
+  open('우리 학교 모험지도','',
+   '<nav class="sa-map-tabs" aria-label="지도와 수첩"><button data-map-tab="world" aria-pressed="true">🧭 모험지도</button><button data-map-tab="notebook" aria-pressed="false">📔 나의 수첩</button></nav>'+
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
-   '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
-   '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='school-finale'?finale.label(lv):m.activity==='garden-letter'?letterLabel(lv):m.activity==='art-frame'?frame.label(lv):m.activity==='art-postcard'?art.label(lv):m.activity==='parcel-adventure'?parcelLabel(lv):m.activity==='kindness-chapter'?kindness.label(lv):m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div data-map-panel="world">'+schoolMapView({chapters:SCHOOL_CHAPTERS,level:lv,completed:done,stamps,current,label})+'</div>'+
+   '<section data-map-panel="notebook" class="sa-map-notebook" hidden><h3>차곡차곡 모은 이야기</h3><p>만났던 친구와 만들었던 기억을 다시 펼쳐요.</p><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='school-finale'?finale.label(lv):m.activity==='garden-letter'?letterLabel(lv):m.activity==='art-frame'?frame.label(lv):m.activity==='art-postcard'?art.label(lv):m.activity==='parcel-adventure'?parcelLabel(lv):m.activity==='kindness-chapter'?kindness.label(lv):m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div></section>'+
+   '<footer class="sa-map-tools">'+button('roadmap','✦ 성장 길잡이')+button('classroom','👣 산책 이어가기')+'</footer>');
+  dialog.dataset.view='map';
  }
  async function workshop(kind){
   if(kind==='school-finale'){dialog.close();await finale.start();return}
@@ -398,7 +402,7 @@ export function installStudentAdventure(ctx){
   if(a==='quest'){const id=Number(b.dataset.id);if(b.dataset.kind==='accept')window.openMainQuest(id);else window.openProgressQuest(id)}
  }
  home.addEventListener('click',e=>{action(e).catch(()=>say('잠깐 연결이 끊겼어요. 다시 눌러 주세요.'))});
- dialog.addEventListener('click',e=>{action(e).catch(()=>{byId('saDialogSubtitle').textContent='불러오지 못했어요. 다시 시도해 주세요.'})});
+ dialog.addEventListener('click',e=>{const tab=e.target.closest('[data-map-tab]');if(tab&&dialog.dataset.view==='map'){const selected=tab.dataset.mapTab;dialog.querySelectorAll('[data-map-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b===tab)));dialog.querySelectorAll('[data-map-panel]').forEach(p=>p.hidden=p.dataset.mapPanel!==selected);dialog.scrollTop=0;return}action(e).catch(()=>{byId('saDialogSubtitle').textContent='불러오지 못했어요. 다시 시도해 주세요.'})});
  // One input route prevents legacy movement listeners from stealing typing or moving twice.
  window.addEventListener('keydown',event=>{
   const key=event.key.toLowerCase(),directions={arrowup:[0,-1],w:[0,-1],arrowdown:[0,1],s:[0,1],arrowleft:[-1,0],a:[-1,0],arrowright:[1,0],d:[1,0]};
