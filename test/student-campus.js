@@ -2,13 +2,13 @@ import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261007-world';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261007-world';
-import {installSchoolWalk} from './school-walk.js?v=20261008-smooth';
+import {installSchoolWalk} from './school-walk.js?v=20261008-paths';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261007-finale';
-import {installCampusWayfinder} from './campus-wayfinder.js?v=20261007-parcel';
+import {installCampusWayfinder} from './campus-wayfinder.js?v=20261008-paths';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';
-const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도']]},hallway:{name:'별빛 복도',hint:'가고 싶은 문을 누르거나 가까이 걸어가 보세요.',routes:[['classroom','🏫 교실'],['library','📚 도서관']]},library:{name:'이야기 도서관',hint:'책지기 토리와 오늘 읽은 이야기를 나눠요.',routes:[['hallway','🚪 복도'],['reading','✍️ 독서 기록']]}};
+const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도']]},hallway:{name:'별빛 복도',hint:'가고 싶은 문을 누르거나 가까이 걸어가 보세요.',routes:[['classroom','🏫 교실'],['library','📚 도서관']]},library:{name:'이야기 도서관',hint:'오른쪽 창가를 지나면 정원으로 이어져요. 토리와 이야기도 나눠요.',routes:[['hallway','← 복도'],['garden','정원 →']]}};
 for(const [id,room] of Object.entries(EXTRA_ROOMS))SCENES[id]={name:room.name,hint:'길을 따라 걸으며 물건과 이야기를 발견해요.',routes:[['hallway','🚪 복도로 가기']]};
 export function installStudentCampus(ctx){
  const doc=document,hub=doc.getElementById('classroomHub');if(!hub)return;
@@ -45,6 +45,13 @@ export function installStudentCampus(ctx){
   walk.syncScene();
   if(open()&&lastScene!==scene)doc.getElementById('campusTitle').focus({preventScroll:true});lastScene=scene;syncNear();
  }
+ function travel(to){
+  const from=ctx.getScene();stop();window.enterHubScene(to);syncScene();
+  if(ctx.getScene()!==to)return;
+  const door=walk.places(to).find(p=>p.kind===from);if(!door)return;
+  const facing=door.x<50?'right':'left',x=door.x+(door.x<50?6:-6);
+  ctx.setPosition(x,80);doc.getElementById('hubPlayer').dataset.facing=facing;walk.camera();syncNear();
+ }
  function talk(){stop();guide.querySelector('.letter-inspect-link')?.remove();guide.dataset.inspection='false';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();letter.refreshTori();if(open()&&!guide.open)guide.showModal()}
  function syncOpen(){
   if(isOpen===open())return;isOpen=open();stop();walk.stop();
@@ -54,11 +61,12 @@ export function installStudentCampus(ctx){
  let parcel=null,letter=null;
  function interact(kind){
   if(kind==='story'){stop();walk.stop();window.studentAdventure.chapter(ctx.getScene());return}
+  if(kind==='nook'){stop();guide.dataset.inspection='true';doc.getElementById('campusGuideTitle').textContent='햇살이 머무는 창가';guide.querySelector('.campus-greeting p').textContent='폭신한 방석 위로 나뭇잎 그림자가 내려앉았어요. 마음에 드는 책과 잠깐 쉬어 갈까요? 오른쪽 초록 문은 학교 정원으로 이어져요.';guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 창가 쉼터';guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();guide.showModal();return}
   if(kind.startsWith('look-')){stop();walk.stop();guide.dataset.inspection='true';const room=ctx.getScene(),i=Number(kind.slice(5));doc.getElementById('campusGuideTitle').textContent=EXTRA_ROOMS[room].props[i];guide.querySelector('.campus-greeting p').textContent=WORLD_DETAILS[room][i];guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent=SCENES[room].name;guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();if(room==='garden'&&i===0){const b=doc.createElement('button');b.className='campus-return letter-inspect-link';b.dataset.guide='letter-garden';b.textContent='🌿 새싹 관찰 편지 · Lv.19';guide.querySelector('.campus-greeting').after(b)}guide.showModal();return}
   if(['parcel','notice'].includes(kind))return parcel.inspect(kind);
   if(kind==='tori')return talk();
   if(['quests','shop'].includes(kind))return people.talk(kind);
-  if(['classroom','hallway','library'].includes(kind))return window.enterHubScene(kind);
+  if(SCENES[kind])return travel(kind);
   if(kind==='reading')return window.openReadingDesk();
   if(kind==='portfolio')return window.openReadingShelf();
   return window.hubInteract(kind);
@@ -76,7 +84,7 @@ export function installStudentCampus(ctx){
  hub.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;
   if(b.dataset.move&&event.detail===0&&!overlay())walk.nudge(Number(b.dataset.move.split(',')[0]));
-  const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else window.enterHubScene(route)}
+  const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else travel(route)}
   if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else walk.goTo(walk.nearest().kind)}}
   if(b.dataset.campus==='find')wayfinder.open();
   if(b.dataset.campus==='home')window.closeClassroomHub();

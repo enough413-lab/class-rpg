@@ -34,3 +34,42 @@
 
 /* Player names sit below the feet in every walking room. */
 #classroomHub.campus-side[data-scene] .campus-player-name{top:calc(100% + 6px);bottom:auto;pointer-events:none}
+
+/* One continuous painted room: the camera reveals its reading alcove and garden door. */
+#classroomHub.campus-library-wide .hub-stage{width:1560px;height:520px;aspect-ratio:3;background-size:100% 100%}
+#classroomHub.campus-library-wide .campus-viewport{height:520px}
+#classroomHub.campus-library-wide .hub-player{width:128px;min-width:0;max-width:none}
+#classroomHub.campus-library-wide .campus-sprite{width:180px!important;height:145px!important}
+#classroomHub.campus-library-wide [data-place=portfolio]{width:174px!important;height:220px!important}
+#classroomHub.campus-library-wide .campus-tori.campus-sprite{width:115px!important;height:170px!important;min-height:0;min-width:0}
+#classroomHub.campus-side .campus-door,#classroomHub.campus-side .campus-nook{top:auto;bottom:20%;height:110px;width:112px;min-height:44px;padding:0;border:0;background:none;box-shadow:none;transform:translateX(-50%);z-index:14}
+#classroomHub.campus-side .campus-door .campus-object-caption{top:0;transform:translate(-50%,-100%);border-radius:10px;background:#edf4dd;border-color:#8ba371;white-space:nowrap}
+#classroomHub.campus-side .campus-door::before{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 5px);width:10px;border-radius:4px;background:#987344;box-shadow:inset 3px 0 #c29a63;pointer-events:none}
+#classroomHub.campus-side .campus-painted-door{height:35%;width:115px}
+#classroomHub.campus-side .campus-painted-door::before{display:none}
+#classroomHub.campus-side .campus-door:is(.is-near,.is-destination,:focus-visible){outline:2px dashed #f6f4bf;outline-offset:5px;border-radius:35px 35px 8px 8px}
+#classroomHub.campus-side .campus-door:is(.is-near,.is-destination,:hover,:focus-visible),#classroomHub.campus-side .campus-nook:is(.is-near,.is-destination,:hover,:focus-visible){background:none;border:0;box-shadow:none}
+#classroomHub.campus-side :is(.campus-door,.campus-nook):is(.is-near,.is-destination,:focus-visible) .campus-object-caption small{display:block;font-size:12px;margin-top:2px}
+#classroomHub.campus-side .campus-nook{height:170px;width:150px}
+#classroomHub.campus-side .campus-nook .campus-object-caption{top:0}
+.finder-rooms [data-finder-room=library]::before{background-image:url('maps/library-panorama-v1.webp');background-position:76% center}
+@media(max-width:849px){
+ #classroomHub.campus-library-wide .hub-stage{width:1260px;height:420px}
+ #classroomHub.campus-library-wide .campus-viewport{height:420px}
+ #classroomHub.campus-library-wide .hub-player{width:112px;min-width:0;max-width:none}
+ #classroomHub.campus-library-wide .campus-sprite{width:155px!important;height:125px!important}
+ #classroomHub.campus-library-wide [data-place=portfolio]{width:145px!important;height:180px!important}
+ #classroomHub.campus-library-wide .campus-tori.campus-sprite{width:100px!important;height:145px!important}
+ #classroomHub.campus-side .campus-door{height:90px}
+ #classroomHub.campus-side .campus-painted-door{height:35%;width:95px}
+}
+@media(max-height:700px) and (max-width:849px){
+ #classroomHub.campus-library-wide .hub-stage{width:1020px;height:340px}
+ #classroomHub.campus-library-wide .campus-viewport{height:340px}
+ #classroomHub.campus-library-wide .hub-player{width:100px}
+ #classroomHub.campus-library-wide .campus-sprite{width:125px!important;height:100px!important}
+ #classroomHub.campus-library-wide [data-place=portfolio]{width:120px!important;height:150px!important}
+ #classroomHub.campus-library-wide .campus-tori.campus-sprite{width:90px!important;height:125px!important}
+ #classroomHub.campus-side .campus-door{height:75px}
+ #classroomHub.campus-side .campus-painted-door{height:35%}
+}

@@ -12,21 +12,21 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
    for(const room of ['classroom','library','hallway']){
     await f.evaluate(room=>enterHubScene(room),room);await settled();
     const box=await f.evaluate(()=>{const r=s=>{const b=document.querySelector(s).getBoundingClientRect();return{x:b.x,y:b.y,w:b.width,h:b.height,bottom:b.bottom}};return{stage:r('.hub-stage'),view:r('.campus-viewport'),player:r('#hubPlayer'),use:r('[data-campus=use]'),screen:innerHeight,overflow:document.getElementById('classroomHub').scrollWidth>innerWidth+1}});
-    assert(Math.abs(box.stage.w/box.stage.h-4/3)<.002);assert(Math.abs(box.view.h-box.stage.h)<1);assert(Math.abs(box.view.y-box.stage.y)<1,'Never crop the ceiling with a negative margin');assert(!box.overflow);assert(box.use.bottom<=box.screen+1,`Movement/use controls must stay visible: ${width}x${height} ${room} ${JSON.stringify(box)}`);
+    assert(Math.abs(box.stage.w/box.stage.h-(room==='library'?3:4/3))<.002);assert(Math.abs(box.view.h-box.stage.h)<1);assert(Math.abs(box.view.y-box.stage.y)<1,'Never crop the ceiling with a negative margin');assert(!box.overflow);assert(box.use.bottom<=box.screen+1,`Movement/use controls must stay visible: ${width}x${height} ${room} ${JSON.stringify(box)}`);
     assert(Math.abs(box.player.bottom-(box.stage.y+box.stage.h*.8))<1,'Feet stay on the new floor');
-    if(width===390)assert(box.view.h>=520,'Phone scene must be taller than the previous 350px viewport');
-    assert(Math.abs(box.player.w/box.stage.w-.17)<.002,'Avatar shares the NPC room scale');assert(box.stage.w>=box.view.w-1,'Room fills viewport without a blank strip');
+    if(width===390&&room!=='library')assert(box.view.h>=520,'Phone scene must be taller than the previous 350px viewport');
+    if(room==='library')assert(box.player.w>=99.9&&box.player.w<=128.1,'Panorama keeps people at a fixed readable scale '+width+' '+JSON.stringify(box));else assert(Math.abs(box.player.w/box.stage.w-.17)<.002,'Avatar shares the NPC room scale');assert(box.stage.w>=box.view.w-1,'Room fills viewport without a blank strip');
     await page.screenshot({path:path.join(shots,`space-${room}-${width}.png`),fullPage:true});
    }
   }
   await page.setViewportSize({width:390,height:844});await f.evaluate(()=>enterHubScene('library'));await settled();
   const stage=await f.locator('.hub-stage').boundingBox(),x=()=>f.locator('#hubPlayer').evaluate(el=>parseFloat(el.style.left));const start=await x();
   await page.mouse.click(stage.x+stage.width*.4,stage.y+stage.height*.25);assert.equal(await x(),start,'Looking at the upper wall should not start walking');
-  const floorX=Math.round(stage.x+stage.width*.46),target=(floorX-stage.x)/stage.width*100;
+  const floorX=Math.round(stage.x+stage.width*.49),target=(floorX-stage.x)/stage.width*100;
   await page.mouse.click(floorX,stage.y+stage.height*.795);await f.waitForFunction(target=>Math.abs(parseFloat(document.getElementById('hubPlayer').style.left)-target)<.06,target);
-  const arrived=await x();await f.locator('[data-place=reading]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await x(),arrived);
-  await f.locator('.campus-tori').click();assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape');
+  const arrived=await x();await page.keyboard.press('Tab');await f.locator('[data-place=reading]').focus();await f.locator('[data-place=reading]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await x(),arrived);
+  await page.keyboard.press('Tab');await f.locator('.campus-tori').focus();await f.locator('.campus-tori').click();assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape');
   assert.deepEqual(await f.evaluate(()=>[mockRpg.student.xp,mockRpg.student.gold]),[260,180]);assert.deepEqual(errors,[]);
-  console.log('PASS: 4:3 native art, uncropped rooms, stable avatar size/floor, visible controls at desktop/laptop/tablet/390/320, wall versus floor input, reading/NPC return and unchanged economy.');
+  console.log('PASS: native room/panorama art, uncropped rooms, stable avatar size/floor, visible controls at desktop/laptop/tablet/390/320, wall versus floor input, reading/NPC return and unchanged economy.');
  }finally{await browser.close();server.close()}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1});

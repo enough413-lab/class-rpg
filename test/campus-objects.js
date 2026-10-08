@@ -14,9 +14,9 @@ const SPRITES={
 };
 const HALLWAY_SPRITES={notice:{art:'records',x:51,width:19,height:28}};
 const LIBRARY_SPRITES={
- reading:{art:'reading-desk',x:27,width:24,height:32},
- portfolio:{art:'journal-shelf',x:82,width:25,height:46},
- tori:{art:'tori',x:58,width:17,height:35,name:'책지기 토리'}
+ reading:{art:'reading-desk',x:22,width:24,height:32},
+ portfolio:{art:'journal-shelf',x:62,width:25,height:46},
+ tori:{art:'tori',x:44,width:17,height:35,name:'책지기 토리'}
 };
 export function decorateCampusObject(button,place,room,tori){
  const doc=button.ownerDocument,caption=doc.createElement('span');caption.className='campus-object-caption';
@@ -46,5 +46,5 @@ export function decorateCampusObject(button,place,room,tori){
 }
 export function markCampusObject(button,{near=false,guided=false}={}){
  button.classList.toggle('is-near',near);button.classList.toggle('is-destination',guided);
- const action=button.querySelector('.campus-object-action'),text=(guided?'◆ 가는 곳 · ':near?'✓ ':'↗ ')+(button.dataset.action||verbs[button.dataset.place]);if(action&&action.textContent!==text)action.textContent=text;
+ const action=button.querySelector('.campus-object-action'),text=(guided?'◆ 가는 곳 · ':near?'✓ ':'↗ ')+(button.dataset.action||verbs[button.dataset.place]||'살펴보기');if(action&&action.textContent!==text)action.textContent=text;
 }

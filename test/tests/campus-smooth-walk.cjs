@@ -38,7 +38,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   for(const event of ['blur','pagehide','visibilitychange']){
    await enter('classroom');await page.keyboard.down('ArrowLeft');await page.waitForTimeout(100);await f.evaluate(name=>(name==='visibilitychange'?document:window).dispatchEvent(new Event(name)),event);await frozen();await repeat();await frozen();await page.keyboard.up('ArrowLeft');
   }
-  await enter('library');await page.keyboard.down('ArrowRight');await page.waitForTimeout(120);await f.locator('.campus-tori').click();await frozen();await page.keyboard.up('ArrowRight');await f.locator('[data-guide=close]').first().click();await frozen();
+  await enter('library');await page.keyboard.down('ArrowRight');await page.waitForTimeout(120);const movingTori=await f.locator('.campus-tori').boundingBox();await page.mouse.click(movingTori.x+movingTori.width/2,movingTori.y+movingTori.height/2);await frozen();await page.keyboard.up('ArrowRight');await f.locator('[data-guide=close]').first().click();await frozen();
   await page.keyboard.down('ArrowRight');await page.waitForTimeout(80);await f.evaluate(()=>enterHubScene('hallway'));await frozen();await page.keyboard.up('ArrowRight');
   await page.keyboard.down('ArrowRight');await page.waitForTimeout(80);await f.evaluate(()=>{mockRpg.student.id=999;document.dispatchEvent(new Event('student-dashboard-updated'))});await frozen();await page.keyboard.up('ArrowRight');
   // Editing keys and modified shortcuts remain local to their controls.
