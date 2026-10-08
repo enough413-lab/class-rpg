@@ -2,7 +2,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261007-world';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261007-world';
-import {installSchoolWalk} from './school-walk.js?v=20261007-shelf';
+import {installSchoolWalk} from './school-walk.js?v=20261008-smooth';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261007-finale';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261007-parcel';
@@ -24,10 +24,10 @@ export function installStudentCampus(ctx){
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
  const people=installCampusNpcs({hub});
- let timer=null,held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
+ let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
- function stop(){clearInterval(timer);timer=null;held=null}
+ function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=walk.nearest(),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
   memory?.capture();
@@ -75,21 +75,21 @@ export function installStudentCampus(ctx){
  window.hubUseNearby=()=>{const near=walk.nearby();if(near){stop();walk.stop();interact(near.kind)}};
  hub.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;
-  if(b.dataset.move&&event.detail===0&&!overlay())window.moveHub(...b.dataset.move.split(',').map(Number));
+  if(b.dataset.move&&event.detail===0&&!overlay())walk.nudge(Number(b.dataset.move.split(',')[0]));
   const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else window.enterHubScene(route)}
-  if(b.dataset.campus==='use'){stop();if(walk.destination())walk.stop();else if(walk.nearby())window.hubUseNearby();else walk.goTo(walk.nearest().kind)}
+  if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else walk.goTo(walk.nearest().kind)}}
   if(b.dataset.campus==='find')wayfinder.open();
   if(b.dataset.campus==='home')window.closeClassroomHub();
   if(b.dataset.campus==='map'){stop();walk.stop();window.studentAdventure.map()}
  });
  footer.addEventListener('pointerdown',event=>{
-  const b=event.target.closest('[data-move]');if(!b||event.button!==0||overlay())return;
-  event.preventDefault();stop();b.focus({preventScroll:true});held=event.pointerId;b.setPointerCapture(event.pointerId);
-  const direction=b.dataset.move.split(',').map(Number);window.moveHub(...direction);
-  timer=setInterval(()=>{if(!open()||overlay()||doc.hidden){stop();return}window.moveHub(...direction)},140);
+  const b=event.target.closest('[data-move]');if(!b||event.button!==0||held!==null||overlay())return;
+  event.preventDefault();b.focus({preventScroll:true});held=event.pointerId;b.setPointerCapture(event.pointerId);
+  walk.hold('pointer:'+held,Number(b.dataset.move.split(',')[0]));
  });
- for(const event of ['pointerup','pointercancel','lostpointercapture'])footer.addEventListener(event,e=>{if(e.pointerId===held)stop()});
- window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
+ for(const event of ['pointerup','pointercancel','lostpointercapture'])footer.addEventListener(event,e=>{if(e.pointerId===held){walk.release('pointer:'+held);held=null}});
+ window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
+ window.addEventListener('keyup',event=>walk.release('key:'+event.key.toLowerCase()),true);
  guide.addEventListener('click',event=>{
   const action=event.target.closest('[data-guide]')?.dataset.guide;if(!action)return;guide.close();
   if(action==='reading')window.openReadingDesk();
@@ -101,6 +101,7 @@ export function installStudentCampus(ctx){
  // Keep keyboard focus in the walking scene, while leaving nested dialogs in charge.
  window.addEventListener('keydown',event=>{
   if(event.key!=='Tab'||!open()||overlay())return;
+  stop();
   const buttons=[...hub.querySelectorAll('button')].filter(b=>!b.disabled&&b.getClientRects().length);
   const first=buttons[0],last=buttons.at(-1),active=doc.activeElement;
   if(!hub.contains(active)||event.shiftKey&&(active===first||active.id==='campusTitle')||!event.shiftKey&&(active===last||active.id==='campusTitle')){
@@ -111,5 +112,5 @@ export function installStudentCampus(ctx){
  new MutationObserver(syncNear).observe(doc.getElementById('hubPlayer'),{attributes:true,attributeFilter:['style']});
  new MutationObserver(syncOpen).observe(hub,{attributes:true,attributeFilter:['class']});
  syncScene();syncOpen();
- return {talk,find:wayfinder.open,parcel,letter};
+ return {talk,find:wayfinder.open,parcel,letter,stop,keyDown:(key,dx,repeat)=>walk.hold('key:'+key,dx,repeat)};
 }

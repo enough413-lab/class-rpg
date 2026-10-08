@@ -9,7 +9,8 @@ const PLACES={
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[{kind:'hallway',x:7,label:'🚪 복도로 돌아가기'},...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:91,label:'📖 이곳의 이야기'}];
 export function installSchoolWalk(ctx){
- const GROUND=80;
+ // CSS pixels per second, shared by keys, touch buttons and destination walking.
+ const GROUND=80,WALK_SPEED=100;
  const {hub,stage,objects}=ctx,doc=hub.ownerDocument,player=doc.getElementById('hubPlayer');
  const viewport=doc.createElement('div');viewport.className='campus-viewport';stage.before(viewport);viewport.append(stage);
  const status=doc.createElement('div');status.className='campus-scene-status';status.setAttribute('role','status');viewport.append(status);
@@ -19,6 +20,8 @@ export function installSchoolWalk(ctx){
  // Keyboard and assistive-technology users already have the movement controls.
  const floor=doc.createElement('button');floor.type='button';floor.className='campus-floor-target';floor.tabIndex=-1;floor.setAttribute('aria-hidden','true');stage.prepend(floor);
  let frame=0,target=null,destination=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
+ const heldDirections=new Map();let movementOwner=null;
+ const direction=()=>[...heldDirections.values()].at(-1)||0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
  const currentPlaces=()=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.());
@@ -27,7 +30,7 @@ export function installSchoolWalk(ctx){
   stage.style.transform='translateX('+(-offset)+'px)';
  }
  function markPlaces(){const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))markCampusObject(b,{near:b.dataset.place===near?.kind,guided:b.dataset.place===destination?.kind})}
- function stop(arrived=false){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
+ function stop(arrived=false){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;heldDirections.clear();movementOwner=null;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
  function nearest(){const x=ctx.getPosition().x;return currentPlaces().reduce((a,b)=>Math.abs(a.x-x)<=Math.abs(b.x-x)?a:b)}
  function nearby(){const closest=nearest();return Math.abs(closest.x-ctx.getPosition().x)<8?closest:null}
  function goTo(kind){
@@ -35,22 +38,41 @@ export function installSchoolWalk(ctx){
   stop();destination=place;target=place.x;waypoint.show(target);
   markPlaces();
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}
-  else{frame=requestAnimationFrame(tick);ctx.onPosition()}
+  else{startFrames();ctx.onPosition()}
   return true;
  }
  function renderPosition(x){
-  const previous=ctx.getPosition().x;ctx.setPosition(Math.max(4,Math.min(96,x)),GROUND);
-  if(x!==previous)player.dataset.facing=x<previous?'left':'right';
-  player.classList.add('walking');clearTimeout(walkEnd);walkEnd=setTimeout(()=>player.classList.remove('walking'),180);
-  markPlaces();
-  camera();ctx.onPosition();
+  const previous=ctx.getPosition().x,next=Math.max(4,Math.min(96,x));if(next===previous)return false;
+  ctx.setPosition(next,GROUND);player.dataset.facing=next<previous?'left':'right';player.classList.add('walking');
+  markPlaces();camera();ctx.onPosition();return true;
+ }
+ function startFrames(){movementOwner=ctx.getStudent()?.id;lastAt=performance.now();frame=requestAnimationFrame(tick)}
+ function advance(time){
+  const dt=Math.min(Math.max(0,(time-lastAt)/1000),.05);lastAt=time;
+  const x=ctx.getPosition().x,dir=direction(),distance=dt*WALK_SPEED/Math.max(1,stage.clientWidth)*100;
+  const diff=dir?dir:target-x,step=dir?dir*distance:Math.sign(diff)*Math.min(Math.abs(diff),distance);
+  renderPosition(x+step);
+  return dir?(dir<0?ctx.getPosition().x<=4:ctx.getPosition().x>=96):Math.abs(target-ctx.getPosition().x)<.001;
  }
  function tick(time){
-  if(!canWalk()||target===null){stop();return}
-  const dt=lastAt?Math.min((time-lastAt)/1000,.05):0;lastAt=time;
-  const x=ctx.getPosition().x,diff=target-x,step=Math.sign(diff)*Math.min(Math.abs(diff),dt*25);
-  renderPosition(x+step);
-  if(Math.abs(target-ctx.getPosition().x)<.05){stop(true);return}frame=requestAnimationFrame(tick);
+  frame=0;if(!canWalk()||movementOwner!==ctx.getStudent()?.id||!heldDirections.size&&target===null){stop();return}
+  if(advance(time)){stop(!heldDirections.size);return}frame=requestAnimationFrame(tick);
+ }
+ function hold(source,dx,repeat=false){
+  if(!canWalk()||!dx||repeat||heldDirections.has(source))return;
+  if(!heldDirections.size)stop();heldDirections.set(source,Math.sign(dx));
+  player.dataset.facing=dx<0?'left':'right';player.classList.add('walking');
+  if(!frame)startFrames();
+ }
+ function release(source){
+  if(!heldDirections.has(source))return;
+  if(canWalk()&&movementOwner===ctx.getStudent()?.id)advance(performance.now());
+  heldDirections.delete(source);
+  if(!heldDirections.size)stop();else player.dataset.facing=direction()<0?'left':'right';
+ }
+ // Native button activation has no hold duration (e.g. screen readers / Enter).
+ function nudge(dx){
+  if(!canWalk()||!dx)return;stop();target=Math.max(4,Math.min(96,ctx.getPosition().x+Math.sign(dx)*12/Math.max(1,stage.clientWidth)*100));startFrames();
  }
  function rig(){
   if(player.querySelector('.campus-rig'))return;
@@ -80,19 +102,20 @@ export function installSchoolWalk(ctx){
  }
  window.moveHub=(dx,dy)=>{
   if(!canWalk())return;stop();
-  if(dx)renderPosition(ctx.getPosition().x+Math.sign(dx)*3);
+  if(dx){renderPosition(ctx.getPosition().x+Math.sign(dx)*3);walkEnd=setTimeout(()=>player.classList.remove('walking'),180)}
   else if(dy<0)window.hubUseNearby();
  };
  stage.addEventListener('click',e=>{
   if(e.target.closest('button')&&e.target!==floor||!canWalk())return;const rect=stage.getBoundingClientRect();
   if(e.clientY<rect.top+rect.height*.75)return;
   stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));waypoint.show(target);
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else frame=requestAnimationFrame(tick);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else startFrames();
  });
  // Pointer focus must not move a target out from under the pending tap/click.
  stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p?.matches(':focus-visible'))camera(Number(p.dataset.walkX))});
  new ResizeObserver(()=>camera()).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
- window.addEventListener('blur',stop);doc.addEventListener('visibilitychange',stop);
- return {syncScene,nearby,nearest,stop,camera,goTo,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.())};
+ window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
+ let studentId=ctx.getStudent()?.id;doc.addEventListener('student-dashboard-updated',()=>{const next=ctx.getStudent()?.id;if(next!==studentId)stop();studentId=next});
+ return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.())};
 }
