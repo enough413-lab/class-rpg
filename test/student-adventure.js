@@ -408,10 +408,13 @@ export function installStudentAdventure(ctx){
   if(!hubOpen&&!explorerOpen)return;
   const editable=event.target.closest('input,textarea,select,[contenteditable="true"]');
   const overlay=doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
-  if(editable||overlay){event.stopImmediatePropagation();return}
+  if(editable||overlay||event.ctrlKey||event.metaKey||event.altKey||event.isComposing){window.studentCampus?.stop();event.stopImmediatePropagation();return}
   if(key==='enter'&&event.target.closest('button,a[href]')){event.stopImmediatePropagation();return}
   event.preventDefault();event.stopImmediatePropagation();
-  if(directions[key]){if(hubOpen)window.moveHub(...directions[key]);else window.moveExplorer?.(...directions[key])}
+  if(directions[key]){
+   if(hubOpen&&window.studentCampus){if(directions[key][0])window.studentCampus.keyDown(key,directions[key][0],event.repeat);else if(!event.repeat){window.studentCampus.stop();if(directions[key][1]<0)window.hubUseNearby()}}
+   else if(hubOpen)window.moveHub(...directions[key]);else window.moveExplorer?.(...directions[key]);
+  }
   else if(key==='escape'){if(hubOpen)window.closeClassroomHub();else window.closeSchoolExplorer?.()}
   else{if(hubOpen)window.hubUseNearby();else window.interactExplorer?.()}
  },true);
