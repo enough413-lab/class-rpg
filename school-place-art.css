@@ -1,0 +1,43 @@
+/* Painted wide places keep the same feet baseline and fixed-size foreground objects. */
+#classroomHub.campus-painted-place .hub-stage{width:1560px;height:520px;aspect-ratio:3;background-size:100% 100%;margin-top:0}
+#classroomHub.campus-painted-place .campus-viewport{height:520px}
+#classroomHub.campus-painted-place .hub-stage::before{display:none}
+#classroomHub.campus-painted-place .campus-painted-prop{top:auto;bottom:20%;width:180px;height:155px;min-height:44px;min-width:44px;z-index:14}
+#classroomHub.campus-painted-place [data-art=cafeteria-table]{width:240px;height:145px}
+#classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:148px;height:166px}
+#classroomHub.campus-painted-place [data-art=playground-mat]{width:170px;height:93px}
+#classroomHub.campus-painted-place [data-art=playground-bench]{width:215px;height:138px}
+#classroomHub.campus-painted-place [data-art=playground-balls]{width:165px;height:150px}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{top:-9px;padding:5px 10px;min-width:0;max-width:155px;border-width:1px;border-radius:6px 6px 11px 11px;box-shadow:0 2px 0 #98794360;font-size:16px;white-space:nowrap}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption::after{display:none}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-action{display:none}
+#classroomHub.campus-painted-place .campus-painted-prop:is(.is-near,.is-destination,:focus-visible) .campus-object-action{display:block}
+#classroomHub.campus-painted-place .campus-painted-prop:focus-visible{outline:none}
+#classroomHub.campus-painted-place .campus-painted-prop:focus-visible .campus-object-caption{outline:3px solid #477557;outline-offset:3px}
+#classroomHub.campus-painted-place .campus-world-object[data-place=story]{top:8%;width:100px;min-height:58px;border-radius:50% 50% 14px 14px;background:#fff2c3;border-color:#a0804b;padding:9px 6px;font-size:15px}
+#classroomHub.campus-painted-place .campus-world-object[data-place=story]::after{height:16px;width:3px;left:50%;top:auto;bottom:100%;background:#b99c68}
+.finder-rooms [data-finder-room=cafeteria]::before,#studentAdventureDialog .sa-map-pin[data-chapter=cafeteria] .sa-pin-emblem{background-image:url('maps/cafeteria-panorama-v1.webp')}
+.finder-rooms [data-finder-room=playground]::before,#studentAdventureDialog .sa-map-pin[data-chapter=playground] .sa-pin-emblem{background-image:url('maps/playground-panorama-v1.webp')}
+#campusGuide[data-inspection=true] .campus-greeting h2{display:block}
+@media(max-width:849px){
+ #classroomHub.campus-painted-place .hub-stage{width:1260px;height:420px}
+ #classroomHub.campus-painted-place .campus-viewport{height:420px}
+ #classroomHub.campus-painted-place .campus-painted-prop{width:155px;height:134px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-table]{width:205px;height:124px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:127px;height:143px}
+ #classroomHub.campus-painted-place [data-art=playground-mat]{width:146px;height:80px}
+ #classroomHub.campus-painted-place [data-art=playground-bench]{width:184px;height:119px}
+ #classroomHub.campus-painted-place [data-art=playground-balls]{width:142px;height:129px}
+ #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:15px}
+}
+@media(max-height:700px) and (max-width:849px){
+ #classroomHub.campus-painted-place .hub-stage{width:1020px;height:340px}
+ #classroomHub.campus-painted-place .campus-viewport{height:340px}
+ #classroomHub.campus-painted-place .campus-painted-prop{width:130px;height:112px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-table]{width:172px;height:104px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:106px;height:120px}
+ #classroomHub.campus-painted-place [data-art=playground-mat]{width:122px;height:67px}
+ #classroomHub.campus-painted-place [data-art=playground-bench]{width:154px;height:100px}
+ #classroomHub.campus-painted-place [data-art=playground-balls]{width:119px;height:108px}
+ #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:14px;padding:4px 8px}
+}

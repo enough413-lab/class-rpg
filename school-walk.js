@@ -1,5 +1,6 @@
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261008-places';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
-import {EXTRA_ROOMS} from './school-walking-places.js?v=20261007-world';
+import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-places';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261008-paths';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
@@ -87,17 +88,17 @@ export function installSchoolWalk(ctx){
   player.replaceChildren(body);const name=doc.createElement('span');name.className='campus-player-name';name.textContent=ctx.getStudent()?.nickname||'나의 모험가';player.append(name);
  }
  function background(){
-  const room=ctx.getScene(),request=++imageRequest,url=room==='library'?'maps/library-panorama-v1.webp':EXTRA_ROOMS[room]?'maps/'+room+'-walk.svg':'maps/'+room+'-tall-'+(room==='library'?'v2':'v1')+'.webp',img=new Image();
+  const room=ctx.getScene(),request=++imageRequest,url=PAINTED_PLACES[room]?.background||(room==='library'?'maps/library-panorama-v1.webp':EXTRA_ROOMS[room]?'maps/'+room+'-walk.svg':'maps/'+room+'-tall-'+(room==='library'?'v2':'v1')+'.webp'),img=new Image();
   status.hidden=false;status.textContent='학교 풍경을 펼치는 중…';
   img.onload=()=>{if(request!==imageRequest)return;stage.style.backgroundImage='url("'+url+'")';stage.style.setProperty('--campus-room-art','url("'+url+'")');status.hidden=true};
   img.onerror=()=>{if(request!==imageRequest)return;status.innerHTML='<span>풍경을 아직 불러오지 못했어요.</span><button type="button">다시 보기</button>';status.querySelector('button').onclick=background};img.src=url;
  }
  function syncScene(){
   const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();camera();markPlaces();return}
-  stop();scene=next;hub.classList.toggle('campus-wide',!!EXTRA_ROOMS[next]);hub.classList.toggle('campus-library-wide',next==='library');ctx.setPosition(EXTRA_ROOMS[next]?12:next==='library'?36:44,GROUND);objects.replaceChildren();
+  stop();scene=next;hub.classList.toggle('campus-wide',!!EXTRA_ROOMS[next]);hub.classList.toggle('campus-painted-place',!!PAINTED_PLACES[next]);hub.classList.toggle('campus-library-wide',next==='library');ctx.setPosition(EXTRA_ROOMS[next]?12:next==='library'?36:44,GROUND);objects.replaceChildren();
   for(const p of currentPlaces()){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
-   if(p.door)decorateRoomDoor(b,p,next==='library');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
+   if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
    b.onclick=()=>{stop();ctx.interact(p.kind)};objects.append(b);
   }
   rig();background();camera();markPlaces();ctx.onPosition();
