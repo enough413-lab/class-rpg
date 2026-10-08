@@ -1,6 +1,6 @@
-import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261008-places';
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261008-nature';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
-import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-places';
+import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261008-paths';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
