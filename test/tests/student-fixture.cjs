@@ -4,6 +4,7 @@ const root=path.resolve(__dirname,'..'),shots=path.resolve(root,'../student-scre
 const mock=String.raw`
 window.mockRpg={calls:[],failSave:false,failJournal:false,failDashboard:false,student:{id:987,number:1,nickname:'별나래',gender:'girl',xp:260,gold:180,setup_complete:true},exploration:JSON.parse(localStorage.getItem('fixtureExploration')||'[]'),workshop:JSON.parse(localStorage.getItem('fixtureWorkshop')||'{"cover":"paper","garden_complete":false}')};
 localStorage.setItem('classRpgStudentToken','fixture');
+mockRpg.finale=JSON.parse(localStorage.getItem('fixtureFinale')||'null')||{memories:[],ribbon:'meadow',wearing:false,completed_at:null};
 mockRpg.art=JSON.parse(localStorage.getItem('fixtureArt')||'null')||{phase:0,cells:Array(25).fill('empty'),stamp:'leaf'};
 Object.assign(mockRpg.art,JSON.parse(localStorage.getItem('fixtureFrame')||'null')||{background:'cream',frame:'wood',ornament:'leaf',placement:'bottom-right',decorated_at:null});
 mockRpg.kindness=JSON.parse(localStorage.getItem('fixtureKindness')||'{"phase":0,"choices":[],"pin":null,"wearing":false}');
@@ -43,6 +44,14 @@ const createClient=()=>({
   m.artSaves=(m.artSaves||0)+1;await new Promise(r=>setTimeout(r,m.artDelay||30));if(m.failArt)return {error:{message:'Offline'}};
   if(args.p_action==='mix'){if(m.art.phase===0)m.art.phase=1}else m.art={...m.art,phase:2,cells:[...args.p_cells],stamp:args.p_stamp};
   localStorage.setItem('fixtureArt',JSON.stringify(m.art));if(m.dropArtReply){m.dropArtReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.art,cells:[...m.art.cells]}};
+ }
+ if(name==='student_school_finale'){
+ const earned=[];if(m.exploration.includes('music-sequence-3'))earned.push('melody');if(m.kindness.phase===4)earned.push('kindness');if(m.exploration.includes('parcel-3'))earned.push('parcel');if(m.art.phase===2&&m.art.decorated_at)earned.push('art');if(m.exploration.includes('letter-3'))earned.push('letter');
+ if(args.p_action==='read'){await new Promise(r=>setTimeout(r,m.finaleReadDelay||0));return m.failFinaleRead?{error:{message:'Offline'}}:{data:{...m.finale,memories:[...m.finale.memories],earned}}}
+ m.finaleSaves=(m.finaleSaves||0)+1;await new Promise(r=>setTimeout(r,m.finaleDelay||20));if(m.failFinale)return {error:{message:'Offline'}};
+ if(args.p_action==='wear'){if(!m.finale.completed_at)return {error:{message:'No finale'}};m.finale.wearing=args.p_wearing}
+ else{if(!m.finale.completed_at&&m.student.xp<1820)return {error:{message:'Level'}};if(args.p_memories?.length!==3||new Set(args.p_memories).size!==3||args.p_memories.some(x=>!earned.includes(x)))return {error:{message:'Missing memories'}};m.finale={...m.finale,memories:[...args.p_memories],ribbon:args.p_ribbon,wearing:m.finale.completed_at?m.finale.wearing:true,completed_at:m.finale.completed_at||new Date().toISOString()}}
+ localStorage.setItem('fixtureFinale',JSON.stringify(m.finale));if(m.dropFinaleReply){m.dropFinaleReply=false;return {error:{message:'Offline'}}}return {data:{...m.finale,memories:[...m.finale.memories],earned}};
  }
  if(name==='student_garden_letter'){
   m.letterSaves=(m.letterSaves||0)+1;await new Promise(r=>setTimeout(r,m.letterDelay||30));if(m.failLetter)return {error:{message:'Offline'}};

@@ -1,3 +1,4 @@
+import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261007-finale';
 import {LETTER_MILESTONE} from './garden-letter.js?v=20261007-letter';
 import {FRAME_MILESTONE,installArtFrame} from './art-frame.js?v=20261007-frame';
 import {ART_MILESTONE,installArtPostcard} from './art-postcard.js?v=20261007-frame';
@@ -26,7 +27,7 @@ export function installStudentAdventure(ctx){
  const dashboard=byId('dashboard');
  if(!dashboard||byId('studentAdventureHome'))return;
  let filter='todo',journal=null,journalError='',journalTask=null,loadedAt=0,owner=null,activeChapter=null,stepIndex=0,replay=false,saving=false,viewRequest=0,gardenChoices=new Set(),endingPromise='';
- const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE,MUSIC_MILESTONE,SEQUENCE_MILESTONE,KINDNESS_MILESTONE,PARCEL_MILESTONE,ART_MILESTONE,FRAME_MILESTONE,LETTER_MILESTONE];
+ const workshopMilestones=[...WORKSHOP_MILESTONES,CHAPTER_ONE_MILESTONE,LIBRARY_MILESTONE,MUSIC_MILESTONE,SEQUENCE_MILESTONE,KINDNESS_MILESTONE,PARCEL_MILESTONE,ART_MILESTONE,FRAME_MILESTONE,LETTER_MILESTONE,FINALE_MILESTONE];
  let libraryIndex=0,libraryChoice={claim:null,evidence:null},librarySolved=false;
  let musicIndex=0,musicChoice=null,musicSolved=false;
  const musicPlayer=createMusicPlayer(state=>{
@@ -55,6 +56,7 @@ export function installStudentAdventure(ctx){
  doc.body.append(dialog);
  const art=installArtPostcard({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
  const frame=installArtFrame({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
+ const finale=installSchoolFinale({db:ctx.db,getToken:ctx.getToken,getStudent:student,levelInfo:ctx.levelInfo,onChange:render});
  const kindness=installKindnessChapter({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
  const sequence=installMusicSequence({dialog,esc,open,button,db:ctx.db,getToken:ctx.getToken,getStudent:student,getJournal:()=>journal,getSaving:()=>saving,setSaving:value=>saving=value,render,markLoaded:()=>{loadedAt=Date.now()}});
  dialog.addEventListener('close',()=>musicPlayer.stop());
@@ -70,7 +72,7 @@ export function installStudentAdventure(ctx){
   if(owner!==s.id){owner=s.id;journal=null;journalError='';loadedAt=0;queueMicrotask(()=>loadJournal())}
   const lv=ctx.levelInfo(s.xp||0),all=ctx.getQuests()||[];
   renderNextGoal(lv.level,s.xp||0);
-  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>'+profileMemento(journal?.workshop)+kindnessProfile(journal?.kindness);
+  byId('saProfileTitle').innerHTML='<span class="sa-level-chip">Lv. '+lv.level+' 모험가</span><h2>'+esc(s.nickname||'모험가')+'</h2>'+profileMemento(journal?.workshop)+kindnessProfile(journal?.kindness)+finale.profile();
   byId('saProfileProgress').innerHTML='<div class="sa-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+lv.pct+'"><span style="width:'+lv.pct+'%"></span></div><div class="sa-small">'+(lv.max?'최고 레벨에 도착했어요!':'다음 레벨까지 <b>'+(lv.need-lv.cur)+' 경험치</b>')+'</div><div class="sa-currency"><span>🪙 <b>'+Number(s.gold||0)+'</b> 골드</span><span>✨ '+Number(s.xp||0)+' 경험치</span></div>';
   const needs=all.filter(q=>!['approved','submitted'].includes(q.status)).length,waiting=all.filter(q=>q.status==='submitted').length;
   byId('saQuestSummary').textContent=needs?'도전할 일 '+needs+'개'+(waiting?' · 선생님 확인 중 '+waiting+'개':''):waiting?'보낸 기록 '+waiting+'개를 선생님이 확인하고 있어요.':'오늘도 나의 속도로 한 걸음씩!';
@@ -146,9 +148,10 @@ export function installStudentAdventure(ctx){
    (journalError?'<p class="sa-offline" role="status">'+esc(journalError)+'</p>':'')+
    '<div class="sa-world" aria-label="학교 탐험 지도">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-map-pin '+(lv<c.level?'locked':'')+'" data-chapter="'+c.id+'" style="left:'+c.x+'%;top:'+c.y+'%" aria-label="'+c.name+', '+label(c)+'">'+c.icon+' '+c.name+'<span>'+label(c)+'</span></button>').join('')+'</div>'+
    '<p class="sa-legend">✦ 학교생활 퀘스트로 레벨을 올려요. 탐험은 이야기 도장을 모으는 작은 연습이에요.</p>'+
-   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='garden-letter'?letterLabel(lv):m.activity==='art-frame'?frame.label(lv):m.activity==='art-postcard'?art.label(lv):m.activity==='parcel-adventure'?parcelLabel(lv):m.activity==='kindness-chapter'?kindness.label(lv):m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
+   '<div class="sa-destinations">'+SCHOOL_CHAPTERS.map(c=>'<button class="sa-destination" data-chapter="'+c.id+'"><b>'+c.icon+' '+c.name+'</b><small>'+c.subtitle+'</small><small>'+label(c)+'</small></button>').join('')+'</div><h3>학교에서 발견한 작은 즐거움</h3><div class="sa-workshop-links">'+workshopMilestones.map(m=>'<button class="sa-destination" data-workshop="'+m.activity+'"><b>'+m.label+'</b><small>'+m.description+'</small><small>'+(m.activity==='school-finale'?finale.label(lv):m.activity==='garden-letter'?letterLabel(lv):m.activity==='art-frame'?frame.label(lv):m.activity==='art-postcard'?art.label(lv):m.activity==='parcel-adventure'?parcelLabel(lv):m.activity==='kindness-chapter'?kindness.label(lv):m.activity==='music-sequence'?sequence.label(lv):m.activity==='music-room'?musicLabel(lv):m.activity==='library-evidence'?libraryLabel(lv):m.activity==='chapter-one'&&journal.workshop?.chapter_one_complete?'✓ 첫 모험 완료 · 기억 보기':lv<m.level?'🔒 Lv. '+m.level+'에 열려요':m.activity==='garden'&&journal.workshop?.garden_complete?'✓ 관찰 완료 · 다시 놀기':'지금 해 보기')+'</small></button>').join('')+'</div>');
  }
  async function workshop(kind){
+  if(kind==='school-finale'){dialog.close();await finale.start();return}
   const m=workshopMilestones.find(x=>x.activity===kind);if(!m)return;
   const request=++viewRequest,lv=ctx.levelInfo(student().xp||0).level;
   open(m.label,'나의 탐험 기록을 펼치고 있어요.',errorView('retry-map'));await loadJournal();
@@ -417,5 +420,5 @@ export function installStudentAdventure(ctx){
  doc.addEventListener('student-letter-updated',()=>{loadedAt=0});
  doc.addEventListener('student-parcel-updated',()=>{loadedAt=0});
  render();
- return {render,map,growth,roadmap,unlocksBetween,workshop,chapter:id=>{chapter(id)}};
+ return {finale,render,map,growth,roadmap,unlocksBetween,workshop,chapter:id=>{chapter(id)}};
 }
