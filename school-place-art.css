@@ -10,6 +10,7 @@
 #classroomHub.campus-painted-place [data-art=playground-balls]{width:165px;height:150px}
 #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{top:-9px;padding:5px 10px;min-width:0;max-width:155px;border-width:1px;border-radius:6px 6px 11px 11px;box-shadow:0 2px 0 #98794360;font-size:16px;white-space:nowrap}
 #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption::after{display:none}
+#classroomHub.campus-painted-place [data-art=playground-mat] .campus-object-caption{top:-46px}
 #classroomHub.campus-painted-place .campus-painted-prop .campus-object-action{display:none}
 #classroomHub.campus-painted-place .campus-painted-prop:is(.is-near,.is-destination,:focus-visible) .campus-object-action{display:block}
 #classroomHub.campus-painted-place .campus-painted-prop:focus-visible{outline:none}

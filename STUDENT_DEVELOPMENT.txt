@@ -305,3 +305,5 @@ Completed cafeteria/playground painted environments, 2026-10-08 (explicit user c
 - Publish only staging and main/test; exact preservation of all other main blobs and live Pages bytes recorded after verification in outputs/student-painted-places-deployment.json in the 2026-09-30/a chat folder. Existing hourly automation and pause on new activities remain in force.
 
 Next bounded priority: continue bringing existing garden/pond placeholder scenery and independent objects up to this art quality, and simplify the walking HUD's page-like header/sidebar without reducing readable child-sized controls. Preserve the eight new art assets, original prompts and camera scale, existing seven-room links, scene-first map/NPC UI, level-earned content and below-feet names. Do not restart the Lv21 backlog unless the user changes direction.
+
+Final visual follow-up: lifted the low stretching mat's name/action label above the player's head at all three tested screen sizes, and added a geometry assertion for every prop label versus the player. No other layout or interaction changed.
