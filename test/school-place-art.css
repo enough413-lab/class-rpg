@@ -62,3 +62,17 @@
  #classroomHub.campus-painted-place [data-art=pond-notebook]{width:119px;height:108px}
  #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:14px;padding:4px 8px}
 }
+/* A brief discovery of light; painted furniture, names and hit targets stay still. */
+.campus-nature-effect{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;border-radius:12px}
+.campus-nature-effect i{position:absolute;display:block;opacity:0;pointer-events:none}
+.campus-nature-effect[data-effect=pollen] i{left:21%;top:42%;width:7px;height:7px;border-radius:50%;background:#fffad3;box-shadow:0 0 5px 2px #fbe79f70;--drift:9px;--delay:0s}
+.campus-nature-effect[data-effect=pollen] i:nth-child(2){left:49%;top:37%;width:5px;height:5px;--drift:-8px;--delay:.18s}
+.campus-nature-effect[data-effect=pollen] i:nth-child(3){left:77%;top:46%;width:6px;height:6px;--drift:6px;--delay:.36s}
+.campus-nature-effect[data-effect=sunlight] i{left:65%;top:19%;width:13px;height:18px;background:#effeff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);--delay:0s}
+.campus-nature-effect[data-effect=sunlight] i:nth-child(2){left:80%;top:8%;width:10px;height:14px;--delay:.28s}
+#classroomHub:not(.hidden) .campus-painted-prop:is(.is-near,:focus-visible) .campus-nature-effect[data-effect=pollen] i{animation:campusPollenLight 2.4s ease-out var(--delay) 1 both}
+#classroomHub:not(.hidden) .campus-painted-prop:is(.is-near,:focus-visible) .campus-nature-effect[data-effect=sunlight] i{animation:campusLensLight 2.2s ease-in-out var(--delay) 1 both}
+.campus-painted-prop.art-missing .campus-nature-effect{display:none}
+@keyframes campusPollenLight{0%{opacity:0;transform:translate(0,0) scale(.7)}25%{opacity:.85}100%{opacity:0;transform:translate(var(--drift),-29px) scale(.3)}}
+@keyframes campusLensLight{0%,100%{opacity:0;transform:scale(.6) rotate(-14deg)}40%{opacity:.82;transform:scale(1) rotate(8deg)}}
+@media(prefers-reduced-motion:reduce){#classroomHub .campus-painted-prop .campus-nature-effect{display:none}}
