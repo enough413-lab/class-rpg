@@ -1,3 +1,4 @@
+import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
 import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
@@ -39,11 +40,11 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=walk.nearest(),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();
+  memory?.capture();meal?.position();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?near.label:direction+'으로 안내받기';
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(meal?.label(near.kind)||near.label):direction+'으로 안내받기';
   if(action.textContent!==label)action.textContent=label;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
@@ -67,8 +68,9 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null;
+ let parcel=null,letter=null,meal=null;
  function interact(kind){
+  if(meal?.interact(kind))return;
   if(kind==='story'){stop();walk.stop();window.studentAdventure.chapter(ctx.getScene());return}
   if(kind==='nook'){stop();guide.dataset.inspection='true';guide.querySelector('.campus-return[data-guide=close]').textContent='계속 둘러보기';doc.getElementById('campusGuideTitle').textContent='햇살이 머무는 창가';guide.querySelector('.campus-greeting p').textContent='폭신한 방석 위로 나뭇잎 그림자가 내려앉았어요. 마음에 드는 책과 잠깐 쉬어 갈까요? 오른쪽 초록 문은 학교 정원으로 이어져요.';guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 창가 쉼터';guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();guide.showModal();return}
   if(kind.startsWith('look-')){stop();walk.stop();guide.dataset.inspection='true';guide.querySelector('.campus-return[data-guide=close]').textContent='계속 둘러보기';const room=ctx.getScene(),i=Number(kind.slice(5));doc.getElementById('campusGuideTitle').textContent=EXTRA_ROOMS[room].props[i];guide.querySelector('.campus-greeting p').textContent=WORLD_DETAILS[room][i];guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent=SCENES[room].name;guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();if(room==='garden'&&i===0){const b=doc.createElement('button');b.className='campus-return letter-inspect-link';b.dataset.guide='letter-garden';b.textContent='🌿 새싹 관찰 편지 · Lv.19';guide.querySelector('.campus-greeting').after(b)}guide.showModal();return}
@@ -81,6 +83,7 @@ export function installStudentCampus(ctx){
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
+ meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
