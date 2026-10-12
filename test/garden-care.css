@@ -1,0 +1,18 @@
+.garden-care-art{position:absolute;inset:0;pointer-events:none;z-index:2}
+.garden-can-side{position:absolute;left:-15%;bottom:0;width:40%;height:47%;pointer-events:none}
+.garden-can{display:block;width:100%;height:100%;transform-origin:70% 65%;filter:drop-shadow(0 2px 1px #354e392f)}
+.garden-can svg{display:block;width:100%;height:100%}
+[data-care-side=right] .garden-can-side{left:auto;right:-15%;transform:scaleX(-1)}
+.garden-pour{position:absolute;left:54%;bottom:55%;width:24%;height:40%;pointer-events:none}
+.garden-pour i{display:block;position:absolute;opacity:0;width:4px;height:9px;left:20%;top:0;border-radius:60% 50% 60% 50%;background:#b2e5e9;box-shadow:0 0 0 1px #578b9690}
+.garden-pour i:nth-child(2){left:50%;top:10%}.garden-pour i:nth-child(3){left:80%;top:20%}
+.garden-dew{display:none;position:absolute;inset:0}.garden-watered .garden-dew{display:block}
+.garden-dew i{position:absolute;left:24%;top:51%;width:5px;height:7px;border-radius:70% 35% 65% 45%;background:#bce8ee;border:1px solid #467e81;box-shadow:inset 1px 1px #f1ffef}
+.garden-dew i:nth-child(2){left:53%;top:41%;width:4px;height:6px}.garden-dew i:nth-child(3){left:78%;top:48%}
+.garden-care-memory{display:none;position:absolute;left:50%;bottom:10%;transform:translateX(-50%);padding:2px 7px;background:#eef6cf;color:#315b48;border:1px solid #718e61;border-radius:9px;font:13px/1.3 SchoolJua,system-ui;white-space:nowrap}
+.garden-watered .garden-care-memory{display:block}
+.garden-care-status{grid-column:1/-1;margin:0;padding:4px 10px;border-radius:10px;background:#f4f6dc;color:#3c5b40;font:14px/1.5 system-ui;word-break:keep-all}
+.garden-care-status[hidden]{display:none}
+#classroomHub[data-scene=garden]:has(.garden-care-status:not([hidden])) .campus-how{display:none!important}
+.art-missing .garden-dew{display:none}.art-missing .garden-care-memory{bottom:0}
+@media(max-width:849px){.garden-care-status{font-size:13px;width:100%;box-sizing:border-box}.garden-can-side{left:-12%}[data-care-side=right] .garden-can-side{right:-12%}}
