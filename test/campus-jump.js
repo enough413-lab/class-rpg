@@ -17,7 +17,7 @@ export function installCampusJump({hub,getStudent,getScene}){
   samples.push({offset:.89,y:reduce?1:3,sx:reduce?1:1.03,sy:reduce?1:.95,tuck:reduce?0:.35},{offset:1,y:0,sx:1,sy:1,tuck:0});
   const options={duration,easing:'linear'},lift=samples.map(p=>({offset:p.offset,translate:'0 '+p.y+'px'}));
   animations=[rig.animate(samples.map(p=>({offset:p.offset,translate:'0 '+p.y+'px',scale:p.sx+' '+p.sy})),options)];
-  for(const el of player.querySelectorAll('.campus-player-name,.cafeteria-held-tray:not([hidden])'))animations.push(el.animate(lift,options));
+  for(const el of player.querySelectorAll('.campus-player-name,.cafeteria-held-tray:not([hidden]),.parcel-held:not([hidden])'))animations.push(el.animate(lift,options));
   for(const [selector,sign] of [['.campus-leg-left',1],['.campus-leg-right',-1]]){
    const leg=rig.querySelector(selector);if(leg)animations.push(leg.animate(samples.map(p=>({offset:p.offset,transform:'translateY('+(-3*p.tuck)+'px) rotate('+(sign*8*p.tuck)+'deg)'})),options));
   }

@@ -1,7 +1,9 @@
+import {installParcelWorld} from './parcel-world.js?v=20261012-parcel-world';
 export const PARCEL_MILESTONE={level:16,label:'📦 책 향기가 나는 꾸러미',activity:'parcel-adventure',description:'교실의 꾸러미와 복도의 단서를 살펴 도서관에 전달하는 작은 산책 의뢰예요.'};
 const STEPS=['parcel-1','parcel-2','parcel-3'];
 export function installParcelAdventure(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='parcelAdventureDialog';dialog.className='parcel-dialog';dialog.setAttribute('aria-labelledby','parcelTitle');doc.body.append(dialog);
+ const world=installParcelWorld(c);
  const tracker=doc.createElement('button');tracker.className='parcel-tracker';tracker.type='button';c.viewport.append(tracker);
  const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
  let owner=null,token=null,done=new Set(),loaded=false,error=false,busy=false,task=null,clues=new Set(),opener=null,view=0,loadVersion=0,saveVersion=0;
@@ -13,7 +15,7 @@ export function installParcelAdventure(c){
   tracker.innerHTML='<span aria-hidden="true">'+(phase()>0?'<img src="maps/npcs/parcel-v1.webp" alt="">':'✦')+'</span><span><b>책 향기 꾸러미</b><small>'+(error?'연결 확인 · 다시 읽기':!loaded?'의뢰 수첩 읽는 중…':level()<16&&!phase()?'Lv.16부터 살펴봐요':walkingHint())+'</small><i aria-hidden="true">'+[0,1,2].map(i=>i<phase()?'●':'○').join(' ')+'</i></span>';
   tracker.setAttribute('aria-label','꾸러미 의뢰 수첩 · '+(loaded?goal():'기록 불러오기'));tracker.dataset.complete=String(phase()===3);
   const parcel=c.objects.querySelector('[data-place=parcel]');if(parcel)parcel.hidden=loaded&&phase()>0;
-  c.onProgress?.({loaded:loaded&&owner===student().id&&token===c.getToken(),phase:phase()});
+  const progress={loaded:loaded&&owner===student().id&&token===c.getToken(),phase:phase()};world.render(progress);c.onProgress?.(progress);
  }
  async function load(){const s=student(),t=c.getToken();if(!s.id||!t)return false;if(owner===s.id&&token===t&&loaded)return true;if(task&&owner===s.id&&token===t)return task;
   owner=s.id;token=t;done=new Set();loaded=false;error=false;clues.clear();render();
@@ -22,7 +24,7 @@ export function installParcelAdventure(c){
   let requestTask;requestTask=(async()=>{try{const {data,error:e}=await c.db.rpc('student_learning_journal',{p_token:t});if(e||!Array.isArray(data?.exploration))throw e||Error('No progress');if(!current())return false;done=new Set(data.exploration);loaded=true;error=false;return true}catch{if(current()){error=true;loaded=false}return false}finally{if(task===requestTask)task=null;render()}})();task=requestTask;return requestTask;
  }
  const close=()=>{if(!busy){view++;dialog.close()}};
- function open(title,subtitle,html){c.stopMovement();if(!dialog.open)opener=doc.activeElement;dialog.innerHTML='<header><div><span>우리 학교 작은 의뢰</span><h2 id="parcelTitle">'+esc(title)+'</h2><p>'+esc(subtitle)+'</p></div><button data-parcel-close type="button" autofocus>닫기</button></header><div class="parcel-body">'+html+'</div>';if(!dialog.open)dialog.showModal();dialog.scrollTop=0}
+ function open(title,subtitle,html){dialog.dataset.handoff='false';c.stopMovement();if(!dialog.open)opener=doc.activeElement;dialog.innerHTML='<header><div><span>우리 학교 작은 의뢰</span><h2 id="parcelTitle">'+esc(title)+'</h2><p>'+esc(subtitle)+'</p></div><button data-parcel-close type="button" autofocus>닫기</button></header><div class="parcel-body">'+html+'</div>';if(!dialog.open)dialog.showModal();dialog.scrollTop=0}
  async function prepare(){
   const request=++view,who=student().id,t=c.getToken();open('책 향기가 나는 꾸러미','의뢰 수첩을 펼치고 있어요.','<p>학교의 발자국을 확인하고 있어요…</p>');
   const ok=await load();if(request!==view||!dialog.open||who!==student().id||t!==c.getToken())return false;
@@ -43,11 +45,12 @@ export function installParcelAdventure(c){
   if(kind==='notice'&&c.getScene()==='hallway'&&phase()===1){
    open('복도의 작은 안내판','꾸러미에 찍힌 표식과 같은 곳을 찾아요.', '<div class="parcel-notice"><span aria-hidden="true">📖 🌿</span><h3>책 나눔 준비 중</h3><p>파란 책 봉인과 잎 장식은 도서관의 표식이에요.<br>책지기 토리가 책 나눔 물건을 기다리고 있어요.</p></div><h3>꾸러미가 향할 곳은?</h3><div class="parcel-route-choices"><button data-parcel-route="shop">✏️ 모모의 상점</button><button data-parcel-route="library">📖 토리의 도서관</button><button data-parcel-route="classroom">🏫 선생님의 교실</button></div>'+footer());return}
   if(kind==='tori'&&c.getScene()==='library'&&phase()===2){
-   open('토리에게 찾아온 책 향기','도서관 · 마지막 발자국', '<div class="parcel-tori"><img src="maps/npcs/tori-v1.webp" alt="책지기 토리"><div><h3>“내가 기다리던 책 나눔 꾸러미구나!”</h3><p>토리: “책 봉인과 잎 표식을 잘 찾았네. 이 안에는 낡은 책을 고칠 종이와 예쁜 책갈피가 있어. 같이 책 나눔을 준비해 줄래?”</p></div></div><div class="parcel-delivery"><img src="maps/npcs/parcel-v1.webp" alt="토리에게 전달할 책 나눔 꾸러미"></div><button class="parcel-primary" data-parcel-save="parcel-3">토리에게 꾸러미 전달하기</button>'+footer());return}
+   open('토리에게 찾아온 책 향기','도서관 · 마지막 발자국', '<div class="parcel-tori"><img src="maps/npcs/tori-v1.webp" alt="책지기 토리"><div><h3>“찾아와 줬구나!”</h3><p>내가 기다리던 책 나눔 꾸러미야. 여기 건네줄래?</p></div></div><button class="parcel-primary" data-parcel-save="parcel-3">'+(c.walk.nearby()?.kind==='tori'?'토리에게 꾸러미 전달하기':'토리에게 가까이 가기')+'</button>'+footer());dialog.dataset.handoff='true';return}
   return start();
  }
  function finish(){open('책 나눔의 작은 배달부','세 발자국을 모두 모았어요.', '<div class="parcel-finish"><img src="maps/npcs/tori-v1.webp" alt="책지기 토리"><h3>토리가 책갈피 하나를 수첩에 끼워 줬어요!</h3><div class="parcel-bookmark" role="img" aria-label="파란 책과 작은 잎이 그려진 기념 책갈피"><span>📖</span><i>🌿</i><b>책 나눔의 기억</b></div><p>꾸러미의 표식 → 복도 안내판 → 토리에게 전달<br>직접 찾아다니며 세 단서를 이어 줬어요.</p><strong>✓ 내 탐험 수첩에 배달 기억이 남아요</strong></div><p class="parcel-note">기념 책갈피는 이 의뢰의 수첩 장식이에요. 경험치·골드·장비 능력치는 바뀌지 않아요.</p><button data-parcel-back>학교 산책 계속하기</button>');render()}
  async function save(step,values){if(busy)return;const feedback=doc.getElementById('parcelFeedback');if(!feedback)return;
+  if(step==='parcel-3'&&(c.getScene()!=='library'||c.walk.nearby()?.kind!=='tori')){close();if(c.getScene()==='library')c.walk.goTo('tori');else go('library','tori');return}
   if(step==='parcel-1'&&clues.size!==2){feedback.textContent='봉인과 잎 장식을 둘 다 살펴봐 주세요.';return}
   const requestedOwner=student().id,requestedToken=c.getToken(),version=++saveVersion;busy=true;c.stopMovement();const buttons=[...dialog.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);feedback.textContent='발견한 발자국을 수첩에 담고 있어요…';
   try{const {data,error:e}=await c.db.rpc('student_parcel_adventure',{p_token:requestedToken,p_step:step,p_clues:values});if(e||!data)throw e||Error('No result');if(requestedOwner!==student().id||requestedToken!==c.getToken())return;
@@ -69,5 +72,5 @@ export function installParcelAdventure(c){
   if(b.hasAttribute('data-parcel-save')){save(b.dataset.parcelSave,b.dataset.parcelSave==='parcel-1'?[...clues].sort():['tori'])}
  });
  new MutationObserver(render).observe(c.objects,{childList:true});doc.addEventListener('student-dashboard-updated',()=>{if(owner!==student().id||token!==c.getToken()){view++;loadVersion++;saveVersion++;busy=false;loaded=false;done.clear();clues.clear();if(dialog.open)dialog.close();render()}load()});
- load();render();return {start,inspect,collected:()=>loaded&&phase()>0};
+ load();render();return {start,inspect,collected:()=>loaded&&phase()>0,snapshot:()=>({loaded:loaded&&owner===student().id&&token===c.getToken(),phase:phase()})};
 }

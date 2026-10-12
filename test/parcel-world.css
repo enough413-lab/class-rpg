@@ -1,0 +1,32 @@
+/* The same original parcel moves from the classroom to the avatar, then Tori. */
+.parcel-held,.parcel-delivered{position:absolute;display:block;pointer-events:none;z-index:21;filter:drop-shadow(0 2px 1px #57432d44)}
+.parcel-held{left:29%;top:44%;width:46%;height:40%}
+#classroomHub.campus-side .campus-tori .parcel-delivered{left:58%;top:auto;bottom:1%;width:40%;height:40%;z-index:2;transform:none;padding:0;border:0;background:none;border-radius:0}
+#classroomHub.campus-side .campus-tori .parcel-prop-fallback{display:none;position:static;transform:none;padding:0;border:0;background:none;font:32px/1 system-ui}
+#classroomHub.campus-side .campus-tori .art-missing>.parcel-prop-fallback{display:block}
+.parcel-held[hidden],.parcel-delivered[hidden]{display:none}
+.parcel-held img,.parcel-delivered img{position:static!important;display:block;width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important}
+.parcel-held img[hidden],.parcel-delivered img[hidden]{display:none!important}
+.parcel-prop-fallback{display:none;font:32px/1 system-ui;text-align:center}
+.art-missing>.parcel-prop-fallback{display:block}
+#hubPlayer.parcel-carrying:has(.cafeteria-held-tray:not([hidden])) .parcel-held{left:2%;width:40%}
+#hubPlayer.parcel-carrying .cafeteria-held-tray{left:42%}
+#campusGuide .tori-notebook{grid-column:1/-1;min-width:0}
+#campusGuide .tori-notebook summary{min-height:44px;box-sizing:border-box;padding:11px 10px}
+#campusGuide .tori-notebook summary:focus-visible{outline:3px solid #547d54;outline-offset:-2px;border-radius:12px}
+#campusGuide .campus-guide-choices{grid-template-columns:1fr}
+.parcel-dialog[data-handoff=true]{inset:auto 0 16px;margin:auto;width:min(640px,calc(100% - 20px));max-height:calc(100dvh - 30px);padding:48px 4px 6px;border:0;background:none;box-shadow:none}
+.parcel-dialog[data-handoff=true]::backdrop{background:linear-gradient(#172a3010 20%,#172a3033 70%,#172a3070);backdrop-filter:none}
+.parcel-dialog[data-handoff=true] header{position:absolute;right:4px;top:0;padding:0;border:0;background:none}
+.parcel-dialog[data-handoff=true] header>div{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.parcel-dialog[data-handoff=true] header button{background:#fff7dc;border:0;border-radius:24px}
+.parcel-dialog[data-handoff=true] .parcel-body{border:3px solid #f0dbaa;border-radius:32px;padding:16px 20px;background:#fff7dc;box-shadow:0 5px #90754d44}
+.parcel-dialog[data-handoff=true] .parcel-tori{grid-template-columns:90px minmax(0,1fr);gap:14px}
+.parcel-dialog[data-handoff=true] .parcel-tori img{height:122px}
+.parcel-dialog[data-handoff=true] .parcel-tori h3{font-size:22px;margin:0 0 6px}
+.parcel-dialog[data-handoff=true] .parcel-tori p{font:18px/1.6 SchoolJua,system-ui;margin:0}
+.parcel-dialog[data-handoff=true] .parcel-primary{width:100%;margin-top:8px}
+.parcel-dialog[data-handoff=true]:has([data-parcel-next]) [data-parcel-save]{display:none}
+.parcel-dialog[data-handoff=true] .parcel-feedback{margin:8px 0 0;padding:10px;line-height:1.5}
+.parcel-dialog[data-handoff=true] .parcel-feedback p{margin:5px 0;line-height:1.5}
+@media(max-width:400px){.parcel-dialog[data-handoff=true] .parcel-body{padding:12px}.parcel-dialog[data-handoff=true] .parcel-tori{grid-template-columns:72px minmax(0,1fr);gap:10px}.parcel-dialog[data-handoff=true] .parcel-tori img{height:105px}.parcel-dialog[data-handoff=true] .parcel-tori h3{font-size:20px}.parcel-dialog[data-handoff=true] .parcel-tori p{font-size:16px}}
