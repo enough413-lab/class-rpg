@@ -1,5 +1,5 @@
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
-import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261008-nature';
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261012-nature-light';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';
@@ -31,7 +31,16 @@ export function installSchoolWalk(ctx){
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
  const currentPlaces=()=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>p.kind!=='parcel'||!ctx.isParcelCollected?.());
  function camera(x=ctx.getPosition().x){
-  const width=stage.clientWidth,view=viewport.clientWidth,offset=Math.max(0,Math.min(width-view,width*x/100-view/2));
+  const width=stage.clientWidth,view=viewport.clientWidth;
+  let focus=width*x/100;
+  // On narrow screens, ease the framing toward a nearby decorative prop so a
+  // side-standing avatar does not push the object out of view. Geometry is
+  // cached at scene/resize; this adds no timer or layout read per object.
+  for(const a of approaches.values())if(a.cameraPair&&view<a.pairView){
+   const delta=a.center*width/100-focus,d=Math.abs(delta),t=Math.max(0,Math.min(1,(a.gapCss+120-d)/120));
+   focus+=Math.sign(delta)*Math.min(d,a.gapCss)/2*t*t*(3-2*t);
+  }
+  const offset=Math.max(0,Math.min(width-view,focus-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
   nameplates.schedule();
  }
@@ -43,7 +52,7 @@ export function installSchoolWalk(ctx){
   approaches.clear();const width=stage.clientWidth;if(!width)return;
   for(const npc of objects.querySelectorAll('.campus-npc,[data-stand-beside]')){
    const center=parseFloat(npc.style.left),gap=((npc.offsetWidth+player.offsetWidth)/2+10)/width*100;
-   approaches.set(npc.dataset.place,{center,points:[{x:center-gap,side:-1},{x:center+gap,side:1}].filter(p=>p.x>=4&&p.x<=96)});
+   approaches.set(npc.dataset.place,{center,cameraPair:npc.dataset.cameraPair==='true',gapCss:gap*width/100,pairView:player.offsetWidth+2*npc.offsetWidth+20,points:[{x:center-gap,side:-1},{x:center+gap,side:1}].filter(p=>p.x>=4&&p.x<=96)});
   }
  }
  function distance(place,x=ctx.getPosition().x){return Math.min(Math.abs(place.x-x),...(approaches.get(place.kind)?.points||[]).map(p=>Math.abs(p.x-x)))}
