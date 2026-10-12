@@ -1,0 +1,606 @@
+{
+  "scope": "test only; production release requires fresh approval",
+  "order": "ascending; do not mark design proposals or real-device/user studies complete without evidence",
+  "items": [
+    {
+      "id": 1,
+      "title": "점프 중 받은 식판이 몸을 따라가지 않음",
+      "status": "verified_pending_deployment",
+      "evidence": "tests/audit-first-items.cjs"
+    },
+    {
+      "id": 2,
+      "title": "낮은 레벨의 선생님 꾸러미 부탁",
+      "status": "verified_pending_deployment",
+      "evidence": "tests/audit-first-items.cjs"
+    },
+    {
+      "id": 3,
+      "title": "완료 후 선생님의 부탁 갱신",
+      "status": "verified_pending_deployment",
+      "evidence": "tests/audit-first-items.cjs + tests/parcel-world.cjs"
+    },
+    {
+      "id": 4,
+      "title": "토리 첫 대화 선택지 과다",
+      "status": "verified_pending_deployment",
+      "evidence": "tests/audit-first-items.cjs + tests/parcel-world.cjs"
+    },
+    {
+      "id": 5,
+      "title": "모모와 관계를 맺는 플레이",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 6,
+      "title": "설명으로 끝나는 물건 행동",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 7,
+      "title": "장소별 행동을 연결하는 모험",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 8,
+      "title": "점프의 발판 및 장애물 기능",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 9,
+      "title": "급식실 의자에 앉는 자세",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 10,
+      "title": "먹는 중 점프 불가 안내",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 11,
+      "title": "위치 저장 실패 안내",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 12,
+      "title": "식판 놀이 기기 간 이어 하기",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 13,
+      "title": "독후감 표지 구별",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 14,
+      "title": "독후감 제목 검색",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 15,
+      "title": "독후감 정렬",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 16,
+      "title": "NPC 대표 의뢰 하나",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 17,
+      "title": "의뢰 수락 표시",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 18,
+      "title": "현재 목표 하나",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 19,
+      "title": "목표에서 지도 연결",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 20,
+      "title": "진행 중 NPC 반응",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 21,
+      "title": "NPC에게 돌아갈 이유",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 22,
+      "title": "완료 후 세계 변화",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 23,
+      "title": "재방문 완료 인정",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 24,
+      "title": "학교 제출과 게임 의뢰 구별",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 25,
+      "title": "의뢰 한 개 처음부터 끝까지 완성",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 26,
+      "title": "책 들고 꽂기",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 27,
+      "title": "책 정리 의뢰",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 28,
+      "title": "정원 물주기",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 29,
+      "title": "물준 식물 변화",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 30,
+      "title": "운동장 공 조작",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 31,
+      "title": "공 목표 놀이",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 32,
+      "title": "연못 움직이는 관찰 대상",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 33,
+      "title": "망원경 장면 변화",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 34,
+      "title": "친구에게 식판 전달",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 35,
+      "title": "장소별 반복 변형 놀이",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 36,
+      "title": "물건 받는 손 동작",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 37,
+      "title": "물건 놓는 동작",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 38,
+      "title": "물건별 팔 자세",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 39,
+      "title": "회전 시 물건 손 정렬",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 40,
+      "title": "NPC 바라보는 대화 자세",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 41,
+      "title": "NPC 접근 시 시선 반응",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 42,
+      "title": "숨쉬는 대기 자세",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 43,
+      "title": "인사 기쁨 궁금함 표현",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 44,
+      "title": "전용 점프 그림",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 45,
+      "title": "의상별 발 그림자 정렬",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 46,
+      "title": "문 진입 표시",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 47,
+      "title": "장소 전환 연출",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 48,
+      "title": "들어온 문 알아보기",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 49,
+      "title": "다음 장소 풍경 연결",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 50,
+      "title": "장소 대표 지형물",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 51,
+      "title": "배경 소품 화풍 통일",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 52,
+      "title": "캐릭터 가구 크기",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 53,
+      "title": "앞뒤 가림 규칙",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 54,
+      "title": "장식과 조작 물건 구별",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 55,
+      "title": "조용한 구역과 활동 구역",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 56,
+      "title": "모바일 아래 빈 공간",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 57,
+      "title": "이동 점프 행동 구분",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 58,
+      "title": "구체적인 행동 동사",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 59,
+      "title": "비활성 버튼 이유",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 60,
+      "title": "메뉴 중요도 차등",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 61,
+      "title": "행동과 기록 화면 분리",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 62,
+      "title": "목표 안내 중복 제거",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 63,
+      "title": "라벨 말풍선 동시 개수",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 64,
+      "title": "긴 이름 줄바꿈 규칙",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 65,
+      "title": "정보 글자 강조 순서",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 66,
+      "title": "짧은 NPC 문장",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 67,
+      "title": "대화형 답변 문구",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 68,
+      "title": "나중에 하기 선택",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 69,
+      "title": "수락 전 행동 결과 안내",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 70,
+      "title": "행동을 기억하는 완료 대사",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 71,
+      "title": "NPC별 말투",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 72,
+      "title": "감정 표정",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 73,
+      "title": "대화 뒤 다음 행동",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 74,
+      "title": "게임 안에서 수행하는 설명",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 75,
+      "title": "NPC 생활 행동",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 76,
+      "title": "책마다 색 표지",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 77,
+      "title": "긴 글 가독성",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 78,
+      "title": "읽던 글 위치 복구",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 79,
+      "title": "같은 책 친구 글 모음",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 80,
+      "title": "한국어 날짜",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 81,
+      "title": "내 글 상태 구별",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 82,
+      "title": "작성 후 책 꽂히는 연출",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 83,
+      "title": "선생님 답장 도착 표시",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 84,
+      "title": "책장과 작성 동선",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 85,
+      "title": "작성 후 세계 복귀",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 86,
+      "title": "음량과 소리 설정",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 87,
+      "title": "색 외 상태 구별",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 88,
+      "title": "읽기 쉬운 글자 설정",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 89,
+      "title": "동작 줄임 상태 결과",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 90,
+      "title": "조작 체험 안내",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 91,
+      "title": "실제 크롬북 장시간 성능",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 92,
+      "title": "모바일 두 손가락 입력",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 93,
+      "title": "확대 큰 글자 레이아웃",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 94,
+      "title": "공중 상호작용 조합",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 95,
+      "title": "의상별 점프 경계",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 96,
+      "title": "같은 계정 다중 탭",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 97,
+      "title": "저장 중 네트워크 계정 전환",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 98,
+      "title": "학교 네트워크 자원 차단",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 99,
+      "title": "업데이트 전 열린 탭",
+      "status": "pending",
+      "evidence": null
+    },
+    {
+      "id": 100,
+      "title": "실제 학생 사용성 관찰",
+      "status": "pending",
+      "evidence": null
+    }
+  ]
+}
