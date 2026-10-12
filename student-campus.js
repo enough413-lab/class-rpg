@@ -1,4 +1,5 @@
-import {installCampusJump} from './campus-jump.js?v=20261012-audit-1';
+import {installMomoFavor} from './momo-favor.js?v=20261012-momo';
+import {installCampusJump} from './campus-jump.js?v=20261012-momo';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
@@ -6,9 +7,9 @@ import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261012-parcel-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
-import {installSchoolWalk} from './school-walk.js?v=20261012-jump-polish';
+import {installSchoolWalk} from './school-walk.js?v=20261012-momo';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
-import {installCampusNpcs} from './campus-npcs.js?v=20261012-audit-1';
+import {installCampusNpcs} from './campus-npcs.js?v=20261012-momo';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';
@@ -34,14 +35,14 @@ export function installStudentCampus(ctx){
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
- const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,levelInfo:ctx.levelInfo});
+ const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a)});
  let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  function stop(){held=null;walk.stop()}
  function syncNear(){
-  if(!open())return;const near=walk.nearby(),closest=walk.nearest(),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();
+  if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
+  memory?.capture();meal?.position();momo?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
@@ -69,8 +70,9 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null;
+ let parcel=null,letter=null,meal=null,momo=null;
  function interact(kind){
+  if(kind==='pencil')return momo?.inspect();
   if(meal?.interact(kind))return;
   if(kind==='story'){stop();walk.stop();window.studentAdventure.chapter(ctx.getScene());return}
   if(kind==='nook'){stop();guide.dataset.inspection='true';guide.querySelector('.campus-return[data-guide=close]').textContent='계속 둘러보기';doc.getElementById('campusGuideTitle').textContent='햇살이 머무는 창가';guide.querySelector('.campus-greeting p').textContent='폭신한 방석 위로 나뭇잎 그림자가 내려앉았어요. 마음에 드는 책과 잠깐 쉬어 갈까요? 오른쪽 초록 문은 학교 정원으로 이어져요.';guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 창가 쉼터';guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();guide.showModal();return}
@@ -83,8 +85,9 @@ export function installStudentCampus(ctx){
   if(kind==='portfolio')return window.openReadingShelf();
   return window.hubInteract(kind);
  }
- const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
+ const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible()});
  installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene});
+ momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
@@ -99,7 +102,7 @@ export function installStudentCampus(ctx){
   const b=event.target.closest('button');if(!b)return;
   if(b.dataset.move&&event.detail===0&&!overlay())walk.nudge(Number(b.dataset.move.split(',')[0]));
   const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else travel(route)}
-  if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else walk.goTo(walk.nearest().kind)}}
+  if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else walk.goTo(momo?.goal()?.kind||walk.nearest().kind)}}
   if(b.dataset.campus==='find')wayfinder.open();
   if(b.dataset.campus==='home')window.closeClassroomHub();
   if(b.dataset.campus==='map'){stop();walk.stop();window.studentAdventure.map()}

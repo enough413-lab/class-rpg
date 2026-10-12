@@ -5,32 +5,32 @@
     {
       "id": 1,
       "title": "점프 중 받은 식판이 몸을 따라가지 않음",
-      "status": "verified_pending_deployment",
+      "status": "resolved",
       "evidence": "tests/audit-first-items.cjs"
     },
     {
       "id": 2,
       "title": "낮은 레벨의 선생님 꾸러미 부탁",
-      "status": "verified_pending_deployment",
+      "status": "resolved",
       "evidence": "tests/audit-first-items.cjs"
     },
     {
       "id": 3,
       "title": "완료 후 선생님의 부탁 갱신",
-      "status": "verified_pending_deployment",
+      "status": "resolved",
       "evidence": "tests/audit-first-items.cjs + tests/parcel-world.cjs"
     },
     {
       "id": 4,
       "title": "토리 첫 대화 선택지 과다",
-      "status": "verified_pending_deployment",
+      "status": "resolved",
       "evidence": "tests/audit-first-items.cjs + tests/parcel-world.cjs"
     },
     {
       "id": 5,
       "title": "모모와 관계를 맺는 플레이",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/momo-favor.cjs"
     },
     {
       "id": 6,
