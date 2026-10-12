@@ -1,0 +1,42 @@
+{
+  "provider": "built-in image_gen via imagegen skill",
+  "date": "2026-10-12",
+  "reference": "maps/hallway-tall-v1.webp",
+  "use": "Existing hallway environment only; all previous room links and parcel chapter retained.",
+  "assets": [
+    {
+      "key": "panorama",
+      "source": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-57d146a0-c8bb-4c50-9e2d-a837399380c5.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/hallway-original.png",
+      "game": "maps/hallway-panorama-v1.webp",
+      "prompt": "Use case: illustration-story. Asset type: production side-scrolling school RPG background, one continuous 3:1 panorama (2172 x 724 or comparable wide resolution). Input image is our own original hallway, STYLE/ARCHITECTURE reference only, not an edit target. Create a NEW much longer cozy school corridor in its warm hand-painted storybook style: honey wooden ceiling beams, cream walls, sage wainscoting, brass and green hanging lamps, tall sunny windows with leafy school grounds, small paper-star garlands. This should feel like a real school corridor with children's simple art displayed in the middle third and a restful window bench farther right. Eye-level straight-on lateral view with horizontal vertical architecture, no vanishing corridor or isometric angle. Foreground walking surface must be continuous and unobstructed: character feet line exactly at 80% of image height, warm wooden platform top above it and dark wood platform fascia below it through the bottom edge. Keep the left 10–22% and right 79–91% of image width as cream wall sections with EMPTY lower wall for independent classroom and library doors to be placed by the game. DO NOT paint doors or openings there. Keep center 47–55% lower wall clear for a separate clue board. Varied yet cohesive scenery across the full width, not repeated tiles or stitched rooms. Upper windows, small plants, school artwork and warm light provide detail without strong dark clutter where characters stand. No characters, no NPCs, no text, no readable letters, no UI, no labels, no watermark, no logos. Original artwork only; do not reproduce any commercial game assets. Match the reference colors and painterly outlining, but compose genuinely new wider scenery."
+    },
+    {
+      "key": "classroom",
+      "source": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-74d7b5a7-235e-4a4b-aecd-3c78c927fa42.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/classroom-door-original.png",
+      "game": "maps/props/hallway-classroom-door-v1.webp",
+      "prompt": "Use case: illustration-story. Asset type: one independent transparent foreground door sprite for our cozy school RPG. Reference is our own school hallway: use its warm painterly outlines, honey wood, gentle daylight and coral classroom-door color. Draw ONE complete front-facing arched coral-peach wooden classroom door, sturdy honey-wood frame, four small pale blue glass panes, a rounded brass handle and subtle painted carved panels. Add a tiny raised simple sunflower emblem centered above the arch, part of the frame. Flat straight-on orthographic elevation, matching a side-view game, no perspective vanishing lines. Door with frame occupies most of canvas height, fully visible with modest transparent margin; base exactly horizontal. Paint readable wood grain, rounded friendly proportions, soft shading on the object only. True transparent background around the door/frame, no wall, no floor, no plants, no floating label, no banner, no letters, no UI, no characters, no multiple doors, no watermark. Original image, no commercial game assets.",
+      "editPrompt": "Edit the supplied single door sprite. Preserve the door shape, colors, emblem, handle, wood frame and front-facing composition exactly. Remove ONLY the broad brown/golden blurred halo/vignette behind and around the door. Everything outside the solid door and its wood frame must be genuinely transparent with crisp clean edges; no glow, no wall, no ground and no broad cast shadow. Keep the entire door/frame complete, not cropped. Keep original object shading inside the frame. This is a production transparent game sprite that will be layered over a cream school wall, so the surrounding brown atmospheric background must be completely absent. No text or other added objects.",
+      "initialSource": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-2ac033c9-d004-498b-a443-b67a8441a5eb.png",
+      "initialOriginal": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/classroom-door-initial.png"
+    },
+    {
+      "key": "library",
+      "source": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-5d01edb4-e48e-4542-806d-1e666017d98d.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/library-door-original.png",
+      "game": "maps/props/hallway-library-door-v1.webp",
+      "prompt": "Use case: illustration-story. Asset type: one independent transparent foreground door sprite for our cozy school RPG. Reference is our own school hallway: use its warm painterly outlines, honey wood, gentle daylight and sage green library-door color. Draw ONE complete front-facing arched sage-green wooden library door, sturdy honey-wood frame, four small pale blue glass panes, rounded brass handle and subtle painted carved panels. Add a small raised open-book emblem centered above the arch, part of the frame. Flat straight-on orthographic elevation, matching a side-view game, no perspective vanishing lines. Door with frame occupies most of canvas height, fully visible with modest transparent margin; base exactly horizontal. Paint readable wood grain, rounded friendly proportions, soft shading on the object only. True transparent background around the door/frame, no wall, no floor, no plants, no floating label, no banner, no letters, no UI, no characters, no multiple doors, no watermark. Original image, no commercial game assets.",
+      "editPrompt": "Edit the supplied single door sprite. Preserve the door shape, colors, emblem, handle, wood frame and front-facing composition exactly. Remove ONLY the broad brown/golden blurred halo/vignette behind and around the door. Everything outside the solid door and its wood frame must be genuinely transparent with crisp clean edges; no glow, no wall, no ground and no broad cast shadow. Keep the entire door/frame complete, not cropped. Keep original object shading inside the frame. This is a production transparent game sprite that will be layered over a cream school wall, so the surrounding brown atmospheric background must be completely absent. No text or other added objects.",
+      "initialSource": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-a19199ef-64f0-4879-af8a-5da803cc39f8.png",
+      "initialOriginal": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/library-door-initial.png"
+    },
+    {
+      "key": "notice",
+      "source": "C:/Users/USER/.codex/generated_images/01a0ef92-d173-7401-b506-03812e3aab75/exec-882ec1b9-2035-4326-aff6-a9ae62a7390f.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/hallway-panorama/notice-original.png",
+      "game": "maps/props/hallway-notice-v1.webp",
+      "prompt": "Use case: illustration-story. Asset type: one transparent freestanding noticeboard prop for our cozy school RPG. Paint a single small honey-colored wooden school bulletin board on two stout legs with a shallow base, front-facing flat side-view elevation, warm hand-painted storybook outlines matching the attached original school hallway. Rounded top corners with a tiny star wood carving. On the pale cork surface pin one large cream sheet containing only a clear BLUE OPEN-BOOK pictogram next to a small GREEN LEAF pictogram. Below are two smaller cream paper shapes with simple colored dot marks, no letters or fake writing. This is the already-existing book delivery clue board, not a new activity. Strong readable silhouette, complete object centered with modest transparent margin, horizontal feet baseline. TRUE transparent background; isolated object only, no ground, no wall, no other furniture, no characters, no UI label, no text, no logos, no watermark. No glow, aura or surrounding brown vignette; clean transparent contours, shading confined to the object itself."
+    }
+  ]
+}
