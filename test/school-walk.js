@@ -7,7 +7,7 @@ import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 import {installCampusNameplates} from './campus-nameplates.js?v=20261012-graphics';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
- classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:24,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:48,label:'📋 선생님 의뢰'},{kind:'teacher',x:66,label:'🌟 해낸 일'},{kind:'shop',x:81,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
+ classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:25,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:54,label:'📋 선생님 의뢰'},{kind:'teacher',x:68,label:'🌟 해낸 일'},{kind:'shop',x:82,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
  hallway:HALLWAY_PLACES,
  library:[roomDoors('library')[0],{kind:'reading',x:22,label:'✍️ 독후감 쓰기'},{kind:'tori',x:44,label:'책지기 토리'},{kind:'portfolio',x:62,label:'📖 독후감 책장'},{kind:'nook',x:79,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
 };

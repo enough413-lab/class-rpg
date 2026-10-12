@@ -10,7 +10,7 @@
 #classroomHub.campus-classroom-wide [data-place=quests]{width:130px!important;height:180px!important}
 #classroomHub.campus-classroom-wide [data-place=teacher]{width:138px!important;height:128px!important}
 #classroomHub.campus-classroom-wide [data-place=shop]{width:132px!important;height:170px!important}
-#classroomHub.campus-classroom-wide [data-place=hallway] .campus-prop-outline{opacity:0}
+#classroomHub.campus-classroom-wide[data-scene=classroom] [data-place=hallway] .campus-prop-outline{opacity:0}
 #classroomHub.campus-classroom-wide [data-place=hallway] .campus-object-caption{top:10%;font-size:16px;background:#f5efcf}
 #classroomHub.campus-side .campus-object-caption{color:#334e39}
 #classroomHub.campus-side .campus-sprite.is-destination .campus-object-caption{border-color:#ac7f32;background:#fff0bc}
@@ -42,3 +42,7 @@
  #classroomHub.campus-classroom-wide [data-place=shop]{width:100px!important;height:130px!important}
 }
 @media(prefers-reduced-motion:reduce){#classroomHub.campus-side .campus-near button:active{transform:none}}
+
+/* Wider furniture spacing allows one readable title line, clear of the pinned tracker. */
+#classroomHub.campus-classroom-wide[data-scene=classroom] [data-place=titles] .campus-object-caption{max-width:150px;white-space:nowrap}
+#studentAdventureDialog .sa-map-pin[data-chapter=classroom] .sa-pin-emblem{background-image:url("maps/classroom-panorama-v1.webp");background-position:45% center}
