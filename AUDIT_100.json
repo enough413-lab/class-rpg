@@ -29,14 +29,79 @@
     {
       "id": 5,
       "title": "모모와 관계를 맺는 플레이",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/momo-favor.cjs"
+      "status": "resolved",
+      "evidence": "tests/momo-favor.cjs; deployed staging 43549eee99593909b77fb18bea075d5d067486f3 / main-test b6a5e6f8e01b14098b6f5b284413129ecf6648cf; outputs/momo-favor-deployment-recheck.json (2026-09-30/a)"
     },
     {
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
-      "status": "pending",
-      "evidence": null
+      "status": "in_progress",
+      "evidence": "tests/garden-care.cjs and tests/nature-light.cjs cover the flower planter only; other targets remain open",
+      "targets": [
+        {
+          "room": "library",
+          "kind": "nook",
+          "label": "창가 쉼터",
+          "status": "pending"
+        },
+        {
+          "room": "garden",
+          "kind": "look-0",
+          "label": "새싹 화분",
+          "status": "pending"
+        },
+        {
+          "room": "garden",
+          "kind": "look-1",
+          "label": "꽃의 자리",
+          "status": "verified_pending_deployment",
+          "behavior": "Walk near, pour water directly in world, local account-specific dew/care memory; later petal sway",
+          "evidence": "tests/garden-care.cjs; outputs/student-garden-care-deployment.json (2026-09-30/a)"
+        },
+        {
+          "room": "garden",
+          "kind": "look-2",
+          "label": "그늘 쉼터",
+          "status": "pending"
+        },
+        {
+          "room": "playground",
+          "kind": "look-0",
+          "label": "준비운동 자리",
+          "status": "pending"
+        },
+        {
+          "room": "playground",
+          "kind": "look-1",
+          "label": "응원 벤치",
+          "status": "pending"
+        },
+        {
+          "room": "playground",
+          "kind": "look-2",
+          "label": "함께 쓰는 공",
+          "status": "pending"
+        },
+        {
+          "room": "pond",
+          "kind": "look-0",
+          "label": "관찰 울타리",
+          "status": "pending"
+        },
+        {
+          "room": "pond",
+          "kind": "look-1",
+          "label": "물결 관찰대",
+          "status": "pending"
+        },
+        {
+          "room": "pond",
+          "kind": "look-2",
+          "label": "질문 노트",
+          "status": "pending"
+        }
+      ],
+      "existingActions": "Cafeteria sink/table/tray return, parcel delivery, Momo pencil, wardrobe/records and room doors remain functional. One flower interaction does not close item 6."
     },
     {
       "id": 7,

@@ -28,8 +28,8 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
     await f.waitForFunction(()=>document.querySelector('.campus-nature-effect').getAnimations({subtree:true}).every(a=>a.playState==='finished'));
     assert(await effect.evaluate(e=>[...e.children].every(e=>getComputedStyle(e).opacity==='0')),'No lingering glow or continuous idle animation');
     await f.evaluate(()=>{moveHub(1,0);moveHub(-1,0)});assert((await animations()).every(a=>a.state==='finished'),'Movement within proximity does not restart the effect');
-    await target.focus();await page.keyboard.press('Enter');assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape');
-    await f.locator('[data-campus=use]').tap();assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape');
+    await target.focus();await page.keyboard.press('Enter');if(room==='garden'){await f.locator('.garden-watered').waitFor();assert(!await f.locator('#campusGuide').isVisible())}else{assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape')}
+    await f.locator('[data-campus=use]').tap();if(room==='garden'){assert(await f.locator('.garden-watered').isVisible())}else{assert(await f.locator('#campusGuide').isVisible());await page.keyboard.press('Escape')}
     assert(await f.locator('[data-campus=use]').evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight+1));assert(await f.locator('#classroomHub').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
     await f.evaluate(()=>{document.activeElement.blur();for(let i=0;i<30;i++)moveHub(1,0)});await go();
     const rightPlayer=await f.locator('#hubPlayer').boundingBox(),rightProp=await target.boundingBox(),view=await f.locator('.campus-viewport').boundingBox();
