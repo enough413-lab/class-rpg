@@ -1,0 +1,33 @@
+begin;
+do $test$
+declare sid bigint;peer bigint;outsider bigint;tid uuid;other_teacher uuid:=gen_random_uuid();t text:=gen_random_uuid()::text;blocked boolean;r jsonb;r2 jsonb;old jsonb;i integer;
+begin
+ select id,teacher_id into sid,tid from public.students order by id limit 1;select id into peer from public.students where teacher_id=tid and id<>sid order by id limit 1;select id into outsider from public.students where id not in(sid,peer) order by id limit 1;
+ insert into auth.users(id) values(other_teacher);insert into public.teacher_profiles(user_id) values(other_teacher);update public.students set teacher_id=other_teacher where id=outsider;
+ delete from public.reading_reviews where student_id in(sid,peer,outsider);
+ update public.students set session_hash=encode(extensions.digest(convert_to(t,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=sid;
+ old:=(select jsonb_build_object('xp',xp,'gold',gold) from public.students where id=sid);
+ for i in 1..23 loop insert into public.reading_reviews(student_id,book_title,read_date,summary,thoughts,recommendation_rating,recommendation_reason,status,rejection_reason) values(sid,'OWN-'||i,current_date,'Synthetic book summary.','Synthetic personal thoughts.',4,'Synthetic recommendation.',case when i<=20 then 'approved' when i=21 then 'rejected' else 'submitted' end,'PRIVATE FEEDBACK');end loop;
+ insert into public.reading_reviews(student_id,book_title,read_date,summary,thoughts,recommendation_rating,recommendation_reason,status) values(peer,'FRIEND-APPROVED',current_date,'Fixture summary.','Fixture thoughts.',5,'Fixture recommendation.','approved'),(peer,'FRIEND-PENDING',current_date,'Private draft.','Private thoughts.',3,'Private recommendation.','submitted'),(peer,'FRIEND-REJECTED',current_date,'Private revision.','Private thoughts.',3,'Private recommendation.','rejected'),(outsider,'OTHER-CLASS',current_date,'Other classroom summary.','Other classroom thoughts.',5,'Other recommendation.','approved');
+ blocked:=false;begin perform public.student_reading_shelf('invalid','mine');exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid token';end if;
+ blocked:=false;begin perform public.student_reading_shelf(null,'class');exception when others then blocked:=true;end;if not blocked then raise exception 'Null token';end if;
+ blocked:=false;begin perform public.student_reading_shelf(t,'invented');exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid scope';end if;
+ blocked:=false;begin perform public.student_reading_shelf(t,'mine',-1);exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid cursor';end if;
+ r:=public.student_reading_shelf(t,'mine');if jsonb_array_length(r->'reviews')<>20 or not (r->>'has_more')::boolean then raise exception 'First page';end if;
+ r2:=public.student_reading_shelf(t,'mine',(r->>'next_before_id')::bigint);if jsonb_array_length(r2->'reviews')<>3 or (r2->>'has_more')::boolean then raise exception 'Second page';end if;
+ if exists(select 1 from jsonb_array_elements((r->'reviews')||(r2->'reviews')) v where v->>'book_title' not like 'OWN-%' or v->>'mine'<>'true' or v ? 'rejection_reason' or v ? 'login_id' or v ? 'student_id') then raise exception 'Ownership/private fields';end if;
+ r:=public.student_reading_shelf(t,'class');r2:=public.student_reading_shelf(t,'class',(r->>'next_before_id')::bigint);if jsonb_array_length(r->'reviews')+jsonb_array_length(r2->'reviews')<>21 then raise exception 'Class pagination';end if;
+ if exists(select 1 from jsonb_array_elements((r->'reviews')||(r2->'reviews')) v where v->>'status'<>'approved' or v->>'book_title' in('FRIEND-PENDING','FRIEND-REJECTED','OTHER-CLASS')) then raise exception 'Unapproved/other class exposed';end if;
+ if old<>(select jsonb_build_object('xp',xp,'gold',gold) from public.students where id=sid) then raise exception 'Economy changed';end if;
+ update public.students set session_expires_at=now()-interval '1 second' where id=sid;
+ blocked:=false;begin perform public.student_reading_shelf(t,'class');exception when others then blocked:=true;end;if not blocked then raise exception 'Expired token';end if;
+ update public.students set session_expires_at=now()+interval '1 hour' where id=sid;perform set_config('rpg.shelf_test_token',t,true);
+end $test$;
+set local role anon;
+do $roles$ begin if jsonb_array_length(public.student_reading_shelf(current_setting('rpg.shelf_test_token'),'mine')->'reviews')<>20 then raise exception 'Anon RPC';end if;end $roles$;
+reset role;
+set local role authenticated;
+do $roles$ begin if jsonb_array_length(public.student_reading_shelf(current_setting('rpg.shelf_test_token'),'class')->'reviews')<>20 then raise exception 'Authenticated RPC';end if;end $roles$;
+reset role;
+rollback;
+select 'PASS: own all statuses, same-teacher approved only, other-teacher exclusion, token/expiry/scope/cursor, bounded non-overlapping pagination, private fields, actual client roles and economy' as result;

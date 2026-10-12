@@ -31,14 +31,14 @@ body:has(#classroomHub:not(.hidden)) .sa-mobile-nav{visibility:hidden}
 
 /* Side-view rooms share one ground line; narrow screens follow the avatar. */
 #classroomHub.campus-side .campus-viewport{position:relative;display:flow-root;overflow:clip;width:100%;background:#f4e4bd;isolation:isolate}
-#classroomHub.campus-side .hub-stage{width:max(100%,740px);aspect-ratio:16/9;background-size:100% 100%;transform-origin:left top;will-change:transform;transition:transform .12s linear}
+#classroomHub.campus-side .hub-stage{width:max(100%,740px);aspect-ratio:16/9;background-size:100% 100%;transform-origin:left top;will-change:transform;transition:none}
 #classroomHub.campus-side .hub-stage>.hub-label,#classroomHub.campus-side .hub-stage>.hub-hotspot,#classroomHub.campus-side .hub-notice{display:none!important}
-#classroomHub.campus-side .hub-player{width:22%;min-width:145px;max-width:210px;aspect-ratio:1230/1270;transform:translate(-50%,-100%);z-index:15;transition:left .12s linear;filter:none}
+#classroomHub.campus-side .hub-player{width:22%;min-width:145px;max-width:210px;aspect-ratio:1230/1270;transform:translate(-50%,-100%);z-index:15;transition:none;filter:none}
 #classroomHub.campus-side .hub-player:before{display:none}
 #classroomHub.campus-side .hub-player:after{content:'';position:absolute;z-index:-1;left:32%;bottom:-1%;width:36%;height:5%;border-radius:50%;background:#61492545;filter:blur(1px)}
 .campus-rig,.campus-part{position:absolute;inset:0;transform-origin:50% 80%}.campus-rig{transform:scaleX(1)}[data-facing=left] .campus-rig{transform:scaleX(-1)}
 .campus-upper{clip-path:inset(0 0 23.5% 0)}.campus-leg-left{clip-path:inset(76% 50% 0 0)}.campus-leg-right{clip-path:inset(76% 0 0 50%)}
-#classroomHub.campus-side .hub-player.walking img{animation:none}.campus-side .walking .campus-upper{animation:campusBodyStep .32s ease-in-out infinite}.campus-side .walking .campus-leg-left{animation:campusLegStep .32s ease-in-out infinite}.campus-side .walking .campus-leg-right{animation:campusLegStep .32s ease-in-out -.16s infinite}
+#classroomHub.campus-side .hub-player.walking img{animation:none}.campus-side .walking .campus-upper{animation:campusBodyStep .42s ease-in-out infinite}.campus-side .walking .campus-leg-left{animation:campusLegStep .42s ease-in-out infinite}.campus-side .walking .campus-leg-right{animation:campusLegStep .42s ease-in-out -.21s infinite}
 @keyframes campusBodyStep{50%{transform:translateY(-1.3px) rotate(.6deg)}}@keyframes campusLegStep{50%{transform:translate(1px,-3px) rotate(-2deg)}}
 .campus-player-name{position:absolute;bottom:103%;left:50%;transform:translateX(-50%);padding:3px 10px;border:1px solid #c8a76a;border-radius:9px;background:#fffdf0ed;color:#4a5b3c;font:15px SchoolJua,sans-serif;white-space:nowrap;box-shadow:0 2px 3px #4a39251a}
 #classroomHub.campus-side .slot-equipment{z-index:6}

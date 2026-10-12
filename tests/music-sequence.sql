@@ -1,0 +1,78 @@
+-- Synthetic staging fixtures only. Every write rolls back.
+begin;
+do $test$
+declare sid bigint; other_sid bigint; t text:=gen_random_uuid()::text; t2 text:=gen_random_uuid()::text;
+ blocked boolean; r jsonb; first_at timestamptz; old_gold integer;
+begin
+ select id,gold into sid,old_gold from public.students order by id limit 1;
+ select id into other_sid from public.students where id<>sid order by id limit 1;
+ if other_sid is null then raise exception 'Need two staging fixtures'; end if;
+ delete from rpg_private.school_exploration where student_id in (sid,other_sid);
+ update public.students set xp=1139,session_hash=encode(extensions.digest(convert_to(t,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=sid;
+ update public.students set xp=1140,session_hash=encode(extensions.digest(convert_to(t2,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=other_sid;
+ insert into rpg_private.school_exploration(student_id,step_id) select sid,'music-room-'||n from generate_series(1,3) n;
+ blocked:=false;begin perform public.student_music_sequence('invalid','music-sequence-1',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Invalid token allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(null,'music-sequence-1',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Null token allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Lv13 bypassed Lv14'; end if;
+ update public.students set xp=1140,session_expires_at=now()-interval '1 second' where id=sid;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Expired token allowed'; end if;
+ update public.students set session_expires_at=now()+interval '1 hour' where id=sid;
+ blocked:=false;begin perform public.student_music_sequence(t2,'music-sequence-1',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Prerequisites borrowed from another account'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-2',array['short','rest','long']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Chapter order bypassed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'invented',array['low','middle','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Invented step allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',null);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Null order allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low','middle']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Wrong length allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low',null,'high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Null element allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low','low','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Duplicate element allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array['low','invented','high']);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Invented note allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1','[0:2]={low,middle,high}'::text[]);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Wrong array bounds allowed'; end if;
+ blocked:=false;begin perform public.student_music_sequence(t,'music-sequence-1',array[['low','middle','high']]);exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Multidimensional array allowed'; end if;
+ r:=public.student_music_sequence(t,'music-sequence-1',array['high','middle','low']);
+ if (r->>'correct')::boolean then raise exception 'Wrong ordering accepted'; end if;
+ if exists(select 1 from rpg_private.school_exploration where student_id=sid and step_id like 'music-sequence-%') then raise exception 'Wrong ordering saved'; end if;
+ r:=public.student_music_sequence(t,'music-sequence-1',array['low','middle','high']);
+ if not (r->>'new')::boolean or r->>'step_id'<>'music-sequence-1' then raise exception 'Correct sequence not saved'; end if;
+ select completed_at into first_at from rpg_private.school_exploration where student_id=sid and step_id='music-sequence-1';
+ r:=public.student_music_sequence(t,'music-sequence-1',array['low','middle','high']);
+ if (r->>'new')::boolean or first_at<>(select completed_at from rpg_private.school_exploration where student_id=sid and step_id='music-sequence-1') then raise exception 'Repeated save rewrote completion'; end if;
+ if jsonb_array_length(public.student_learning_journal(t2)->'exploration')<>0 then raise exception 'Journal leaks another student'; end if;
+ update public.students set xp=0 where id=sid;
+ perform public.student_music_sequence(t,'music-sequence-2',array['short','rest','long']);
+ perform public.student_music_sequence(t,'music-sequence-3',array['low','high','rest','middle']);
+ if jsonb_array_length(public.student_learning_journal(t)->'exploration')<>6 then raise exception 'Journal missing sequence'; end if;
+ if (select gold<>old_gold or xp<>0 from public.students where id=sid) then raise exception 'Economy changed'; end if;
+ update public.students set xp=1140 where id=sid;
+ blocked:=false;begin perform public.student_school_workshop(t,'cover','sprout');exception when others then blocked:=true;end;
+ if not blocked then raise exception 'Sequence inflated ordinary location stamps'; end if;
+ perform set_config('rpg.sequence_test_token',t,true);
+end $test$;
+set local role anon;
+do $roles$
+declare blocked boolean:=false;
+begin
+ if not (public.student_music_sequence(current_setting('rpg.sequence_test_token'),'music-sequence-3',array['low','high','rest','middle'])->>'correct')::boolean then raise exception 'Anon token RPC failed'; end if;
+ begin perform 1 from rpg_private.school_exploration;exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Private table exposed'; end if;
+end $roles$;
+reset role;
+set local role authenticated;
+do $roles$ begin
+ if not (public.student_music_sequence(current_setting('rpg.sequence_test_token'),'music-sequence-1',array['low','middle','high'])->>'correct')::boolean then raise exception 'Authenticated token RPC failed'; end if;
+end $roles$;
+reset role;
+rollback;
+select 'PASS: Lv14 boundary, prerequisites, token expiry, invalid arrays, sequence, replay, ownership, continuity, unchanged economy/stamps and real roles' result;

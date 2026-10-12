@@ -1,0 +1,9 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Create one isolated transparent meal-tray prop for our original warm hand-painted school RPG. Use our own attached cafeteria table image as STYLE REFERENCE only. ONE small honey-gray stainless rectangular compartment lunch tray, shallow friendly rounded corners, seen from slightly above with front edge horizontal. Rice with small black sesame dots, a warm orange vegetable side, green broccoli, and one golden omelette piece in separate compartments. No cup, no spoon, no table, no furniture, no hands, no character. Entire tray fully visible centered with modest margins. Painterly warm outlines and gentle object-only shading like the reference. True transparent background, no halo, glow, vignette, cast floor shadow, text or logo. Clear silhouette readable when displayed only 70px wide in a character's hands. Original artwork, no copied commercial game assets.",
+  "reference": "maps/props/cafeteria-table-v1.webp",
+  "source": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-e5f4945f-471a-4540-a687-d966d633a24e.png",
+  "game": "maps/props/meal-tray-v1.webp",
+  "bytes": 10458,
+  "processing": "Resize inside 220x150 and WebP quality86, original alpha preserved; no code background removal"
+}

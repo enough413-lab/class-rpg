@@ -1,0 +1,64 @@
+{
+  "provider": "built-in image_gen via imagegen skill",
+  "date": "2026-10-08",
+  "originalArt": true,
+  "encoding": "WebP quality 88 effort 6. Panoramas retain original dimensions. Props fit within 600x600 with generated alpha. No repainting or programmatic background removal.",
+  "assets": [
+    {
+      "name": "garden",
+      "prompt": "Use case: stylized-concept. Asset type: original 3:1 side-scrolling elementary-school RPG background, ideally 3072x1024. A finished, cozy school observation garden in an original hand-painted storybook game, richly painted foliage and honey-oak details, crisp readable contours, sage green, pale gold, soft cream, gentle floral accents. One continuous wide landscape, no panels or tiling. Straight-on lateral camera, modest visible top surfaces, NOT top-down or isometric. Left x6% shows the warm library's arched open door behind a leafy arbor; middle x45% a small charming glass greenhouse and raised vegetable beds behind the path; right x94% a willow-framed opening with glimpse of blue pond water shows the onward route. Interesting tree canopy, distant hills, blue sky and soft clouds leave generous headroom. Background flowers and greenery are richly varied but soft enough that foreground sprites remain clear. CRITICAL game geometry: continuous level horizontal pale sandstone walkway from y67% through y83%, character feet at y80%, shallow grassy edge below y85%. Leave foreground x27%,x53%,x79% clear for separate sprout table, flower planter and bench sprites. No foreground furniture, no large props in lane. No people, no animals, UI, text, letters, numbers, signs, logos or watermark. Opaque complete image. Lovely original premium storybook game art, no flat vector placeholders.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-c0587344-8161-4b1c-a41a-a98c53069195.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/garden-original.png",
+      "game": "maps/garden-panorama-v1.webp"
+    },
+    {
+      "name": "pond",
+      "prompt": "Use case: stylized-concept. Asset type: original 3:1 side-scrolling elementary-school RPG background, ideally 3072x1024. A beautiful peaceful school nature pond in an original hand-painted storybook RPG matching cozy honey-oak school architecture, sage greens, turquoise water, warm pale gold path, richly shaded painted foliage and crisp readable contours. One continuous wide landscape, no panels or tiling. Straight-on lateral game camera, NOT aerial or isometric. The blue pond lies entirely behind the walking lane in the middle distance with tiny water ripples, water lilies, reeds, reflecting clouds and a little wooden bridge far behind. A continuous low wooden safety railing follows the rear edge of the foreground walking path, simple and clear, not hiding the scenery. At left x6% a leafy garden gate with distant greenhouse returns toward school garden. At right x94% a tree-lined path reveals a sunlit school sports field beyond. Willow canopy left, open blue sky center, rounded trees right, generous headroom. CRITICAL: flat uninterrupted sandstone walking lane from y67% to y83%, character feet y80%; shallow grass/flowers below y85%, no cliff, no water crossing the path. Leave x27%,x53%,x79% of foreground clear for separate observation railing marker, small optical viewing stand and notebook table sprites. No foreground furniture or people. Polished original cozy game environment, natural readable depth, no UI/text/letters/numbers/logos/watermark, no flat vector shapes. Opaque.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-ccff45c5-0d24-48ba-8800-bde2f5a0b008.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/pond-original.png",
+      "game": "maps/pond-panorama-v1.webp"
+    },
+    {
+      "name": "garden-sprout",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. A child-height honey-oak observation table carrying a single large terracotta flowerpot with a healthy small green seedling, two prominent leaves turning toward the light; a small sage watering can sits underneath the table. Clear seedling silhouette and chunky furniture legs. Width:height about 1.2:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-8084ba45-929d-4349-a148-1771d6e6a00b.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/garden-sprout-original.png",
+      "game": "maps/props/garden-sprout-v1.webp"
+    },
+    {
+      "name": "garden-flowers",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. One low oval honey-oak raised flower planter on four short legs, brimming with a neat cluster of yellow daisies, purple bellflowers and pink cosmos with clearly different petal shapes; a little gardening trowel hangs from the side. Distinct silhouette, readable petals, transparent gaps under the planter. Width:height about 1.35:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-0dafa31d-2dfd-4dd0-ad0c-52bc8318cf92.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/garden-flowers-original.png",
+      "game": "maps/props/garden-flowers-v1.webp"
+    },
+    {
+      "name": "garden-bench",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. One cozy empty garden resting bench, honey-oak curved slatted back and seat, muted sage sturdy legs; a small ivy vine wraps one outside leg and a folded cream cushion rests on one side. Small carved leaf decoration on backrest, not a face or letters. Clearly distinct bench silhouette. Width:height about 1.75:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-002c4d8d-2bdf-4062-a5cc-417e1c8568a2.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/garden-bench-original.png",
+      "game": "maps/props/garden-bench-v1.webp"
+    },
+    {
+      "name": "pond-fence",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. One short freestanding observation safety railing section, honey-oak rounded posts with two horizontal sage-green rails, a small carved leaf ornament centered; simple magnifying-glass shaped wooden ornament attached to one post, no letters. Friendly handmade school garden furniture. Transparent open gaps between rails. Width:height about 1.5:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-166047b2-7403-461c-9b1c-0102c7eac541.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/pond-fence-original.png",
+      "game": "maps/props/pond-fence-v1.webp"
+    },
+    {
+      "name": "pond-viewer",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. A cute child-height binocular observation viewer mounted on a sturdy honey-oak tripod base with sage metal joints, chunky cream binocular head angled slightly upward toward the distant pond. Safe rounded shapes, natural texture, no coinslot or text. Both eyepieces and lens barrels clearly recognizable. Width:height about .85:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-09339311-59de-4036-9350-5124478a8878.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/pond-viewer-original.png",
+      "game": "maps/props/pond-viewer-v1.webp"
+    },
+    {
+      "name": "pond-notebook",
+      "prompt": "Use case: stylized-concept. Asset type: single independent transparent prop for an original cozy school side-scrolling RPG. Rich hand-painted storybook art, warm honey oak, cream and sage tones, crisp brown contours, slightly rounded charming shapes. Straight-on lateral game camera with a little top surface visible; not isometric. Full object centered, 4 percent transparent margins, horizontal baseline. Genuinely transparent alpha surrounding object and in open gaps. No scene, ground patch, background, people, UI, text, letters, signage, logos or watermark. Minimal close contact shadow at feet. One small waist-height honey-oak nature-notebook lectern, slanted top with a large open cream sketchbook displaying only simple painted leaf and water-ripple drawings with absolutely no text, a chunky wooden pencil beside it. Sage green cross-braced legs, transparent gaps, readable book silhouette. Width:height about 1.1:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-f75695b9-ca3e-4dcb-8b86-d03ee1c0e5d9.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/nature-places/pond-notebook-original.png",
+      "game": "maps/props/pond-notebook-v1.webp"
+    }
+  ]
+}

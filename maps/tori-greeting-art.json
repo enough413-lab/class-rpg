@@ -1,0 +1,13 @@
+{
+  "tool": "built-in image_gen",
+  "reference": "maps/npcs/tori-v1.webp",
+  "prompt": "Edit this original school-game librarian owl into ONE warm greeting portrait variant. Preserve its exact identity: round cream/olive owl, big brown eyes, thin round brass spectacles, tiny orange beak, leafy ear tufts, moss-green cape and honey-brown open storybook with leaf bookmark. Front-facing full-body, soft warm painted outlines matching the original. Raise ONE wing to the side of its face in a friendly small wave, with clearly separated rounded feather tips; the OTHER wing supports the same open book held against its body. A bright welcoming expression and gentle head tilt, without changing the face proportions or costume. Entire body and raised wing fully visible with modest margins. True transparent background. No wall, scenery, floor, halo, vignette, broad cast shadow, text, logo or UI. Original character only; do not imitate any commercial game character. This variant is for a dialogue portrait only; keep the existing walking sprite unchanged.",
+  "transparencyEdit": "Edit ONLY the transparency of this greeting owl portrait. Preserve the owl, raised waving wing, spectacles, open book, leaf bookmark, colors, expression and full-body contours exactly. Remove all broad brown/golden halo, vignette, atmospheric glow and shadow surrounding the owl. Every pixel outside the solid owl/wing/book/cape/feet silhouette must be genuinely transparent, including the gaps near the waving wing and feet. Clean soft painted contour with no rectangular background and no ground shadow; retain shading inside the character only. Do not crop or add anything.",
+  "originalSource": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-e59d694b-cbd8-4687-b5c5-79f047b22d61.png",
+  "finalSource": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-bf034e37-c6bc-4444-abfe-8772af8b3092.png",
+  "game": "maps/npcs/tori-greeting-v1.webp",
+  "width": 400,
+  "height": 600,
+  "bytes": 57762,
+  "processing": "Resize inside 480x600 and WebP quality86; generated alpha preserved; no code background removal"
+}

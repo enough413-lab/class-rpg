@@ -59,3 +59,12 @@
 }
 @media(prefers-reduced-motion:reduce){.campus-npc .campus-sprite-art{animation:none}}
 @media(max-width:360px){.npc-conversation{grid-template-columns:72px 1fr;gap:10px}.npc-conversation img{height:135px}}
+
+/* The library uses separate foreground art just like the classroom. */
+#classroomHub.campus-side[data-scene=library] .hub-stage::before{opacity:.12}
+#classroomHub.campus-side .campus-tori.campus-sprite{top:auto;min-width:96px;min-height:128px;transform:translateX(-50%)}
+.campus-portrait img{display:block;width:100%;height:auto;max-height:165px;object-fit:contain;filter:drop-shadow(0 4px 1px #66503222)}
+#classroomHub.campus-side .campus-tori.campus-sprite .campus-sprite-missing{display:none;position:absolute;inset:0;transform:none;border-radius:14px;white-space:normal}
+#classroomHub.campus-side .campus-tori.campus-sprite.art-missing .campus-sprite-missing{display:grid}
+#classroomHub.campus-side .campus-tori.campus-sprite .campus-object-caption{top:calc(100% + 8px);bottom:auto;display:flex;transform:translateX(-50%)}
+.campus-guide h2{word-break:keep-all;overflow-wrap:break-word}

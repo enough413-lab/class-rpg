@@ -1,0 +1,53 @@
+-- Synthetic staging fixtures only; every mutation rolls back.
+begin;
+do $test$
+declare sid bigint; other_sid bigint; t text:=gen_random_uuid()::text; t2 text:=gen_random_uuid()::text; blocked boolean; r jsonb; picture text[]:=array_fill('empty'::text,array[25]); first_at timestamptz; old_gold integer; old_items integer; old_stamps integer;
+begin
+ select id,gold into sid,old_gold from public.students order by id limit 1;select id into other_sid from public.students where id<>sid order by id limit 1;if other_sid is null then raise exception 'Need two fixtures';end if;
+ delete from rpg_private.school_art where student_id in (sid,other_sid);
+ select count(*) into old_items from public.student_items where student_id=sid;select count(*) into old_stamps from rpg_private.school_exploration where student_id=sid;
+ update public.students set xp=1469,session_hash=encode(extensions.digest(convert_to(t,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=sid;
+ update public.students set xp=1470,session_hash=encode(extensions.digest(convert_to(t2,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=other_sid;
+ blocked:=false;begin perform public.student_art_postcard('invalid','mix',array['blue','yellow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid token allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(null,'mix',array['blue','yellow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Null token allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'mix',array['blue','yellow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Lv16 bypassed Lv17';end if;
+ update public.students set xp=1470,session_expires_at=now()-interval '1 second' where id=sid;
+ blocked:=false;begin perform public.student_art_postcard(t,'mix',array['blue','yellow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Expired token allowed';end if;
+ update public.students set session_expires_at=now()+interval '1 hour' where id=sid;
+ picture[13]:='green';
+ blocked:=false;begin perform public.student_art_postcard(t,'save',picture,'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Mix prerequisite bypassed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'invented',array['blue','yellow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Unknown action allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'mix',null);exception when others then blocked:=true;end;if not blocked then raise exception 'Null array allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'mix',array['blue','blue']);exception when others then blocked:=true;end;if not blocked then raise exception 'Wrong mix allowed';end if;
+ r:=public.student_art_postcard(t,'mix',array['yellow','blue']);if (r->>'phase')::integer<>1 then raise exception 'Discovery not saved';end if;
+ r:=public.student_art_postcard(t,'mix',array['blue','yellow']);if (r->>'phase')::integer<>1 then raise exception 'Mix retry failed';end if;
+ if (public.student_learning_journal(t2)->'art'->>'phase')::integer<>0 then raise exception 'Other account borrowed progress';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'save',array['red'],'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Wrong picture length allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'save',array_fill('empty'::text,array[25]),'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Blank picture allowed';end if;
+ picture[1]:=null;blocked:=false;begin perform public.student_art_postcard(t,'save',picture,'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Null paint allowed';end if;
+ picture[1]:='script';blocked:=false;begin perform public.student_art_postcard(t,'save',picture,'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Invented paint allowed';end if;
+ picture[1]:='red';blocked:=false;begin perform public.student_art_postcard(t,'save',picture,'invented');exception when others then blocked:=true;end;if not blocked then raise exception 'Invented stamp allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'save',picture,null);exception when others then blocked:=true;end;if not blocked then raise exception 'Null stamp allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'save',array_fill('green'::text,array[5,5]),'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Multidimensional picture allowed';end if;
+ blocked:=false;begin perform public.student_art_postcard(t,'save',array_fill('green'::text,array[25],array[0]),'leaf');exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid array bounds allowed';end if;
+ update public.students set xp=0 where id=sid;
+ r:=public.student_art_postcard(t,'save',picture,'leaf');if (r->>'phase')::integer<>2 or r->'cells'->>0<>'red' or r->'cells'->>12<>'green' then raise exception 'Picture not saved';end if;
+ first_at:=(r->>'completed_at')::timestamptz;r:=public.student_art_postcard(t,'save',picture,'leaf');if (r->>'completed_at')::timestamptz<>first_at then raise exception 'Replay rewrote first completion';end if;
+ picture[25]:='purple';r:=public.student_art_postcard(t,'save',picture,'heart');if r->'cells'->>24<>'purple' or r->>'stamp'<>'heart' or (r->>'completed_at')::timestamptz<>first_at then raise exception 'Edit failed or rewrote completion';end if;
+ r:=public.student_art_postcard(t,'mix',array['blue','yellow']);if r->'cells'->>24<>'purple' then raise exception 'Mix replay erased earned art';end if;
+ if (select xp<>0 or gold<>old_gold from public.students where id=sid) then raise exception 'Economy changed';end if;
+ if (select count(*) from public.student_items where student_id=sid)<>old_items or (select count(*) from rpg_private.school_exploration where student_id=sid)<>old_stamps then raise exception 'Inventory or stamps changed';end if;
+ perform set_config('rpg.art_test_token',t,true);
+end $test$;
+set local role anon;
+do $roles$ declare blocked boolean:=false;begin
+ if (public.student_learning_journal(current_setting('rpg.art_test_token'))->'art'->>'phase')::integer<>2 then raise exception 'Anon owned journal failed';end if;
+ begin perform 1 from rpg_private.school_art;exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Private picture table exposed';end if;
+ blocked:=false;begin perform rpg_private.art_state(1);exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Private art helper exposed';end if;
+end $roles$;
+reset role;
+set local role authenticated;
+do $roles$ begin if (public.student_art_postcard(current_setting('rpg.art_test_token'),'mix',array['blue','yellow'])->>'phase')::integer<>2 then raise exception 'Authenticated replay failed';end if;end $roles$;
+reset role;
+rollback;
+select 'PASS: Lv17/token gates, mix prerequisite, bounded palette/picture/stamp, ownership, retry/edit timestamp, XP continuity, economy and actual roles' result;

@@ -9,7 +9,7 @@
 .campus-side .campus-near p,.campus-side .campus-how{word-break:keep-all;overflow-wrap:break-word}
 .finder-rooms button::before{background-image:url('maps/classroom-tall-v1.webp')}
 .finder-rooms [data-finder-room=hallway]::before{background-image:url('maps/hallway-tall-v1.webp')}
-.finder-rooms [data-finder-room=library]::before{background-image:url('maps/library-tall-v1.webp')}
+.finder-rooms [data-finder-room=library]::before{background-image:url('maps/library-tall-v2.webp')}
 @media(min-width:850px){
  #classroomHub.campus-side .hub-player{min-width:188px}
  #classroomHub.campus-side .hub-shell{display:grid;grid-template-columns:minmax(0,1fr) 240px;width:min(100%,calc((100dvh - 190px)*4/3 + 240px));max-width:1240px;align-items:start}

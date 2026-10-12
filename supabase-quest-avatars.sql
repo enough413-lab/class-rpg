@@ -8,3 +8,4 @@ language sql stable security definer set search_path=public as $$
 $$;
 revoke all on function public.teacher_student_appearances() from public,anon;
 grant execute on function public.teacher_student_appearances() to authenticated;
+

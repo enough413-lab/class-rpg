@@ -1,0 +1,19 @@
+/* Quiet room signage: the scene leads, nearby actions explain. */
+#classroomHub.campus-side .campus-viewport{background:#e6d3af}
+@media(max-width:849px){#classroomHub.campus-side .hub-stage{width:max(100%,clamp(480px,calc((100dvh - 244px)*4/3),740px))}}
+#classroomHub.campus-side .hub-player{width:17%;min-width:0;max-width:none}
+#classroomHub.campus-side .campus-player-name{font:13px/1.3 SchoolJua,sans-serif;padding:3px 8px;box-shadow:none;background:#fffdf0e6;border-color:#d4c09b}
+#classroomHub.campus-side .campus-object-caption{min-width:0;max-width:150px;padding:4px 7px;border:1px solid #c9b38b;border-radius:7px;gap:0;font-size:14px;box-shadow:0 1px 3px #4c39251a;background:#fffbedeb}
+#classroomHub.campus-side .campus-object-caption::after{display:none}
+#classroomHub.campus-side .campus-object-caption small{display:none}
+#classroomHub.campus-side .campus-object:is(.is-near,.is-destination,:focus-visible) .campus-object-caption,#classroomHub.campus-side .campus-sprite:is(.is-near,.is-destination,:focus-visible) .campus-object-caption{border-color:#759360;background:#f5ffe7;z-index:20}
+#classroomHub.campus-side .campus-object:is(.is-near,.is-destination,:focus-visible) .campus-object-caption small,#classroomHub.campus-side .campus-sprite:is(.is-near,.is-destination,:focus-visible) .campus-object-caption small{display:block;font-size:12px;margin-top:2px}
+#classroomHub.campus-side .campus-npc::after{display:none}
+#classroomHub.campus-side .campus-npc:is(.is-near,:focus-visible)::after{display:block;font-size:18px;line-height:22px;padding:0 7px;top:-24px}
+#classroomHub.campus-side .campus-sprite .campus-object-caption{top:-5px}
+#classroomHub.campus-side .campus-npc .campus-object-caption{top:calc(100% + 7px);background:#fff8e6;border-color:#c9b38b}
+#classroomHub.campus-side .campus-tori.campus-sprite .campus-object-caption{top:calc(100% + 7px)}
+#classroomHub.campus-side .campus-sprite-art{filter:drop-shadow(0 2px 2px #45392c40)}
+#classroomHub.campus-side .campus-object .campus-prop-outline{opacity:.35}
+#classroomHub.campus-side .campus-object:is(.is-near,.is-destination,:focus-visible) .campus-prop-outline{opacity:1}
+@media(max-width:849px){#classroomHub.campus-side .hub-player{width:17%;min-width:0;max-width:none}.campus-side .campus-header{padding:8px 12px}.campus-side .campus-menu button{border-radius:10px}}

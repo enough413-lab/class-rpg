@@ -1,0 +1,64 @@
+{
+  "provider": "built-in image_gen via imagegen skill",
+  "date": "2026-10-08",
+  "originalArt": true,
+  "encoding": "WebP quality 88, effort 6; props fit within 600x600 with original alpha; panoramas retain original size. No repainting or background removal.",
+  "assets": [
+    {
+      "name": "cafeteria",
+      "prompt": "Use case: stylized-concept. Asset type: original 3:1 side-scrolling elementary-school RPG background, ideally 3072x1024. A finished, inviting Korean school cafeteria drawn in a richly painted storybook game style, warm honey oak, sage green, creamy ivory, soft pumpkin accents, hand-painted material detail, clear brown contours, sunny cheerful mood. One continuous wide room with no panels, no tiling. Straight-on lateral game camera with modest visible top surfaces; all verticals upright. Wide windows in upper half, green pendant lamps, wood ceiling beams, leafy view outside, tiny herb pots, food-shaped paper decorations without words. A friendly serving hatch with soup pots and vegetable baskets occupies the back wall around x65%, clearly part of distant background; small rear dining furniture can appear above y65% but NO foreground furniture in the walking lane. At far left x6% an open sage arched doorway shows a sunny schoolyard outside. Rightmost x95% has a cozy sunny plant corner, NOT an exit. CRITICAL gameplay layout: a continuous empty foreground floor strip from y66% to y83%, with character feet on y80%; flat horizontal warm terrazzo-tile platform with front edge at y83% and a shallow decorative oak plinth below. Leave lower foreground slots at x27%, x53%, x79% open for separate sink, lunch table and tray trolley sprites. Keep the interesting architecture above the lane so independent game characters are clear. Polished original paid-game illustration, high ceiling and generous headroom, handcrafted cozy details. No people, animals, UI, labels, text, letters, numbers, logos, watermark. Not a top-down view, not isometric, not flat vector shapes. Opaque complete image.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-67175f11-654c-4764-b974-bc17987c51aa.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/cafeteria-original.png",
+      "game": "maps/cafeteria-panorama-v1.webp"
+    },
+    {
+      "name": "playground",
+      "prompt": "Use case: stylized-concept. Asset type: original 3:1 side-scrolling elementary-school RPG background, ideally 3072x1024. A beautiful cozy Korean elementary-school playground in a hand-painted storybook RPG, warm natural colors, rounded forms, softly painted texture and crisp readable contours, rich but calm detail. One continuous wide landscape, no panels or repetitions. Straight-on lateral game camera, NOT aerial or isometric. Sky with soft fluffy clouds, distant gentle wooded hills and a charming school roof partly visible behind trees. Middle ground contains a modest sports field with curved running-track lines, a distant small soccer goal, flower beds and green shrubs around the border. At x6% a leafy opening and glimpses of blue water indicate a path back to the pond. At x94% a short garden path leads toward a welcoming school cafeteria entrance in the background. Three distinctive areas: left shady stretching lawn under an old tree, center sunny field, right cheerful equipment area near the school building. CRITICAL: a continuous clear horizontal pale packed-earth walking lane from y68% to y84%, character feet at y80%. Grass edges and tiny clover below y85% form a shallow foreground lip; no deep precipice. Leave x27%,x53%,x79% of lower lane clear for separate mat, bench and ball-rack sprites; no foreground bench, mat, ball basket or people. Architectural/environmental depth comes from behind the lane, never a sloping walking surface. Polished original paid-game background, lovely detailed tree canopies with light filtering through, subtle dappled light, generous open vertical sky. No people, animals, UI, text, letters, numbers, logos or watermark. No flat placeholder vector shapes. Opaque complete image.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-c33e6ca0-4aa7-4599-9fa3-c32d3d73c083.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/playground-original.png",
+      "game": "maps/playground-panorama-v1.webp"
+    },
+    {
+      "name": "cafeteria-sink",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. A child-height double handwashing station: cream enamel basin in a sage green and honey-wood cabinet, two short silver faucets, one little pump soap dispenser and a folded pale yellow hand towel. Rounded safe corners, inviting clean materials. Width:height about 1.25:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-a133f5f9-a0c9-454c-aa53-9f7b530afd98.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/cafeteria-sink-original.png",
+      "game": "maps/props/cafeteria-sink-v1.webp"
+    },
+    {
+      "name": "cafeteria-table",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. A small sturdy school lunch table with two low matching benches, honey oak legs and creamy top; two neat Korean school metal divided lunch trays with rice and colorful vegetables, two little water cups. Clear warm handmade wood texture, thin legs with transparent gaps, no characters. Width:height about 1.8:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-65903e31-5870-48e3-953e-e0fccfaff11e.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/cafeteria-table-original.png",
+      "game": "maps/props/cafeteria-table-v1.webp"
+    },
+    {
+      "name": "cafeteria-trays",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. A compact school tray-return trolley with small rounded wheels, honey oak frame, two sage-green lower shelves with neatly stacked silver lunch trays, a small utensil cup on top. Clean and welcoming, no food waste, no sign. Width:height about .9:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-299ce6ac-fdce-4b9c-8fb0-49aa3b1c8e2c.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/cafeteria-trays-original.png",
+      "game": "maps/props/cafeteria-trays-v1.webp"
+    },
+    {
+      "name": "playground-mat",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. A cheerful stretching spot prop: one oval woven pale-gold exercise mat with a sage green edging, a neatly rolled extra sky-blue mat resting at back left, a small pair of orange soft cones at back right. Everything forms one connected prop grouping with a clear silhouette. No letters or symbols. Width:height about 1.7:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-5ff17743-3c0a-4a72-b109-f7f0821d43d2.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/playground-mat-original.png",
+      "game": "maps/props/playground-mat-v1.webp"
+    },
+    {
+      "name": "playground-bench",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. One cozy outdoor school bench, golden honey oak slatted seat and curved backrest, sage-green metal legs, two little clover decorations carved into the wood, a small folded mint towel at one end. Sturdy school furniture, empty seating and open transparent spaces beneath and between slats. Width:height about 1.7:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-0923b8a6-2d5e-4d63-9dd1-d0014aa82919.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/playground-bench-original.png",
+      "game": "maps/props/playground-bench-v1.webp"
+    },
+    {
+      "name": "playground-balls",
+      "prompt": "Use case: stylized-concept. Asset type: one independent transparent game furniture sprite for an original cozy elementary-school side-scrolling RPG. Hand-painted storybook illustration, warm honey oak, cream and sage colors, crisp brown contours with richly shaded detail, charming slightly rounded proportions. Straight-on side view with a little top surface visible; horizontal feet baseline, not isometric. Complete object centered with only 4% transparent margin, no crop, no scene/background/floor, no people, no text, no signs, no UI, no watermark. Truly transparent alpha around the object and between open parts. One object grouping only, high-quality readable silhouette; minimal soft grounding shadow close to feet. One low school sports equipment cart with honey-oak slatted sides and sage frame on four small rounded wheels, holding a clearly recognizable orange basketball, cream black soccer ball, a soft blue playground ball and a looped skipping rope hooked on the side. Warm inviting painted details, no branding. Width:height about 1.1:1.",
+      "source": "C:\\Users\\USER\\.codex\\generated_images\\01a0ef92-d173-7401-b506-03812e3aab75\\exec-08b58dfc-caaa-445b-bfec-df79fa2cff7a.png",
+      "original": "C:/Users/USER/Documents/Codex/2026-09-30/a/outputs/painted-places/playground-balls-original.png",
+      "game": "maps/props/playground-balls-v1.webp"
+    }
+  ]
+}

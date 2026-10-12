@@ -6,16 +6,16 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto(base);
   let f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.getElementById('saProfileTitle')?.textContent.includes('별나래'));
-  await f.evaluate(async()=>{mockRpg.student.xp=729;await loadDashboard()});await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').click();
+  await f.evaluate(async()=>{mockRpg.student.xp=729;await loadDashboard()});await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=chapter-one]').click();
   assert.match(await f.locator('#saDialogBody').textContent(),/1 경험치/);assert.equal(await f.locator('[data-sa=finish-chapter]').count(),0);
   await f.locator('#studentAdventureDialog [data-sa=close]').click();await f.evaluate(async()=>{mockRpg.student.xp=730;await loadDashboard()});
-  await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').click();
+  await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=chapter-one]').click();
   assert(await f.locator('[data-sa=finish-chapter]').isDisabled());assert.equal(await f.locator('.sa-ceremony-checklist [data-chapter]').count(),7);
   await f.locator('#studentAdventureDialog [data-sa=map]').click();await f.locator('.sa-passport').waitFor();
   await f.evaluate(()=>{mockRpg.exploration=['classroom','hallway','library','garden','playground','pond','cafeteria'].flatMap(c=>[1,2,3].map(n=>c+'-'+n));mockRpg.workshop.garden_complete=true;localStorage.setItem('fixtureExploration',JSON.stringify(mockRpg.exploration));localStorage.setItem('fixtureWorkshop',JSON.stringify(mockRpg.workshop))});
   // Reload to verify the ceremony is driven by restored account progress.
   await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.getElementById('saProfileTitle')?.textContent.includes('별나래'));
-  await f.evaluate(async()=>{mockRpg.student.xp=730;await loadDashboard()});await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').click();
+  await f.evaluate(async()=>{mockRpg.student.xp=730;await loadDashboard()});await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=chapter-one]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=chapter-one]').click();
   await f.locator('[data-sa=finish-chapter]').click();assert.match(await f.locator('#saChapterFeedback').textContent(),/하나 골라/);
   await f.locator('[data-promise=kindness]').click();await f.evaluate(()=>mockRpg.failChapter=true);await f.locator('[data-sa=finish-chapter]').click();assert.match(await f.locator('#saChapterFeedback').textContent(),/아직 저장하지 못/);assert.equal(await f.locator('[data-promise=kindness]').getAttribute('aria-pressed'),'true');
   assert.equal(await f.locator('.sa-profile-memento').count(),0);
@@ -25,7 +25,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await f.locator('[data-chapter-badge=false]').click();assert.equal(await f.locator('.sa-profile-memento').count(),0);
   await page.reload();f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.getElementById('saProfileTitle')?.textContent.includes('별나래'));
   assert.equal(await f.locator('.sa-profile-memento').count(),0);
-  await f.locator('.sa-hero [data-sa=map]').click();assert.match(await f.locator('[data-workshop=chapter-one]').textContent(),/첫 모험 완료/);await f.locator('[data-workshop=chapter-one]').click();
+  await f.locator('.sa-hero [data-sa=map]').click();assert.match(await f.locator('[data-workshop=chapter-one]').textContent(),/첫 모험 완료/);await f.locator('[data-workshop=chapter-one]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=chapter-one]').click();
   assert.equal(await f.locator('[data-promise=kindness]').getAttribute('aria-pressed'),'true');await f.locator('[data-chapter-badge=true]').click();assert.equal(await f.locator('.sa-profile-memento').count(),1);
   await page.setViewportSize({width:390,height:844});await f.locator('#studentAdventureDialog').evaluate(el=>el.scrollTop=0);await page.screenshot({path:path.join(shots,'mobile-chapter-one.png'),fullPage:true});
   assert(await f.evaluate(()=>{const d=document.getElementById('studentAdventureDialog');return d.scrollWidth<=d.clientWidth+1}));

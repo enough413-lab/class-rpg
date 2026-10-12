@@ -40,3 +40,4 @@ select jsonb_build_object('total',total,'page',page,'pages',pages,'page_size',10
 $function$;
 revoke all on function public.teacher_activity_log_page(bigint,integer) from public,anon;
 grant execute on function public.teacher_activity_log_page(bigint,integer) to authenticated;
+

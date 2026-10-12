@@ -1,0 +1,53 @@
+-- Synthetic staging fixtures only; all record changes roll back.
+begin;
+do $test$
+declare sid bigint; other_sid bigint; t text:=gen_random_uuid()::text; t2 text:=gen_random_uuid()::text; blocked boolean; r jsonb; first_at timestamptz; old_gold integer; old_items integer;
+begin
+ select id,gold into sid,old_gold from public.students order by id limit 1;select id into other_sid from public.students where id<>sid order by id limit 1;if other_sid is null then raise exception 'Need two fixtures';end if;
+ select count(*) into old_items from public.student_items where student_id=sid;
+ delete from rpg_private.school_exploration where student_id in (sid,other_sid);
+ update public.students set xp=1699,session_hash=encode(extensions.digest(convert_to(t,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=sid;
+ update public.students set xp=1700,session_hash=encode(extensions.digest(convert_to(t2,'UTF8'),'sha256'),'hex'),session_expires_at=now()+interval '1 hour' where id=other_sid;
+ blocked:=false;begin perform public.student_garden_letter('invalid','letter-1',array['leaf','stem','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Invalid token allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(null,'letter-1',array['leaf','stem','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Null token allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['leaf','stem','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Lv18 bypassed Lv19';end if;
+ update public.students set xp=1700,session_expires_at=now()-interval '1 second' where id=sid;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['leaf','stem','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Expired token allowed';end if;
+ update public.students set session_expires_at=now()+interval '1 hour' where id=sid;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-2',array['leaf','light','grow']);exception when others then blocked:=true;end;if not blocked then raise exception 'Sequence bypassed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'invented',array['leaf','stem','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Unknown step allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',null);exception when others then blocked:=true;end;if not blocked then raise exception 'Null clues allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['book']);exception when others then blocked:=true;end;if not blocked then raise exception 'Missing clue allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['leaf','stem',null]);exception when others then blocked:=true;end;if not blocked then raise exception 'Null element allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['leaf','leaf','light']);exception when others then blocked:=true;end;if not blocked then raise exception 'Duplicate clue allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array['leaf','stem','invented']);exception when others then blocked:=true;end;if not blocked then raise exception 'Invented clue allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1',array[['leaf','stem','light']]);exception when others then blocked:=true;end;if not blocked then raise exception 'Multidimensional clues allowed';end if;
+ blocked:=false;begin perform public.student_garden_letter(t,'letter-1','[0:2]={leaf,stem,light}'::text[]);exception when others then blocked:=true;end;if not blocked then raise exception 'Array bounds allowed';end if;
+ r:=public.student_garden_letter(t,'letter-1',array['leaf','stem','grow']);if (r->>'correct')::boolean then raise exception 'Wrong clues accepted';end if;
+ if exists(select 1 from rpg_private.school_exploration where student_id=sid) then raise exception 'Wrong clue saved';end if;
+ r:=public.student_garden_letter(t,'letter-1',array['light','stem','leaf']);if not (r->>'new')::boolean then raise exception 'Clues failed';end if;
+ select completed_at into first_at from rpg_private.school_exploration where student_id=sid and step_id='letter-1';r:=public.student_garden_letter(t,'letter-1',array['leaf','stem','light']);if (r->>'new')::boolean then raise exception 'Replay duplicated progress';end if;
+ if first_at<>(select completed_at from rpg_private.school_exploration where student_id=sid and step_id='letter-1') then raise exception 'Replay timestamp rewritten';end if;
+ if jsonb_array_length(public.student_learning_journal(t2)->'exploration')<>0 then raise exception 'Progress leaked';end if;
+ update public.students set xp=0 where id=sid;
+ r:=public.student_garden_letter(t,'letter-2',array['grow','light','leaf']);if (r->>'correct')::boolean then raise exception 'Wrong destination accepted';end if;
+ perform public.student_garden_letter(t,'letter-2',array['leaf','light','grow']);perform public.student_garden_letter(t,'letter-3',array['tori']);
+ if jsonb_array_length(public.student_learning_journal(t)->'exploration')<>3 then raise exception 'Journal missing letter';end if;
+ if (select xp<>0 or gold<>old_gold from public.students where id=sid) then raise exception 'Economy changed';end if;
+ if (select count(*) from public.student_items where student_id=sid)<>old_items then raise exception 'Inventory changed';end if;
+ update public.students set xp=1700 where id=sid;
+ blocked:=false;begin perform public.student_school_workshop(t,'cover','sprout');exception when others then blocked:=true;end;if not blocked then raise exception 'Parcel inflated location stamps';end if;
+ blocked:=false;begin perform public.student_garden_letter(t2,'letter-3',array['tori']);exception when others then blocked:=true;end;if not blocked then raise exception 'Another account borrowed letter';end if;
+ perform set_config('rpg.letter_test_token',t,true);
+end $test$;
+set local role anon;
+do $roles$ declare blocked boolean:=false;begin
+ if not (public.student_garden_letter(current_setting('rpg.letter_test_token'),'letter-3',array['tori'])->>'correct')::boolean then raise exception 'Anon RPC failed';end if;
+ begin perform 1 from rpg_private.school_exploration;exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Private progress exposed';end if;
+end $roles$;
+reset role;
+set local role authenticated;
+do $roles$ begin if not (public.student_garden_letter(current_setting('rpg.letter_test_token'),'letter-1',array['leaf','stem','light'])->>'correct')::boolean then raise exception 'Authenticated RPC failed';end if;end $roles$;
+reset role;
+rollback;
+select 'PASS: Lv19/token gates, valid clue arrays, sequence, wrong destination, replay, account isolation, continuity, unchanged economy/inventory/stamps and actual roles' result;

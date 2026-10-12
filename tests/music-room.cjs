@@ -6,7 +6,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
  try{
   const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());
   async function ready(){const f=page.frames().find(f=>f.url().includes('app-core.html'));await f.waitForFunction(()=>document.getElementById('saProfileTitle')?.textContent.includes('별나래'));return f}
-  async function enter(f){await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=music-room]').click()}
+  async function enter(f){await f.locator('.sa-hero [data-sa=map]').click();await f.locator('[data-workshop=music-room]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=music-room]').click()}
   await page.goto(base);let f=await ready();
   await f.evaluate(async()=>{mockRpg.student.xp=1034;await loadDashboard()});assert.match(await f.locator('#saNextGoal').textContent(),/Lv. 13[\s\S]*음악실[\s\S]*1 경험치/);
   await enter(f);assert.match(await f.locator('#saDialogBody').textContent(),/1 경험치/);assert.equal(await f.locator('[data-music-play]').count(),0);
@@ -31,7 +31,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(shots,'mobile-music-badge.png'),fullPage:true});
   await f.locator('[data-music-replay="0"]').click();await f.locator('[data-music-choice="1"]').click();await f.locator('[data-sa=check-music]').click();await f.locator('[data-sa=next-music]').waitFor();assert.equal(await f.evaluate(()=>mockRpg.exploration.length),3);assert.deepEqual(await f.evaluate(()=>({xp:mockRpg.student.xp,gold:mockRpg.student.gold})),{xp:260,gold:180});
   await f.locator('#studentAdventureDialog [data-sa=map]').click();assert.match(await f.locator('.sa-passport').textContent(),/0 \/ 7/);assert.match(await f.locator('[data-workshop=music-room]').textContent(),/소리 배지/);
-  await page.setViewportSize({width:1366,height:768});await f.locator('[data-workshop=music-room]').click();await f.locator('[data-music-replay="0"]').click();await page.screenshot({path:path.join(shots,'laptop-music-room.png'),fullPage:true});
+  await page.setViewportSize({width:1366,height:768});await f.locator('[data-workshop=music-room]').waitFor({state:'attached'});if(await f.locator('[data-map-tab=notebook]').isVisible())await f.locator('[data-map-tab=notebook]').click();await f.locator('[data-workshop=music-room]').click();await f.locator('[data-music-replay="0"]').click();await page.screenshot({path:path.join(shots,'laptop-music-room.png'),fullPage:true});
   assert.deepEqual(errors,[]);console.log('PASS: Lv13 goal/gate, opt-in audio/stop/blur, visual fallback, hints, retry/lost reply/double-click, Escape save guard, reload/XP-correction continuity, badge/replay, unchanged stamps/economy, keyboard and 390/320 layouts');
  }finally{await browser.close();server.close()}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1});

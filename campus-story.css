@@ -1,0 +1,9 @@
+#classroomHub.campus-side .campus-tori .campus-story-bubble{position:absolute;left:50%;top:-48px;bottom:auto;transform:translateX(-50%);width:max-content;max-width:180px;padding:9px 12px;border:2px solid #d3ad58;border-radius:17px;background:#fff5ce;color:#584527;box-shadow:0 3px 0 #56412522;font:700 14px/1.4 system-ui,sans-serif;white-space:nowrap;pointer-events:none;z-index:8}
+#classroomHub .campus-story-bubble::after{content:'';position:absolute;left:calc(50% - 6px);bottom:-7px;width:10px;height:10px;background:inherit;border-right:2px solid #d3ad58;border-bottom:2px solid #d3ad58;transform:rotate(45deg)}
+#classroomHub.campus-side .campus-tori[data-parcel-story=complete] .campus-story-bubble{background:#eef6d8;border-color:#9ab06a;color:#405733}
+#classroomHub [data-parcel-story=complete] .campus-story-bubble::after{border-color:#9ab06a}
+#campusGuide[data-parcel-story=delivery] [data-guide=parcel],#campusGuide[data-parcel-story=complete] [data-guide=parcel]{border-color:#a7bd7b;background:#eef6df}
+#campusGuide[data-parcel-story=complete] .campus-portrait{position:relative}
+#campusGuide[data-parcel-story=complete] .campus-portrait::after{content:'🌿';position:absolute;bottom:0;right:0;display:grid;place-items:center;width:36px;height:36px;border:2px solid #a7bd7b;border-radius:50%;background:#f5f8e6;font-size:24px}
+#campusGuide .campus-guide-choices span{word-break:keep-all;overflow-wrap:break-word}
+@media(max-width:400px){#classroomHub.campus-side .campus-tori .campus-story-bubble{top:-66px;max-width:128px;padding:7px 9px;font-size:13px;white-space:normal;word-break:keep-all}}

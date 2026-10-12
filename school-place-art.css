@@ -1,0 +1,78 @@
+/* Painted wide places keep the same feet baseline and fixed-size foreground objects. */
+#classroomHub.campus-painted-place .hub-stage{width:1560px;height:520px;aspect-ratio:3;background-size:100% 100%;margin-top:0}
+#classroomHub.campus-painted-place .campus-viewport{height:520px}
+#classroomHub.campus-painted-place .hub-stage::before{display:none}
+#classroomHub.campus-painted-place .campus-painted-prop{top:auto;bottom:20%;width:180px;height:155px;min-height:44px;min-width:44px;z-index:14}
+#classroomHub.campus-painted-place [data-art=cafeteria-table]{width:240px;height:145px}
+#classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:148px;height:166px}
+#classroomHub.campus-painted-place [data-art=playground-mat]{width:170px;height:93px}
+#classroomHub.campus-painted-place [data-art=playground-bench]{width:215px;height:138px}
+#classroomHub.campus-painted-place [data-art=playground-balls]{width:165px;height:150px}
+#classroomHub.campus-painted-place [data-art=garden-sprout]{width:175px;height:165px}
+#classroomHub.campus-painted-place [data-art=garden-flowers]{width:200px;height:148px}
+#classroomHub.campus-painted-place [data-art=garden-bench]{width:220px;height:138px}
+#classroomHub.campus-painted-place [data-art=pond-fence]{width:190px;height:140px}
+#classroomHub.campus-painted-place [data-art=pond-viewer]{width:132px;height:168px}
+#classroomHub.campus-painted-place [data-art=pond-notebook]{width:165px;height:150px}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{top:-9px;padding:5px 10px;min-width:0;max-width:155px;border-width:1px;border-radius:6px 6px 11px 11px;box-shadow:0 2px 0 #98794360;font-size:16px;white-space:nowrap}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption::after{display:none}
+#classroomHub.campus-painted-place [data-art=playground-mat] .campus-object-caption{top:-46px}
+#classroomHub.campus-painted-place .campus-painted-prop .campus-object-action{display:none}
+#classroomHub.campus-painted-place .campus-painted-prop:is(.is-near,.is-destination,:focus-visible) .campus-object-action{display:block}
+#classroomHub.campus-painted-place .campus-painted-prop:focus-visible{outline:none}
+#classroomHub.campus-painted-place .campus-painted-prop:focus-visible .campus-object-caption{outline:3px solid #477557;outline-offset:3px}
+#classroomHub.campus-painted-place .campus-world-object[data-place=story]{top:8%;width:100px;min-height:58px;border-radius:50% 50% 14px 14px;background:#fff2c3;border-color:#a0804b;padding:9px 6px;font-size:15px}
+#classroomHub.campus-painted-place .campus-world-object[data-place=story]::after{height:16px;width:3px;left:50%;top:auto;bottom:100%;background:#b99c68}
+.finder-rooms [data-finder-room=cafeteria]::before,#studentAdventureDialog .sa-map-pin[data-chapter=cafeteria] .sa-pin-emblem{background-image:url('maps/cafeteria-panorama-v1.webp')}
+.finder-rooms [data-finder-room=playground]::before,#studentAdventureDialog .sa-map-pin[data-chapter=playground] .sa-pin-emblem{background-image:url('maps/playground-panorama-v1.webp')}
+.finder-rooms [data-finder-room=garden]::before,#studentAdventureDialog .sa-map-pin[data-chapter=garden] .sa-pin-emblem{background-image:url('maps/garden-panorama-v1.webp')}
+.finder-rooms [data-finder-room=pond]::before,#studentAdventureDialog .sa-map-pin[data-chapter=pond] .sa-pin-emblem{background-image:url('maps/pond-panorama-v1.webp')}
+#campusGuide[data-inspection=true] .campus-greeting h2{display:block}
+@media(max-width:849px){
+ #classroomHub.campus-painted-place .hub-stage{width:1260px;height:420px}
+ #classroomHub.campus-painted-place .campus-viewport{height:420px}
+ #classroomHub.campus-painted-place .campus-painted-prop{width:155px;height:134px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-table]{width:205px;height:124px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:127px;height:143px}
+ #classroomHub.campus-painted-place [data-art=playground-mat]{width:146px;height:80px}
+ #classroomHub.campus-painted-place [data-art=playground-bench]{width:184px;height:119px}
+ #classroomHub.campus-painted-place [data-art=playground-balls]{width:142px;height:129px}
+ #classroomHub.campus-painted-place [data-art=garden-sprout]{width:150px;height:142px}
+ #classroomHub.campus-painted-place [data-art=garden-flowers]{width:172px;height:127px}
+ #classroomHub.campus-painted-place [data-art=garden-bench]{width:189px;height:119px}
+ #classroomHub.campus-painted-place [data-art=pond-fence]{width:163px;height:120px}
+ #classroomHub.campus-painted-place [data-art=pond-viewer]{width:114px;height:144px}
+ #classroomHub.campus-painted-place [data-art=pond-notebook]{width:142px;height:129px}
+ #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:15px}
+}
+@media(max-height:700px) and (max-width:849px){
+ #classroomHub.campus-painted-place .hub-stage{width:1020px;height:340px}
+ #classroomHub.campus-painted-place .campus-viewport{height:340px}
+ #classroomHub.campus-painted-place .campus-painted-prop{width:130px;height:112px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-table]{width:172px;height:104px}
+ #classroomHub.campus-painted-place [data-art=cafeteria-trays]{width:106px;height:120px}
+ #classroomHub.campus-painted-place [data-art=playground-mat]{width:122px;height:67px}
+ #classroomHub.campus-painted-place [data-art=playground-bench]{width:154px;height:100px}
+ #classroomHub.campus-painted-place [data-art=playground-balls]{width:119px;height:108px}
+ #classroomHub.campus-painted-place [data-art=garden-sprout]{width:126px;height:119px}
+ #classroomHub.campus-painted-place [data-art=garden-flowers]{width:144px;height:107px}
+ #classroomHub.campus-painted-place [data-art=garden-bench]{width:158px;height:100px}
+ #classroomHub.campus-painted-place [data-art=pond-fence]{width:137px;height:101px}
+ #classroomHub.campus-painted-place [data-art=pond-viewer]{width:95px;height:121px}
+ #classroomHub.campus-painted-place [data-art=pond-notebook]{width:119px;height:108px}
+ #classroomHub.campus-painted-place .campus-painted-prop .campus-object-caption{font-size:14px;padding:4px 8px}
+}
+/* A brief discovery of light; painted furniture, names and hit targets stay still. */
+.campus-nature-effect{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;border-radius:12px}
+.campus-nature-effect i{position:absolute;display:block;opacity:0;pointer-events:none}
+.campus-nature-effect[data-effect=pollen] i{left:21%;top:42%;width:7px;height:7px;border-radius:50%;background:#fffad3;box-shadow:0 0 5px 2px #fbe79f70;--drift:9px;--delay:0s}
+.campus-nature-effect[data-effect=pollen] i:nth-child(2){left:49%;top:37%;width:5px;height:5px;--drift:-8px;--delay:.18s}
+.campus-nature-effect[data-effect=pollen] i:nth-child(3){left:77%;top:46%;width:6px;height:6px;--drift:6px;--delay:.36s}
+.campus-nature-effect[data-effect=sunlight] i{left:65%;top:19%;width:13px;height:18px;background:#effeff;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);--delay:0s}
+.campus-nature-effect[data-effect=sunlight] i:nth-child(2){left:80%;top:8%;width:10px;height:14px;--delay:.28s}
+#classroomHub:not(.hidden) .campus-painted-prop:is(.is-near,:focus-visible) .campus-nature-effect[data-effect=pollen] i{animation:campusPollenLight 2.4s ease-out var(--delay) 1 both}
+#classroomHub:not(.hidden) .campus-painted-prop:is(.is-near,:focus-visible) .campus-nature-effect[data-effect=sunlight] i{animation:campusLensLight 2.2s ease-in-out var(--delay) 1 both}
+.campus-painted-prop.art-missing .campus-nature-effect{display:none}
+@keyframes campusPollenLight{0%{opacity:0;transform:translate(0,0) scale(.7)}25%{opacity:.85}100%{opacity:0;transform:translate(var(--drift),-29px) scale(.3)}}
+@keyframes campusLensLight{0%,100%{opacity:0;transform:scale(.6) rotate(-14deg)}40%{opacity:.82;transform:scale(1) rotate(8deg)}}
+@media(prefers-reduced-motion:reduce){#classroomHub .campus-painted-prop .campus-nature-effect{display:none}}

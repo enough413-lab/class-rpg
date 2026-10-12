@@ -4,6 +4,10 @@ const root=path.resolve(__dirname,'..'),shots=path.resolve(root,'../student-scre
 const mock=String.raw`
 window.mockRpg={calls:[],failSave:false,failJournal:false,failDashboard:false,student:{id:987,number:1,nickname:'별나래',gender:'girl',xp:260,gold:180,setup_complete:true},exploration:JSON.parse(localStorage.getItem('fixtureExploration')||'[]'),workshop:JSON.parse(localStorage.getItem('fixtureWorkshop')||'{"cover":"paper","garden_complete":false}')};
 localStorage.setItem('classRpgStudentToken','fixture');
+mockRpg.finale=JSON.parse(localStorage.getItem('fixtureFinale')||'null')||{memories:[],ribbon:'meadow',wearing:false,completed_at:null};
+mockRpg.art=JSON.parse(localStorage.getItem('fixtureArt')||'null')||{phase:0,cells:Array(25).fill('empty'),stamp:'leaf'};
+Object.assign(mockRpg.art,JSON.parse(localStorage.getItem('fixtureFrame')||'null')||{background:'cream',frame:'wood',ornament:'leaf',placement:'bottom-right',decorated_at:null});
+mockRpg.kindness=JSON.parse(localStorage.getItem('fixtureKindness')||'{"phase":0,"choices":[],"pin":null,"wearing":false}');
 mockRpg.reviews=JSON.parse(localStorage.getItem('fixtureReviews')||'null')||[{review_id:47,book_title:'구름 학교',read_date:'2026-09-28',summary:'구름이 친구를 만나요.',thoughts:'서로 도우면 좋겠어요.',recommendation_rating:5,recommendation_reason:'따뜻한 이야기예요.',status:'rejected',rejection_reason:'친구를 도운 장면을 한 가지 더 적어 볼까요?'},{review_id:48,book_title:'작은 정원',read_date:'2026-09-27',summary:'씨앗이 자랐어요.',thoughts:'매일 돌봐 주고 싶어요.',recommendation_rating:4,recommendation_reason:'식물을 좋아하는 친구에게 추천해요.',status:'approved'}];
 mockRpg.receipts=JSON.parse(localStorage.getItem('fixtureReceipts')||'{}');mockRpg.purchases=Number(localStorage.getItem('fixturePurchases')||0);mockRpg.student.gold=180-mockRpg.purchases*40;
 mockRpg.inventory=[{item_id:'shirt',slot:'top',name:'교복 상의',image:'3.top/top_girl_basic.png',equipped:true},{item_id:'skirt',slot:'bottom',name:'교복 치마',image:'4.bottom/bottom_girl_basic.png',equipped:true},{item_id:'shoes',slot:'shoes',name:'운동화',image:'7.shoes/shoes_girl_basic.png',equipped:true}];
@@ -27,7 +31,53 @@ const createClient=()=>({
   if(m.dropOutfitReply){m.dropOutfitReply=false;return {error:{message:'Network request failed'}}}
   return {data:null};
  }
- if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_learning_journal')return m.failJournal?{error:{message:'Offline'}}:{data:{art:{...m.art,cells:[...m.art.cells]},kindness:{...m.kindness},exploration:m.exploration,workshop:{...m.workshop},areas:{learning:5,reading:8,kindness:3,life:7,organizing:6,helper:2},recent:[{title:'함께 꾸민 우리 교실',at:'2026-09-28T10:00:00Z'},{title:'친구에게 건넨 응원 한마디',at:'2026-09-27T10:00:00Z'}]}};
+ if(name==='student_kindness_chapter'){
+  m.kindnessSaves=(m.kindnessSaves||0)+1;await new Promise(r=>setTimeout(r,m.kindnessDelay||30));if(m.failKindness)return {error:{message:'Offline'}};
+  if(args.p_step==='pin')m.kindness.pin=args.p_choice;
+  else if(args.p_step==='wear')m.kindness.wearing=args.p_choice==='show';
+  else {const n=Number(args.p_step.split('-')[1]);if(n===2&&args.p_choice!=='library')return {data:{correct:false}};if(n>m.kindness.phase){m.kindness.choices.push(args.p_choice);m.kindness.phase=n;if(n===4){m.kindness.pin=args.p_choice;m.kindness.wearing=true}}}
+  localStorage.setItem('fixtureKindness',JSON.stringify(m.kindness));if(m.dropKindnessReply){m.dropKindnessReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.kindness}};
+ }
+ if(name==='student_art_frame'){m.frameSaves=(m.frameSaves||0)+1;if(m.failFrame)return {error:{message:'offline'}};Object.assign(m.art,{background:args.p_background,frame:args.p_frame,ornament:args.p_ornament,placement:args.p_placement,decorated_at:m.art.decorated_at||'2026-10-07T00:00:00Z'});localStorage.setItem('fixtureFrame',JSON.stringify(m.art));if(m.loseFrameReply){m.loseFrameReply=false;return {error:{message:'lost reply'}}}return {data:structuredClone(m.art)}}
+ if(name==='student_art_postcard'){
+  m.artSaves=(m.artSaves||0)+1;await new Promise(r=>setTimeout(r,m.artDelay||30));if(m.failArt)return {error:{message:'Offline'}};
+  if(args.p_action==='mix'){if(m.art.phase===0)m.art.phase=1}else m.art={...m.art,phase:2,cells:[...args.p_cells],stamp:args.p_stamp};
+  localStorage.setItem('fixtureArt',JSON.stringify(m.art));if(m.dropArtReply){m.dropArtReply=false;return {error:{message:'Network request failed'}}}return {data:{...m.art,cells:[...m.art.cells]}};
+ }
+ if(name==='student_school_finale'){
+ const earned=[];if(m.exploration.includes('music-sequence-3'))earned.push('melody');if(m.kindness.phase===4)earned.push('kindness');if(m.exploration.includes('parcel-3'))earned.push('parcel');if(m.art.phase===2&&m.art.decorated_at)earned.push('art');if(m.exploration.includes('letter-3'))earned.push('letter');
+ if(args.p_action==='read'){await new Promise(r=>setTimeout(r,m.finaleReadDelay||0));return m.failFinaleRead?{error:{message:'Offline'}}:{data:{...m.finale,memories:[...m.finale.memories],earned}}}
+ m.finaleSaves=(m.finaleSaves||0)+1;await new Promise(r=>setTimeout(r,m.finaleDelay||20));if(m.failFinale)return {error:{message:'Offline'}};
+ if(args.p_action==='wear'){if(!m.finale.completed_at)return {error:{message:'No finale'}};m.finale.wearing=args.p_wearing}
+ else{if(!m.finale.completed_at&&m.student.xp<1820)return {error:{message:'Level'}};if(args.p_memories?.length!==3||new Set(args.p_memories).size!==3||args.p_memories.some(x=>!earned.includes(x)))return {error:{message:'Missing memories'}};m.finale={...m.finale,memories:[...args.p_memories],ribbon:args.p_ribbon,wearing:m.finale.completed_at?m.finale.wearing:true,completed_at:m.finale.completed_at||new Date().toISOString()}}
+ localStorage.setItem('fixtureFinale',JSON.stringify(m.finale));if(m.dropFinaleReply){m.dropFinaleReply=false;return {error:{message:'Offline'}}}return {data:{...m.finale,memories:[...m.finale.memories],earned}};
+ }
+ if(name==='student_garden_letter'){
+  m.letterSaves=(m.letterSaves||0)+1;await new Promise(r=>setTimeout(r,m.letterDelay||30));if(m.failLetter)return {error:{message:'Offline'}};
+  const expected={'letter-1':['leaf','stem','light'],'letter-2':['leaf','light','grow'],'letter-3':['tori']}[args.p_step];
+  const got=args.p_clues;if(!expected||got?.length!==expected.length||new Set(got).size!==expected.length)return {error:{message:'Bad clues'}};
+  const correct=args.p_step==='letter-2'?JSON.stringify(got)===JSON.stringify(expected):expected.every(x=>got.includes(x));if(!correct)return {data:{correct:false}};
+  const i=Number(args.p_step.slice(-1));if(Array.from({length:i-1},(_,n)=>'letter-'+(n+1)).some(x=>!m.exploration.includes(x)))return {error:{message:'Sequence'}};
+  if(m.student.xp<1700&&!m.exploration.includes('letter-1'))return {error:{message:'Level'}};
+  const fresh=!m.exploration.includes(args.p_step);m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  if(m.dropLetterReply){m.dropLetterReply=false;return {error:{message:'Offline'}}}return {data:{correct:true,new:fresh,step_id:args.p_step}};
+ }
+ if(name==='student_parcel_adventure'){
+  m.parcelSaves=(m.parcelSaves||0)+1;await new Promise(r=>setTimeout(r,m.parcelDelay||30));if(m.failParcel)return {error:{message:'Offline'}};
+  const expected={'parcel-1':['book','leaf'],'parcel-2':['library'],'parcel-3':['tori']}[args.p_step];
+  if(JSON.stringify([...args.p_clues].sort())!==JSON.stringify(expected))return {data:{correct:false}};
+  m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));if(m.dropParcelReply){m.dropParcelReply=false;return {error:{message:'Network request failed'}}}return {data:{correct:true,step_id:args.p_step}};
+ }
+ if(name==='student_music_sequence'){
+  m.sequenceSaves=(m.sequenceSaves||0)+1;await new Promise(r=>setTimeout(r,m.sequenceDelay||30));
+  if(m.failSequence)return {error:{message:'Offline'}};
+  const expected={'music-sequence-1':['low','middle','high'],'music-sequence-2':['short','rest','long'],'music-sequence-3':['low','high','rest','middle']}[args.p_step];
+  if(JSON.stringify(args.p_order)!==JSON.stringify(expected))return {data:{correct:false}};
+  m.exploration=[...new Set([...m.exploration,args.p_step])];localStorage.setItem('fixtureExploration',JSON.stringify(m.exploration));
+  if(m.dropSequenceReply){m.dropSequenceReply=false;return {error:{message:'Network request failed'}}}
+  return {data:{correct:true,step_id:args.p_step}};
+ }
  if(name==='student_music_room'){
   m.musicSaves=(m.musicSaves||0)+1;await new Promise(r=>setTimeout(r,m.musicDelay||30));
   if(m.failMusic)return {error:{message:'Offline'}};
@@ -56,6 +106,7 @@ const createClient=()=>({
   }
   m.workshop.cover=args.p_choice;localStorage.setItem('fixtureWorkshop',JSON.stringify(m.workshop));return {data:{cover:args.p_choice}};
  }
+ if(name==='student_reading_shelf'){if(m.failShelf)return {error:{message:'offline'}};let rows=args.p_scope==='mine'?m.reviews.map(r=>({...r,author_nickname:m.student.nickname,mine:true})):m.shelfReviews||[{review_id:60,book_title:'친구의 작은 숲',read_date:'2026-10-07',summary:'친구가 나무를 돌봐요.',thoughts:'함께 돌보면 좋겠어요.',recommendation_rating:5,recommendation_reason:'따뜻한 이야기예요.',status:'approved',author_nickname:'초록별',mine:false}];if(args.p_before_id)rows=rows.filter(r=>r.review_id<args.p_before_id);rows=rows.sort((a,b)=>b.review_id-a.review_id);const page=rows.slice(0,20);return {data:{reviews:page,has_more:rows.length>20,next_before_id:page.at(-1)?.review_id||null}}}
  if(name==='student_reading_journal')return m.failReadingHistory?{error:{message:'Offline'}}:{data:{reviews:m.reviews,weekly_count:m.reviews.length}};
  if(name==='student_safe_action'){
   m.actionCalls=(m.actionCalls||[]).concat([{...args}]);await new Promise(r=>setTimeout(r,m.actionDelay||300));
