@@ -1,3 +1,4 @@
+import {installCampusJump} from './campus-jump.js?v=20261012-jump';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
@@ -25,9 +26,9 @@ export function installStudentCampus(ctx){
  function syncHud(){const s=ctx.getStudent(),text=s?'Lv. '+ctx.levelInfo(s.xp||0).level+' · '+Number(s.gold||0).toLocaleString('ko-KR')+' G':'';if(wallet.textContent!==text)wallet.textContent=text}
  new MutationObserver(syncHud).observe(doc.getElementById('hubStatus'),{childList:true,characterData:true,subtree:true});
  doc.addEventListener('student-dashboard-updated',syncHud);syncHud();
- const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
+ const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button><button type="button" data-campus="jump" aria-label="점프 · 스페이스 키">점프</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
  footer.append(footer.querySelector('.campus-routes'));footer.append(footer.querySelector('.campus-how'));
- footer.querySelector('.campus-how').textContent='← → 걷기 · ↑ / E 살펴보기 · 바닥을 눌러 이동';
+ footer.querySelector('.campus-how').textContent='← → 걷기 · Space 점프 · ↑ / E 살펴보기';
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><span class="game-speaker-name">책지기 토리</span><div class="campus-portrait">'+TORI_GREETING+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>마음에 남은 책이 있니?<br>오늘은 어떤 이야기를 나눠 볼까?</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 책 이야기 쓰기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 꾸러미 이야기</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="letter"><b>🌿 새싹 이야기</b><span>Lv.19부터 · 정원에서 관찰 편지를 만들어요.</span></button><button data-guide="evidence"><b>🔎 책 속 단서 찾기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">다음에 또 이야기하자!</button>';
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
@@ -83,6 +84,7 @@ export function installStudentCampus(ctx){
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected()});
+ installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene});
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
