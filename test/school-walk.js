@@ -24,7 +24,7 @@ export function installSchoolWalk(ctx){
  // Keyboard and assistive-technology users already have the movement controls.
  const floor=doc.createElement('button');floor.type='button';floor.className='campus-floor-target';floor.tabIndex=-1;floor.setAttribute('aria-hidden','true');stage.prepend(floor);
  let frame=0,target=null,destination=null,lastAt=0,walkEnd=0,scene='',imageRequest=0;
- const heldDirections=new Map();let movementOwner=null;
+ const heldDirections=new Map(),approaches=new Map();let movementOwner=null,approachSide=0;
  const direction=()=>[...heldDirections.values()].at(-1)||0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
@@ -35,12 +35,27 @@ export function installSchoolWalk(ctx){
   nameplates.schedule();
  }
  function markPlaces(){const near=nearby();for(const b of objects.querySelectorAll('[data-place]'))markCampusObject(b,{near:b.dataset.place===near?.kind,guided:b.dataset.place===destination?.kind})}
- function stop(arrived=false){const wasGuided=!!destination;cancelAnimationFrame(frame);frame=0;target=null;destination=null;lastAt=0;heldDirections.clear();movementOwner=null;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
- function nearest(){const x=ctx.getPosition().x;return currentPlaces().reduce((a,b)=>Math.abs(a.x-x)<=Math.abs(b.x-x)?a:b)}
- function nearby(){const closest=nearest();return Math.abs(closest.x-ctx.getPosition().x)<8?closest:null}
+ function stop(arrived=false){const wasGuided=!!destination;if(arrived===true&&approachSide)player.dataset.facing=approachSide<0?'right':'left';cancelAnimationFrame(frame);frame=0;target=null;destination=null;approachSide=0;lastAt=0;heldDirections.clear();movementOwner=null;clearTimeout(walkEnd);player.classList.remove('walking');waypoint.end(arrived===true);markPlaces();if(wasGuided)ctx.onPosition()}
+ // Measure once per scene/resize, never on each walking frame. Leave room for
+ // both character silhouettes and keep the chosen resident actionable on arrival.
+ function measureApproaches(){
+  approaches.clear();const width=stage.clientWidth;if(!width)return;
+  for(const npc of objects.querySelectorAll('.campus-npc')){
+   const center=parseFloat(npc.style.left),gap=((npc.offsetWidth+player.offsetWidth)/2+10)/width*100;
+   approaches.set(npc.dataset.place,{center,points:[{x:center-gap,side:-1},{x:center+gap,side:1}].filter(p=>p.x>=4&&p.x<=96)});
+  }
+ }
+ function distance(place,x=ctx.getPosition().x){return Math.min(Math.abs(place.x-x),...(approaches.get(place.kind)?.points||[]).map(p=>Math.abs(p.x-x)))}
+ function nearest(){return currentPlaces().reduce((a,b)=>distance(a)<=distance(b)?a:b)}
+ function nearby(){const closest=nearest();return distance(closest)<8?closest:null}
+ function approachTarget(place,side=0){
+  const a=approaches.get(place.kind);if(!a?.points.length)return {x:place.x,side:0};
+  const preferred=side||(ctx.getPosition().x<=a.center?-1:1);
+  return a.points.find(p=>p.side===preferred)||a.points[0];
+ }
  function goTo(kind){
   const place=currentPlaces().find(p=>p.kind===kind);if(!place||!canWalk())return false;
-  stop();destination=place;target=place.x;waypoint.show(target);
+  stop();measureApproaches();destination=place;const arrival=approachTarget(place);target=arrival.x;approachSide=arrival.side;waypoint.show(target);
   markPlaces();
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}
   else{startFrames();ctx.onPosition()}
@@ -97,14 +112,14 @@ export function installSchoolWalk(ctx){
   img.onerror=()=>{if(request!==imageRequest)return;status.innerHTML='<span>풍경을 아직 불러오지 못했어요.</span><button type="button">다시 보기</button>';status.querySelector('button').onclick=background};img.src=url;
  }
  function syncScene(){
-  const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();camera();markPlaces();return}
+  const next=ctx.getScene();if(scene===next&&objects.querySelector('[data-place]')){rig();measureApproaches();camera();markPlaces();return}
   stop();scene=next;hub.classList.toggle('campus-wide',!!EXTRA_ROOMS[next]);hub.classList.toggle('campus-painted-place',!!PAINTED_PLACES[next]);hub.classList.toggle('campus-library-wide',next==='library');ctx.setPosition(EXTRA_ROOMS[next]?12:next==='library'?36:44,GROUND);objects.replaceChildren();
   for(const p of currentPlaces()){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
    if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
    b.onclick=()=>{stop();ctx.interact(p.kind)};objects.append(b);
   }
-  rig();background();camera();markPlaces();ctx.onPosition();
+  rig();measureApproaches();background();camera();markPlaces();ctx.onPosition();
  }
  window.moveHub=(dx,dy)=>{
   if(!canWalk())return;stop();
@@ -119,7 +134,7 @@ export function installSchoolWalk(ctx){
  });
  // Pointer focus must not move a target out from under the pending tap/click.
  stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p?.matches(':focus-visible'))camera(Number(p.dataset.walkX))});
- new ResizeObserver(()=>camera()).observe(viewport);
+ new ResizeObserver(()=>{measureApproaches();if(destination&&approachSide){const arrival=approachTarget(destination,approachSide);target=arrival.x;approachSide=arrival.side;waypoint.show(target)}camera();markPlaces();ctx.onPosition()}).observe(viewport);
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
  let studentId=ctx.getStudent()?.id;doc.addEventListener('student-dashboard-updated',()=>{const next=ctx.getStudent()?.id;if(next!==studentId)stop();studentId=next});
