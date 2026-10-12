@@ -47,3 +47,11 @@
  #classroomHub.campus-side .campus-how{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
  #classroomHub.campus-side .campus-near button{font-size:16px}
 }
+
+/* Matching original icons and readable helper text, without growing hit targets. */
+.campus-menu .hud-icon{width:24px;height:24px;display:grid;place-items:center;line-height:1}
+.campus-menu .hud-icon svg{display:block;width:24px;height:24px}
+#classroomHub.campus-side .campus-menu button{font-size:13px;line-height:1.2}
+.campus-wallet{font-size:15px;letter-spacing:.1px}
+#classroomHub.campus-side .campus-how{font:14px/1.5 system-ui,sans-serif;color:#526446}
+@media(max-width:849px){.campus-wallet{font-size:14px}.campus-menu .hud-icon,.campus-menu .hud-icon svg{width:22px;height:22px}}

@@ -1,3 +1,4 @@
+import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
 import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
@@ -16,7 +17,7 @@ export function installStudentCampus(ctx){
  const shell=hub.querySelector('.hub-shell'),stage=hub.querySelector('.hub-stage'),objects=doc.getElementById('hubSceneObjects');
  hub.classList.add('campus-walk');hub.setAttribute('role','dialog');hub.setAttribute('aria-modal','true');hub.setAttribute('aria-labelledby','campusTitle');
  const header=doc.createElement('header');header.className='campus-header';
- header.innerHTML='<div><span class="campus-eyebrow">우리 학교 산책</span><h2 id="campusTitle" tabindex="-1"></h2><p id="campusHint"></p></div><div class="campus-menu"><button data-campus="find" aria-label="길 찾기"><span class="hud-icon" aria-hidden="true">🧭</span>길 찾기</button><button data-campus="map" aria-label="탐험 지도"><span class="hud-icon" aria-hidden="true">🗺️</span>지도</button><button data-campus="home" aria-label="내 화면으로"><span class="hud-icon" aria-hidden="true">🏠</span>내 화면</button></div>';
+ header.innerHTML='<div><span class="campus-eyebrow">우리 학교 산책</span><h2 id="campusTitle" tabindex="-1"></h2><p id="campusHint"></p></div><div class="campus-menu"><button data-campus="find" aria-label="길 찾기"><span class="hud-icon" aria-hidden="true">'+campusIcon('find')+'</span>길 찾기</button><button data-campus="map" aria-label="탐험 지도"><span class="hud-icon" aria-hidden="true">'+campusIcon('map')+'</span>지도</button><button data-campus="home" aria-label="내 화면으로"><span class="hud-icon" aria-hidden="true">'+campusIcon('home')+'</span>내 화면</button></div>';
  shell.prepend(header);header.firstElementChild.append(doc.getElementById('hubStatus'));hub.querySelector('.hub-top').remove();
  const wallet=doc.createElement('span');wallet.className='campus-wallet';wallet.setAttribute('aria-label','내 레벨과 골드');header.firstElementChild.append(wallet);
  function syncHud(){const s=ctx.getStudent(),text=s?'Lv. '+ctx.levelInfo(s.xp||0).level+' · '+Number(s.gold||0).toLocaleString('ko-KR')+' G':'';if(wallet.textContent!==text)wallet.textContent=text}
