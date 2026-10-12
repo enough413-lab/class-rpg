@@ -6,7 +6,7 @@ export function installCampusNameplates({hub,stage,viewport,player,objects}){
   const name=player.querySelector('.campus-player-name');if(!name)return;
   const view=viewport.getBoundingClientRect(),scene=stage.getBoundingClientRect();if(!view.width)return;
   const measure=label=>{const r=label.getBoundingClientRect(),old=offsets.get(label)||{x:0,y:0};return {label,left:r.left-old.x,top:r.top-old.y,width:r.width,height:r.height}};
-  const own=measure(name),playerBody=player.getBoundingClientRect(),npcs=[...objects.querySelectorAll('.campus-npc .campus-object-caption')].map(label=>({...measure(label),body:label.parentElement.getBoundingClientRect()}));
+  const own=measure(name),playerBody=player.getBoundingClientRect(),npcs=[...objects.querySelectorAll('.campus-npc .campus-object-caption,[data-stand-beside] .campus-object-caption')].map(label=>({...measure(label),body:label.parentElement.getBoundingClientRect()}));
   const parcelLabel=objects.querySelector('[data-place=parcel]:not([hidden]) .campus-object-caption'),parcel=parcelLabel?{...measure(parcelLabel),body:parcelLabel.parentElement.getBoundingClientRect()}:null;
   const scenery=parcel?[...objects.querySelectorAll('.campus-object-caption')].filter(label=>label!==parcelLabel&&!label.parentElement.classList.contains('campus-npc')).map(label=>label.getBoundingClientRect()):[];
   const clampX=r=>Math.max(view.left+8,Math.min(r.left,view.right-8-r.width))-r.left;
