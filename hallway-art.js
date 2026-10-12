@@ -1,6 +1,6 @@
 // Original painted assets for the existing hallway, with independent route doors.
 export const HALLWAY_BACKGROUND='maps/hallway-panorama-v1.webp';
-export const HALLWAY_PLACES=[{kind:'classroom',x:8,label:'← 우리 교실'},{kind:'notice',x:51,label:'📜 도서 안내판'},{kind:'library',x:90,label:'도서관 →'}];
+export const HALLWAY_PLACES=[{kind:'classroom',x:8,label:'← 우리 교실'},{kind:'notice',x:51,label:'📜 꾸러미 표식 안내'},{kind:'library',x:90,label:'도서관 →'}];
 export function decorateHallwayObject(button,place){
  const art={classroom:'hallway-classroom-door',library:'hallway-library-door',notice:'hallway-notice'}[place.kind];if(!art)return false;
  const doc=button.ownerDocument,door=place.kind!=='notice';button.classList.add('campus-sprite','campus-hallway-prop');if(door)button.classList.add('campus-hallway-door');else button.dataset.standBeside='true';button.dataset.art=art;button.dataset.walkX=place.x;button.dataset.action=door?'이동하기':'단서 읽기';button.setAttribute('aria-label',place.label+' · '+button.dataset.action);

@@ -1,7 +1,7 @@
 // Bounds follow the existing painted props, in percent of the whole room.
 // Reusing the room texture keeps every crop aligned with the original artwork.
 const PROPS={
- classroom:{hallway:[89,48,10.5,27.5]},
+ classroom:{hallway:[90,44,9,36]},
  hallway:{classroom:[8.3,45.5,13,29.5],library:[80.7,46,13,29]},
  library:{hallway:[.5,48,11,27]}
 };

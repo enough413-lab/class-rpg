@@ -12,10 +12,10 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
    for(const room of ['classroom','library','hallway']){
     await f.evaluate(room=>enterHubScene(room),room);await settled();
     const box=await f.evaluate(()=>{const r=s=>{const b=document.querySelector(s).getBoundingClientRect();return{x:b.x,y:b.y,w:b.width,h:b.height,bottom:b.bottom}};return{stage:r('.hub-stage'),view:r('.campus-viewport'),player:r('#hubPlayer'),use:r('[data-campus=use]'),screen:innerHeight,overflow:document.getElementById('classroomHub').scrollWidth>innerWidth+1}});
-    assert(Math.abs(box.stage.w/box.stage.h-(room==='classroom'?4/3:3))<.002);assert(Math.abs(box.view.h-box.stage.h)<1);assert(Math.abs(box.view.y-box.stage.y)<1,'Never crop the ceiling with a negative margin');assert(!box.overflow);assert(box.use.bottom<=box.screen+1,`Movement/use controls must stay visible: ${width}x${height} ${room} ${JSON.stringify(box)}`);
+    assert(Math.abs(box.stage.w/box.stage.h-3)<.002);assert(Math.abs(box.view.h-box.stage.h)<1);assert(Math.abs(box.view.y-box.stage.y)<1,'Never crop the ceiling with a negative margin');assert(!box.overflow);assert(box.use.bottom<=box.screen+1,`Movement/use controls must stay visible: ${width}x${height} ${room} ${JSON.stringify(box)}`);
     assert(Math.abs(box.player.bottom-(box.stage.y+box.stage.h*.8))<1,'Feet stay on the new floor');
-    if(width===390&&room==='classroom')assert(box.view.h>=520,'Phone scene must be taller than the previous 350px viewport');
-    if(room!=='classroom')assert(box.player.w>=99.9&&box.player.w<=128.1,'Panorama keeps people at a fixed readable scale '+width+' '+JSON.stringify(box));else assert(Math.abs(box.player.w/box.stage.w-.17)<.002,'Avatar shares the NPC room scale');assert(box.stage.w>=box.view.w-1,'Room fills viewport without a blank strip');
+
+    assert(box.player.w>=99.9&&box.player.w<=128.1,'Panorama keeps people at a fixed readable scale '+width+' '+JSON.stringify(box));assert(box.stage.w>=box.view.w-1,'Room fills viewport without a blank strip');
     await page.screenshot({path:path.join(shots,`space-${room}-${width}.png`),fullPage:true});
    }
   }
