@@ -1,0 +1,5 @@
+#classroomHub.campus-side .campus-pad [data-campus=jump]{min-width:48px;min-height:48px;font:16px SchoolJua,system-ui;touch-action:manipulation}
+.campus-jump-shadow{display:none;position:absolute;bottom:-1px;left:32%;width:36%;height:8px;border-radius:50%;background:#39422f;pointer-events:none}
+#hubPlayer[data-jumping] .campus-jump-shadow{display:block}
+#classroomHub.campus-side .campus-pad{gap:6px;grid-template-columns:repeat(3,48px)}
+@media(max-width:400px){#classroomHub.campus-side .campus-pad{grid-template-columns:repeat(3,44px);gap:4px}#classroomHub.campus-side .campus-pad [data-campus=jump]{min-width:44px;min-height:44px;padding:6px}.campus-controller{gap:8px}}
