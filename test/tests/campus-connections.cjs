@@ -7,7 +7,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   const page=await browser.newPage({viewport:{width:1366,height:768},hasTouch:true}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);
   let f=page.frames().find(x=>x.url().includes('app-core.html'));await f.waitForFunction(()=>window.studentCampus&&document.getElementById('saProfileTitle')?.textContent.includes('별나래'));await f.evaluate(()=>document.fonts.ready);fs.mkdirSync(shots,{recursive:true});
   const ready=()=>f.locator('.campus-scene-status').waitFor({state:'hidden'}),pos=()=>f.locator('#hubPlayer').evaluate(e=>parseFloat(e.style.left));
-  const navigate=async kind=>{await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place='+kind+']').click();await f.waitForFunction(k=>document.querySelector('[data-campus=use]').textContent.includes(document.querySelector('[data-place='+k+']').querySelector('b').textContent),kind)};
+  const navigate=async kind=>{await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place='+kind+']').click();await f.locator('.campus-waypoint[data-state=arrived]').waitFor()};
   const frozen=async()=>{const x=await pos();await page.waitForTimeout(160);assert.equal(await pos(),x)};
   // Six physical links are usable in both directions, arriving beside the matching doorway.
   const chain=['classroom','hallway','library','garden','pond','playground','cafeteria'];
@@ -22,7 +22,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
    assert(await f.locator('.hub-stage').evaluate(el=>el.clientWidth-el.parentElement.clientWidth>500),'The wider HUD viewport still has scenery to uncover');
    await navigate('hallway');await page.screenshot({path:path.join(shots,'paths-library-left-'+width+'.png'),fullPage:true});
    const left=await f.locator('.hub-stage').evaluate(el=>el.getBoundingClientRect().left);await navigate('nook');const right=await f.locator('.hub-stage').evaluate(el=>el.getBoundingClientRect().left);assert(left-right>450,'Walking reveals a different portion of one continuous room');
-   await f.locator('[data-campus=use]').tap();assert.match(await f.locator('#campusGuide').textContent(),/학교 정원/);assert(!await f.locator('.campus-guide-choices').isVisible());await page.keyboard.press('Escape');
+   await f.locator('[data-campus=use]').tap();assert(await f.locator('.nook-book.is-open').isVisible());assert(!await f.locator('#campusGuide').isVisible());await f.locator('.nook-close').tap();
    await page.screenshot({path:path.join(shots,'paths-library-right-'+width+'.png'),fullPage:true});
    assert(await f.locator('[data-campus=use]').evaluate(el=>el.getBoundingClientRect().bottom<=innerHeight+1));assert(await f.locator('#classroomHub').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
    assert(await f.locator('.campus-player-name').evaluate(el=>el.getBoundingClientRect().top>el.parentElement.getBoundingClientRect().bottom));

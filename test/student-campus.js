@@ -1,3 +1,4 @@
+import {installLibraryNook} from './library-nook.js?v=20261012-nook';
 import {installGardenCare} from './garden-care.js?v=20261012-garden-care';
 import {installMomoFavor} from './momo-favor.js?v=20261012-momo';
 import {installCampusJump} from './campus-jump.js?v=20261012-momo';
@@ -43,11 +44,11 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();
+  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?(gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
   if(action.textContent!==label)action.textContent=label;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
@@ -71,13 +72,13 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null,momo=null,gardenCare=null;
+ let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null;
  function interact(kind){
+  if(nook?.interact(kind))return;
   if(gardenCare?.interact(kind))return;
   if(kind==='pencil')return momo?.inspect();
   if(meal?.interact(kind))return;
   if(kind==='story'){stop();walk.stop();window.studentAdventure.chapter(ctx.getScene());return}
-  if(kind==='nook'){stop();guide.dataset.inspection='true';guide.querySelector('.campus-return[data-guide=close]').textContent='계속 둘러보기';doc.getElementById('campusGuideTitle').textContent='햇살이 머무는 창가';guide.querySelector('.campus-greeting p').textContent='폭신한 방석 위로 나뭇잎 그림자가 내려앉았어요. 마음에 드는 책과 잠깐 쉬어 갈까요? 오른쪽 초록 문은 학교 정원으로 이어져요.';guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 창가 쉼터';guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();guide.showModal();return}
   if(kind.startsWith('look-')){stop();walk.stop();guide.dataset.inspection='true';guide.querySelector('.campus-return[data-guide=close]').textContent='계속 둘러보기';const room=ctx.getScene(),i=Number(kind.slice(5));doc.getElementById('campusGuideTitle').textContent=EXTRA_ROOMS[room].props[i];guide.querySelector('.campus-greeting p').textContent=WORLD_DETAILS[room][i];guide.querySelector('.campus-portrait').hidden=true;guide.querySelector('.campus-guide-top span').textContent=SCENES[room].name;guide.querySelector('.campus-guide-choices').hidden=true;guide.querySelector('.campus-real').hidden=true;guide.querySelector('.letter-inspect-link')?.remove();if(room==='garden'&&i===0){const b=doc.createElement('button');b.className='campus-return letter-inspect-link';b.dataset.guide='letter-garden';b.textContent='🌿 새싹 관찰 편지 · Lv.19';guide.querySelector('.campus-greeting').after(b)}guide.showModal();return}
   if(['parcel','notice'].includes(kind))return parcel.inspect(kind);
   if(kind==='tori')return talk();
@@ -91,6 +92,7 @@ export function installStudentCampus(ctx){
  installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene});
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  gardenCare=installGardenCare({...ctx,hub,objects,walk,stop,refresh:syncNear});
+ nook=installLibraryNook({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
