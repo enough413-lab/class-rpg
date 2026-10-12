@@ -4,7 +4,7 @@ import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-pat
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
-import {installCampusNameplates} from './campus-nameplates.js?v=20261012-graphics';
+import {installCampusNameplates} from './campus-nameplates.js?v=20261012-jump-polish';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:25,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:54,label:'📋 선생님 의뢰'},{kind:'teacher',x:68,label:'🌟 해낸 일'},{kind:'shop',x:82,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
