@@ -36,13 +36,15 @@
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
       "status": "in_progress",
-      "evidence": "tests/garden-care.cjs and tests/nature-light.cjs cover the flower planter only; other targets remain open",
+      "evidence": "Flower care and library window book have bounded action/visible-result tests. Eight explicitly listed targets remain pending; overall item 6 stays in_progress.",
       "targets": [
         {
           "room": "library",
           "kind": "nook",
           "label": "창가 쉼터",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Walk near the window book stand, open/turn three original picture pages directly, close or walk/jump away; personal device bookmark remains and resumes without rewards or reading-record writes",
+          "evidence": "tests/library-nook.cjs; tests/campus-connections.cjs; outputs/student-library-nook-deployment.json (2026-09-30/a)"
         },
         {
           "room": "garden",
@@ -54,9 +56,9 @@
           "room": "garden",
           "kind": "look-1",
           "label": "꽃의 자리",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk near, pour water directly in world, local account-specific dew/care memory; later petal sway",
-          "evidence": "tests/garden-care.cjs; outputs/student-garden-care-deployment.json (2026-09-30/a)"
+          "evidence": "tests/garden-care.cjs; Pages38211655997/live bytes complete; staging4f7c2e5814517508d7dafc0e8d2c4cff1b95236e / main-test9d7d3578362d40fbc20efcaec6e38f0203cdbcd2; outputs/student-garden-care-deployment.json (2026-09-30/a)"
         },
         {
           "room": "garden",
