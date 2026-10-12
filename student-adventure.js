@@ -1,5 +1,5 @@
 import {schoolMapView} from './school-map-ui.js?v=20261008-game-ui';
-import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261007-finale';
+import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261012-dialogue';
 import {LETTER_MILESTONE} from './garden-letter.js?v=20261007-letter';
 import {FRAME_MILESTONE,installArtFrame} from './art-frame.js?v=20261007-frame';
 import {ART_MILESTONE,installArtPostcard} from './art-postcard.js?v=20261007-frame';
