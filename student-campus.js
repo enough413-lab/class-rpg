@@ -2,11 +2,11 @@ import {roomDoors} from './school-connections.js?v=20261008-paths';
 import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
-import {installParcelAdventure} from './parcel-adventure.js?v=20261012-graphics';
-import {installSchoolWalk} from './school-walk.js?v=20261012-graphics';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261012-classroom-interactions';
+import {installSchoolWalk} from './school-walk.js?v=20261012-classroom-interactions';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261008-game-ui';
-import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-graphics';
+import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';
 const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도']]},hallway:{name:'별빛 복도',hint:'왼쪽은 우리 교실, 오른쪽은 도서관이에요. 긴 창가를 따라 걸어 봐요.',routes:[['classroom','🏫 교실'],['library','📚 도서관']]},library:{name:'이야기 도서관',hint:'오른쪽 창가를 지나면 정원으로 이어져요. 토리와 이야기도 나눠요.',routes:[['hallway','← 복도'],['garden','정원 →']]}};

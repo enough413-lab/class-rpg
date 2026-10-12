@@ -15,9 +15,9 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   const held=await position();await page.keyboard.press('ArrowLeft');assert.equal(await position(),held);
   await f.locator('[data-finder-close]').focus();await page.keyboard.press('Shift+Tab');assert.equal(await f.evaluate(()=>document.activeElement.dataset.finderPlace),'hallway');
   await page.keyboard.press('Escape');assert.equal(await f.evaluate(()=>document.activeElement.dataset.campus),'find');
-  await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=inventory]').click();await arrive(24);
+  await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=inventory]').click();await arrive(25);
   assert(!(await f.locator('#inventoryModal').isVisible()),'Arrival must not unexpectedly open an activity');
-  await f.locator('[data-campus=use]').click();assert(await f.locator('#inventoryModal').isVisible());await f.waitForFunction(()=>document.getElementById('inventoryModal').getAttribute('aria-busy')==='false');await page.keyboard.press('Escape');assert.equal(await position(),24);
+  await f.locator('[data-campus=use]').click();assert(await f.locator('#inventoryModal').isVisible());await f.waitForFunction(()=>document.getElementById('inventoryModal').getAttribute('aria-busy')==='false');await page.keyboard.press('Escape');assert.equal(await position(),25);
   // Cross-room guidance only lists implemented walking rooms, including Lv.1 reading.
   await f.locator('[data-campus=find]').click();await f.locator('[data-finder-room=library]').click();assert.equal(await f.locator('[data-finder-place]').count(),6);
   await f.locator('[data-finder-place=reading]').click();await arrive(22);assert.match(await f.locator('#campusTitle').textContent(),/도서관/);await f.locator('[data-campus=use]').click();assert(await f.locator('#readingPortfolioModal').isVisible());await page.keyboard.press('Escape');assert.equal(await position(),22);
@@ -40,7 +40,7 @@ const {chromium}=require('playwright');const {server,shots}=require('./student-f
   assert(await f.locator('#classroomHub').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
   assert(await f.locator('.campus-viewport').evaluate(el=>el.scrollLeft===0));
   await page.setViewportSize({width:320,height:640});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=hallway]').scrollIntoViewIfNeeded();assert(await f.locator('[data-finder-close]').evaluate(el=>el.getBoundingClientRect().top>=0));assert(await f.locator('#campusWayfinder').evaluate(el=>el.scrollWidth<=el.clientWidth+1));await page.keyboard.press('Escape');
-  await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=inventory]').click();await arrive(24);assert.equal(await f.locator('#hubPlayer').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
+  await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').click();await f.locator('[data-finder-place=inventory]').click();await arrive(25);assert.equal(await f.locator('#hubPlayer').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
   // Touch activation runs once; close/reopen does not restart an old route.
   const touch=await browser.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await touch.route('https://**',r=>r.abort());await touch.goto(base);const tf=touch.frames().find(f=>f.url().includes('app-core.html'));await tf.waitForFunction(()=>window.studentCampus);await tf.evaluate(()=>enterHubScene('library'));await tf.locator('[data-campus=find]').tap();await tf.locator('[data-finder-place=tori]').tap();await tf.locator('.campus-waypoint[data-state=arrived]').waitFor();await tf.waitForFunction(()=>document.querySelector('[data-campus=use]').dataset.state==='arrived');await tf.locator('[data-campus=use]').tap();assert(await tf.locator('#campusGuide').isVisible());await touch.close();
   assert.deepEqual(await f.evaluate(()=>[mockRpg.student.xp,mockRpg.student.gold]),[0,180]);assert.deepEqual(errors,[]);

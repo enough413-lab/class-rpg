@@ -19,6 +19,7 @@
  #classroomHub.campus-hallway-wide .hub-player{width:112px}
  #classroomHub.campus-hallway-wide .campus-hallway-prop{width:155px;height:150px}
  #classroomHub.campus-hallway-wide [data-place=notice]{width:118px;height:108px}
+ #classroomHub.campus-hallway-wide [data-place=notice] .campus-object-caption{top:-18px}
  #classroomHub.campus-hallway-wide .campus-hallway-door{width:148px;height:222px}
  #classroomHub.campus-hallway-wide .campus-hallway-door .campus-object-caption{bottom:138px}
  #classroomHub.campus-hallway-wide .campus-hallway-prop .campus-object-caption{font-size:15px}
@@ -29,6 +30,7 @@
  #classroomHub.campus-hallway-wide .hub-player{width:100px}
  #classroomHub.campus-hallway-wide .campus-hallway-prop{width:138px;height:134px}
  #classroomHub.campus-hallway-wide [data-place=notice]{width:92px;height:84px}
+ #classroomHub.campus-hallway-wide [data-place=notice] .campus-object-caption{top:-30px}
  #classroomHub.campus-hallway-wide .campus-hallway-door{width:124px;height:186px}
  #classroomHub.campus-hallway-wide .campus-hallway-door .campus-object-caption{bottom:120px}
  #classroomHub.campus-hallway-wide .campus-hallway-prop .campus-object-caption{font-size:14px}
