@@ -1,4 +1,4 @@
-import {installCampusJump} from './campus-jump.js?v=20261012-parcel-world';
+import {installCampusJump} from './campus-jump.js?v=20261012-audit-1';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
@@ -8,7 +8,7 @@ import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-n
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
 import {installSchoolWalk} from './school-walk.js?v=20261012-jump-polish';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
-import {installCampusNpcs} from './campus-npcs.js?v=20261012-parcel-world';
+import {installCampusNpcs} from './campus-npcs.js?v=20261012-audit-1';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';
@@ -34,7 +34,7 @@ export function installStudentCampus(ctx){
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
- const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot()});
+ const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,levelInfo:ctx.levelInfo});
  let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
