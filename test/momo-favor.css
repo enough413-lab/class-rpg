@@ -1,0 +1,8 @@
+#classroomHub.campus-side .momo-pencil{top:80%;width:72px;min-height:44px;padding:6px;border:0;background:none;box-shadow:none;transform:translate(-50%,-90%)}
+.momo-pencil>svg{display:block;width:60px;height:28px;transform:rotate(-12deg);filter:drop-shadow(0 2px 1px #68533155)}
+.momo-pencil .campus-object-caption{display:none;bottom:110%;top:auto}
+.momo-pencil:is(.is-near,:focus-visible) .campus-object-caption{display:block}
+.momo-pencil[hidden],.momo-held[hidden],.momo-returned[hidden],.momo-favor-status[hidden]{display:none!important}
+.momo-held{position:absolute;left:31%;top:53%;width:50px;height:22px;z-index:21;pointer-events:none}.momo-held svg,.momo-returned svg{width:100%;height:100%}
+.momo-returned{position:absolute;left:62%;top:58%;width:43px;height:20px;pointer-events:none;transform:rotate(-18deg)}
+.momo-favor-status{margin:4px 0 0;padding:6px 10px;border-radius:12px;background:#fff3ce;font:14px/1.5 system-ui;color:#475d40;word-break:keep-all}

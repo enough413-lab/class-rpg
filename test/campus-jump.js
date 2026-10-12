@@ -17,11 +17,11 @@ export function installCampusJump({hub,getStudent,getScene}){
   samples.push({offset:.89,y:reduce?1:3,sx:reduce?1:1.03,sy:reduce?1:.95,tuck:reduce?0:.35},{offset:1,y:0,sx:1,sy:1,tuck:0});
   const options={duration,easing:'linear'},lift=samples.map(p=>({offset:p.offset,translate:'0 '+p.y+'px'}));
   animations=[rig.animate(samples.map(p=>({offset:p.offset,translate:'0 '+p.y+'px',scale:p.sx+' '+p.sy})),options)];
-  const linked=new Map(),heldSelector='.cafeteria-held-tray:not([hidden]),.parcel-held:not([hidden])';
+  const linked=new Map(),heldSelector='.cafeteria-held-tray:not([hidden]),.parcel-held:not([hidden]),.momo-held:not([hidden])';
   function attach(el){const a=el.animate(lift,options),base=animations[0];if(base.startTime!==null)a.startTime=base.startTime;else a.currentTime=base.currentTime;if(base.playState==='paused'){a.pause();a.currentTime=base.currentTime}linked.set(el,a);animations.push(a)}
   function syncHeld(){
    const visible=new Set(player.querySelectorAll(heldSelector));
-   for(const [el,a]of linked)if(!el.isConnected||el.matches('.cafeteria-held-tray,.parcel-held')&&!visible.has(el)){a.cancel();linked.delete(el);animations=animations.filter(x=>x!==a)}
+   for(const [el,a]of linked)if(!el.isConnected||el.matches('.cafeteria-held-tray,.parcel-held,.momo-held')&&!visible.has(el)){a.cancel();linked.delete(el);animations=animations.filter(x=>x!==a)}
    for(const el of visible)if(!linked.has(el))attach(el);
   }
   const name=player.querySelector('.campus-player-name');if(name)attach(name);syncHeld();
