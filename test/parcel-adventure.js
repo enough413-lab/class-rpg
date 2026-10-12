@@ -6,7 +6,7 @@ export function installParcelAdventure(c){
  const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
  let owner=null,token=null,done=new Set(),loaded=false,error=false,busy=false,task=null,clues=new Set(),opener=null,view=0,loadVersion=0,saveVersion=0;
  const student=()=>c.getStudent()||{},phase=()=>STEPS.filter(id=>done.has(id)).length,level=()=>c.levelInfo(student().xp||0).level;
- const goal=()=>phase()===0?'교실의 꾸러미에서 단서 두 가지 찾기':phase()===1?'복도의 도서 안내판 살펴보기':phase()===2?'도서관에서 토리에게 꾸러미 전달하기':'도서 꾸러미 전달 완료';
+ const goal=()=>phase()===0?'교실의 꾸러미에서 단서 두 가지 찾기':phase()===1?'복도의 꾸러미 표식 안내판 살펴보기':phase()===2?'도서관에서 토리에게 꾸러미 전달하기':'도서 꾸러미 전달 완료';
  function render(){
   tracker.innerHTML='<span aria-hidden="true">'+(phase()>0?'<img src="maps/npcs/parcel-v1.webp" alt="">':'✦')+'</span><span><b>책 향기 꾸러미</b><small>'+(error?'연결 확인 · 다시 읽기':!loaded?'의뢰 수첩 읽는 중…':level()<16&&!phase()?'Lv.16부터 살펴봐요':goal())+'</small><i aria-hidden="true">'+[0,1,2].map(i=>i<phase()?'●':'○').join(' ')+'</i></span>';
   tracker.setAttribute('aria-label','꾸러미 의뢰 수첩 · '+(loaded?goal():'기록 불러오기'));tracker.dataset.complete=String(phase()===3);

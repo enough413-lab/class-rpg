@@ -1,0 +1,15 @@
+{
+  "tool": "built-in image_gen",
+  "generationPrompt": "Create an ORIGINAL continuous 3:1 side-scrolling school RPG classroom panorama (wide landscape approx 2172x724). Supplied image is our own classroom architecture/color STYLE REFERENCE only. Warm hand-painted storybook honey timber ceiling, sage lower wall, cream plaster, brass hanging green lamps, sunlit windows with trees. Straight frontal lateral camera with horizontal ground, no vanishing perspective. Character feet baseline exactly 80% image height; shallow warm wooden platform above it, dark wood fascia below through image bottom. Compose varied scenery: left third sunny windows with small children's art, center third modest green chalkboard with only small chalk sun/flowers/no writing, right third classroom reading corner with windows and a few hanging plants. Keep lower wall/background broad and clear behind independent game furniture: display cabinet at8%, wardrobe24%, parcel38%, teacher54%, records68%, shopkeeper82%, exit94%. DO NOT paint these furniture, people, boxes, chairs or counters into background. Far right at94% add a complete sage green arched school exit door in honey wood frame, front-facing, bottom exactly80%, top46%, width approx8.5% image width. Tiny raised sun emblem above door, no words. Preserve coherent existing classroom palette and warm soft painted outlines. Keep lower area uncrowded and brighter than UI signs. Visual variety across whole panorama, no repeated tiles/stitched rooms. No characters, NPCs, readable text, logos, UI, watermark. Original artwork, do not copy any commercial game art.",
+  "editPrompt": "Edit our original classroom panorama. Preserve dimensions 2172x724, warm hand-painted style, ceiling/windows, chalkboard, children's paper art, sunlit walking platform and rightmost green arched exit door exactly. Remove ONLY the two painted bookcases/shelves and all books standing on them in the lower right-middle wall (approximately 67%-84% horizontal). Replace that furniture region with seamless cream wall, sage vertical lower wainscoting and clear floor matching its surroundings. Preserve hanging plants above; a small wall-mounted children's drawing can remain. Do not add any furniture, props, doors, people, text or UI. That area needs to be empty so our independent interactive game furniture can be placed without duplicates. Everything else unchanged.",
+  "reference": "maps/classroom-tall-v1.webp",
+  "initialSource": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-ac574575-ff81-4075-a23a-ea21e4ab2e16.png",
+  "finalSource": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-61b4d9b5-4474-4bab-92e7-3980c979a476.png",
+  "game": "maps/classroom-panorama-v1.webp",
+  "dimensions": [
+    2172,
+    724
+  ],
+  "bytes": 136822,
+  "processing": "WebP quality 84; original source retained; no code image editing"
+}
