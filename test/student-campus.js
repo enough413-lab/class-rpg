@@ -1,4 +1,4 @@
-import {installCampusJump} from './campus-jump.js?v=20261012-jump';
+import {installCampusJump} from './campus-jump.js?v=20261012-jump-polish';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
@@ -6,7 +6,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261007-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-classroom-interactions';
-import {installSchoolWalk} from './school-walk.js?v=20261012-nature-light';
+import {installSchoolWalk} from './school-walk.js?v=20261012-jump-polish';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261012-dialogue';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';

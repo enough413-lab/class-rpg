@@ -5,7 +5,10 @@ export function installCampusNameplates({hub,stage,viewport,player,objects}){
   frame=0;if(hub.classList.contains('hidden'))return;
   const name=player.querySelector('.campus-player-name');if(!name)return;
   const view=viewport.getBoundingClientRect(),scene=stage.getBoundingClientRect();if(!view.width)return;
-  const measure=label=>{const r=label.getBoundingClientRect(),old=offsets.get(label)||{x:0,y:0};return {label,left:r.left-old.x,top:r.top-old.y,width:r.width,height:r.height}};
+  // The player tag follows the jump, but collision spacing stays on the ground
+  // so walking in air does not make neighbouring NPC names bounce around.
+  const jumpY=player.dataset.jumping?parseFloat(getComputedStyle(name).translate.split(' ')[1])||0:0;
+  const measure=label=>{const r=label.getBoundingClientRect(),old=offsets.get(label)||{x:0,y:0};return {label,left:r.left-old.x,top:r.top-old.y-(label===name?jumpY:0),width:r.width,height:r.height}};
   const own=measure(name),playerBody=player.getBoundingClientRect(),npcs=[...objects.querySelectorAll('.campus-npc .campus-object-caption,[data-stand-beside] .campus-object-caption')].map(label=>({...measure(label),body:label.parentElement.getBoundingClientRect()}));
   const parcelLabel=objects.querySelector('[data-place=parcel]:not([hidden]) .campus-object-caption'),parcel=parcelLabel?{...measure(parcelLabel),body:parcelLabel.parentElement.getBoundingClientRect()}:null;
   const scenery=parcel?[...objects.querySelectorAll('.campus-object-caption')].filter(label=>label!==parcelLabel&&!label.parentElement.classList.contains('campus-npc')).map(label=>label.getBoundingClientRect()):[];
