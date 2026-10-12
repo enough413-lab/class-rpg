@@ -1,14 +1,14 @@
-import {installCampusJump} from './campus-jump.js?v=20261012-jump-polish';
+import {installCampusJump} from './campus-jump.js?v=20261012-parcel-world';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
 import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
-import {installCampusStory} from './campus-story.js?v=20261007-world';
+import {installCampusStory} from './campus-story.js?v=20261012-parcel-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
-import {installParcelAdventure} from './parcel-adventure.js?v=20261012-classroom-interactions';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
 import {installSchoolWalk} from './school-walk.js?v=20261012-jump-polish';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
-import {installCampusNpcs} from './campus-npcs.js?v=20261012-dialogue';
+import {installCampusNpcs} from './campus-npcs.js?v=20261012-parcel-world';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';
@@ -34,7 +34,7 @@ export function installStudentCampus(ctx){
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
- const people=installCampusNpcs({hub});
+ const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot()});
  let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
@@ -63,7 +63,7 @@ export function installStudentCampus(ctx){
   const facing=door.x<50?'right':'left',x=door.x+(door.x<50?6:-6);
   ctx.setPosition(x,80);doc.getElementById('hubPlayer').dataset.facing=facing;walk.camera();syncNear();
  }
- function talk(){stop();guide.querySelector('.letter-inspect-link')?.remove();guide.dataset.inspection='false';guide.querySelector('.campus-return[data-guide=close]').textContent='다음에 또 이야기하자!';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();letter.refreshTori();if(open()&&!guide.open)guide.showModal()}
+ function talk(){stop();const notebook=guide.querySelector('.tori-notebook');if(notebook)notebook.open=false;guide.querySelector('.letter-inspect-link')?.remove();guide.dataset.inspection='false';guide.querySelector('.campus-return[data-guide=close]').textContent='다음에 또 이야기하자!';doc.getElementById('campusGuideTitle').textContent='책지기 토리';guide.querySelector('.campus-greeting p').textContent='책에서 마음에 남은 장면이 있니? 함께 이야기해 보자.';const portraitImage=guide.querySelector('.campus-portrait img');guide.querySelector('.campus-portrait').hidden=portraitImage.complete&&!portraitImage.naturalWidth;guide.querySelector('.campus-guide-top span').textContent='이야기 도서관 · 책지기';guide.querySelector('.campus-guide-choices').hidden=false;guide.querySelector('.campus-real').hidden=true;story.refresh();letter.refreshTori();if(open()&&!guide.open)guide.showModal()}
  function syncOpen(){
   if(isOpen===open())return;isOpen=open();stop();walk.stop();
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}

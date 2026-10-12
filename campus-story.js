@@ -2,11 +2,14 @@
 export function installCampusStory({objects,guide}){
  const title=guide.querySelector('#campusGuideTitle'),speech=guide.querySelector('.campus-greeting p'),choice=guide.querySelector('[data-guide=parcel]');
  const original={title:title.textContent,speech:speech.innerHTML,label:choice.querySelector('b').textContent,note:choice.querySelector('span').textContent};
+ const choices=guide.querySelector('.campus-guide-choices'),notebook=guide.ownerDocument.createElement('details');notebook.className='tori-notebook npc-notebook';const summary=guide.ownerDocument.createElement('summary');summary.textContent='내 이야기 수첩';notebook.append(summary);choices.append(notebook);
+ const reading=choices.querySelector('[data-guide=reading]'),others=['parcel','letter','evidence'].map(id=>choices.querySelector('[data-guide='+id+']'));
  let latest={};
  function render({loaded=false,phase=0}={}){
   latest={loaded,phase};
   const state=loaded&&phase===3?'complete':loaded&&phase===2?'delivery':'none';
   guide.dataset.parcelStory=state;
+  const active=loaded&&phase>0;for(const b of others){const parent=b===choice&&active?choices:notebook;if(b.parentElement!==parent){if(parent===choices)choices.insertBefore(b,reading);else notebook.append(b)}}
   if(guide.dataset.inspection!=='true'){
   title.textContent=state==='complete'?'다시 와 줬구나!':state==='delivery'?'내 책 꾸러미를 찾았구나!':original.title;
   speech.innerHTML=state==='complete'?'네가 가져온 꾸러미로 책 나눔 준비를 마쳤어.<br>다음 친구에게 소개할 책을 함께 골라 볼까?':state==='delivery'?'책 봉인과 잎 장식을 따라 여기까지 왔네.<br>가져온 꾸러미를 내게 건네줄래?':original.speech;
