@@ -7,7 +7,7 @@ import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-n
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-classroom-interactions';
 import {installSchoolWalk} from './school-walk.js?v=20261012-classroom-interactions';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
-import {installCampusNpcs} from './campus-npcs.js?v=20261008-game-ui';
+import {installCampusNpcs} from './campus-npcs.js?v=20261012-dialogue';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';

@@ -103,3 +103,9 @@
  #campusGuide .campus-guide-choices button{font-size:14px;padding:8px 5px 8px 17px;word-break:keep-all}
  #campusNpcDialog .npc-choices button small{display:block;margin-left:0}
 }
+
+/* Short first conversation; the notebook opens only on request. */
+#campusNpcDialog[data-person=quests] .npc-choices{grid-template-columns:1fr}
+.npc-notebook summary{min-height:44px;display:list-item;padding:12px 10px;cursor:pointer;font:15px/1.4 SchoolJua,system-ui;color:#6c6048}
+.npc-notebook[open]{border-top:1px solid #cbb778;margin-top:6px}
+.npc-notebook[open] button{font-size:15px!important}
