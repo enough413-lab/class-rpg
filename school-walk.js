@@ -1,5 +1,5 @@
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
-import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261012-nature-light';
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261013-sprout';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';
@@ -33,12 +33,14 @@ export function installSchoolWalk(ctx){
  const currentPlaces=(includeInactive=false)=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(includeInactive||p.kind!=='pencil'||ctx.isMomoPencilVisible?.()));
  function camera(x=ctx.getPosition().x){
   const width=stage.clientWidth,view=viewport.clientWidth;
-  let focus=width*x/100;
+  const playerFocus=width*x/100;let focus=playerFocus;
   // On narrow screens, ease the framing toward a nearby decorative prop so a
   // side-standing avatar does not push the object out of view. Geometry is
   // cached at scene/resize; this adds no timer or layout read per object.
+  // Each offset uses the same avatar position. A short outer falloff prevents
+  // adjacent props from pulling the camera away from the one being used.
   for(const a of approaches.values())if(a.cameraPair&&view<a.pairView){
-   const delta=a.center*width/100-focus,d=Math.abs(delta),t=Math.max(0,Math.min(1,(a.gapCss+120-d)/120));
+   const delta=a.center*width/100-playerFocus,d=Math.abs(delta),t=Math.max(0,Math.min(1,(a.gapCss+24-d)/24));
    focus+=Math.sign(delta)*Math.min(d,a.gapCss)/2*t*t*(3-2*t);
   }
   const offset=Math.max(0,Math.min(width-view,focus-view/2));

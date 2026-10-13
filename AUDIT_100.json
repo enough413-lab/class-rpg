@@ -36,21 +36,23 @@
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
       "status": "in_progress",
-      "evidence": "Flower care and library window book have bounded action/visible-result tests. Eight explicitly listed targets remain pending; overall item 6 stays in_progress.",
+      "evidence": "Flower care, library window book and sprout leaf care have bounded action/visible-result tests. Seven explicitly listed targets remain pending; overall item 6 stays in_progress.",
       "targets": [
         {
           "room": "library",
           "kind": "nook",
           "label": "창가 쉼터",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk near the window book stand, open/turn three original picture pages directly, close or walk/jump away; personal device bookmark remains and resumes without rewards or reading-record writes",
-          "evidence": "tests/library-nook.cjs; tests/campus-connections.cjs; outputs/student-library-nook-deployment.json (2026-09-30/a)"
+          "evidence": "tests/library-nook.cjs; tests/campus-connections.cjs; successful Pages38216755106/live bytes; staging b03ae65b34fd0546ea42a7f0a1659de67ecc6cb1 / main-test 962b63445c8bd84a0d00d60a0c632a385f801550; outputs/student-library-nook-deployment.json (2026-09-30/a)"
         },
         {
           "room": "garden",
           "kind": "look-0",
           "label": "새싹 화분",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Stand beside the sprout and directly swipe its leaves or use the keyboard-equivalent duster; clean leaves and a small care tag remain per account/device. Existing Lv19 observation letter stays separately available, with no reward or letter writes.",
+          "evidence": "tests/garden-sprout.cjs; tests/garden-letter.cjs; tests/nature-light.cjs; outputs/student-garden-sprout-deployment.json (2026-09-30/a)"
         },
         {
           "room": "garden",

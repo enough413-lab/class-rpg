@@ -7,7 +7,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);
   let f=page.frames().find(x=>x.url().includes('app-core'));await f.waitForFunction(()=>window.studentCampus);fs.mkdirSync(shots,{recursive:true});
   const ready=async room=>{await f.evaluate(room=>enterHubScene(room),room);await f.locator('.campus-scene-status').waitFor({state:'hidden'});await f.waitForFunction(()=>[...document.querySelectorAll('.campus-painted-prop img')].every(e=>e.complete&&e.naturalWidth))};
-  const go=async()=>{await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').tap();await f.locator('[data-finder-place=look-1]').tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor()};
+  const go=async()=>{await page.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').tap();await f.locator('[data-finder-place=look-1]').tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor();await f.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))))};
   const animations=()=>f.locator('.campus-nature-effect').evaluate(e=>e.getAnimations({subtree:true}).map(a=>({state:a.playState,iterations:a.effect.getTiming().iterations,duration:a.effect.getTiming().duration})));
   for(const [width,height]of[[1366,768],[390,844],[320,640]]){
    await page.setViewportSize({width,height});
@@ -16,7 +16,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
     assert.equal(await f.locator('.campus-nature-effect').count(),1);assert.equal(await effect.getAttribute('aria-hidden'),'true');assert.equal(await effect.evaluate(e=>getComputedStyle(e).pointerEvents),'none');
     assert.equal(await effect.evaluate(e=>getComputedStyle(e).display),'none','Reduced motion keeps static existing proximity/focus cues');assert.deepEqual(await animations(),[]);
     const player=await f.locator('#hubPlayer').boundingBox(),prop=await target.boundingBox();assert(player.x+player.width<=prop.x-8||prop.x+prop.width<=player.x-8,'Avatar stands beside the painted prop');
-    const before=await target.boundingBox(),label=await target.locator('.campus-object-caption').boundingBox();assert(before.width>=44&&before.height>=44);assert(label.x>=0&&label.x+label.width<=width+1);
+    const before=await target.boundingBox(),label=await target.locator('.campus-object-caption').boundingBox();assert(before.width>=44&&before.height>=44);assert(label.x>=0&&label.x+label.width<=width+1,JSON.stringify({room,width,label,prop,player}));
     await page.emulateMedia({reducedMotion:'no-preference'});await f.waitForFunction(()=>document.querySelector('.campus-nature-effect').getAnimations({subtree:true}).some(a=>a.playState==='running'));
     const a=await animations();assert.equal(a.length,room==='garden'?3:2);assert(a.every(a=>a.iterations===1&&a.duration<=2400));
     // Freeze the actual production animation midway to inspect the decorative layer.
@@ -43,7 +43,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   await f.evaluate(()=>{document.activeElement.blur();for(let i=0;i<4;i++)moveHub(-1,0)});
   assert(!await f.locator('[data-place=look-1]').evaluate(e=>e.classList.contains('is-near')));
   const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
-  await page.keyboard.down('ArrowRight');await page.waitForTimeout(1000);await page.keyboard.up('ArrowRight');
+  await page.keyboard.down('ArrowRight');try{await f.waitForFunction(()=>document.querySelector('[data-place=look-1]').classList.contains('is-near'),null,{timeout:5000})}finally{await page.keyboard.up('ArrowRight')}
   assert(await f.locator('[data-place=look-1]').evaluate(e=>e.classList.contains('is-near')));assert((await animations()).some(a=>a.state==='running'));
   await f.waitForFunction(()=>document.querySelector('.campus-nature-effect').getAnimations({subtree:true}).every(a=>a.playState==='finished'));await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});
   // Keyboard focus can discover the same detail without moving the character.

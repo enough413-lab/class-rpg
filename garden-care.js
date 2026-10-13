@@ -11,7 +11,7 @@ export function installGardenCare(c){
  function sync(){
   activate();const here=c.getScene()==='garden',prop=here&&c.objects.querySelector('[data-place=look-1]');
   if(run&&(!here||!run.prop.isConnected||c.hub.classList.contains('hidden')||Math.abs(c.getPosition().x-run.x)>.2))cancel();
-  status.hidden=!here||!message;const text=message+(storageOk?'':' 이 기기에 저장하지 못했어요.');if(status.textContent!==text)status.textContent=text;
+  status.hidden=!here||!message||c.walk.nearby()?.kind!=='look-1';const text=message+(storageOk?'':' 이 기기에 저장하지 못했어요.');if(status.textContent!==text)status.textContent=text;
   if(!prop)return;
   if(!prop.querySelector('.garden-care-art')){const art=doc.createElement('span');art.className='garden-care-art';art.setAttribute('aria-hidden','true');art.innerHTML='<span class="garden-can-side"><span class="garden-can">'+CAN+'</span><span class="garden-pour"><i></i><i></i><i></i></span></span><span class="garden-dew"><i></i><i></i><i></i></span><span class="garden-care-memory">물 준 꽃</span>';prop.append(art)}
   prop.classList.toggle('garden-watered',watered);const textLabel=label('look-1');prop.dataset.action=textLabel;prop.setAttribute('aria-label','꽃의 자리 · '+textLabel);const hint=prop.querySelector('.campus-object-action');if(hint.textContent!==textLabel)hint.textContent=textLabel;
