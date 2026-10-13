@@ -8,6 +8,7 @@ export function writeStudentSession(value){
  memoryToken=value||'';
  let saved=false;
  for(const name of ['localStorage','sessionStorage'])try{if(value)window[name].setItem(SESSION_KEY,value);else window[name].removeItem(SESSION_KEY);saved=true}catch{}
+ if(!value)try{window.sessionStorage.removeItem('classRpgStudentTokenBackup')}catch{}
  return saved;
 }
 export function installStudentLogin(ctx){
