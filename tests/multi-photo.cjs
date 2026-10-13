@@ -11,12 +11,12 @@ loadDashboard=async()=>{};window.loadDashboard=loadDashboard;window.testReady=tr
 const mock=`const createClient=()=>({rpc:async(name,args)=>{
  if(name==='student_repeat_quest_record')return {data:{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null},error:null};
  if(name==='student_quest_evidence')return {data:{report_text:'완료',evidence_image:window.savedImage},error:null};
- if(name==='student_quest_context'){const q=dashboardQuests.find(q=>q.id===args.p_quest_id);return{data:{quest_id:q.id,title:q.title,quest_type:q.quest_type,period_key:q.quest_type==='main'?'once':'2026-10-13',submission_mode:q.submission_mode??null,record:q.status==='submitted'?{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null}:null}}};if(name==='student_submit_quest_guarded'){window.calls.push(args);if(window.failSubmit)return {error:{message:'테스트 연결 오류'}};window.savedImage=args.p_image;return{data:{ok:true}};}
+ if(name==='student_quest_context'){const q=dashboardQuests.find(q=>q.id===args.p_quest_id);return{data:{quest_id:q.id,title:q.title,quest_type:q.quest_type,period_key:q.quest_type==='main'?'once':'2026-10-13',submission_mode:q.submission_mode??null,record:q.status==='submitted'?{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null}:null}}};if(name==='student_submit_quest_guarded'||name==='student_submit_quest_with_captions'){window.calls.push(args);if(window.failSubmit)return {error:{message:'테스트 연결 오류'}};window.savedImage=args.p_image;return{data:{ok:true}};}
  return {data:[],error:null};}});window.calls=[];`;
 const teacher=`<!doctype html><html lang="ko"><meta charset="utf-8"><div id="reviews"></div><script type="module">
 import {createQuestReviews,currentQuestPeriod} from '/teacher-quest-reviews.js';
 window.initReviews=async image=>{
- const rows=[{id:1,student_id:1,quest_id:1,status:'submitted',period_key:currentQuestPeriod('daily'),report_text:'사진 다섯 장',evidence_image:image}];
+ const rows=[{id:1,student_id:1,quest_id:1,status:'submitted',period_key:currentQuestPeriod('daily'),report_text:'사진 다섯 장',evidence_image:image,evidence_captions:['첫 설명','둘째 설명','셋째 설명','넷째 설명','다섯째 설명']}];
  const data={quests:[{id:1,title:'매일 책 읽기',quest_type:'daily',active:true}],students:[{id:1,student_number:1,nickname:'테스트'}],quest_submissions:rows};
  const db={from(table){const q={select(){return q},eq(){return q},order(){return q},async range(a,b){return {data:data[table].slice(a,b+1)}}};return q},async rpc(){return {data:[],error:null}}};
  const ui=createQuestReviews({root:document.querySelector('#reviews'),db,refresh:()=>ui.load(),onCount:()=>{}});await ui.load();
@@ -49,7 +49,7 @@ const server=http.createServer((req,res)=>{
   const count=async n=>assert.equal(await page.locator('#progressQuestPreview img').count(),n);
   await page.evaluate(()=>submitQuest(11));await page.locator('#progressQuestText').fill('오늘 책을 읽었어요.');
   await upload(files.slice(0,2));await count(2);await upload(files.slice(2,4));await count(4);
-  await page.getByRole('button',{name:'사진 2 삭제',exact:true}).click();await count(3);
+  await page.locator('.photo-edit-details').nth(1).locator('summary').click();await page.getByRole('button',{name:'사진 2 삭제',exact:true}).click();await count(3);
   await upload([files[1],files[4]]);await count(5);
   await upload([files[0]]);await count(5);assert.match(await page.locator('#progressQuestMsg').textContent(),/최대 5장/);
   await page.evaluate(()=>closeProgressQuest());await page.reload();await page.waitForFunction(()=>window.testReady);await page.evaluate(()=>submitQuest(11));await count(5);
@@ -60,14 +60,14 @@ const server=http.createServer((req,res)=>{
   await page.evaluate(()=>window.failSubmit=false);await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
   const payload=await page.evaluate(()=>window.calls.at(-1).p_image);assert.equal(JSON.parse(payload).length,5);assert(payload.length<2000000);
   assert.equal(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('classRpgQuestDraft:')).length),0);
-  await page.evaluate(()=>openProgressQuest(12));await count(5);await page.getByRole('button',{name:'사진 3 삭제',exact:true}).click();await count(4);
+  await page.evaluate(()=>openProgressQuest(12));await count(5);await page.locator('.photo-edit-details').nth(2).locator('summary').click();await page.getByRole('button',{name:'사진 3 삭제',exact:true}).click();await count(4);
   await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();assert.equal(await page.evaluate(()=>JSON.parse(window.calls.at(-1).p_image).length),4);
   await page.evaluate(()=>openCompletedQuest(13));assert.equal(await page.locator('#completedRecordBody img').count(),4);await page.evaluate(()=>closeCompletedQuest());
   await page.evaluate(pic=>window.savedImage=pic,pics[0]);await page.evaluate(()=>openProgressQuest(12));await count(1);
   await upload([{name:'bad.jpg',mimeType:'image/jpeg',buffer:Buffer.from('not an image')}]);await count(1);
   assert.match(await page.locator('#progressQuestMsg').textContent(),/読み|읽을 수 없는/);
   await upload([{name:'bad.txt',mimeType:'text/plain',buffer:Buffer.from('text')}]);await count(1);assert.match(await page.locator('#progressQuestMsg').textContent(),/사진 파일만/);
-  await page.getByRole('button',{name:'사진 1 삭제',exact:true}).click();await page.locator('#progressQuestText').fill('');await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
+  await page.locator('.photo-edit-details').nth(0).locator('summary').click();await page.getByRole('button',{name:'사진 1 삭제',exact:true}).click();await page.locator('#progressQuestText').fill('');await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
   assert.equal(await page.evaluate(()=>window.calls.at(-1).p_image),null);
   await page.evaluate(()=>openProgressQuest(13));await page.locator('#progressQuestSubmit').click();assert.match(await page.locator('#progressQuestMsg').textContent(),/한 줄/);
   await page.locator('#progressQuestText').fill('메인 완료');await upload(files.slice(0,2));await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
@@ -80,7 +80,7 @@ const server=http.createServer((req,res)=>{
    return {oldSize:old.length,newSize:prepared.length,bad:m.readEvidenceImages('["javascript:alert(1)",null,{}]'),legacy:m.readEvidenceImages(old).length};
   });assert(helpers.oldSize>360000);assert(helpers.newSize<=360000);assert.equal(helpers.legacy,1);assert.deepEqual(helpers.bad,[]);
   await page.goto(base+'/teacher-photo-test');await page.waitForFunction(()=>window.initReviews);await page.evaluate(image=>initReviews(image),payload);
-  await page.locator('[data-quest="1"]').click();await page.locator('[data-open-student="1"]').click();assert.equal(await page.locator('.qr-photos img').count(),5);
+  await page.locator('[data-quest="1"]').click();await page.locator('[data-open-student="1"]').click();assert.equal(await page.locator('.qr-photos img').count(),5);assert.match(await page.locator('.qr-photos').textContent(),/첫 설명/);
   for(let i=0;i<5;i++){
    const expected=await page.locator(`[data-photo-index="${i}"] img`).getAttribute('src');
    await page.locator(`[data-photo-index="${i}"]`).click();assert.equal(await page.locator('.qr-zoom img').getAttribute('src'),expected);await page.locator('.qr-zoom button').click();
