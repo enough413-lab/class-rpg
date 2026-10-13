@@ -2,7 +2,7 @@ export function installStudentSession(ctx){
  const doc=ctx.doc||document;
  let leaving=false;
  function clearView(message='로그인이 만료됐어요. 다시 들어와 주세요.'){
-  ctx.clear();
+  ctx.clear();for(const input of doc.querySelectorAll('input[type=password]'))input.value='';
   for(const d of doc.querySelectorAll('dialog[open]'))d.close();
   for(const el of doc.querySelectorAll('.modal-backdrop'))el.classList.add('hidden');
   for(const el of doc.querySelectorAll('.reward-notice-backdrop,.achievement-backdrop,.classreward-backdrop,.milestone-backdrop,.levelup-backdrop'))el.remove();

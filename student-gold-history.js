@@ -1,0 +1,20 @@
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date=v=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(v));
+export function installStudentGoldHistory(ctx){
+ const dialog=document.createElement('dialog');dialog.id='studentGoldHistory';dialog.setAttribute('aria-labelledby','goldHistoryTitle');dialog.style.cssText='width:min(560px,calc(100% - 24px));max-height:85vh;overflow:auto;border:1px solid #dbe5de;border-radius:20px;padding:20px;color:#17362e';document.body.append(dialog);const style=document.createElement('style');style.textContent='#studentGoldHistory button{min-height:44px;padding:9px 12px;font:inherit;border:1px solid #dbe5de;border-radius:10px;background:#f5f7f1}';document.head.append(style);
+ let owner='',version=0,busy=false,rows=[],cursor=null,more=false;const identity=()=>String(ctx.getStudent()?.id||'')+':'+ctx.getToken(),same=()=>owner===identity(),el=id=>document.getElementById(id);
+ async function load(append=false){
+  if(busy||!same())return;busy=true;const v=++version;el('goldHistoryStatus').textContent='내 골드 기록을 확인하고 있어요…';
+  try{const {data,error}=await ctx.db.rpc('student_gold_history',{p_token:ctx.getToken(),p_before_id:append?cursor:null});if(error||!Array.isArray(data?.entries)||!Number.isFinite(data.balance))throw error||Error('missing gold history');if(v!==version||!same()||!dialog.open)return;
+   rows=append?[...rows,...data.entries]:data.entries;cursor=data.next_before_id;more=data.has_more===true;el('goldHistoryBalance').textContent='현재 잔액 '+data.balance+' G';
+   el('goldHistoryRows').innerHTML=rows.length?rows.map(r=>'<article style="padding:12px 0;border-top:1px solid #dbe5de"><strong>'+({opening:'기록 시작 잔액',received:'골드 들어옴',spent:'골드 쓰임'}[r.kind]||'골드 변화')+'</strong><p>'+(r.kind==='opening'?Number(r.after_gold)+' G':(Number(r.delta)>0?'+':'')+Number(r.delta)+' G · '+Number(r.before_gold)+' → '+Number(r.after_gold)+' G')+'</p><small>'+esc(date(r.created_at))+'</small></article>').join(''):'<p>아직 기록한 골드 변화가 없어요. 지금 잔액에서부터 새 변화를 차곡차곡 기록해요.</p>';
+   el('goldHistoryMore').hidden=!more;el('goldHistoryStatus').textContent='서버에서 확인한 잔액과 실제 변동이에요.';
+  }catch{if(same()&&v===version&&dialog.open)el('goldHistoryStatus').textContent='골드 기록을 아직 확인하지 못했어요. 다시 확인해 주세요.'}
+  finally{if(v===version){busy=false;el('goldHistoryRefresh').disabled=false;el('goldHistoryMore').disabled=false}}
+ }
+ function open(){owner=identity();version++;busy=false;rows=[];cursor=null;more=false;dialog.innerHTML='<header style="display:flex;justify-content:space-between;gap:8px"><h2 id="goldHistoryTitle">내 골드가 오간 기록</h2><button class="btn" data-gold-close>닫기</button></header><p id="goldHistoryBalance" style="font-size:22px;font-weight:800"></p><p>이 기록 기능이 켜진 뒤의 실제 골드 변화를 보여 줘요. 그전의 구매는 구매 영수증에서 볼 수 있어요. 남아 있지 않은 옛 보상액은 임의로 계산하지 않아요.</p><div id="goldHistoryRows"></div><p id="goldHistoryStatus" role="status"></p><button class="btn" id="goldHistoryRefresh">다시 확인</button> <button class="btn" id="goldHistoryMore" hidden>이전 기록 더 보기</button>';el('goldHistoryRefresh').onclick=()=>load();el('goldHistoryMore').onclick=()=>load(true);if(!dialog.open)dialog.showModal();load()}
+ dialog.addEventListener('click',e=>{if(e.target.closest('[data-gold-close]')){version++;busy=false;dialog.close();el('shopWalletOpen')?.focus()}});
+ document.addEventListener('student-dashboard-updated',()=>{if(owner&&!same()){version++;rows=[];busy=false;if(dialog.open)dialog.close();dialog.replaceChildren()}});
+ function attach(){const wallet=document.getElementById('shopCouponWallet');if(!wallet?.open||wallet.querySelector('[data-open-gold-history]'))return;const b=document.createElement('button');b.type='button';b.dataset.openGoldHistory='true';b.textContent='골드 오간 기록';wallet.querySelector('header').after(b);b.onclick=()=>{wallet.close();open()}}
+ new MutationObserver(attach).observe(document.body,{childList:true,subtree:true});return{open};
+}
