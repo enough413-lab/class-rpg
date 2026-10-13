@@ -1,6 +1,6 @@
 const fs=require('fs'),http=require('http'),path=require('path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');const root=path.resolve(__dirname,'..');
-const studentMock=`const createClient=()=>({rpc:async(name,args)=>{if(name==='student_submit_quest_evidence'){window.calls.push(args);return {error:null}}return {data:[],error:null}}});window.calls=[];`;
+const studentMock=`const createClient=()=>({rpc:async(name,args)=>{if(name==='student_quest_context'){const q=dashboardQuests.find(q=>q.id===args.p_quest_id);return{data:{quest_id:q.id,title:q.title,quest_type:q.quest_type,period_key:q.quest_type==='main'?'once':'2026-10-13',submission_mode:q.submission_mode??null,record:q.status==='submitted'?{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null}:null}}};if(name==='student_submit_quest_guarded'){window.calls.push(args);return {data:{ok:true},error:null}}return {data:[],error:null}}});window.calls=[];`;
 const studentFixture=`current={id:987,nickname:'테스트'};token='fixture';dashboardQuests=[];for(const kind of ['daily','weekly','main'])for(const mode of ['photo','text','both'])dashboardQuests.push({id:101+dashboardQuests.length,title:kind+' '+mode,quest_type:kind,submission_mode:mode,status:kind==='main'?'accepted':'available'});loadDashboard=async()=>{};window.fixtureQuests=dashboardQuests;window.testReady=true;`;
 const teacherMock=`window.questRows=[];window.writes=[];window.failSave=false;window.studentRows=[{id:901,student_number:1,login_id:'fixture1',nickname:'첫성장',xp:50,gold:0,setup_complete:true},{id:902,student_number:2,login_id:'fixture2',nickname:'성장중',xp:260,gold:0,setup_complete:true},{id:903,student_number:3,login_id:'fixture3',nickname:'완주',xp:3155,gold:0,setup_complete:true}];
 const createClient=()=>({
@@ -32,7 +32,7 @@ const server=http.createServer((req,res)=>{
    if(q.submission_mode!=='photo')await page.locator('#progressQuestText').fill('수행한 내용');else await page.evaluate(()=>document.querySelector('#progressQuestText').value='이전 방식의 숨겨진 글');
    if(q.submission_mode==='both'){await page.locator('#progressQuestSubmit').click();assert.equal(await page.evaluate(()=>calls.length),before);assert.match(await page.locator('#progressQuestMsg').textContent(),/사진을 1장/);}
    if(q.submission_mode!=='text'){await page.locator('#progressQuestPhoto').setInputFiles([image,image]);await page.waitForFunction(()=>!document.querySelector('#progressQuestSubmit').disabled);}
-   await page.locator('#progressQuestSubmit').click();const call=await page.evaluate(()=>calls.at(-1));assert.equal(call.p_quest_id,q.id);assert.equal(call.p_report,q.submission_mode==='photo'?'':'수행한 내용');
+   await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();const call=await page.evaluate(()=>calls.at(-1));assert.equal(call.p_quest_id,q.id);assert.equal(call.p_report,q.submission_mode==='photo'?'':'수행한 내용');
    if(q.submission_mode==='text')assert.equal(call.p_image,null);else assert.equal(JSON.parse(call.p_image).length,2);
   }
   await page.goto(base+'/teacher-test');const frame=page.frames().find(f=>f.url().includes('teacher-core.html'));await frame.waitForFunction(()=>window.testReady&&window.__directQuestAddInstalled);

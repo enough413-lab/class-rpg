@@ -17,3 +17,5 @@ export function questPeriod(type, weekday = 1, now = new Date()) {
   if (type === 'weekly') date.setUTCDate(date.getUTCDate() - ((date.getUTCDay()+6)%7 + 1 - resetDay(weekday) + 7)%7);
   return type === 'main' ? 'once' : date.toISOString().slice(0,10);
 }
+
+export function nextResetLabel(quest){if(!quest.next_reset_at||!['daily','weekly'].includes(quest.quest_type))return '';const value=new Date(quest.next_reset_at);if(!Number.isFinite(value.getTime()))return '';return '다음 도전: '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(value)+' (한국시간)';}

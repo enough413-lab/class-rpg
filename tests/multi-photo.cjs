@@ -11,7 +11,7 @@ loadDashboard=async()=>{};window.loadDashboard=loadDashboard;window.testReady=tr
 const mock=`const createClient=()=>({rpc:async(name,args)=>{
  if(name==='student_repeat_quest_record')return {data:{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null},error:null};
  if(name==='student_quest_evidence')return {data:{report_text:'완료',evidence_image:window.savedImage},error:null};
- if(name==='student_submit_quest_evidence'){window.calls.push(args);if(window.failSubmit)return {error:{message:'테스트 연결 오류'}};window.savedImage=args.p_image;}
+ if(name==='student_quest_context'){const q=dashboardQuests.find(q=>q.id===args.p_quest_id);return{data:{quest_id:q.id,title:q.title,quest_type:q.quest_type,period_key:q.quest_type==='main'?'once':'2026-10-13',submission_mode:q.submission_mode??null,record:q.status==='submitted'?{status:'submitted',report_text:'기존 제출 기록',evidence_image:window.savedImage||null}:null}}};if(name==='student_submit_quest_guarded'){window.calls.push(args);if(window.failSubmit)return {error:{message:'테스트 연결 오류'}};window.savedImage=args.p_image;return{data:{ok:true}};}
  return {data:[],error:null};}});window.calls=[];`;
 const teacher=`<!doctype html><html lang="ko"><meta charset="utf-8"><div id="reviews"></div><script type="module">
 import {createQuestReviews,currentQuestPeriod} from '/teacher-quest-reviews.js';
@@ -55,22 +55,22 @@ const server=http.createServer((req,res)=>{
   await page.evaluate(()=>closeProgressQuest());await page.reload();await page.waitForFunction(()=>window.testReady);await page.evaluate(()=>submitQuest(11));await count(5);
   assert.equal(await page.locator('#progressQuestText').inputValue(),'오늘 책을 읽었어요.');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  await page.evaluate(()=>window.failSubmit=true);await page.locator('#progressQuestSubmit').click();await count(5);
-  assert.match(await page.locator('#progressQuestMsg').textContent(),/테스트 연결 오류/);
-  await page.evaluate(()=>window.failSubmit=false);await page.locator('#progressQuestSubmit').click();
+  await page.evaluate(()=>window.failSubmit=true);await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();await count(5);
+  assert.match(await page.locator('#progressQuestMsg').textContent(),/결과를 아직 확인하지 못/);
+  await page.evaluate(()=>window.failSubmit=false);await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
   const payload=await page.evaluate(()=>window.calls.at(-1).p_image);assert.equal(JSON.parse(payload).length,5);assert(payload.length<2000000);
   assert.equal(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('classRpgQuestDraft:')).length),0);
   await page.evaluate(()=>openProgressQuest(12));await count(5);await page.getByRole('button',{name:'사진 3 삭제',exact:true}).click();await count(4);
-  await page.locator('#progressQuestSubmit').click();assert.equal(await page.evaluate(()=>JSON.parse(window.calls.at(-1).p_image).length),4);
+  await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();assert.equal(await page.evaluate(()=>JSON.parse(window.calls.at(-1).p_image).length),4);
   await page.evaluate(()=>openCompletedQuest(13));assert.equal(await page.locator('#completedRecordBody img').count(),4);await page.evaluate(()=>closeCompletedQuest());
   await page.evaluate(pic=>window.savedImage=pic,pics[0]);await page.evaluate(()=>openProgressQuest(12));await count(1);
   await upload([{name:'bad.jpg',mimeType:'image/jpeg',buffer:Buffer.from('not an image')}]);await count(1);
   assert.match(await page.locator('#progressQuestMsg').textContent(),/読み|읽을 수 없는/);
   await upload([{name:'bad.txt',mimeType:'text/plain',buffer:Buffer.from('text')}]);await count(1);assert.match(await page.locator('#progressQuestMsg').textContent(),/사진 파일만/);
-  await page.getByRole('button',{name:'사진 1 삭제',exact:true}).click();await page.locator('#progressQuestText').fill('');await page.locator('#progressQuestSubmit').click();
+  await page.getByRole('button',{name:'사진 1 삭제',exact:true}).click();await page.locator('#progressQuestText').fill('');await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
   assert.equal(await page.evaluate(()=>window.calls.at(-1).p_image),null);
   await page.evaluate(()=>openProgressQuest(13));await page.locator('#progressQuestSubmit').click();assert.match(await page.locator('#progressQuestMsg').textContent(),/한 줄/);
-  await page.locator('#progressQuestText').fill('메인 완료');await upload(files.slice(0,2));await page.locator('#progressQuestSubmit').click();
+  await page.locator('#progressQuestText').fill('메인 완료');await upload(files.slice(0,2));await page.locator('#progressQuestSubmit').click();await page.locator('[data-preview-send]').click();
   assert.equal(await page.evaluate(()=>JSON.parse(window.calls.at(-1).p_image).length),2);
   // Large existing photos are resized when adding more, preserving compatibility.
   const helpers=await page.evaluate(async()=>{

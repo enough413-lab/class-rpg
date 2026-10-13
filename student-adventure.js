@@ -7,7 +7,7 @@ import {PARCEL_MILESTONE} from './parcel-adventure.js?v=20261007-parcel';
 import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261007-world';
 import {SEQUENCE_MILESTONE,installMusicSequence} from './music-sequence.js?v=20261007-sequence';
 import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20260930-workshop';
-import {weeklyResetLabel} from './quest-schedule.js?v=20260930-workshop';
+import {weeklyResetLabel,nextResetLabel} from './quest-schedule.js?v=20261013-quests';
 import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progression';
 import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20260930-workshop';
 import {CHAPTER_PROMISES,CHAPTER_ONE_MILESTONE,chapterOneView,profileMemento} from './school-chapter.js?v=20260930-chapter';
@@ -108,6 +108,7 @@ export function installStudentAdventure(ctx){
   const status=q.status==='submitted'?'선생님 확인 중':q.status==='rejected'?'한 번 더 도전':q.status==='approved'?'완료':q.status==='accepted'?'도전 중':'시작할 수 있어요';
   return '<article class="quest sa-quest"><div class="sa-quest-top"><span class="sa-tag '+esc(q.quest_type)+'">'+esc(typeName[q.quest_type]||'의뢰')+'</span><span class="sa-tag waiting">'+status+'</span></div><b>'+esc(q.title)+'</b><p class="muted">'+esc(q.description||'학교에서 실천하고 나의 기록을 남겨요.')+'</p>'+
    (q.quest_type==='weekly'?'<p class="sa-small">'+esc(weeklyResetLabel(q))+'</p>':'')+
+   (nextResetLabel(q)?'<p class="sa-small">'+esc(nextResetLabel(q))+'</p>':'')+
    (q.status==='rejected'&&q.rejection_reason?'<p>💬 선생님: '+esc(q.rejection_reason)+'</p>':'')+
    '<div class="sa-quest-bottom"><div class="sa-reward">✨ '+Number(q.xp||0)+' 경험치 · 🪙 '+Number(q.gold||0)+' 골드<br>보낼 기록: '+mode+'</div>'+
    (['done','waiting'].includes(a.kind)?'<span class="sa-tag">'+a.label+'</span>':button('quest',a.label,'primary','data-id="'+Number(q.id)+'" data-kind="'+a.kind+'"'))+'</div></article>';

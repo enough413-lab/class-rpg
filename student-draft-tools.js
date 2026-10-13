@@ -8,10 +8,11 @@ export function installStudentDraftTools(ctx){
  const style=doc.createElement('style');style.textContent='#studentDraftManager button{min-height:44px;font:inherit;padding:9px 12px;border:1px solid #dbe5de;border-radius:9px;background:#f5f8f2;color:#215f49;margin-top:6px}#studentDraftManager article{overflow-wrap:anywhere}';doc.head.append(style);
  function collect(){
   const who=String(ctx.getStudent()?.id||'');if(!who)return[];
+  let pendingQuest=null;try{pendingQuest=JSON.parse(localStorage.getItem('classRpgQuestRequest:v1:'+location.pathname+':'+who)||'null')}catch{}
   const prefix='classRpgQuestDraft:v1:'+encodeURIComponent(who)+':';
   const reading='classRpgReadingDraft:v1:'+location.pathname+':'+who,found=[];
   for(let n=0;n<localStorage.length;n++){
-   const key=localStorage.key(n);if(!key?.startsWith(prefix)&&key!==reading)continue;
+   const key=localStorage.key(n);if(key===pendingQuest?.draftKey)continue;if(!key?.startsWith(prefix)&&key!==reading)continue;
    let value;try{value=JSON.parse(localStorage.getItem(key))}catch{continue}
    if(key.startsWith(prefix)&&typeof value?.text==='string'&&typeof value?.image==='string')found.push({key,label:'퀘스트 초안 · '+decodeURIComponent(key.slice(prefix.length)),text:value.text,date:value.savedAt});
    if(key===reading&&value?.drafts&&typeof value.drafts==='object')for(const [context,draft]of Object.entries(value.drafts)){
@@ -36,7 +37,7 @@ export function installStudentDraftTools(ctx){
   if(!confirm('아직 제출하지 않은 이 초안을 지울까요? 이미 제출한 기록은 그대로 남아요.'))return;
   try{
    if(row.context){const value=JSON.parse(localStorage.getItem(row.key)||'null');if(value?.pending?.context===row.context)throw Error('pending');if(value?.drafts){delete value.drafts[row.context];if(value.active===row.context)value.active='new';localStorage.setItem(row.key,JSON.stringify(value))}}
-   else {localStorage.removeItem(row.key);ctx.clearQuestDraft?.(row.key)}
+   else {let pendingQuest=null;try{pendingQuest=JSON.parse(localStorage.getItem('classRpgQuestRequest:v1:'+location.pathname+':'+owner)||'null')}catch{}if(row.key===pendingQuest?.draftKey)throw Error('pending');localStorage.removeItem(row.key);ctx.clearQuestDraft?.(row.key)}
    if(row.context)ctx.invalidateReading?.();
    rows=collect();render();doc.getElementById('draftManagerStatus').textContent='선택한 초안만 지웠어요. 글쓰기 창을 다시 열면 정리한 상태가 반영돼요.';
   }catch{doc.getElementById('draftManagerStatus').textContent='아직 지우지 못했어요. 제출 결과 확인 중인 글은 먼저 결과를 확인해 주세요.'}
