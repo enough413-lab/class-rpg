@@ -1,3 +1,4 @@
+import {installPlaygroundMat} from './playground-mat.js?v=20261013-mat';
 import {installGardenBench} from './garden-bench.js?v=20261013-bench';
 import {installGardenSprout} from './garden-sprout.js?v=20261013-sprout';
 import {installLibraryNook} from './library-nook.js?v=20261012-nook';
@@ -46,11 +47,11 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();
+  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?(bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
   if(action.textContent!==label)action.textContent=label;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
@@ -74,8 +75,9 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null;
+ let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null;
  function interact(kind){
+  if(mat?.interact(kind))return;
   if(bench?.interact(kind))return;
   if(sprout?.interact(kind))return;
   if(nook?.interact(kind))return;
@@ -97,6 +99,7 @@ export function installStudentCampus(ctx){
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  gardenCare=installGardenCare({...ctx,hub,objects,walk,stop,refresh:syncNear});
  nook=installLibraryNook({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
+ mat=installPlaygroundMat({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
  bench=installGardenBench({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
   sprout=installGardenSprout({...ctx,hub,objects,walk,stop,refresh:syncNear,openLetter:()=>letter.start('garden')});
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});

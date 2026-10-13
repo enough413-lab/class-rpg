@@ -1,0 +1,20 @@
+/* The outfit's own rig responds to the hand; walking and jumping stay independent. */
+#hubPlayer.mat-ready :is(.campus-upper,.campus-leg-left,.campus-leg-right,.cafeteria-held-tray,.parcel-held,.momo-held){transition:rotate 140ms ease-out,translate 140ms ease-out}
+#hubPlayer[data-mat-pose] .campus-part{animation:none!important}
+#hubPlayer[data-mat-pose] .campus-upper{transform-origin:50% 77%;rotate:var(--mat-lean,0deg);translate:0 var(--mat-drop,0px)}
+#hubPlayer[data-mat-pose] .campus-leg-left{transform-origin:44% 76%;rotate:var(--mat-knee,0deg)}
+#hubPlayer[data-mat-pose] .campus-leg-right{transform-origin:56% 76%;rotate:calc(-1 * var(--mat-knee,0deg))}
+#hubPlayer[data-mat-pose] :is(.cafeteria-held-tray,.parcel-held,.momo-held){translate:var(--mat-hand-x,0px) var(--mat-drop,0px);rotate:var(--mat-lean,0deg)}
+#classroomHub [data-art=playground-mat]{touch-action:none;overflow:visible}
+#classroomHub.campus-painted-place [data-art=playground-mat]{bottom:calc(20% - 26px)}
+#classroomHub [data-art=playground-mat].mat-reached{cursor:grab}
+#classroomHub [data-art=playground-mat].mat-reached:active{cursor:grabbing}
+/* Keep the label above the head when the avatar stands on the mat. */
+#classroomHub.campus-painted-place [data-art=playground-mat].mat-reached .campus-object-caption{top:-72px}
+.mat-footprints{position:absolute;left:8%;bottom:25%;width:48px;height:20px;pointer-events:none;opacity:0}
+.mat-used .mat-footprints{opacity:.78}.mat-footprints svg{display:block;width:100%;height:100%;fill:#6d9579;stroke:#f6ecc6;stroke-width:2}
+.mat-help{grid-column:1/-1;margin:0;padding:0 10px;color:#425c4b;text-align:center;font:14px/1.5 system-ui;word-break:keep-all}
+.mat-help[hidden]{display:none}#classroomHub[data-scene=playground]:has(.mat-help:not([hidden])) .campus-how{display:none!important}
+@media(max-width:849px){.mat-help{font-size:13px}.mat-footprints{width:40px;height:17px}#classroomHub.campus-painted-place [data-art=playground-mat]{bottom:calc(20% - 22px)}#classroomHub.campus-painted-place [data-art=playground-mat].mat-reached .campus-object-caption{top:-64px}}
+@media(max-width:380px){#classroomHub.campus-painted-place [data-art=playground-mat]{bottom:calc(20% - 18px)}}
+@media(prefers-reduced-motion:reduce){#hubPlayer.mat-ready :is(.campus-upper,.campus-leg-left,.campus-leg-right,.cafeteria-held-tray,.parcel-held,.momo-held){transition:none}}

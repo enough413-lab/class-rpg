@@ -36,7 +36,7 @@
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
       "status": "in_progress",
-      "evidence": "Flower care, library window book, sprout leaf care and garden bench rest/pinwheel have bounded action/visible-result tests. Six explicitly listed targets remain pending; overall item 6 stays in_progress.",
+      "evidence": "Flower care, library window book, sprout leaf care, garden bench rest/pinwheel and the playground exercise mat have bounded action/visible-result tests. Five explicitly listed targets remain pending; overall item 6 stays in_progress.",
       "targets": [
         {
           "room": "library",
@@ -66,15 +66,17 @@
           "room": "garden",
           "kind": "look-2",
           "label": "그늘 쉼터",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk to the bench and sit/stand in the world; place a personal pinwheel, swipe or use a key to spin it with a finite slowing turn. Walking/jumping leaves the seat; only toy placement is remembered per account/device, with no rewards.",
-          "evidence": "tests/garden-bench.cjs; outputs/student-garden-bench-deployment.json (2026-09-30/a)"
+          "evidence": "tests/garden-bench.cjs; successful Pages38331442071/live bytes; staging86e898fe82340c309fe82ae686de7518bc9a089d / main-test1ba2f7e3c82e3d55b034f91cb30bfe1b03f263d7; outputs/student-garden-bench-deployment.json (2026-09-30/a)"
         },
         {
           "room": "playground",
           "kind": "look-0",
           "label": "준비운동 자리",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Walk onto the original mat, swipe left/right/down to directly lean or bend the dressed avatar, or use the equivalent finite keyboard action. Walking/jumping/room/map/account interruptions cancel; a personal device footprint marking remains after use, without school records or rewards.",
+          "evidence": "tests/playground-mat.cjs; outputs/student-playground-mat-deployment.json (2026-09-30/a)"
         },
         {
           "room": "playground",
