@@ -1,0 +1,15 @@
+/* The original layered outfit sits on the original bench; no duplicate avatar. */
+#hubPlayer[data-bench-rest] :is(.campus-rig,.campus-player-name,.cafeteria-held-tray,.parcel-held,.momo-held){translate:0 var(--bench-lift,0px)}
+#hubPlayer[data-bench-rest] .campus-part{animation:none!important}
+#hubPlayer[data-bench-rest] .campus-leg-left{transform-origin:44% 76%;transform:rotate(42deg)}
+#hubPlayer[data-bench-rest] .campus-leg-right{transform-origin:56% 76%;transform:rotate(-42deg)}
+#classroomHub.campus-side #hubPlayer[data-bench-rest]::after{visibility:hidden}
+#classroomHub.campus-painted-place [data-art=garden-bench].bench-occupied .campus-object-caption{top:-27px}
+#classroomHub .bench-pinwheel{position:absolute;z-index:17;width:56px;height:56px;min-width:44px;min-height:44px;transform:translateX(-50%);padding:0;border:0;border-radius:50%;background:transparent;box-shadow:none;touch-action:none;cursor:grab;overflow:visible}
+#classroomHub .bench-pinwheel[hidden]{display:none}#classroomHub .bench-pinwheel:disabled{opacity:1;cursor:default}#classroomHub .bench-pinwheel:focus-visible{outline:3px solid #f5d37b;outline-offset:3px}
+#classroomHub .bench-pinwheel svg{position:relative;display:block;width:100%;height:100%;filter:drop-shadow(0 1px 1px #35452c44)}
+.bench-wheel-blades{transform-origin:32px 32px}.bench-wheel-stem{position:absolute;left:48%;top:50%;width:4px;height:42px;border-radius:3px;background:#977849;box-shadow:inset 1px 0 #e1c894}
+.bench-help{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 8px;color:#4b604b;font:14px/1.5 system-ui;box-sizing:border-box}.bench-help[hidden]{display:none}.bench-help span{min-width:0;word-break:keep-all}
+#classroomHub .bench-play{flex:none;min-height:44px;padding:7px 12px;border:1px solid #b8ba91;border-radius:16px;background:#fff4d7;color:#475d49;font:14px/1.3 SchoolJua,system-ui;cursor:pointer}
+#classroomHub[data-scene=garden]:has(.bench-help:not([hidden])) .campus-how{display:none!important}
+@media(max-width:849px){#classroomHub .bench-pinwheel{width:48px;height:48px}.bench-wheel-stem{height:34px}.bench-help{font-size:13px;gap:6px}#classroomHub .bench-play{font-size:13px;padding:5px 8px}}
