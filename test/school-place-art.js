@@ -12,7 +12,7 @@ export function decoratePlaceProp(button,place,room){
  const missing=doc.createElement('span');missing.className='campus-sprite-missing';missing.textContent='그림을 못 불러왔어요. 이름을 눌러 살펴봐요.';missing.setAttribute('aria-hidden','true');
  // Small one-shot light effects use the existing proximity/focus state. No idle
  // timer, extra image request, movement handler or saved progression is needed.
- if(['garden-sprout','garden-flowers','pond-viewer','playground-balls'].includes(art)){button.dataset.standBeside='';button.dataset.cameraPair='true'}
+ if(['garden-sprout','garden-flowers','pond-viewer','pond-fence','playground-balls'].includes(art)){button.dataset.standBeside='';button.dataset.cameraPair='true'}
  if(art==='garden-flowers'||art==='pond-viewer'){
   const effect=doc.createElement('span');effect.className='campus-nature-effect';effect.dataset.effect=art==='garden-flowers'?'pollen':'sunlight';effect.setAttribute('aria-hidden','true');
   for(let i=0;i<(art==='garden-flowers'?3:2);i++)effect.append(doc.createElement('i'));

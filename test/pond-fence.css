@@ -1,0 +1,16 @@
+/* Original small code-native nature details over the unchanged painted fence. */
+#classroomHub [data-art=pond-fence]{touch-action:none}
+.fence-details,.fence-zoom{position:absolute;inset:0;pointer-events:none}
+.fence-creature{position:absolute;top:38%;width:15%;height:23%;translate:-50% -50%}
+.fence-creature svg{display:block;width:100%;height:100%;overflow:visible}
+.fence-lens{display:none;position:absolute;top:38%;translate:-50% -50%;width:76px;height:76px;box-sizing:border-box;border:5px solid #bb9354;border-radius:50%;background:#edf2d6;box-shadow:inset 0 0 0 2px #fff7d8,0 2px 4px #564b3c48;overflow:hidden;z-index:3}
+.fence-looking{cursor:grab!important}.fence-looking:active{cursor:grabbing!important}.fence-looking .fence-lens{display:block}
+.fence-zoom{inset:auto}.fence-zoom::after{content:'';position:absolute;left:5%;right:5%;top:38%;height:18%;translate:0 -50%;background:#c4d6ae;z-index:-1}
+.fence-found{position:absolute;left:29%;top:72%;display:flex;gap:3px;pointer-events:none}.fence-found i{display:grid;place-items:center;width:17px;height:18px;border-radius:3px 3px 8px 8px;border:1px solid #9b8656;background:#f4e7b8;color:#526d53;font:16px/1 system-ui;font-style:normal;box-shadow:0 1px 1px #5c4e3d33}.fence-found[hidden]{display:none}
+.fence-help{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 8px;color:#405d49;font:14px/1.5 system-ui;box-sizing:border-box}.fence-help[hidden]{display:none}.fence-help>span{min-width:0;word-break:keep-all}
+#classroomHub :is(.fence-previous,.fence-next){flex:none;min-width:44px;min-height:44px;padding:6px 10px;border:1px solid #acb68d;border-radius:16px;background:#fff4d7;color:#475d49;font:14px/1.3 SchoolJua,system-ui;cursor:pointer}
+#classroomHub :is(.fence-previous,.fence-next)[hidden]{display:none}
+#classroomHub[data-scene=pond]:has(.fence-help:not([hidden])) .campus-how{display:none!important}
+@media(max-width:849px){.fence-help{font-size:13px;gap:5px;flex-wrap:wrap}.fence-help>span{flex-basis:100%;text-align:center}#classroomHub :is(.fence-previous,.fence-next){font-size:14px}.fence-lens{width:64px;height:64px;border-width:4px}}
+
+.fence-found svg{width:100%;height:100%}
