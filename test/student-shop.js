@@ -7,15 +7,15 @@ export function installStudentShop(ctx){
  const same=id=>owner===id&&identity()===id;
  const dialog=document.createElement('dialog');dialog.className='student-purchase-dialog';dialog.id='studentPurchaseDialog';dialog.setAttribute('aria-labelledby','purchaseTitle');
  dialog.innerHTML='<div class="purchase-icon" aria-hidden="true">🎁</div><h2 id="purchaseTitle">내 모험에 더할 선물</h2><p id="purchaseProduct"></p><div id="purchaseBalance"></div><p id="purchaseHint"></p><p id="purchaseMessage" role="status"></p><div class="purchase-buttons"><button class="btn" id="purchaseCancel">더 둘러보기</button><button class="btn good" id="purchaseConfirm">구매하기</button></div>';
- document.body.append(dialog);
+ document.body.append(dialog);const drafts=document.createElement('button');drafts.type='button';drafts.className='btn';drafts.textContent='저장된 초안 정리';drafts.onclick=()=>{if(busy)return;dialog.close();window.studentDraftTools?.open()};dialog.querySelector('.purchase-buttons').append(drafts);
  $('purchaseCancel').onclick=()=>dialog.close();$('purchaseConfirm').onclick=()=>purchase();
  dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault()});
  const recovery=document.createElement('div');recovery.id='shopRecovery';recovery.hidden=true;
  recovery.innerHTML='<p>지난 구매 결과를 먼저 확인해 주세요. 골드는 한 번만 사용돼요.</p><button class="btn" id="shopRecover">구매 결과 확인하기</button>';
- $('shopMsg').after(recovery);$('shopRecover').onclick=()=>purchase();$('shopMsg').setAttribute('role','status');
+ const balanceRetry=document.createElement('button');balanceRetry.type='button';balanceRetry.className='btn';balanceRetry.id='shopBalanceRetry';balanceRetry.textContent='잔액과 상품 다시 확인';balanceRetry.hidden=true;$('shopMsg').after(balanceRetry);balanceRetry.onclick=()=>confirmView();$('shopMsg').after(recovery);$('shopRecover').onclick=()=>purchase();$('shopMsg').setAttribute('role','status');
  function message(text,ok=false){$('shopMsg').className='message '+(ok?'ok':'error');$('shopMsg').textContent=text}
  function persist(){try{if(pending)localStorage.setItem(key(owner),JSON.stringify(pending));else localStorage.removeItem(key(owner));return true}catch{return false}}
- function load(){owner=identity();pending=null;try{const value=JSON.parse(localStorage.getItem(key(owner))||'null');if(value?.id&&value?.payload?.product_id)pending=value}catch{}}
+ function load(){if(owner!==identity())balanceRetry.hidden=true;owner=identity();pending=null;try{const value=JSON.parse(localStorage.getItem(key(owner))||'null');if(value?.id&&value?.payload?.product_id)pending=value}catch{}}
  function sync(){
   const locked=busy||!!pending;
   $('shopGrid').querySelectorAll('button').forEach(b=>{
@@ -38,12 +38,13 @@ export function installStudentShop(ctx){
   $('purchaseHint').textContent=item.kind==='coupon'?'선생님께 교환 요청이 보내져요. 확인받은 뒤 사용해요.':'내 옷장에 보관돼요. 원하는 때에 골라 입을 수 있어요.';
   $('purchaseMessage').textContent='';dialog.showModal();$('purchaseCancel').focus();sync();
  };
+ async function confirmView(){balanceRetry.disabled=true;const id=owner;try{const results=await Promise.allSettled([ctx.refresh(),ctx.loadShop()]);if(!same(id))return;const verified=results.every(r=>r.status==='fulfilled'&&r.value!=null);balanceRetry.hidden=verified;message(verified?'구매한 뒤의 잔액과 상품을 확인했어요.':'구매는 완료됐어요. 잔액과 상품은 아직 확인 중이에요. 아래에서 다시 확인해 주세요.',verified);return verified}finally{balanceRetry.disabled=false}}
  async function purchase(){
   if(busy||!same(owner))return;
   if(!pending){
    if(!selection)return;
    pending={id:crypto.randomUUID(),payload:{product_id:selection.product_id,expected_price:selection.price},kind:selection.kind,name:selection.name};
-   if(!persist()){pending=null;$('purchaseMessage').textContent='이 기기에 구매 준비를 저장하지 못했어요. 창을 닫았다가 다시 시도해 주세요.';return}
+   if(!persist()){pending=null;$('purchaseMessage').textContent='이 기기에 구매 준비를 저장하지 못했어요. 선택한 상품은 그대로예요. 구매하기를 다시 누르거나 초안을 정리해 주세요.';return}
   }
   const id=owner,request=pending;busy=true;sync();message('구매 결과를 확인하고 있어요…',true);
   try{
@@ -51,8 +52,8 @@ export function installStudentShop(ctx){
    if(error)throw error;if(!data?.ok)throw new Error('unconfirmed');
    if(!same(id))return;
    pending=null;selection=null;persist();dialog.close();
-   await Promise.allSettled([ctx.refresh(),ctx.loadShop()]);
-   if(same(id))message(request.kind==='coupon'?'교환 요청을 보냈어요! 선생님의 확인을 기다려 주세요.':'“'+request.name+'” 구매 완료! 내 옷장에서 골라 입어 보세요.',true);
+   const verified=await confirmView();
+   if(same(id)&&verified)message(request.kind==='coupon'?'교환 요청을 보냈어요! 선생님의 확인을 기다려 주세요.':'“'+request.name+'” 구매 완료! 내 옷장에서 골라 입어 보세요.',true);
   }catch(error){
    if(!same(id))return;
    if(error?.code==='P0001'||/^22\w{3}$/.test(error?.code||'')){
