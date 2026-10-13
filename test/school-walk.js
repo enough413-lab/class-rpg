@@ -1,5 +1,5 @@
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
-import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261013-sprout';
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261013-ball';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';
@@ -72,6 +72,13 @@ export function installSchoolWalk(ctx){
   markPlaces();
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}
   else{startFrames();ctx.onPosition()}
+  return true;
+ }
+ // Loose world objects use the same movement scheduler and speed as fixed places.
+ function goToPoint(x,label){
+  if(!Number.isFinite(x)||!canWalk())return false;
+  stop();target=Math.max(4,Math.min(96,x));destination={kind:'world-object',x:target,label};waypoint.show(target);markPlaces();
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else{startFrames();ctx.onPosition()}
   return true;
  }
  function renderPosition(x){
@@ -151,5 +158,5 @@ export function installSchoolWalk(ctx){
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
  let studentId=ctx.getStudent()?.id;doc.addEventListener('student-dashboard-updated',()=>{const next=ctx.getStudent()?.id;if(next!==studentId)stop();studentId=next});
- return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.()))};
+ return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,goToPoint,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.()))};
 }
