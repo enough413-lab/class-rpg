@@ -15,7 +15,7 @@ export function groupQuestReviews(quests, submissions) {
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const typeNames = { daily: '일일', weekly: '주간', main: '메인' };
 const icons = { daily: '☀️', weekly: '📅', main: '🏆' };
-const rowVersion = r => JSON.stringify([r.status, r.submitted_at, r.report_text, r.evidence_image, r.period_key]);
+const rowVersion = r => JSON.stringify([r.status, r.submitted_at, r.report_text, r.evidence_image, r.evidence_captions, r.period_key]);
 const dateLabel = value => value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '제출 날짜 없음';
 export function currentQuestPeriod(type, now = new Date(), weekday = 1) {return questPeriod(type,weekday,now)}
 export function questRoster(group, students, period) {
@@ -180,7 +180,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
       ${row?.submitted_at?`<div class="qr-meta">제출 · ${escape(dateLabel(row.submitted_at))}</div>`:''}
       <p class="qr-report">${escape(row?.report_text||(row?'작성된 수행 내용이 없어요.':'아직 수행 기록이 없어요.'))}</p>
       ${status==='rejected'&&row?.rejection_reason?`<p class="qr-report">보완 요청: ${escape(row.rejection_reason)}</p>`:''}
-      ${photos.length?`<p class="qr-meta">첨부 사진 ${photos.length}장 · 누르면 크게 보여요</p><div class="qr-photos">${photos.map((photo,i)=>`<button class="qr-photo" data-photo="${id}" data-photo-index="${i}" aria-label="${escape(name)} 수행 사진 ${i+1} 확대"><img src="${escape(photo)}" alt="학생 수행 사진 ${i+1}" loading="lazy"></button>`).join('')}</div>`:''}
+      ${photos.length?`<p class="qr-meta">첨부 사진 ${photos.length}장 · 누르면 크게 보여요</p><div class="qr-photos">${photos.map((photo,i)=>`<button class="qr-photo" data-photo="${id}" data-photo-index="${i}" aria-label="${escape(name)} 수행 사진 ${i+1} 확대"><img src="${escape(photo)}" alt="학생 수행 사진 ${i+1}" loading="lazy"><span>${escape(row?.evidence_captions?.[i]||'')}</span></button>`).join('')}</div>`:''}
       ${pending?`<div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">개별 승인</button></div>`:''}
       </div><p class="qr-detail-message" role="status"></p>`;
   }
@@ -212,7 +212,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     try {
       const [quests, rows, rosterStudents, looks] = await Promise.all([
         pages(() => db.from('quests').select('id,title,quest_type,weekly_reset_day,active,target_student_ids').eq('active', true).order('id')),
-        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,rejection_reason,students(student_number,nickname),quests(title,quest_type,weekly_reset_day,active)').order('id')),
+        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,evidence_captions,rejection_reason,students(student_number,nickname),quests(title,quest_type,weekly_reset_day,active)').order('id')),
         pages(() => db.from('students').select('id,student_number,nickname,gender').order('id')),
         db.rpc('teacher_student_appearances')
       ]);

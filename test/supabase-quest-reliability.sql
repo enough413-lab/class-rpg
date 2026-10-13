@@ -18,7 +18,7 @@ begin
  select x.* into q from public.quests x join public.students s on s.teacher_id=x.teacher_id where x.id=p_quest_id and s.id=sid and x.active and (x.target_student_ids is null or sid=any(x.target_student_ids));
  if q.id is null then raise exception '지금 작성할 수 없는 퀘스트예요.';end if;
  pkey:=public.quest_current_period_key(q.quest_type,q.weekly_reset_day);
- select jsonb_build_object('status',status,'report_text',report_text,'evidence_image',evidence_image,'rejection_reason',rejection_reason,'submitted_at',submitted_at,'reviewed_at',reviewed_at) into record from public.quest_submissions where student_id=sid and quest_id=q.id and period_key=pkey;
+ select jsonb_build_object('status',status,'report_text',report_text,'evidence_image',evidence_image,'evidence_captions',evidence_captions,'rejection_reason',rejection_reason,'submitted_at',submitted_at,'reviewed_at',reviewed_at) into record from public.quest_submissions where student_id=sid and quest_id=q.id and period_key=pkey;
  return jsonb_build_object('server_now',now(),'quest_id',q.id,'title',q.title,'quest_type',q.quest_type,'submission_mode',q.submission_mode,'period_key',pkey,'record',record);
 end; $$;
 revoke all on function public.student_quest_context(text,bigint) from public;
@@ -69,7 +69,7 @@ returns jsonb language plpgsql security definer stable set search_path='' as $$
 declare sid bigint; result jsonb;
 begin
  sid:=public.student_for_token(p_token);if sid is null then raise exception '다시 로그인해 주세요.';end if;
- select jsonb_build_object('id',s.id,'title',q.title,'period_key',s.period_key,'status',s.status,'report_text',s.report_text,'evidence_image',s.evidence_image,'submitted_at',s.submitted_at,'reviewed_at',s.reviewed_at) into result from public.quest_submissions s join public.quests q on q.id=s.quest_id where s.id=p_submission_id and s.student_id=sid and s.status in('submitted','approved','rejected');
+ select jsonb_build_object('id',s.id,'title',q.title,'period_key',s.period_key,'status',s.status,'report_text',s.report_text,'evidence_image',s.evidence_image,'evidence_captions',s.evidence_captions,'submitted_at',s.submitted_at,'reviewed_at',s.reviewed_at) into result from public.quest_submissions s join public.quests q on q.id=s.quest_id where s.id=p_submission_id and s.student_id=sid and s.status in('submitted','approved','rejected');
  if result is null then raise exception '내 제출 기록을 다시 확인해 주세요.';end if;return result;
 end; $$;
 revoke all on function public.student_quest_history_detail(text,bigint) from public;

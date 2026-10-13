@@ -52,19 +52,21 @@ async function shrinkImage(url) {
   throw new Error('사진 용량을 줄이지 못했어요. 다른 사진을 선택해 주세요.');
 }
 
-export async function prepareEvidencePhotos(existing, files) {
+export async function prepareEvidencePhotos(existing, files, onProgress = () => {}) {
   if (existing.length + files.length > MAX_QUEST_PHOTOS) throw new Error('사진은 최대 5장까지 첨부할 수 있어요. 먼저 사진을 삭제해 주세요.');
   for (const file of files) {
     if (!/^image\//i.test(file.type)) throw new Error('사진 파일만 선택해 주세요.');
     if (file.size > 15 * 1024 * 1024) throw new Error('사진 한 장의 원본 크기는 15MB 이하여야 해요.');
   }
-  const images = [];
-  for (const old of existing) images.push(old.length > MAX_PHOTO_CHARS ? await shrinkImage(old) : old);
+  const images = [];const total=existing.length+files.length;let done=0;
+  onProgress({done,total,phase:'preparing'});
+  for (const old of existing){onProgress({done,total,phase:'preparing'});images.push(old.length > MAX_PHOTO_CHARS ? await shrinkImage(old) : old);done++;}
   // Commit only after every image succeeds, preserving the draft on any failure.
   for (const file of files) {
     const url = URL.createObjectURL(file);
-    try { images.push(await shrinkImage(url)); }
+    try {onProgress({done,total,phase:'preparing'});images.push(await shrinkImage(url));done++;}
+    catch(error){if(/\.(heic|heif)$/i.test(file.name)||/heic|heif/i.test(file.type))throw new Error('이 기기에서 HEIC 사진을 읽지 못했어요. 사진을 JPG·PNG로 내보내거나 화면을 캡처한 사진으로 다시 첨부해 주세요. 기존 사진은 보관했어요.');throw error;}
     finally { URL.revokeObjectURL(url); }
   }
-  return encodeEvidenceImages(images);
+  onProgress({done,total,phase:'complete'});return encodeEvidenceImages(images);
 }
