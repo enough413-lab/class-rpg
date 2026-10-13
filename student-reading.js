@@ -1,3 +1,5 @@
+import {normalizeReadingDraft} from './reading-draft-state.js?v=20261013-drafts';
+import {draftDate} from './student-draft-tools.js?v=20261013-drafts';
 import {installReadingShelf} from './reading-shelf.js?v=20261007-shelf';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ids={book_title:'readingBookTitle',read_date:'readingDate',summary:'readingSummary',thoughts:'readingThought',recommendation_rating:'readingRating',recommendation_reason:'readingRecommendation'};
@@ -8,11 +10,12 @@ const hasWriting=data=>['book_title','summary','thoughts','recommendation_reason
 export function installStudentReading(ctx){
  const $=id=>document.getElementById(id);
  const shelf=installReadingShelf({...ctx,write:id=>openDesk(id)});
- let owner='',state=null,context='new',busy=false,historyVersion=0,reviews=[];
+ let owner='',state=null,context='new',busy=false,historyVersion=0,reviews=[],recoveryNote='',preserveOriginal=false;
  const identity=()=>String(ctx.getStudent()?.id||'');
  const key=id=>'classRpgReadingDraft:v1:'+location.pathname+':'+id;
  const same=id=>identity()===id&&owner===id;
  function persist(){
+  if(preserveOriginal)return false;
   try{localStorage.setItem(key(owner),JSON.stringify(state));return true}catch{return false}
  }
  function ensure(){
@@ -44,12 +47,12 @@ export function installStudentReading(ctx){
  function fields(){return Object.fromEntries(Object.entries(ids).map(([k,id])=>[k,k==='recommendation_rating'?Number($(id).value):$(id).value]))}
  function capture(){
   if(!same(owner)||busy||state.pending)return;
-  state.drafts[context]=fields();state.active=context;
+  state.drafts[context]={...fields(),savedAt:Date.now()};state.active=context;
   $('readingDraftStatus').textContent=persist()?'✓ 쓰던 글을 이 기기에 보관했어요.':'이 기기에 글을 보관하지 못했어요. 창을 닫기 전에 쓴 글을 따로 복사해 주세요.';
  }
  function loadState(id){
-  owner=id;state={active:'new',drafts:{},pending:null};
-  try{const saved=JSON.parse(localStorage.getItem(key(id))||'null');if(saved?.drafts&&typeof saved.drafts==='object')state=saved}catch{}
+  owner=id;state={active:'new',drafts:{},pending:null};recoveryNote='';preserveOriginal=false;
+  let raw='';try{raw=localStorage.getItem(key(id))||'';if(raw){const result=normalizeReadingDraft(JSON.parse(raw));state=result.state;if(result.repaired){try{localStorage.setItem(key(id)+':recovery:'+Date.now(),raw);recoveryNote='일부 초안을 읽지 못했어요. 읽을 수 있는 글을 가져왔고 이전 원본은 따로 보관했어요.'}catch{preserveOriginal=true;recoveryNote='이전 원본을 따로 보관하지 못했어요. 지금 글을 복사한 뒤 선생님께 도움을 부탁해 주세요.'}}}}catch{if(raw){preserveOriginal=true;recoveryNote='이전 초안을 읽지 못했어요. 이전 원본을 지우지 않고 보관하고 있어요.'}}
   context=String(state.pending?.context||state.active||'new');
  }
  function renderForm(){
@@ -60,9 +63,9 @@ export function installStudentReading(ctx){
   $('readingNew').hidden=context==='new';
   $('readingTeacherNote').hidden=!row?.rejection_reason;
   $('readingTeacherNote').textContent=row?.rejection_reason?'선생님 말씀: '+row.rejection_reason:'';
-  $('readingDraftStatus').textContent=hasWriting(state.drafts[context])?'✓ 쓰던 글을 이어서 가져왔어요.':'한 줄씩 천천히 써 보세요. 쓰는 동안 자동으로 보관해요.';
+  $('readingDraftStatus').textContent=hasWriting(state.drafts[context])?'✓ '+(draftDate(state.drafts[context].savedAt)?draftDate(state.drafts[context].savedAt)+'에 보관한 ':'')+'쓰던 글을 이어서 가져왔어요.':'한 줄씩 천천히 써 보세요. 쓰는 동안 자동으로 보관해요.';
   syncBusy();
-  if(state.pending)message('이전에 보낸 글의 결과를 확인해 주세요. 같은 글은 한 번만 제출돼요.');
+  if(recoveryNote)message(recoveryNote);else if(state.pending)message('이전에 보낸 글의 결과를 확인해 주세요. 같은 글은 한 번만 제출돼요.');
  }
  function syncBusy(){
   const frozen=busy||!!state.pending;
@@ -132,5 +135,5 @@ export function installStudentReading(ctx){
  }
  window.addEventListener('pagehide',capture);
  window.openReadingPortfolio=open;window.openReadingDesk=openDesk;window.closeReadingPortfolio=close;window.saveReadingEntry=save;
- return {open,close};
+ return {open,close,reloadDrafts:()=>{if(!busy&&same(owner)){loadState(owner);renderForm()}}};
 }
