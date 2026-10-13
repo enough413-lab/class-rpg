@@ -36,7 +36,7 @@
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
       "status": "in_progress",
-      "evidence": "Flower care, library window book, sprout leaf care, garden bench, playground mat, cheering bench and ball carry/roll/return have bounded action/visible-result tests. Three explicitly listed pond targets remain pending; overall item 6 stays in_progress.",
+      "evidence": "Flower care, library window book, sprout leaf care, garden bench, playground mat, cheering bench, ball carry/roll/return and pond fence magnifier have bounded action/visible-result tests. Pond viewer and notebook remain explicitly pending; overall item 6 stays in_progress.",
       "targets": [
         {
           "room": "library",
@@ -90,15 +90,17 @@
           "room": "playground",
           "kind": "look-2",
           "label": "함께 쓰는 공",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk beside the existing basket, take a small ball, carry it with the dressed avatar while walking/jumping, swipe left/right or use a key to roll it, chase/pick it up and return it. A personal device return tag remains; no rewards, inventory or school records.",
-          "evidence": "tests/playground-ball.cjs; outputs/student-playground-ball-deployment.json (2026-09-30/a)"
+          "evidence": "tests/playground-ball.cjs; successful Pages38346091655/live bytes; staging59d9561af7c1cee1ac55a8471f206ffbe4f77544 / main-test8687eea11f48f29ce8e0817b2898e059e67556f2; outputs/student-playground-ball-deployment.json (2026-09-30/a)"
         },
         {
           "room": "pond",
           "kind": "look-0",
           "label": "관찰 울타리",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Walk beside the existing fence and move an in-scene magnifying window by touch or equivalent keyboard buttons. Three original small neighbours appear enlarged; personal account/device discovery tags remain on the fence. No dialogue quiz, rewards or school-record writes.",
+          "evidence": "tests/pond-fence.cjs; outputs/student-pond-fence-deployment.json (2026-09-30/a)"
         },
         {
           "room": "pond",
