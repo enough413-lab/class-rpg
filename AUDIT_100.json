@@ -36,7 +36,7 @@
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
       "status": "in_progress",
-      "evidence": "Flower care, library window book, sprout leaf care, garden bench rest/pinwheel and the playground exercise mat have bounded action/visible-result tests. Five explicitly listed targets remain pending; overall item 6 stays in_progress.",
+      "evidence": "Flower care, library window book, sprout leaf care, garden bench rest/pinwheel, playground exercise mat and cheering bench have bounded action/visible-result tests. Four explicitly listed targets remain pending; overall item 6 stays in_progress.",
       "targets": [
         {
           "room": "library",
@@ -74,15 +74,17 @@
           "room": "playground",
           "kind": "look-0",
           "label": "준비운동 자리",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk onto the original mat, swipe left/right/down to directly lean or bend the dressed avatar, or use the equivalent finite keyboard action. Walking/jumping/room/map/account interruptions cancel; a personal device footprint marking remains after use, without school records or rewards.",
-          "evidence": "tests/playground-mat.cjs; outputs/student-playground-mat-deployment.json (2026-09-30/a)"
+          "evidence": "tests/playground-mat.cjs; successful Pages38336686340/live bytes; staging371d00ff4d0016c39f79ffe437ee43a49868cd63 / main-test2f9af4875398f8211188c20956cf2a668194815a; outputs/student-playground-mat-deployment.json (2026-09-30/a)"
         },
         {
           "room": "playground",
           "kind": "look-1",
           "label": "응원 벤치",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Walk to the original cheering bench, sit/stand, take a small pennant and directly swipe or use a key to wave it with a short cheer. Standing/walking/jumping parks the used flag at the bench; only personal device placement is remembered, with no school records, rewards or shared chat.",
+          "evidence": "tests/playground-cheer.cjs; outputs/student-playground-cheer-deployment.json (2026-09-30/a)"
         },
         {
           "room": "playground",

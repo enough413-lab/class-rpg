@@ -1,0 +1,19 @@
+/* The existing outfit sits on the original bench; its carried objects and name follow. */
+#hubPlayer[data-cheer-rest] :is(.campus-rig,.campus-player-name,.cafeteria-held-tray,.parcel-held,.momo-held){translate:0 var(--cheer-lift,0px)}
+#hubPlayer[data-cheer-rest] .campus-part{animation:none!important}
+#hubPlayer[data-cheer-rest] .campus-leg-left{transform-origin:44% 76%;transform:rotate(15deg)}
+#hubPlayer[data-cheer-rest] .campus-leg-right{transform-origin:56% 76%;transform:rotate(-15deg)}
+#hubPlayer[data-cheer-rest] .campus-upper{transform-origin:50% 76%;rotate:var(--cheer-lean,0deg)}
+#hubPlayer[data-cheer-rest] :is(.cafeteria-held-tray,.parcel-held,.momo-held){rotate:var(--cheer-lean,0deg)}
+#classroomHub.campus-side #hubPlayer[data-cheer-rest]::after{visibility:hidden}
+#classroomHub.campus-painted-place [data-art=playground-bench].cheer-occupied .campus-object-caption{top:-33px}
+#classroomHub [data-art=playground-bench].cheer-speaking .campus-object-caption{visibility:hidden}
+#classroomHub .cheer-flag{position:absolute;z-index:17;width:58px;height:86px;min-width:44px;min-height:44px;padding:0;border:0;background:none;box-shadow:none;touch-action:none;cursor:grab;overflow:visible}
+#classroomHub .cheer-flag[hidden],.cheer-words[hidden]{display:none}#classroomHub .cheer-flag:disabled{opacity:1;cursor:default}#classroomHub .cheer-flag:focus-visible{outline:3px solid #f5d37b;outline-offset:3px;border-radius:10px}
+.cheer-flag svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 1px #4c4b3529)}.cheer-flag-motion{transform-origin:9px 79px}
+#classroomHub .cheer-flag:not(.is-held)::after{content:'';position:absolute;left:10%;bottom:4%;width:6px;height:10px;border-radius:3px;border:1px solid #697657;background:#a3ad80;pointer-events:none}
+.cheer-words{position:absolute;z-index:18;transform:translateX(-50%);padding:6px 12px;border-radius:18px 18px 18px 4px;border:1px solid #cab77f;background:#fff5d6;color:#476b50;box-shadow:0 2px 0 #6d66312b;font:16px/1.3 SchoolJua,system-ui;white-space:nowrap;pointer-events:none}
+.cheer-help{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px;color:#405d49;font:14px/1.5 system-ui;box-sizing:border-box}.cheer-help[hidden]{display:none}.cheer-help span{min-width:0;word-break:keep-all}
+#classroomHub .cheer-play{flex:none;min-height:44px;padding:7px 12px;border:1px solid #b8ba91;border-radius:16px;background:#fff4d7;color:#475d49;font:14px/1.3 SchoolJua,system-ui;cursor:pointer}
+#classroomHub[data-scene=playground]:has(.cheer-help:not([hidden])) .campus-how{display:none!important}
+@media(max-width:849px){#classroomHub .cheer-flag{width:49px;height:73px}.cheer-help{font-size:13px;gap:6px}#classroomHub .cheer-play{font-size:13px;padding:5px 8px}.cheer-words{font-size:15px}}
