@@ -1,11 +1,13 @@
 // The original jump arc can also land on an optional room terrain adapter.
-export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null}){
+export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null,onMealJumpBlocked=()=>{}}){
  const doc=hub.ownerDocument,player=doc.getElementById('hubPlayer'),button=hub.querySelector('[data-campus="jump"]');
  let animations=[],frame=0,owner=null,scene=null,heldObserver=null,terrain=null;
- const blocked=()=>hub.classList.contains('hidden')||doc.hidden||player.classList.contains('cafeteria-eating')||doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
+ const unavailable=()=>hub.classList.contains('hidden')||doc.hidden||doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
+ const blocked=()=>unavailable()||player.classList.contains('cafeteria-eating');
  function cancel(completed=false){cancelAnimationFrame(frame);frame=0;heldObserver?.disconnect();heldObserver=null;const previous=animations;animations=[];previous.forEach(a=>a.cancel());delete player.dataset.jumping;delete player.dataset.jumpPhase;const current=terrain;terrain=null;current?.end(completed===true)}
  function jump(){
-  if(blocked()||animations.length)return false;
+  if(unavailable()||animations.length)return false;
+  if(player.classList.contains('cafeteria-eating')){onMealJumpBlocked();return false}
   const rig=player.querySelector('.campus-rig');if(!rig)return false;
   const ground=getTerrain();if(ground?.takeoff()===false)return false;terrain=ground;
   owner=getStudent()?.id;scene=getScene();player.dataset.jumping='true';
@@ -39,7 +41,7 @@ export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null})
  // A second touch does not synthesize a click while the movement finger stays down.
  button.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.isPrimary){e.preventDefault();jump()}});
  window.addEventListener('keydown',e=>{
-  if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey||blocked())return;
+  if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey||unavailable())return;
   const active=doc.activeElement;
   if(active?.matches('input,textarea,select,[contenteditable]')||active?.closest('button,a,summary')&&!active.matches('[data-move],[data-campus="jump"]'))return;
   e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)jump();
