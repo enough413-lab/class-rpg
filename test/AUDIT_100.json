@@ -152,8 +152,8 @@
     {
       "id": 11,
       "title": "위치 저장 실패 안내",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/campus-memory-status.cjs and 9 regression suites; real Storage quota/security errors, keyboard/native browser touch, seven rooms and 1366/390/320 screenshots, reduced/4x CPU emulation, account debounce isolation, reload and recovery. Resolve only after outputs/student-spot-save-feature-deployment.json (2026-09-30/a) is complete. Physical Chromebook/pupil observation untested.",
+      "status": "resolved",
+      "evidence": "tests/campus-memory-status.cjs and 9 regression suites; staging b01647654c11e4fa8f91bf6cfa9e22866d799d6d / main-test 571c024444f080e89b2d52378e30317a26846bc4; successful Pages 38520997531, live-byte checks and exact main-outside-test preservation. outputs/student-spot-save-feature-deployment.json (2026-09-30/a). Native browser touch/keyboard,seven rooms,1366/390/320,reduced/4x CPU emulation; physical Chromebook/pupil observation untested. Item12 next.",
       "behavior": "A local walking-position save failure shows one short notice and a native keyboard/touch retry beside the controls. Failed positions stay separately per account in session memory; reopening does not jump back to stale storage. Successful retry or the next stopped walk confirms the real local write. Read failure is distinguished and cannot silently overwrite an unread saved position. No idle polling, RPC, reward or school-record changes."
     },
     {
