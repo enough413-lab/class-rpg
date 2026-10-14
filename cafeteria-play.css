@@ -1,4 +1,22 @@
-.cafeteria-held-tray{position:absolute;left:22%;top:48%;width:70px;height:42px;z-index:20;pointer-events:none;filter:drop-shadow(0 2px 1px #4e453333)}.cafeteria-held-tray[hidden]{display:none}.cafeteria-held-tray img{position:static!important;display:block;width:100%!important;height:100%!important;object-fit:contain!important}.cafeteria-play-status{grid-column:1/-1;margin:0;padding:5px 10px;border-radius:10px;background:#fff8dc;color:#3c5b40;font:14px/1.5 system-ui;word-break:keep-all}.cafeteria-play-status[hidden]{display:none}.cafeteria-eating .campus-rig{transform:translateY(-7px);transform-origin:50% 100%}.cafeteria-eating .campus-leg-left{transform-origin:43% 76%;transform:rotate(55deg)}.cafeteria-eating .campus-leg-right{transform-origin:57% 76%;transform:rotate(-55deg)}.cafeteria-washing::before{display:block!important;position:absolute;content:'◌ ◌ ◌'!important;left:22%;top:30%;padding:0!important;color:#aedfe6;font-size:26px;z-index:22;animation:cafeteriaBubble .65s ease-out}.cafeteria-bite .cafeteria-held-tray{animation:cafeteriaNibble .4s ease-in-out}@keyframes cafeteriaBubble{to{transform:translateY(-15px);opacity:0}}@keyframes cafeteriaNibble{50%{transform:translateY(-8px) rotate(-6deg)}}
+.cafeteria-held-tray{position:absolute;left:22%;top:48%;width:70px;height:42px;z-index:20;pointer-events:none;filter:drop-shadow(0 2px 1px #4e453333)}.cafeteria-held-tray[hidden]{display:none}.cafeteria-held-tray img{position:static!important;display:block;width:100%!important;height:100%!important;object-fit:contain!important}.cafeteria-play-status{grid-column:1/-1;margin:0;padding:5px 10px;border-radius:10px;background:#fff8dc;color:#3c5b40;font:14px/1.5 system-ui;word-break:keep-all}.cafeteria-play-status[hidden]{display:none}.cafeteria-washing::before{display:block!important;position:absolute;content:'◌ ◌ ◌'!important;left:22%;top:30%;padding:0!important;color:#aedfe6;font-size:26px;z-index:22;animation:cafeteriaBubble .65s ease-out}.cafeteria-bite .cafeteria-held-tray{animation:cafeteriaNibble .4s ease-in-out}@keyframes cafeteriaBubble{to{transform:translateY(-15px);opacity:0}}@keyframes cafeteriaNibble{50%{transform:translateY(-8px) rotate(-6deg)}}
 @media(max-width:849px){.cafeteria-held-tray{width:60px;height:36px}.cafeteria-play-status{width:100%;box-sizing:border-box;font-size:13px;padding:4px 8px}#classroomHub[data-scene=cafeteria] .hub-help{gap:5px}}
 @media(prefers-reduced-motion:reduce){.cafeteria-bite .cafeteria-held-tray,.cafeteria-washing::before{animation:none}}
 #classroomHub[data-scene=cafeteria] .campus-how{display:none!important}
+
+/* Sit on the original chair, facing the table, with the same dressed avatar. */
+#hubPlayer[data-meal-seat] :is(.campus-rig,.campus-player-name,.cafeteria-held-tray,.parcel-held,.momo-held){translate:0 var(--meal-lift,0px)}
+#hubPlayer[data-meal-seat] .campus-part{animation:none!important}
+#hubPlayer[data-meal-seat] .campus-leg-left{transform-origin:44% 76%;transform:rotate(-38deg)}
+#hubPlayer[data-meal-seat] .campus-leg-right{transform-origin:56% 76%;transform:rotate(-38deg)}
+#hubPlayer[data-meal-seat] .cafeteria-held-tray{left:calc(50% + var(--meal-tray-x));top:var(--meal-tray-y)}
+#classroomHub.campus-side #hubPlayer[data-meal-seat]::after{visibility:hidden}
+.cafeteria-seat-fallback{display:none}
+#classroomHub [data-art=cafeteria-table].art-missing .campus-sprite-missing{display:none}
+#classroomHub [data-art=cafeteria-table].art-missing .cafeteria-seat-fallback{display:block;position:absolute;bottom:0;left:0;width:100%;aspect-ratio:600/320;pointer-events:none}
+.cafeteria-seat-fallback i{position:absolute;box-sizing:border-box;background:#d8b27a;border:3px solid #9c754c;border-radius:7px;box-shadow:0 3px 0 #ae8657}
+.cafeteria-seat-fallback .meal-table{top:33%;left:20%;width:60%;height:14%}
+.cafeteria-seat-fallback .meal-table::before,.cafeteria-seat-fallback .meal-table::after{content:'';position:absolute;top:100%;width:7%;height:240%;background:#ae8657;border:2px solid #8b6b48;border-radius:0 0 3px 3px}
+.cafeteria-seat-fallback .meal-table::before{left:5%}.cafeteria-seat-fallback .meal-table::after{right:5%}
+.cafeteria-seat-fallback :is(.meal-chair-left,.meal-chair-right){top:66%;width:19%;height:11%;background:#efd5a0}
+.cafeteria-seat-fallback .meal-chair-left{left:3%}.cafeteria-seat-fallback .meal-chair-right{right:3%}
+.cafeteria-seat-fallback :is(.meal-chair-left,.meal-chair-right)::after{content:'';position:absolute;top:100%;left:8%;width:65%;height:190%;border:3px solid #9c754c;border-width:0 4px}

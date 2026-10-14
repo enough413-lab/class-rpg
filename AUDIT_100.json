@@ -138,8 +138,9 @@
     {
       "id": 9,
       "title": "급식실 의자에 앉는 자세",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/cafeteria-seat.cjs plus 13 regression suites; native browser keyboard/touch, 1366/390/320 visuals, reduced motion and 4x CPU emulation; left/right alignment, cancellation, owner/reload, art/storage fallback and unchanged economy. Resolve only after outputs/student-cafeteria-seat-feature-deployment.json (2026-09-30/a) reports complete. Physical Chromebook/student observation not claimed.",
+      "behavior": "Walk at the existing constant speed to the nearest original dining chair, face the table and sit with both legs forward. The same dressed avatar, held tray and below-feet name share the chair lift; the tray rests on the table. First movement or the final bite stands up. Reconnect resumes the carried meal and bite count, never a floating seat."
     },
     {
       "id": 10,
