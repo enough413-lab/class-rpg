@@ -1,6 +1,7 @@
+import {installReadingRevisions} from './reading-revisions.js?v=20261014-reading';
 import {normalizeReadingDraft} from './reading-draft-state.js?v=20261013-drafts';
 import {draftDate} from './student-draft-tools.js?v=20261013-drafts';
-import {installReadingShelf} from './reading-shelf.js?v=20261007-shelf';
+import {installReadingShelf} from './reading-shelf.js?v=20261014-reading';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ids={book_title:'readingBookTitle',read_date:'readingDate',summary:'readingSummary',thoughts:'readingThought',recommendation_rating:'readingRating',recommendation_reason:'readingRecommendation'};
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -9,8 +10,8 @@ const hasWriting=data=>['book_title','summary','thoughts','recommendation_reason
 
 export function installStudentReading(ctx){
  const $=id=>document.getElementById(id);
- const shelf=installReadingShelf({...ctx,write:id=>openDesk(id)});
- let owner='',state=null,context='new',busy=false,historyVersion=0,reviews=[],recoveryNote='',preserveOriginal=false;
+ const revisions=installReadingRevisions(ctx);const shelf=installReadingShelf({...ctx,write:id=>openDesk(id)});
+ let owner='',state=null,context='new',busy=false,historyVersion=0,reviews=[],recoveryNote='',preserveOriginal=false,weeklyCount=null,serverToday=null,sharingKnown=false;
  const identity=()=>String(ctx.getStudent()?.id||'');
  const key=id=>'classRpgReadingDraft:v1:'+location.pathname+':'+id;
  const same=id=>identity()===id&&owner===id;
@@ -27,23 +28,28 @@ export function installStudentReading(ctx){
    '<div class="reading-welcome"><span aria-hidden="true">📚</span><div><b>책에서 만난 생각을 모아요</b><p>내 말로 짧게 적어도 좋아요. 선생님이 확인하면 10 경험치와 30 골드를 받아요.</p></div></div>'+
    '<div class="reading-context"><h3 id="readingFormTitle">새 책 이야기 쓰기</h3><button type="button" class="btn" id="readingNew" hidden>새 글 쓰기</button></div>'+
    '<p id="readingTeacherNote" class="reading-teacher-note" hidden></p><p id="readingDraftStatus" class="reading-draft-status" role="status"></p>'+
-   '<form id="readingEntryForm"><div class="reading-book-row"><div class="field"><label for="readingBookTitle">읽은 책 이름</label><input id="readingBookTitle" maxlength="80" required placeholder="어떤 책을 읽었나요?" autocomplete="off"></div><div class="field"><label for="readingDate">읽은 날</label><input id="readingDate" type="date" required></div></div>'+
+   '<p id="readingLimitNotice" role="status"></p><p id="readingSharingNotice">누가 읽을 수 있는지 서버 설정을 확인하고 있어요.</p><div id="readingDuplicateNotice"></div><form id="readingEntryForm"><div class="reading-book-row"><div class="field"><label for="readingBookTitle">읽은 책 이름</label><input id="readingBookTitle" maxlength="80" required placeholder="어떤 책을 읽었나요?" autocomplete="off"></div><div class="field"><label for="readingDate">읽은 날</label><input id="readingDate" type="date" required></div></div>'+
    '<div class="field"><label for="readingSummary">어떤 이야기였나요?</label><p id="readingSummaryHelp">기억에 남는 일을 순서대로 적어 보세요.</p><textarea id="readingSummary" maxlength="3000" required aria-describedby="readingSummaryHelp" placeholder="처음에는… 그러다가…"></textarea></div>'+
    '<div class="field"><label for="readingThought">나는 이렇게 생각했어요</label><p id="readingThoughtHelp">내 경험과 닮은 점이나 주인공에게 하고 싶은 말도 좋아요.</p><textarea id="readingThought" maxlength="3000" required aria-describedby="readingThoughtHelp" placeholder="내가 주인공이라면…"></textarea></div>'+
    '<div class="field"><label for="readingRating">친구에게 얼마나 추천하고 싶나요?</label><select id="readingRating"><option value="5">★★★★★ · 꼭 추천해요</option><option value="4">★★★★☆ · 추천해요</option><option value="3">★★★☆☆ · 괜찮아요</option><option value="2">★★☆☆☆ · 조금 아쉬워요</option><option value="1">★☆☆☆☆ · 나와는 잘 맞지 않았어요</option></select></div>'+
    '<div class="field"><label for="readingRecommendation">그렇게 생각한 까닭은요?</label><textarea id="readingRecommendation" maxlength="1500" required placeholder="어떤 친구에게 추천하고 싶은지도 적어 보세요."></textarea></div>'+
    '<div id="readingPortfolioMsg" class="message" role="status" aria-live="polite"></div><button type="submit" id="readingSubmit" class="btn good">선생님께 보내기</button></form>'+
    '<p class="reading-draft-hint">쓰던 글은 이 기기의 내 계정에 자동으로 보관돼요. 제출한 글은 다른 기기에서도 볼 수 있어요.</p>';
-  $('readingEntryForm').addEventListener('input',capture);
+  for(const id of ['readingBookTitle','readingSummary','readingThought','readingRecommendation']){const count=document.createElement('small');count.id=id+'Count';count.style.cssText='display:block;font-size:13px;margin-top:5px';$(id).after(count);$(id).setAttribute('aria-describedby',[$(id).getAttribute('aria-describedby')||'',count.id].join(' ').trim())}$('readingDate').max=today();$('readingDate').addEventListener('change',()=>dateCheck());
+  $('readingEntryForm').addEventListener('input',()=>{counts();duplicates();capture()});
   $('readingEntryForm').addEventListener('change',capture);
   $('readingEntryForm').addEventListener('submit',e=>{e.preventDefault();save()});
-  $('readingNew').onclick=()=>switchContext('new');const shelfButton=document.createElement('button');shelfButton.type='button';shelfButton.className='btn reading-shelf-link';shelfButton.textContent='📚 책장에서 나와 친구들의 글 읽기';shelfButton.onclick=()=>{close();shelf.open()};modal.querySelector('.reading-form').append(shelfButton);
+  $('readingDuplicateNotice').addEventListener('click',e=>{const b=e.target.closest('[data-reading-existing]');if(!b)return;const row=$('readingHistory').querySelector('[data-own-review="'+Number(b.dataset.readingExisting)+'"]');if(row){row.querySelector('details').open=true;row.scrollIntoView({block:'center'})}});$('readingNew').onclick=()=>switchContext('new');const shelfButton=document.createElement('button');shelfButton.type='button';shelfButton.className='btn reading-shelf-link';shelfButton.textContent='📚 책장에서 나와 친구들의 글 읽기';shelfButton.onclick=()=>{close();shelf.open()};modal.querySelector('.reading-form').append(shelfButton);
   $('readingHistory').addEventListener('click',e=>{
    if(e.target.closest('[data-reading-reload]'))loadHistory();
-   const button=e.target.closest('[data-reading-retry]');if(button&&!busy&&!state.pending)switchContext(button.dataset.readingRetry);
+   const versions=e.target.closest('[data-reading-versions]');if(versions)revisions.open(versions.dataset.readingVersions);const existing=e.target.closest('[data-reading-existing]');if(existing){const row=$('readingHistory').querySelector('[data-own-review="'+Number(existing.dataset.readingExisting)+'"]');if(row){row.querySelector('details').open=true;row.scrollIntoView({block:'center'})}}const button=e.target.closest('[data-reading-retry]');if(button&&!busy&&!state.pending)switchContext(button.dataset.readingRetry);
   });
  }
  function message(text,ok=false){$('readingPortfolioMsg').className='message '+(ok?'ok':'error');$('readingPortfolioMsg').textContent=text}
+ function counts(){for(const id of ['readingBookTitle','readingSummary','readingThought','readingRecommendation']){if($(id+'Count'))$(id+'Count').textContent=$(id).value.length+' / '+$(id).maxLength+'자'}}
+ function dateCheck(quiet=false){const future=$('readingDate').value>(serverToday||today());$('readingDate').max=serverToday||today();$('readingDate').setCustomValidity(future?'읽은 날은 한국시간 오늘까지 고를 수 있어요.':'');if(future&&!quiet)message('읽은 날은 한국시간 오늘까지 고를 수 있어요. 날짜를 다시 확인해 주세요.');return !future}
+ function duplicates(){if(!$('readingDuplicateNotice'))return;const title=$('readingBookTitle').value.trim().normalize('NFKC').toLocaleLowerCase();const found=context==='new'&&title?reviews.filter(r=>String(r.book_title||'').trim().normalize('NFKC').toLocaleLowerCase()===title):[];$('readingDuplicateNotice').innerHTML=found.length?'<p>같은 책 이름의 내 글이 있어요. 다른 감상이라면 새 글을 쓸 수 있어요.</p>'+found.map(r=>'<button type="button" class="btn" data-reading-existing="'+Number(r.review_id)+'">'+esc(r.read_date)+'에 쓴 내 글 보기</button>').join(''):''}
+ function limitNotice(){if(!$('readingLimitNotice'))return;$('readingLimitNotice').textContent=weeklyCount===null?'이번 주 기록 수를 확인하고 있어요. 초안은 계속 쓸 수 있어요.':'이번 주 '+weeklyCount+' / 3편 · '+(context==='new'&&weeklyCount>=3?'새 글은 다음 주에 보낼 수 있어요. 지금 쓴 초안은 계속 보관해요.':'새 글은 주간 3편까지 보내요.')+(context!=='new'?' 반려 글은 같은 기록을 수정해요. 새 글이 한 편 더 생기지 않지만 이번 주에 다시 보내면 이번 주 편수에 포함돼요. 수정 자체에는 새 글 3편 제한을 적용하지 않아요.':'')}
  function fields(){return Object.fromEntries(Object.entries(ids).map(([k,id])=>[k,k==='recommendation_rating'?Number($(id).value):$(id).value]))}
  function capture(){
   if(!same(owner)||busy||state.pending)return;
@@ -64,7 +70,7 @@ export function installStudentReading(ctx){
   $('readingTeacherNote').hidden=!row?.rejection_reason;
   $('readingTeacherNote').textContent=row?.rejection_reason?'선생님 말씀: '+row.rejection_reason:'';
   $('readingDraftStatus').textContent=hasWriting(state.drafts[context])?'✓ '+(draftDate(state.drafts[context].savedAt)?draftDate(state.drafts[context].savedAt)+'에 보관한 ':'')+'쓰던 글을 이어서 가져왔어요.':'한 줄씩 천천히 써 보세요. 쓰는 동안 자동으로 보관해요.';
-  syncBusy();
+  counts();duplicates();dateCheck(true);limitNotice();syncBusy();
   if(recoveryNote)message(recoveryNote);else if(state.pending)message('이전에 보낸 글의 결과를 확인해 주세요. 같은 글은 한 번만 제출돼요.');
  }
  function syncBusy(){
@@ -87,11 +93,12 @@ export function installStudentReading(ctx){
   $('readingHistory').setAttribute('aria-busy','true');
   if(!reviews.length)$('readingHistory').innerHTML='<p class="reading-loading">책 이야기를 불러오고 있어요…</p>';
   try{
-   const {data,error}=await ctx.db.rpc('student_reading_journal',{p_token:ctx.getToken()});if(error||!Array.isArray(data?.reviews))throw error||new Error('missing journal');
+   const [{data,error},ruleResult]=await Promise.all([ctx.db.rpc('student_reading_journal',{p_token:ctx.getToken()}),ctx.db.rpc('student_reading_rules',{p_token:ctx.getToken()})]);if(error||!Array.isArray(data?.reviews))throw error||new Error('missing journal');
    if(!same(id)||version!==historyVersion)return;
-   reviews=data.reviews;$('readingPortfolioCount').textContent='이번 주 '+data.weekly_count+' / 3편 · 모두 '+reviews.length+'편';
+   reviews=data.reviews;weeklyCount=Number.isFinite(Number(data.weekly_count))?Number(data.weekly_count):null;if(!ruleResult.error&&ruleResult.data?.today){serverToday=ruleResult.data.today;sharingKnown=true;$('readingSharingNotice').textContent=ruleResult.data.class_sharing?'선생님이 확인한 글은 같은 반 친구들의 책장에 보여요. 확인 중이거나 반려된 글은 본인과 선생님만 읽어요.':'친구 책장 공개가 꺼져 있어요. 지금 글은 본인과 선생님만 읽어요.';dateCheck(true)}limitNotice();duplicates();$('readingPortfolioCount').textContent='이번 주 '+data.weekly_count+' / 3편 · 모두 '+reviews.length+'편';
    $('readingHistory').innerHTML='<div class="reading-history-heading"><h3>차곡차곡 모은 책 이야기</h3><button class="btn" data-reading-reload>새로고침</button></div>'+(reviews.length?reviews.map(r=>
-    '<article class="reading-entry"><div class="reading-entry-top"><h4>'+esc(r.book_title)+'</h4><span class="reading-state '+esc(r.status)+'">'+({submitted:'선생님 확인 중',approved:'확인 완료 · 보상 받음',rejected:'조금 더 다듬어요'}[r.status]||'선생님 확인 중')+'</span></div><p class="reading-entry-date">'+esc(r.read_date)+' · '+'★'.repeat(Math.max(0,Math.min(5,Number(r.recommendation_rating)||0)))+'</p><details><summary>내가 쓴 글 펼치기</summary><p><b>책 이야기</b><br>'+esc(r.summary)+'</p><p><b>내 생각</b><br>'+esc(r.thoughts)+'</p><p><b>추천하는 까닭</b><br>'+esc(r.recommendation_reason)+'</p></details>'+
+    '<article class="reading-entry" data-own-review="'+Number(r.review_id)+'"><div class="reading-entry-top"><h4>'+esc(r.book_title)+'</h4><span class="reading-state '+esc(r.status)+'">'+({submitted:'선생님 확인 중',approved:'확인 완료 · 보상 받음',rejected:'조금 더 다듬어요'}[r.status]||'선생님 확인 중')+'</span></div><p class="reading-entry-date">'+esc(r.read_date)+' · '+'★'.repeat(Math.max(0,Math.min(5,Number(r.recommendation_rating)||0)))+' · 5점 중 '+Number(r.recommendation_rating)+'점'+'</p><details><summary>내가 쓴 글 펼치기</summary><p><b>책 이야기</b><br>'+esc(r.summary)+'</p><p><b>내 생각</b><br>'+esc(r.thoughts)+'</p><p><b>추천하는 까닭</b><br>'+esc(r.recommendation_reason)+'</p></details>'+
+    '<button type="button" class="btn" data-reading-versions="'+Number(r.review_id)+'">수정 전후 보기</button>'+
     (r.status==='rejected'?'<p class="reading-teacher-note">'+esc(r.rejection_reason?'선생님 말씀: '+r.rejection_reason:'생각을 조금 더 보태서 다시 보내 주세요.')+'</p><button class="btn" data-reading-retry="'+esc(r.review_id)+'">이 글 다듬기</button>':'')+'</article>').join(''):'<div class="reading-empty"><span aria-hidden="true">🌱</span><b>첫 책 이야기를 기다려요</b><p>좋아하는 책 한 권에서 시작해 볼까요?</p></div>');
    const row=reviews.find(r=>String(r.review_id)===context);
    $('readingTeacherNote').hidden=!row?.rejection_reason;$('readingTeacherNote').textContent=row?.rejection_reason?'선생님 말씀: '+row.rejection_reason:'';
@@ -102,7 +109,7 @@ export function installStudentReading(ctx){
  }
  async function open(mode='combined'){
   const id=identity();if(!id)return;ensure();$('readingPortfolioModal').classList.toggle('reading-desk',mode==='desk');$('readingJournalTitle').textContent=mode==='desk'?'책상에서 독후감 쓰기':'나의 책 이야기';if(busy&&owner!==id){$('readingPortfolioModal').classList.add('hidden');return}
-  if(!busy){capture();reviews=[];loadState(id);message('');renderForm()}
+  if(!busy){capture();reviews=[];weeklyCount=null;serverToday=null;sharingKnown=false;loadState(id);message('');renderForm()}
   $('readingPortfolioModal').classList.remove('hidden');await loadHistory();
  }
  async function openDesk(reviewId=null){await open('desk');if(reviewId&&same(owner)&&!busy&&!state.pending){if(reviews.some(r=>String(r.review_id)===String(reviewId)))switchContext(reviewId);else message('수정할 글을 아직 불러오지 못했어요. 연결을 확인하고 책장에서 다시 펼쳐 주세요.');}const form=$('readingEntryForm');form?.scrollIntoView({block:'nearest'})}
@@ -110,7 +117,7 @@ export function installStudentReading(ctx){
  async function save(){
   if(busy||!same(owner))return;
   if(!state.pending){
-   if(!$('readingEntryForm').reportValidity())return;
+   if(!dateCheck())return;if(context==='new'&&weeklyCount!==null&&weeklyCount>=3){capture();return message('이번 주 새 글 3편을 모두 보냈어요. 초안은 계속 보관하고 다음 주에 보내 주세요.')}if(!$('readingEntryForm').reportValidity())return;
    capture();const payload=fields();for(const k of ['book_title','summary','thoughts','recommendation_reason'])payload[k]=payload[k].trim();
    if(!['book_title','read_date','summary','thoughts','recommendation_reason'].every(k=>payload[k]))return message('빈칸을 채우고 내 생각을 들려주세요.');
    if(context!=='new')payload.review_id=Number(context);

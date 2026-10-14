@@ -1,5 +1,5 @@
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
-import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261013-fence';
+import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';

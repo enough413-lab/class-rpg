@@ -1,3 +1,4 @@
+import {installPondNotebook} from './pond-notebook.js?v=20261014-notebook';
 import {installPondViewer} from './pond-viewer.js?v=20261014-viewer';
 import {installPondFence} from './pond-fence.js?v=20261013-fence';
 import {installPlaygroundBall} from './playground-ball.js?v=20261013-ball';
@@ -16,7 +17,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
 import {installCampusStory} from './campus-story.js?v=20261012-parcel-world';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
-import {installSchoolWalk} from './school-walk.js?v=20261013-fence';
+import {installSchoolWalk} from './school-walk.js?v=20261014-notebook';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261012-momo';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -51,11 +52,11 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();
+  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?(viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(notebook?.label(near.kind)||viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
   if(action.textContent!==label)action.textContent=label;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
@@ -79,8 +80,9 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null;
+ let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null;
  function interact(kind){
+  if(notebook?.interact(kind))return;
   if(viewer?.interact(kind))return;
   if(fence?.interact(kind))return;
   if(ball?.interact(kind))return;
@@ -107,6 +109,7 @@ export function installStudentCampus(ctx){
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  gardenCare=installGardenCare({...ctx,hub,objects,walk,stop,refresh:syncNear});
  nook=installLibraryNook({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
+ notebook=installPondNotebook({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
  viewer=installPondViewer({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
  fence=installPondFence({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
  ball=installPlaygroundBall({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});

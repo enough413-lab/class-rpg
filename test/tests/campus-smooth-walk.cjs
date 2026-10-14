@@ -7,7 +7,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   page.on('pageerror',e=>errors.push(e.message));await page.route('https://**',r=>r.abort());await page.goto('http://127.0.0.1:'+server.address().port);
   const f=page.frames().find(x=>x.url().includes('app-core.html'));await f.waitForFunction(()=>window.studentCampus?.keyDown&&document.getElementById('saProfileTitle')?.textContent.includes('별나래'));
   await f.waitForFunction(()=>document.__busyGuard);await f.evaluate(()=>document.fonts.ready);
-  const enter=async room=>{await f.evaluate(room=>{enterHubScene(room==='library'?'hallway':'library');enterHubScene(room)},room);await f.locator('.campus-scene-status').waitFor({state:'hidden'});await f.waitForFunction(()=>document.querySelector('.hub-stage').getAnimations().every(a=>a.playState!=='running'));await f.locator('#campusTitle').focus()};
+  const enter=async room=>{await f.evaluate(room=>{enterHubScene(room==='library'?'hallway':'library');enterHubScene(room)},room);await f.locator('.campus-scene-status').waitFor({state:'hidden'});await f.waitForFunction(()=>document.querySelector('.hub-stage').getAnimations().every(a=>a.playState!=='running'));await f.locator('#campusTitle').focus();await f.waitForFunction(()=>document.hasFocus());await f.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))};
   const pos=()=>f.locator('#hubPlayer').evaluate(el=>parseFloat(el.style.left));
   const frozen=async()=>{const x=await pos();await page.waitForTimeout(170);assert.equal(await pos(),x,'Released/canceled movement must not drift')};
   // Sample actual rendered coordinates and actual frame time. OS repeat rate must not matter.
