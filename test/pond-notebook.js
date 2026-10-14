@@ -1,6 +1,7 @@
 // Personal leaf rubbing on the existing pond desk. No school record or reward writes.
 const LEAF='<path d="M55 123Q52 75 94 42L113 39 114 24 135 27 151 12 165 22 194 11 190 29 216 29 207 46 239 49 225 67 239 85 218 91 221 109 195 112 191 128 166 121 152 133 127 119 108 127 93 113 72 130Z"/><path d="M51 132Q117 100 201 39M85 115 83 70m25 33-5-48m27 35-1-52m26 37 3-43m-49 71 56 5m-33-19 57 6m-35-21 55 7" fill="none" stroke="#47634f" stroke-width="2.5" stroke-linecap="round"/>';
 const COLS=28,ROWS=14;
+export function leafImpression(cells,id){const ink=cells.map(n=>'M'+(n%COLS*10)+' '+(Math.floor(n/COLS)*10)+'h10v10h-10Z').join('');return '<svg viewBox="0 0 280 140" aria-hidden="true"><defs><mask id="'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="280" height="140"><path fill="white" d="'+ink+'"/></mask></defs><g mask="url(#'+id+')">'+LEAF+'</g></svg>'}
 export function installPondNotebook(c){
  const doc=c.hub.ownerDocument,player=doc.getElementById('hubPlayer'),reduce=matchMedia('(prefers-reduced-motion: reduce)');
  const paper=doc.createElement('div');paper.className='pond-paper';paper.hidden=true;paper.setAttribute('role','group');paper.setAttribute('aria-label','연못 노트 위 잎 무늬 종이');
@@ -58,5 +59,5 @@ export function installPondNotebook(c){
  function pause(){close();sync();c.refresh()}
  new MutationObserver(sync).observe(c.objects,{childList:true});new MutationObserver(sync).observe(c.hub,{attributes:true,attributeFilter:['class']});new MutationObserver(()=>{sync();c.refresh()}).observe(player,{attributes:true,attributeFilter:['data-jumping']});new ResizeObserver(pause).observe(c.stage);
  doc.addEventListener('student-dashboard-updated',sync);for(const type of ['blur','pagehide'])window.addEventListener(type,pause);doc.addEventListener('visibilitychange',()=>{if(doc.hidden)pause()});c.hub.addEventListener('click',e=>{if(e.target.closest('[data-campus=map],[data-campus=find],[data-route],[data-place=story]'))pause()},true);
- crayon.hidden=true;sync();return{interact,label,sync};
+ crayon.hidden=true;sync();return{interact,label,sync,putAway:pause,snapshot:()=>{activate();return{owner,cells:[...cells],busy:!!run||!!drag}}};
 }
