@@ -124,8 +124,9 @@
     {
       "id": 7,
       "title": "장소별 행동을 연결하는 모험",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/tori-leaf-favor.cjs; native browser touch/keyboard, 1366/390/320, 4x CPU emulation, exact paper/reconnect/account isolation, stale/distant handoff rejection, storage retry and active parcel/late letter priority. Deployment receipt must be complete before resolving: outputs/student-tori-leaf-feature-deployment.json in 2026-09-30/a. No physical Chromebook/student observation claim.",
+      "behavior": "Accept Tori's short request; walk library → garden → pond; directly rub a leaf on the existing question notebook, take a copy of the actual marks, carry it back through the world and hand it to nearby Tori. The exact impression remains by Tori with a personal thank-you/memory. Existing impressions can be used without resetting them. No new level/chapter, school record, reward or DB write."
     },
     {
       "id": 8,

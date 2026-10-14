@@ -7,7 +7,7 @@ export function installGardenLetter(c){
  let owner=null,token=null,done=new Set(),loaded=false,busy=false,task=null,generation=0,view=0,clues=new Set(),words=[null,null,null],selected=null,drag=null,suppressClick=false,opener=null;
  const student=()=>c.getStudent()||{},phase=()=>STEPS.filter(x=>done.has(x)).length,valid=(id,t,g)=>id===student().id&&t===c.getToken()&&g===generation;
  const status=()=>phase()===3?'✓ 초록 편지 · 기억 보기':phase()===2?'완성한 편지 전하기':phase()===1?'새싹 편지 조립하기':'새싹의 비밀 알아보기';
- function refreshTori(){const b=c.guide.querySelector('[data-guide=letter]');if(b)b.querySelector('b').textContent='🌿 '+status();if(c.guide.dataset.inspection==='false'&&c.guide.dataset.parcelStory!=='delivery'&&loaded&&phase()===3)c.guide.querySelector('.campus-greeting p').textContent='네가 전해 준 새싹 편지를 기억해. 작은 줄기까지 자세히 보았지! 오늘도 새롭게 발견한 것이 있니?'}
+ function refreshTori(){const b=c.guide.querySelector('[data-guide=letter]');if(b)b.querySelector('b').textContent='🌿 '+status();if(c.guide.dataset.inspection==='false'&&c.guide.dataset.parcelStory!=='delivery'&&c.guide.dataset.leafStory!=='active'&&loaded&&phase()===3)c.guide.querySelector('.campus-greeting p').textContent='네가 전해 준 새싹 편지를 기억해. 작은 줄기까지 자세히 보았지! 오늘도 새롭게 발견한 것이 있니?'}
  function reset(){generation++;view++;owner=student().id;token=c.getToken();done.clear();clues.clear();words=[null,null,null];loaded=false;busy=false;task=null;selected=null;drag=null;if(d.open)d.close();if(c.guide.open)c.guide.close();refreshTori()}
  async function load(){
   if(owner!==student().id||token!==c.getToken())reset();if(loaded)return true;if(task)return task;if(!owner||!token)return false;

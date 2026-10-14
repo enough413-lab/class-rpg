@@ -1,4 +1,5 @@
-import {installPondNotebook} from './pond-notebook.js?v=20261014-notebook';
+import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261014-leaf-favor';
+import {installPondNotebook} from './pond-notebook.js?v=20261014-leaf-favor';
 import {installPondViewer} from './pond-viewer.js?v=20261014-viewer';
 import {installPondFence} from './pond-fence.js?v=20261013-fence';
 import {installPlaygroundBall} from './playground-ball.js?v=20261013-ball';
@@ -13,8 +14,8 @@ import {installCampusJump} from './campus-jump.js?v=20261012-momo';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
-import {installGardenLetter} from './garden-letter.js?v=20261007-letter';
-import {installCampusStory} from './campus-story.js?v=20261012-parcel-world';
+import {installGardenLetter} from './garden-letter.js?v=20261014-leaf-favor';
+import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
 import {installSchoolWalk} from './school-walk.js?v=20261014-notebook';
@@ -52,7 +53,7 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();
+  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
@@ -80,7 +81,7 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null;
+ let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null;
  function interact(kind){
   if(notebook?.interact(kind))return;
   if(viewer?.interact(kind))return;
@@ -120,6 +121,7 @@ export function installStudentCampus(ctx){
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
+ leafFavor=installToriLeafFavor({...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
  const openCampus=window.openClassroomHub;

@@ -16,6 +16,7 @@ export function installCampusStory({objects,guide}){
   choice.querySelector('b').textContent=state==='complete'?'🌿 책 나눔 기념 책갈피':state==='delivery'?'📦 토리에게 꾸러미 전해 주기':original.label;
   choice.querySelector('span').textContent=state==='complete'?'함께 준비한 날의 기억을 다시 펼쳐요.':state==='delivery'?'직접 찾아온 마지막 발자국을 남겨요.':original.note;
   }
+  guide.dispatchEvent(new Event('campus-story-rendered'));
   const tori=objects.querySelector('[data-place=tori]');if(!tori)return;
   tori.dataset.parcelStory=state;
   let bubble=tori.querySelector('.campus-story-bubble');
