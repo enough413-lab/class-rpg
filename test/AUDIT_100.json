@@ -145,8 +145,8 @@
     {
       "id": 10,
       "title": "먹는 중 점프 불가 안내",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/cafeteria-jump-hint.cjs plus 9 regression suites; native browser touch/keyboard, 1366/390/320 visuals, reduced motion and 4x CPU emulation, repeated input, account/reload/map/room recovery, local storage warning and unchanged meals/economy. Resolve only after outputs/student-meal-jump-hint-feature-deployment.json (2026-09-30/a) is complete. No physical Chromebook/pupil observation claim.",
+      "status": "resolved",
+      "evidence": "tests/cafeteria-jump-hint.cjs and 9 regression suites; staging 4c0c4348e3997f5cc6b91da6824934adfe4ee134 / main-test b8aa9ea8ce6fc47309c27c91838ba0841b826c3b; successful Pages 38514542480, live-byte checks and exact main-outside-test preservation. outputs/student-meal-jump-hint-feature-deployment.json (2026-09-30/a). Native browser touch/keyboard,1366/390/320,reduced/4x CPU emulation; physical Chromebook/pupil observation untested. Item11 next.",
       "behavior": "While seated for a meal, the jump control visibly pauses and explains the reason and arrow-key recovery. Native touch, button Enter/Space and the game Space shortcut give one short existing-status message without eating, jumping or saving. Standing restores the normal jump and accessible label. Meal action Space and text input retain their own behavior."
     },
     {
