@@ -35,8 +35,8 @@
     {
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
-      "status": "verified_pending_deployment",
-      "evidence": "All ten explicitly inventoried explanation-only targets now have direct-action/visible-result tests. Nine prior deployments are confirmed; confirm the complete pond-notebook receipt before resolving item 6 and proceeding to item 7. This closes the inventoried objects only, not the entire game or all 100 items.",
+      "status": "resolved",
+      "evidence": "All ten inventoried explanation-only objects have verified direct manipulation and visible personal results. Per-target deployment/test evidence is recorded below; final pond notebook deployed and checked on Pages38493274558. Item 7 remains pending. This does not resolve other audit items or claim physical-device/student validation.",
       "targets": [
         {
           "room": "library",
@@ -114,9 +114,9 @@
           "room": "pond",
           "kind": "look-2",
           "label": "질문 노트",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Stand beside the existing desk and directly rub the paper with touch or a bounded keyboard pencil stroke. Only the rubbed parts reveal the leaf. Undo the latest stroke; the exact personal impression remains as a miniature on the desk and resumes on this device/account. No reward or school-record writes.",
-          "evidence": "tests/pond-notebook.cjs; outputs/student-pond-notebook-deployment.json (2026-09-30/a)"
+          "evidence": "tests/pond-notebook.cjs; successful Pages38493274558/live bytes; staging94875863be5f164d14e57372aa8937d9915d8d1c / main-test1ed15a65958569f9d7b6fd95d78cd8942900e8c2; outputs/student-pond-notebook-feature-deployment.json (2026-09-30/a)"
         }
       ],
       "existingActions": "Cafeteria sink/table/tray return, parcel delivery, Momo pencil, wardrobe/records and room doors remain functional. One flower interaction does not close item 6."
