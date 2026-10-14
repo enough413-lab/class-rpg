@@ -20,7 +20,7 @@ import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
 import {installSchoolWalk} from './school-walk.js?v=20261014-platforms';
-import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
+import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261012-momo';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
@@ -42,6 +42,18 @@ export function installStudentCampus(ctx){
  const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button><button type="button" data-campus="jump" aria-label="점프 · 스페이스 키">점프</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
  footer.append(footer.querySelector('.campus-routes'));footer.append(footer.querySelector('.campus-how'));
  footer.querySelector('.campus-how').textContent='← → 걷기 · Space 점프 · ↑ / E 살펴보기';
+ const memoryNotice=doc.createElement('div');memoryNotice.className='campus-memory-notice';memoryNotice.hidden=true;
+ memoryNotice.innerHTML='<p id="campusMemoryStatus" role="status" aria-live="polite" aria-atomic="true"></p><button type="button" aria-describedby="campusMemoryStatus">다시 시도</button>';
+ footer.append(memoryNotice);let memoryNoticeTimer=0;
+ const memoryRetry=memoryNotice.querySelector('button');memoryRetry.addEventListener('click',()=>memory?.retry());
+ function memoryStatus(state){
+  clearTimeout(memoryNoticeTimer);memoryNotice.dataset.state=state;memoryNotice.hidden=state==='idle';
+  const failed=state.endsWith('error');
+  if(!failed&&doc.activeElement===memoryRetry)doc.getElementById('campusTitle').focus({preventScroll:true});
+  memoryRetry.hidden=!failed;memoryRetry.setAttribute('aria-label',state==='load-error'?'지난 산책 자리 다시 불러오기':'이 기기에 산책 자리 다시 저장');
+  memoryNotice.querySelector('p').innerHTML=state==='save-error'?'<b>산책 자리 저장 실패</b><span>계속 걸어도 괜찮아요.</span>':state==='load-error'?'<b>지난 산책 자리 읽기 실패</b><span>지금은 교실에서 시작해요.</span>':state==='saved'?'이 기기에 산책 자리를 저장했어요.':'';
+  if(state==='saved')memoryNoticeTimer=setTimeout(()=>{memoryNotice.hidden=true},4000);
+ }
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><span class="game-speaker-name">책지기 토리</span><div class="campus-portrait">'+TORI_GREETING+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>마음에 남은 책이 있니?<br>오늘은 어떤 이야기를 나눠 볼까?</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 책 이야기 쓰기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 꾸러미 이야기</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="letter"><b>🌿 새싹 이야기</b><span>Lv.19부터 · 정원에서 관찰 편지를 만들어요.</span></button><button data-guide="evidence"><b>🔎 책 속 단서 찾기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">다음에 또 이야기하자!</button>';
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
@@ -124,7 +136,7 @@ export function installStudentCampus(ctx){
  parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  leafFavor=installToriLeafFavor({...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
- memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},doc});
+ memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},onStatus:memoryStatus,doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
  const openCampus=window.openClassroomHub;
  window.openClassroomHub=(...args)=>{memory.flush();openCampus(...args);syncScene();memory.resume(true,true)};
