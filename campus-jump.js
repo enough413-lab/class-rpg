@@ -1,12 +1,13 @@
-// A cosmetic jump shares the existing ground and horizontal walking coordinates.
-export function installCampusJump({hub,getStudent,getScene}){
+// The original jump arc can also land on an optional room terrain adapter.
+export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null}){
  const doc=hub.ownerDocument,player=doc.getElementById('hubPlayer'),button=hub.querySelector('[data-campus="jump"]');
- let animations=[],frame=0,owner=null,scene=null,heldObserver=null;
+ let animations=[],frame=0,owner=null,scene=null,heldObserver=null,terrain=null;
  const blocked=()=>hub.classList.contains('hidden')||doc.hidden||player.classList.contains('cafeteria-eating')||doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
- function cancel(){cancelAnimationFrame(frame);frame=0;heldObserver?.disconnect();heldObserver=null;const previous=animations;animations=[];previous.forEach(a=>a.cancel());delete player.dataset.jumping;delete player.dataset.jumpPhase}
+ function cancel(completed=false){cancelAnimationFrame(frame);frame=0;heldObserver?.disconnect();heldObserver=null;const previous=animations;animations=[];previous.forEach(a=>a.cancel());delete player.dataset.jumping;delete player.dataset.jumpPhase;const current=terrain;terrain=null;current?.end(completed===true)}
  function jump(){
   if(blocked()||animations.length)return false;
   const rig=player.querySelector('.campus-rig');if(!rig)return false;
+  const ground=getTerrain();if(ground?.takeoff()===false)return false;terrain=ground;
   owner=getStudent()?.id;scene=getScene();player.dataset.jumping='true';
   let shadow=player.querySelector('.campus-jump-shadow');if(!shadow){shadow=doc.createElement('span');shadow.className='campus-jump-shadow';shadow.setAttribute('aria-hidden','true');player.append(shadow)}
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,height=reduce?12:44,duration=reduce?360:560;
@@ -31,10 +32,12 @@ export function installCampusJump({hub,getStudent,getScene}){
   }
   const upper=rig.querySelector('.campus-upper');if(upper)animations.push(upper.animate(samples.map(p=>({offset:p.offset,transform:'rotate('+(-1.5*p.tuck)+'deg)'})),options));
   animations.push(shadow.animate(samples.map(p=>{const altitude=Math.max(0,-p.y)/height;return{offset:p.offset,opacity:.27-.13*altitude,scale:String(1-.3*altitude)}}),options));
-  const landing=animations[0];landing.onfinish=cancel;const start=performance.now(),end=start+duration;
-  function check(){const now=performance.now();if(now>=end||blocked()||owner!==getStudent()?.id||scene!==getScene()||!rig.isConnected){cancel();return}const t=(now-start)/duration,phase=t<.12?'prepare':t<.84?'air':'land';if(player.dataset.jumpPhase!==phase)player.dataset.jumpPhase=phase;frame=requestAnimationFrame(check)}check();return true;
+  const landing=animations[0];landing.onfinish=()=>{terrain?.frame(0);cancel(true)};const start=performance.now(),end=start+duration;
+  function check(){const now=performance.now();if(blocked()||owner!==getStudent()?.id||scene!==getScene()||!rig.isConnected){cancel();return}if(now>=end){terrain?.frame(0);cancel(true);return}const t=Math.min(1,Math.max(0,Number(landing.currentTime??now-start)/duration)),phase=t<.12?'prepare':t<.84?'air':'land';let a=samples[0],b=samples.at(-1);for(let i=1;i<samples.length;i++){b=samples[i];if(b.offset>=t)break;a=b}const u=(t-a.offset)/Math.max(.0001,b.offset-a.offset);terrain?.frame(-(a.y+(b.y-a.y)*u));if(player.dataset.jumpPhase!==phase)player.dataset.jumpPhase=phase;frame=requestAnimationFrame(check)}check();return true;
  }
  button.addEventListener('click',jump);
+ // A second touch does not synthesize a click while the movement finger stays down.
+ button.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.isPrimary){e.preventDefault();jump()}});
  window.addEventListener('keydown',e=>{
   if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey||blocked())return;
   const active=doc.activeElement;

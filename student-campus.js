@@ -1,3 +1,4 @@
+import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261014-leaf-favor';
 import {installPondNotebook} from './pond-notebook.js?v=20261014-leaf-favor';
 import {installPondViewer} from './pond-viewer.js?v=20261014-viewer';
@@ -10,7 +11,7 @@ import {installGardenSprout} from './garden-sprout.js?v=20261013-sprout';
 import {installLibraryNook} from './library-nook.js?v=20261012-nook';
 import {installGardenCare} from './garden-care.js?v=20261013-sprout';
 import {installMomoFavor} from './momo-favor.js?v=20261012-momo';
-import {installCampusJump} from './campus-jump.js?v=20261012-momo';
+import {installCampusJump} from './campus-jump.js?v=20261014-platforms';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261012-play';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
@@ -18,7 +19,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261014-leaf-favor';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
-import {installSchoolWalk} from './school-walk.js?v=20261014-notebook';
+import {installSchoolWalk} from './school-walk.js?v=20261014-platforms';
 import {installCampusMemory} from './campus-memory.js?v=20261007-journey';
 import {installCampusNpcs} from './campus-npcs.js?v=20261012-momo';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -53,7 +54,7 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();
+  memory?.capture();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();platforms?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
@@ -81,7 +82,7 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null;
+ let parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null,platforms=null;
  function interact(kind){
   if(notebook?.interact(kind))return;
   if(viewer?.interact(kind))return;
@@ -105,8 +106,9 @@ export function installStudentCampus(ctx){
   if(kind==='portfolio')return window.openReadingShelf();
   return window.hubInteract(kind);
  }
- const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible()});
- installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene});
+ const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible(),constrainPosition:(a,b)=>platforms?.constrain(a,b)??b});
+ const jump=installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene,getTerrain:()=>platforms});
+ platforms=installPlaygroundPlatforms({...ctx,hub,stage,walk,stop,refresh:syncNear,jump:jump.jump,cancelJump:jump.cancel});
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  gardenCare=installGardenCare({...ctx,hub,objects,walk,stop,refresh:syncNear});
  nook=installLibraryNook({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});

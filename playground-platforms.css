@@ -1,0 +1,8 @@
+.playground-platforms{position:absolute;bottom:20%;width:152px;height:32px;z-index:8;pointer-events:none}.playground-platforms[hidden]{display:none}
+.playground-platforms>i{position:absolute;bottom:0;box-sizing:border-box;border:2px solid #907145;border-top:5px solid #dac391;border-radius:5px 5px 3px 3px;background:repeating-linear-gradient(0deg,#b4925d 0 6px,#bfa16a 7px 8px);box-shadow:0 3px 2px #51473144}
+.playground-platforms .jump-beam{left:0;width:var(--beam-width);height:var(--beam-height)}.playground-platforms .jump-bar{left:var(--bar-left);width:22px;height:var(--bar-height);background:#c58b68;border-top-color:#ead29c}
+.playground-platforms b{display:none;position:absolute;top:-10px;left:40%;width:7px;height:5px;border-radius:50%;background:#527253;box-shadow:9px 1px #527253;rotate:-12deg}.playground-platforms .has-footprints b{display:block}
+.platform-help{position:absolute;z-index:25;top:12px;left:12px;max-width:250px;display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border:1px solid #c2a976;border-radius:6px 17px 12px 5px;background:#fff7dff2;color:#405d49;box-shadow:0 2px 4px #354c3a33;font:14px/1.5 system-ui}.platform-help[hidden]{display:none}.platform-help>span{flex:1 1 100%;word-break:keep-all}
+#classroomHub .platform-help button{min-width:44px;min-height:44px;border:1px solid #a0b187;border-radius:12px;padding:7px 11px;background:#ecf0d7;color:#405d49;font:700 14px/1.4 system-ui}#classroomHub .platform-help button[hidden]{display:none}#classroomHub .platform-help button:disabled{opacity:.5}
+#hubPlayer[data-platform-falling] .campus-part{animation:none}
+@media(max-width:849px){.platform-help{max-width:210px;font-size:13px;top:10px;left:10px;padding:7px 9px}}

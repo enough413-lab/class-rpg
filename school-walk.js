@@ -70,19 +70,19 @@ export function installSchoolWalk(ctx){
   const place=currentPlaces().find(p=>p.kind===kind);if(!place||!canWalk())return false;
   stop();measureApproaches();destination=place;const arrival=approachTarget(place);target=arrival.x;approachSide=arrival.side;waypoint.show(target);
   markPlaces();
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(Math.abs(target-ctx.getPosition().x)<.001)}
   else{startFrames();ctx.onPosition()}
   return true;
  }
  // Loose world objects use the same movement scheduler and speed as fixed places.
- function goToPoint(x,label){
+ function goToPoint(x,label,{continuous=false}={}){
   if(!Number.isFinite(x)||!canWalk())return false;
   stop();target=Math.max(4,Math.min(96,x));destination={kind:'world-object',x:target,label};waypoint.show(target);markPlaces();
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else{startFrames();ctx.onPosition()}
+  if(!continuous&&matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(Math.abs(target-ctx.getPosition().x)<.001)}else{startFrames();ctx.onPosition()}
   return true;
  }
  function renderPosition(x){
-  const previous=ctx.getPosition().x,next=Math.max(4,Math.min(96,x));if(next===previous)return false;
+  const previous=ctx.getPosition().x,wanted=Math.max(4,Math.min(96,x)),next=ctx.constrainPosition?.(previous,wanted)??wanted;if(next===previous)return false;
   ctx.setPosition(next,GROUND);player.dataset.facing=next<previous?'left':'right';player.classList.add('walking');
   markPlaces();camera();ctx.onPosition();return true;
  }
@@ -93,11 +93,11 @@ export function installSchoolWalk(ctx){
   const diff=dir?dir:target-x,step=dir?dir*distance:Math.sign(diff)*Math.min(Math.abs(diff),distance);
   renderPosition(x+step);
   if(dir)return dir<0?ctx.getPosition().x<=4:ctx.getPosition().x>=96;
-  const arrived=Math.abs(target-ctx.getPosition().x)<.001;if(arrived)renderPosition(target);return arrived;
+  const arrived=Math.abs(target-ctx.getPosition().x)<.001;if(arrived)renderPosition(target);return arrived||!player.hasAttribute('data-jumping')&&Math.abs(step)>.00001&&Math.abs(ctx.getPosition().x-x)<.00001&&'blocked';
  }
  function tick(time){
   frame=0;if(!canWalk()||movementOwner!==ctx.getStudent()?.id||!heldDirections.size&&target===null){stop();return}
-  if(advance(time)){stop(!heldDirections.size);return}frame=requestAnimationFrame(tick);
+  const result=advance(time);if(result){stop(result!=='blocked'&&!heldDirections.size);return}frame=requestAnimationFrame(tick);
  }
  function hold(source,dx,repeat=false){
   if(!canWalk()||!dx||repeat||heldDirections.has(source))return;
@@ -150,7 +150,7 @@ export function installSchoolWalk(ctx){
   if(e.target.closest('button')&&e.target!==floor||!canWalk())return;const rect=stage.getBoundingClientRect();
   if(e.clientY<rect.top+rect.height*.75)return;
   stop();target=Math.max(4,Math.min(96,(e.clientX-rect.left)/rect.width*100));waypoint.show(target);
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(true)}else startFrames();
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){renderPosition(target);stop(Math.abs(target-ctx.getPosition().x)<.001)}else startFrames();
  });
  // Pointer focus must not move a target out from under the pending tap/click.
  stage.addEventListener('focusin',e=>{const p=e.target.closest('[data-place]');if(p?.matches(':focus-visible'))camera(Number(p.dataset.walkX))});
