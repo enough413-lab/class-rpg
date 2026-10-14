@@ -20,3 +20,6 @@
 .cafeteria-seat-fallback :is(.meal-chair-left,.meal-chair-right){top:66%;width:19%;height:11%;background:#efd5a0}
 .cafeteria-seat-fallback .meal-chair-left{left:3%}.cafeteria-seat-fallback .meal-chair-right{right:3%}
 .cafeteria-seat-fallback :is(.meal-chair-left,.meal-chair-right)::after{content:'';position:absolute;top:100%;left:8%;width:65%;height:190%;border:3px solid #9c754c;border-width:0 4px}
+
+/* Keep the paused jump focusable so touch and keyboard can hear its reason. */
+#classroomHub.campus-side .campus-pad [data-campus=jump][aria-disabled=true]{border-style:dashed;border-color:#9ba78e;background:#e5e8d9;color:#465b42;cursor:help}

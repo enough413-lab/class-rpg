@@ -11,8 +11,8 @@ import {installGardenSprout} from './garden-sprout.js?v=20261013-sprout';
 import {installLibraryNook} from './library-nook.js?v=20261012-nook';
 import {installGardenCare} from './garden-care.js?v=20261013-sprout';
 import {installMomoFavor} from './momo-favor.js?v=20261012-momo';
-import {installCampusJump} from './campus-jump.js?v=20261014-platforms';
-import {installCafeteriaPlay} from './cafeteria-play.js?v=20261014-seated';
+import {installCampusJump} from './campus-jump.js?v=20261014-meal-jump';
+import {installCafeteriaPlay} from './cafeteria-play.js?v=20261014-meal-jump';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
 import {installGardenLetter} from './garden-letter.js?v=20261014-leaf-favor';
@@ -107,7 +107,7 @@ export function installStudentCampus(ctx){
   return window.hubInteract(kind);
  }
  const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible(),constrainPosition:(a,b)=>platforms?.constrain(a,b)??b});
- const jump=installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene,getTerrain:()=>platforms});
+ const jump=installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene,getTerrain:()=>platforms,onMealJumpBlocked:()=>meal?.explainJump()});
  platforms=installPlaygroundPlatforms({...ctx,hub,stage,walk,stop,refresh:syncNear,jump:jump.jump,cancelJump:jump.cancel});
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear});
  gardenCare=installGardenCare({...ctx,hub,objects,walk,stop,refresh:syncNear});
