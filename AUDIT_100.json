@@ -35,8 +35,8 @@
     {
       "id": 6,
       "title": "설명으로 끝나는 물건 행동",
-      "status": "in_progress",
-      "evidence": "All listed objects except the pond notebook now have bounded direct-action/visible-result tests. Pond viewer is verified for test deployment; pond/look-2 notebook remains explicitly pending, so overall item 6 stays in_progress.",
+      "status": "verified_pending_deployment",
+      "evidence": "All ten explicitly inventoried explanation-only targets now have direct-action/visible-result tests. Nine prior deployments are confirmed; confirm the complete pond-notebook receipt before resolving item 6 and proceeding to item 7. This closes the inventoried objects only, not the entire game or all 100 items.",
       "targets": [
         {
           "room": "library",
@@ -106,15 +106,17 @@
           "room": "pond",
           "kind": "look-1",
           "label": "물결 관찰대",
-          "status": "verified_pending_deployment",
+          "status": "resolved",
           "behavior": "Walk beside the existing tripod, directly pan its pond view by swiping or turning a large accessible direction knob. Its optical head turns while the feet remain planted; a visible water bird responds with one bounded wing/ripple animation. A personal device sighting tag and viewing angle remain, with no reward or school record.",
-          "evidence": "tests/pond-viewer.cjs; tests/nature-light.cjs; outputs/student-pond-viewer-deployment.json (2026-09-30/a)"
+          "evidence": "tests/pond-viewer.cjs; tests/nature-light.cjs; successful Pages38487729411/live bytes; staging0ef2ffe8cfe397648ae997aad53eb5a9f3243d25 / main-test40ebaec4dcdd489c2b38d06ba3a8137455233a7d; outputs/student-pond-viewer-deployment.json (2026-09-30/a)"
         },
         {
           "room": "pond",
           "kind": "look-2",
           "label": "질문 노트",
-          "status": "pending"
+          "status": "verified_pending_deployment",
+          "behavior": "Stand beside the existing desk and directly rub the paper with touch or a bounded keyboard pencil stroke. Only the rubbed parts reveal the leaf. Undo the latest stroke; the exact personal impression remains as a miniature on the desk and resumes on this device/account. No reward or school-record writes.",
+          "evidence": "tests/pond-notebook.cjs; outputs/student-pond-notebook-deployment.json (2026-09-30/a)"
         }
       ],
       "existingActions": "Cafeteria sink/table/tray return, parcel delivery, Momo pencil, wardrobe/records and room doors remain functional. One flower interaction does not close item 6."
