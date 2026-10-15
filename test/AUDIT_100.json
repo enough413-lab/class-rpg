@@ -166,8 +166,8 @@
     {
       "id": 13,
       "title": "독후감 표지 구별",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/reading-covers.cjs and three existing reading suites passed; inspected desktop/390/320, long title, native browser keyboard/touch/scroll, reduced motion and 4x CPU. Same-title/NFC/whitespace/grapheme safety, escaping, text contrast, bookmarks, account separation, reconnect, late reply and retry covered. Resolve only after outputs/student-reading-covers-feature-deployment.json is complete. No physical Chromebook or pupil observation.",
+      "status": "resolved",
+      "evidence": "tests/reading-covers.cjs and three reading regression suites; staging a404a0cb1e389dde0a8111aaba11b483987a7221 / main-test 324134ff9e60a8b44dcf0ab56443179f3b1df1b7; successful Pages 38668895502, live-byte checks and exact main-outside-test preservation. outputs/student-reading-covers-feature-deployment.json (2026-09-30/a). Native browser touch/keyboard/scroll,1366/390/320,reduced/4x CPU emulation; physical Chromebook/pupil observation untested. No DB changes. Item14 next.",
       "behavior": "Book jackets use six original line motifs, six high-contrast palettes and a four-grapheme title mark, deterministically derived from the normalized title. The same book keeps its jacket across authors, scopes, pagination, filters and reloads. Full titles and author/date remain readable; covers are decorative and add no controls, external requests, stored data or rewards."
     },
     {
