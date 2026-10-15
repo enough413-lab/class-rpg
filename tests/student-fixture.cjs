@@ -14,6 +14,13 @@ mockRpg.inventory=[{item_id:'shirt',slot:'top',name:'교복 상의',image:'3.top
 const createClient=()=>({
  rpc:async(name,args)=>{
  const m=window.mockRpg;m.calls.push(name);
+ if(name==='student_cafeteria_play'){
+  if(window.mealTestRpc)return window.mealTestRpc({id:m.student.id,args});
+  if(m.failMeal)return {error:{message:'offline'}};
+  const key='fixtureMeal_'+m.student.id;let d=JSON.parse(localStorage.getItem(key)||'null')||{state:{v:1,mode:'free',bites:0,meals:0,washed:false},revision:0};
+  if(args.p_state){if(d.request===args.p_request_id)return{data:d};if(args.p_expected_revision!==d.revision)return{data:{...d,conflict:true}};d={state:args.p_state,revision:d.revision+1,request:args.p_request_id};localStorage.setItem(key,JSON.stringify(d))}
+  return {data:d};
+ }
  if(name==='student_login_options')return {data:[{student_number:1,login_id:'ym01',nickname:'별나래'}]};
  if(name==='student_dashboard')return m.failDashboard?{error:{message:'Network request failed'}}:{data:{student:m.student,inventory:m.inventory,reward_notifications:m.rewardNotifications||[],quests:[
  {id:11,title:'내 책상은 내가 정리해요',description:'책과 필통을 가지런히 두고, 내 주변을 살펴봐요.',quest_type:'daily',category:'organizing',difficulty:'easy',submission_mode:'photo',status:'available',xp:10,gold:10},
