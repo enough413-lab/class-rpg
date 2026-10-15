@@ -159,8 +159,8 @@
     {
       "id": 12,
       "title": "식판 놀이 기기 간 이어 하기",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/cafeteria-memory.cjs (shared mock and actual development RPC in two isolated browser contexts), tests/cafeteria-memory.sql (all existing table content hashes unchanged within rollback), simultaneous HTTP CAS, 11 regression suites, inspected 1366/390/320 screens, native browser touch/keyboard/4x CPU. Synthetic live fixtures removed; no physical Chromebook/pupil observation. Resolve only after outputs/student-meal-sync-feature-deployment.json is complete.",
+      "status": "resolved",
+      "evidence": "tests/cafeteria-memory.cjs (mock and actual dev RPC), tests/cafeteria-memory.sql, concurrent HTTP CAS and 11 regression suites; staging c45dfbf2c8415e31772f44de0d32ea11805cc601 / main-test 8ee88231adf9a97f2d60f8088aa3c7199e432fcb; successful Pages 38667285708, live-byte checks and exact main-outside-test preservation. outputs/student-meal-sync-feature-deployment.json (2026-09-30/a). Native browser touch/keyboard,seven rooms,1366/390/320,reduced/4x CPU emulation; physical Chromebook/pupil observation untested. Item13 next.",
       "behavior": "Personal meal contents, bites, returns and hand washing resume from the development server across devices. Sitting stays local. Per-account session validation, revision compare-and-swap, idempotent retry and a compact native retry control prevent stale-device overwrite and duplicate returns. Existing device-only data imports only into an empty server record; school rewards are unchanged."
     },
     {
