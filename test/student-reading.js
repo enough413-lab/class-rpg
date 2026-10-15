@@ -1,7 +1,7 @@
 import {installReadingRevisions} from './reading-revisions.js?v=20261014-reading';
 import {normalizeReadingDraft} from './reading-draft-state.js?v=20261013-drafts';
 import {draftDate} from './student-draft-tools.js?v=20261013-drafts';
-import {installReadingShelf} from './reading-shelf.js?v=20261014-reading';
+import {installReadingShelf} from './reading-shelf.js?v=20261015-covers';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ids={book_title:'readingBookTitle',read_date:'readingDate',summary:'readingSummary',thoughts:'readingThought',recommendation_rating:'readingRating',recommendation_reason:'readingRecommendation'};
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
