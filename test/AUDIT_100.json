@@ -173,8 +173,8 @@
     {
       "id": 14,
       "title": "독후감 제목 검색",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/reading-title-search.cjs, reading-title-http.cjs, reading-title-search.sql and four reading regressions passed. Development-only student_reading_shelf_find RPC; production unchanged. Resolve only after successful Pages/live-byte checks. Temporary isolated HTTP fixture cleanup remains pending after interrupted connector deletion requests; this is not real student data. No physical Chromebook/student observation.",
+      "status": "resolved",
+      "evidence": "Title UI/actual development HTTP/rollback SQL plus four reading regressions passed; staging 76cb1dbf41fc372857a6e1269a3e0170ed5ec574 / main-test 026f1f24f989ca91c125232b1e14ae28d9ba8808; Pages 39178142673, exact live bytes and main-outside-test preservation. outputs/student-reading-title-search-feature-deployment.json and database receipt (2026-09-30/a). Development-only read RPC; production unchanged. Native browser touch/keyboard,1366/390/320,4x CPU; physical Chromebook/pupil observation untested. Isolated synthetic HTTP fixture cleanup remains separately pending after interrupted deletion calls. Item15 next.",
       "behavior": "Find existing reading reviews by a literal part of the book title, optionally combined with author nickname. Search runs before server pagination, keeps own/class sharing restrictions, and filters authorized bookmarks. Clear resets the query; keyboard/touch, loading, no results and retry remain available."
     },
     {
