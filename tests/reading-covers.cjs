@@ -42,7 +42,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
   const all=await covers();for(const [title,cover] of Object.entries(initial))assert.equal(all[title],cover);
   await f.locator('[data-shelf-pin="240"]').tap();await f.locator('[data-shelf-scope=pins]').tap();await ready(1);assert.equal((await covers())['구름 학교'],own);
   await f.locator('.shelf-book summary').focus();await page.keyboard.press('Enter');assert(await f.locator('.shelf-review').isVisible());
-  await f.locator('[data-shelf-scope=class]').tap();await ready(20);await f.locator('#shelfAuthorQuery').fill('초록별');await f.locator('#shelfAuthorForm button').tap();await ready(12);
+  await f.locator('[data-shelf-scope=class]').tap();await ready(20);await f.locator('#shelfAuthorQuery').fill('초록별');await f.locator('#shelfAuthorForm [type=submit]').tap();await ready(12);
   for(const [title,cover] of Object.entries(await covers()))assert.equal(all[title],cover,'Filter must not recolour or reshape covers');
   const pure=await f.evaluate(async()=>{const {readingCover}=await import('./reading-shelf.js?v=20261015-covers');return {a:readingCover('구름 학교'),nfd:readingCover('구름 학교'.normalize('NFD')),spaced:readingCover('  구름  학교\n'),blank:readingCover(null)}});
   assert.equal(pure.a,pure.nfd);assert.equal(pure.a,pure.spaced);assert.match(pure.blank,/제목없음/);
