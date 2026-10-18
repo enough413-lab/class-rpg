@@ -36,7 +36,8 @@ body:has(#classroomHub:not(.hidden)) .sa-mobile-nav{visibility:hidden}
 #classroomHub.campus-side .hub-player{width:22%;min-width:145px;max-width:210px;aspect-ratio:1230/1270;transform:translate(-50%,-100%);z-index:15;transition:none;filter:none}
 #classroomHub.campus-side .hub-player:before{display:none}
 #classroomHub.campus-side .hub-player:after{content:'';position:absolute;z-index:-1;left:32%;bottom:-1%;width:36%;height:5%;border-radius:50%;background:#61492545;filter:blur(1px)}
-.campus-rig,.campus-part{position:absolute;inset:0;transform-origin:50% 80%}.campus-rig{transform:scaleX(1)}[data-facing=left] .campus-rig{transform:scaleX(-1)}
+/* The base artwork faces left; mirror the complete dressed avatar only when facing right. */
+.campus-rig,.campus-part{position:absolute;inset:0;transform-origin:50% 80%}.campus-rig{transform:scaleX(1)}[data-facing=right] .campus-rig{transform:scaleX(-1)}
 .campus-upper{clip-path:inset(0 0 23.5% 0)}.campus-leg-left{clip-path:inset(76% 50% 0 0)}.campus-leg-right{clip-path:inset(76% 0 0 50%)}
 #classroomHub.campus-side .hub-player.walking img{animation:none}.campus-side .walking .campus-upper{animation:campusBodyStep .42s ease-in-out infinite}.campus-side .walking .campus-leg-left{animation:campusLegStep .42s ease-in-out infinite}.campus-side .walking .campus-leg-right{animation:campusLegStep .42s ease-in-out -.21s infinite}
 @keyframes campusBodyStep{50%{transform:translateY(-1.3px) rotate(.6deg)}}@keyframes campusLegStep{50%{transform:translate(1px,-3px) rotate(-2deg)}}
