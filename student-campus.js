@@ -1,8 +1,9 @@
+import {installQuestSigns} from './campus-quest-signs.js?v=20261019-controls';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261019-flowerbed';
-import {installNpcTrio} from './npc-trio.js?v=20261019-flowerbed';
-import {installCurrentGoal} from './campus-current-goal.js?v=20261019-journey';
+import {installNpcTrio} from './npc-trio.js?v=20261019-controls';
+import {installCurrentGoal} from './campus-current-goal.js?v=20261019-controls';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
-import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-current-goal';
+import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
 import {installPondNotebook} from './pond-notebook.js?v=20261014-leaf-favor';
 import {installPondViewer} from './pond-viewer.js?v=20261014-viewer';
 import {installPondFence} from './pond-fence.js?v=20261013-fence';
@@ -13,16 +14,16 @@ import {installGardenBench} from './garden-bench.js?v=20261013-bench';
 import {installGardenSprout} from './garden-sprout.js?v=20261013-sprout';
 import {installLibraryNook} from './library-nook.js?v=20261012-nook';
 import {installGardenCare} from './garden-care.js?v=20261013-sprout';
-import {installMomoFavor} from './momo-favor.js?v=20261019-current-goal';
-import {installCampusJump} from './campus-jump.js?v=20261019-journey';
+import {installMomoFavor} from './momo-favor.js?v=20261019-controls';
+import {installCampusJump} from './campus-jump.js?v=20261019-controls';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261014-meal-sync';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
-import {installGardenLetter} from './garden-letter.js?v=20261019-current-goal';
+import {installGardenLetter} from './garden-letter.js?v=20261019-controls';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
-import {installParcelAdventure} from './parcel-adventure.js?v=20261019-current-goal';
-import {installSchoolWalk} from './school-walk.js?v=20261019-flowerbed';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261019-controls';
+import {installSchoolWalk} from './school-walk.js?v=20261019-controls';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -42,9 +43,9 @@ export function installStudentCampus(ctx){
  function syncHud(){const s=ctx.getStudent(),text=s?'Lv. '+ctx.levelInfo(s.xp||0).level+' · '+Number(s.gold||0).toLocaleString('ko-KR')+' G':'';if(wallet.textContent!==text)wallet.textContent=text}
  new MutationObserver(syncHud).observe(doc.getElementById('hubStatus'),{childList:true,characterData:true,subtree:true});
  doc.addEventListener('student-dashboard-updated',syncHud);syncHud();
- const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button><button type="button" data-campus="jump" aria-label="점프 · 스페이스 키">점프</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑ 또는 E로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
+ const footer=hub.querySelector('.hub-help');footer.innerHTML='<nav class="campus-routes" aria-label="다른 장소로 이동"></nav><div class="campus-controller"><div class="campus-pad" role="group" aria-label="캐릭터 이동"><button data-move="-1,0" aria-label="왼쪽으로 이동">←</button><button data-move="1,0" aria-label="오른쪽으로 이동">→</button><button type="button" data-campus="jump" aria-label="점프 · Space를 길게 누르면 연속 점프">점프</button></div><div class="campus-near"><p id="campusNear" role="status" aria-live="polite"></p><button data-campus="use" disabled>가까이 가 보세요</button></div></div><p class="campus-how">← → 버튼을 누르고 걷거나, 가고 싶은 바닥을 눌러요.<br><span>키보드: ← → 걷기 · ↑로 말 걸기 · Esc로 나가기</span><br><span>이 기기에서는 마지막 산책 자리부터 이어져요.</span></p>';
  footer.append(footer.querySelector('.campus-routes'));footer.append(footer.querySelector('.campus-how'));
- footer.querySelector('.campus-how').textContent='← → 걷기 · Space 점프 · ↑ / E 살펴보기';
+ footer.querySelector('.campus-how').textContent='← → 걷기 · Space 길게: 연속 점프 · ↑ 말 걸기 / 살펴보기';
  const memoryNotice=doc.createElement('div');memoryNotice.className='campus-memory-notice';memoryNotice.hidden=true;
  memoryNotice.innerHTML='<p id="campusMemoryStatus" role="status" aria-live="polite" aria-atomic="true"></p><button type="button" aria-describedby="campusMemoryStatus">다시 시도</button>';
  footer.append(memoryNotice);let memoryNoticeTimer=0;
@@ -62,19 +63,19 @@ export function installStudentCampus(ctx){
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
- const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,getToken:ctx.getToken,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a),onVisitMomo:()=>{stop();walk.goTo('shop');doc.getElementById('campusTitle').focus({preventScroll:true})}});
+ const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,getToken:ctx.getToken,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a),onVisitMomo:()=>{stop();doc.getElementById('campusTitle').focus({preventScroll:true})}});
  let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();flowerbed?.sync();trio?.sync();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();platforms?.sync();currentGoal?.refresh();
+  memory?.capture();flowerbed?.sync();trio?.sync();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();platforms?.sync();currentGoal?.refresh();signs?.sync();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?(notebook?.label(near.kind)||viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):direction+'으로 안내받기';
-  if(action.textContent!==label)action.textContent=label;
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(notebook?.label(near.kind)||viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):'가까이 걸어와 ↑ 살펴보기';
+  const caption=near?'↑ '+label:label;if(action.textContent!==caption)action.textContent=caption;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
  function syncScene(){
@@ -97,7 +98,7 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let flowerbed=null,trio=null,currentGoal=null,parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null,platforms=null;
+ let signs=null,flowerbed=null,trio=null,currentGoal=null,parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null,platforms=null;
  function interact(kind){
   if(flowerbed?.interact(kind))return;
   if(trio?.interact(kind))return;
@@ -142,8 +143,10 @@ export function installStudentCampus(ctx){
  letter=installGardenLetter({onRequestAction:()=>currentGoal?.focus('letter'),onRequestUpdate:()=>currentGoal?.refresh(),...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  leafFavor=installToriLeafFavor({onRequestAction:()=>currentGoal?.focus('leaf'),...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
  flowerbed=installFlowerbed({...ctx,hub,objects,walk,stop});
- trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,visitFlowerbed:()=>walk.goTo('flowerbed'),flowerbedSummary:()=>flowerbed.summary(),focusGoal:id=>currentGoal?.focus(id)});
+ trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,visitFlowerbed:()=>doc.getElementById('campusTitle').focus({preventScroll:true}),flowerbedSummary:()=>flowerbed.summary(),focusGoal:id=>currentGoal?.focus(id)});
  currentGoal=installCurrentGoal({...ctx,hub,viewport:stage.parentElement,requests:()=>[...trio.requests(),momo?.request(),leafFavor?.request(),parcel?.request(),letter?.request()],stop:()=>{stop();walk.stop()},openParcel:()=>parcel.start()});
+ signs=installQuestSigns({hub,objects,requests:()=>[...trio.requests(),momo.request()],parcel:()=>parcel.snapshot(),trio:()=>trio.signs(),level:()=>ctx.levelInfo(ctx.getStudent()?.xp||0).level,momoPhase:()=>momo.dialogue().action==='momo-accept'?0:1});
+ signs.sync();
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},onStatus:memoryStatus,doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
  const openCampus=window.openClassroomHub;
@@ -155,7 +158,7 @@ export function installStudentCampus(ctx){
   const b=event.target.closest('button');if(!b)return;
   if(b.dataset.move&&event.detail===0&&!overlay())walk.nudge(Number(b.dataset.move.split(',')[0]));
   const route=b.dataset.route;if(route){stop();if(route==='story'){walk.stop();window.studentAdventure.chapter(ctx.getScene())}else if(route==='reading')window.openReadingDesk();else travel(route)}
-  if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else walk.goTo(momo?.goal()?.kind||walk.nearest().kind)}}
+  if(b.dataset.campus==='use'){const traveling=!!walk.destination();stop();if(!traveling){if(walk.nearby())window.hubUseNearby();else doc.getElementById('campusTitle').focus({preventScroll:true})}}
   if(b.dataset.campus==='find')wayfinder.open();
   if(b.dataset.campus==='home')window.closeClassroomHub();
   if(b.dataset.campus==='map'){stop();walk.stop();window.studentAdventure.map()}

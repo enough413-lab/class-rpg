@@ -1,18 +1,18 @@
 import {decorateFlowerbed} from './campus-flowerbed.js?v=20261019-flowerbed';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261019-flowerbed';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261019-controls';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261012-graphics';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261019-controls';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 import {installCampusNameplates} from './campus-nameplates.js?v=20261012-jump-polish';
-import {decorateMomoPencil} from './momo-favor.js?v=20261012-momo';
+import {decorateMomoPencil} from './momo-favor.js?v=20261019-controls';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
  classroom:[{kind:'pencil',x:16,label:'모모의 연필'},{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:25,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:54,label:'📋 선생님 의뢰'},{kind:'teacher',x:68,label:'🌟 해낸 일'},{kind:'shop',x:82,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
  hallway:HALLWAY_PLACES,
- library:[roomDoors('library')[0],{kind:'reading',x:22,label:'✍️ 독후감 쓰기'},{kind:'tori',x:44,label:'책지기 토리'},{kind:'portfolio',x:62,label:'📖 독후감 책장'},{kind:'nook',x:79,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
+ library:[roomDoors('library')[0],{kind:'reading',x:22,label:'독서 기록대'},{kind:'tori',x:44,label:'책지기 토리'},{kind:'portfolio',x:62,label:'📖 독후감 책장'},{kind:'nook',x:79,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[...roomDoors(room),...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:87,label:'📖 이곳의 이야기'}];
 PLACES.library.push(...TRIO_SEARCH_PLACES);
@@ -142,7 +142,7 @@ export function installSchoolWalk(ctx){
   for(const p of currentPlaces(true)){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
    if(decorateFlowerbed(b,p)){}else if(decorateTrioObject(b,p)){}else if(p.kind==='pencil')decorateMomoPencil(b);else if(next==='hallway'&&decorateHallwayObject(b,p)){}else if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
-   b.onclick=()=>{stop();ctx.interact(p.kind)};objects.append(b);
+   b.onclick=()=>{stop();if(b.classList.contains('campus-npc')){doc.getElementById('campusTitle').focus({preventScroll:true});return}if(nearby()?.kind===p.kind)ctx.interact(p.kind);else doc.getElementById('campusTitle').focus({preventScroll:true})};objects.append(b);
   }
   rig();measureApproaches();background();hub.scrollTop=0;camera();markPlaces();ctx.onPosition();
  }
@@ -163,5 +163,5 @@ export function installSchoolWalk(ctx){
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
  let studentId=ctx.getStudent()?.id;doc.addEventListener('student-dashboard-updated',()=>{const next=ctx.getStudent()?.id;if(next!==studentId)stop();studentId=next});
- return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,goToPoint,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&ctx.isTrioPlaceVisible?.(p.kind)!==false)};
+ return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,goToPoint,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>!['pencil','parcel','notice','trio-clue-color','trio-clue-motif','trio-books'].includes(p.kind)&&(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&ctx.isTrioPlaceVisible?.(p.kind)!==false)};
 }

@@ -1,10 +1,10 @@
 // The original jump arc can also land on an optional room terrain adapter.
 export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null,onMealJumpBlocked=()=>{}}){
  const doc=hub.ownerDocument,player=doc.getElementById('hubPlayer'),button=hub.querySelector('[data-campus="jump"]');
- let animations=[],frame=0,owner=null,scene=null,heldObserver=null,terrain=null;
+ let animations=[],frame=0,owner=null,scene=null,heldObserver=null,terrain=null,heldSpace=false,repeatFrame=0;
  const unavailable=()=>hub.classList.contains('hidden')||doc.hidden||doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const blocked=()=>unavailable()||player.classList.contains('cafeteria-eating');
- function cancel(completed=false){cancelAnimationFrame(frame);frame=0;heldObserver?.disconnect();heldObserver=null;const previous=animations;animations=[];previous.forEach(a=>a.cancel());delete player.dataset.jumping;delete player.dataset.jumpPhase;const current=terrain;terrain=null;current?.end(completed===true)}
+ function cancel(completed=false){cancelAnimationFrame(repeatFrame);repeatFrame=0;if(completed!==true)heldSpace=false;cancelAnimationFrame(frame);frame=0;heldObserver?.disconnect();heldObserver=null;const previous=animations;animations=[];previous.forEach(a=>a.cancel());delete player.dataset.jumping;delete player.dataset.jumpPhase;const current=terrain;terrain=null;current?.end(completed===true);if(completed===true&&heldSpace)repeatFrame=requestAnimationFrame(()=>{repeatFrame=0;if(heldSpace&&!blocked()&&owner===getStudent()?.id&&scene===getScene())jump();else heldSpace=false})}
  function jump(){
   if(unavailable()||animations.length)return false;
   if(player.classList.contains('cafeteria-eating')){onMealJumpBlocked();return false}
@@ -41,11 +41,12 @@ export function installCampusJump({hub,getStudent,getScene,getTerrain=()=>null,o
  // A second touch does not synthesize a click while the movement finger stays down.
  button.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.isPrimary){e.preventDefault();jump()}});
  window.addEventListener('keydown',e=>{
-  if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey||unavailable())return;
+  if(e.code!=='Space'||e.altKey||e.ctrlKey||e.metaKey||hub.classList.contains('hidden'))return;
   const active=doc.activeElement;
-  if(active?.matches('input,textarea,select,[contenteditable]')||active?.closest('button,a,summary')&&!active.matches('[data-move],[data-campus="jump"]'))return;
-  e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)jump();
+  if(active?.matches('input,textarea,select,[contenteditable]'))return;
+  e.preventDefault();e.stopImmediatePropagation();if(unavailable()){heldSpace=false;return}if(!e.repeat){heldSpace=true;jump();}
  },true);
+ window.addEventListener('keyup',e=>{if(e.code!=='Space')return;heldSpace=false;cancelAnimationFrame(repeatFrame);repeatFrame=0;if(!hub.classList.contains('hidden')&&!doc.activeElement?.matches('input,textarea,select,[contenteditable]')){e.preventDefault();e.stopImmediatePropagation()}},true);
  for(const name of ['blur','pagehide'])window.addEventListener(name,cancel);
  doc.addEventListener('visibilitychange',cancel);doc.addEventListener('student-dashboard-updated',()=>{if(owner!==getStudent()?.id)cancel()});
  return {jump,cancel};
