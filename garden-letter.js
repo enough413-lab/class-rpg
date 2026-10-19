@@ -4,14 +4,14 @@ const WORDS={leaf:'🌿 새싹은',light:'☀️ 빛을 향해',grow:'🌱 자�
 const CLUES={leaf:'잎 두 장이 펼쳐져 있어요.',stem:'줄기가 햇빛이 오는 쪽으로 기울어 있어요.',light:'오른쪽 위에서 햇빛이 비쳐요.'};
 export function installGardenLetter(c){
  const doc=c.hub.ownerDocument,d=doc.createElement('dialog');d.id='gardenLetterDialog';d.className='parcel-dialog letter-dialog';d.setAttribute('aria-labelledby','letterTitle');doc.body.append(d);
- let owner=null,token=null,done=new Set(),loaded=false,busy=false,task=null,generation=0,view=0,clues=new Set(),words=[null,null,null],selected=null,drag=null,suppressClick=false,opener=null;
+ let owner=null,token=null,done=new Set(),loaded=false,loadError=false,busy=false,task=null,generation=0,view=0,clues=new Set(),words=[null,null,null],selected=null,drag=null,suppressClick=false,opener=null;
  const student=()=>c.getStudent()||{},phase=()=>STEPS.filter(x=>done.has(x)).length,valid=(id,t,g)=>id===student().id&&t===c.getToken()&&g===generation;
  const status=()=>phase()===3?'✓ 초록 편지 · 기억 보기':phase()===2?'완성한 편지 전하기':phase()===1?'새싹 편지 조립하기':'새싹의 비밀 알아보기';
  function refreshTori(){const b=c.guide.querySelector('[data-guide=letter]');if(b)b.querySelector('b').textContent='🌿 '+status();if(c.guide.dataset.inspection==='false'&&c.guide.dataset.parcelStory!=='delivery'&&c.guide.dataset.leafStory!=='active'&&loaded&&phase()===3)c.guide.querySelector('.campus-greeting p').textContent='네가 전해 준 새싹 편지를 기억해. 작은 줄기까지 자세히 보았지! 오늘도 새롭게 발견한 것이 있니?'}
- function reset(){generation++;view++;owner=student().id;token=c.getToken();done.clear();clues.clear();words=[null,null,null];loaded=false;busy=false;task=null;selected=null;drag=null;if(d.open)d.close();if(c.guide.open)c.guide.close();refreshTori()}
+ function reset(){generation++;view++;owner=student().id;token=c.getToken();done.clear();clues.clear();words=[null,null,null];loaded=false;loadError=false;busy=false;task=null;selected=null;drag=null;if(d.open)d.close();if(c.guide.open)c.guide.close();refreshTori()}
  async function load(){
   if(owner!==student().id||token!==c.getToken())reset();if(loaded)return true;if(task)return task;if(!owner||!token)return false;
-  const id=owner,t=token,g=generation;let pending;pending=(async()=>{try{const {data,error}=await c.db.rpc('student_learning_journal',{p_token:t});if(error||!Array.isArray(data?.exploration))throw error||Error('Missing journal');if(!valid(id,t,g))return false;done=new Set(data.exploration);loaded=true;refreshTori();return true}catch{return false}finally{if(task===pending)task=null}})();task=pending;return pending;
+  loadError=false;const id=owner,t=token,g=generation;let pending;pending=(async()=>{try{const {data,error}=await c.db.rpc('student_learning_journal',{p_token:t});if(error||!Array.isArray(data?.exploration))throw error||Error('Missing journal');if(!valid(id,t,g))return false;done=new Set(data.exploration);loaded=true;refreshTori();return true}catch{if(valid(id,t,g))loadError=true;return false}finally{if(task===pending)task=null;c.onRequestUpdate?.()}})();task=pending;return pending;
  }
  function open(subtitle,html){c.stopMovement();if(!d.open)opener=doc.activeElement;d.innerHTML='<header><div><span>우리 학교 작은 의뢰 · Lv.19</span><h2 id="letterTitle">햇빛을 찾는 초록 편지</h2><p>'+subtitle+'</p></div><button data-letter="close" autofocus>닫기</button></header><div class="parcel-body">'+html+'</div>';if(!d.open)d.showModal();d.scrollTop=0}
  const feedback=()=>'<p id="letterFeedback" class="parcel-feedback" role="status" aria-live="polite"></p>';
@@ -39,7 +39,7 @@ export function installGardenLetter(c){
   const id=owner,t=token,g=generation;busy=true;const buttons=[...d.querySelectorAll('button')];buttons.forEach(b=>b.disabled=true);f.textContent='내 수첩에 발자국을 저장하고 있어요…';
   try{const {data,error}=await c.db.rpc('student_garden_letter',{p_token:t,p_step:step,p_clues:values});if(!valid(id,t,g))return;if(error||!data||data.correct&&data.step_id!==step)throw error||Error('Missing result');
    if(!data.correct){f.textContent='“누가 → 어디를 향해 → 어떻게” 순서로 이어 볼까요? 조각을 다시 놓아도 괜찮아요.';return}
-   done.add(step);refreshTori();doc.dispatchEvent(new CustomEvent('student-letter-updated'));f.innerHTML='<b>✓ 발자국 '+phase()+' / 3을 저장했어요.</b><p>'+(['','세 단서로 편지를 만들어 볼까요?','편지가 완성됐어요. 토리가 기다리고 있어요.','토리가 너의 발견을 기억할 거예요.'][phase()])+'</p><button class="parcel-primary" data-letter="next">'+(phase()===1?'편지 조립하기':phase()===2?'토리에게 걸어가기':'초록 편지의 기억 보기')+'</button>';f.querySelector('button').focus({preventScroll:true});
+   done.add(step);refreshTori();c.onRequestAction?.();doc.dispatchEvent(new CustomEvent('student-letter-updated'));f.innerHTML='<b>✓ 발자국 '+phase()+' / 3을 저장했어요.</b><p>'+(['','세 단서로 편지를 만들어 볼까요?','편지가 완성됐어요. 토리가 기다리고 있어요.','토리가 너의 발견을 기억할 거예요.'][phase()])+'</p><button class="parcel-primary" data-letter="next">'+(phase()===1?'편지 조립하기':phase()===2?'토리에게 걸어가기':'초록 편지의 기억 보기')+'</button>';f.querySelector('button').focus({preventScroll:true});
   }catch{if(valid(id,t,g))f.textContent='저장을 확인하지 못했어요. 단서와 조각은 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}finally{if(valid(id,t,g)){busy=false;buttons.forEach(b=>{if(b.isConnected)b.disabled=done.has(step)&&b.dataset.letter!=='close'})}}
  }
  function go(){const room=phase()<2?'garden':'library',target=phase()<2?'look-0':'tori';d.close();window.enterHubScene(room);requestAnimationFrame(()=>{if(c.getScene()===room)c.walk.goTo(target)})}
@@ -55,5 +55,6 @@ export function installGardenLetter(c){
  for(const name of ['pointercancel','lostpointercapture'])d.addEventListener(name,()=>{drag=null;d.querySelectorAll('.letter-over').forEach(b=>b.classList.remove('letter-over'))});
  d.addEventListener('cancel',e=>{if(busy)e.preventDefault()});d.addEventListener('close',()=>{view++;drag=null;if(opener?.isConnected&&opener.getClientRects().length)opener.focus({preventScroll:true})});
  doc.addEventListener('student-dashboard-updated',()=>{if(owner!==student().id||token!==c.getToken())reset();load()});load();
- return {start,refreshTori};
+ function request(){const ready=loaded&&owner===student().id&&token===c.getToken();return {id:'letter',title:'초록 편지',loaded:ready||loadError||!student().id||!c.getToken(),active:ready&&(phase()===1||phase()===2),text:phase()===1?'정원 · 새싹 화분에서 편지 조립하기':'도서관 · 토리에게 편지 전하기',error:loadError?'수첩 기록을 불러오지 못했어요.':null,retry:()=>{loaded=false;load()}}}
+ return {start,refreshTori,request};
 }

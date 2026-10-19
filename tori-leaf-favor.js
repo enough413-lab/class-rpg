@@ -57,16 +57,17 @@ export function installToriLeafFavor(c){
   activate();if(owner==null||!playable()||!guide.open||guide.dataset.inspection==='true')return;
   if(!nearTori()){guide.close();message='토리 곁으로 걸어가요.';if(c.getScene()==='library')c.walk.goTo('tori');sync();return}
   c.stop();message='';if(phase===0){phase=1;acceptedIn=c.getScene();save();guide.close()}else if(phase===1){guide.close()}else if(phase===2){phase=3;save();c.refreshStory()}else{guide.close()}
-  sync();c.refresh();
+  sync();c.refresh();c.onRequestAction?.();
  };
  take.onclick=()=>{
   activate();const s=c.notebook.snapshot();if(owner==null||phase!==1||s.owner!==owner||!s.cells.length||s.busy||!open()||c.getScene()!=='pond'||c.walk.nearby()?.kind!=='look-2'||player.hasAttribute('data-jumping')||doc.querySelector('dialog[open]'))return;
-  c.stop();cells=[...s.cells];phase=2;message='';save();c.notebook.putAway();sync();c.refreshStory();c.refresh();
+  c.stop();cells=[...s.cells];phase=2;message='';save();c.notebook.putAway();sync();c.refreshStory();c.refresh();c.onRequestAction?.();
  };
  retry.onclick=()=>{activate();save();sync()};
  guide.addEventListener('campus-story-rendered',renderDialogue);
  doc.addEventListener('student-dashboard-updated',()=>{activate();c.refreshStory();sync()});
  new MutationObserver(sync).observe(player,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
  new MutationObserver(sync).observe(c.hub,{attributes:true,attributeFilter:['class']});
- sync();renderDialogue();return {sync};
+ function request(){activate();return {id:'leaf',title:'토리의 잎 그림',loaded:true,active:phase===1||phase===2,text:goal(),error:!stored?'이 기기에 저장하지 못했어요.':null,retry:()=>{save();sync();c.refresh()}}}
+ sync();renderDialogue();return {sync,request};
 }

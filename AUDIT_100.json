@@ -201,8 +201,9 @@
     {
       "id": 18,
       "title": "현재 목표 하나",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/current-goal.cjs, tests/request-acceptance.cjs, tests/npc-request.cjs, tests/audit-first-items.cjs, tests/momo-favor.cjs, tests/tori-leaf-favor.cjs, tests/parcel-world.cjs, tests/parcel-adventure.cjs, tests/campus-story.cjs, tests/garden-letter.cjs, tests/campus-journey.cjs, tests/campus-smooth-walk.cjs, tests/reading-order.cjs, tests/campus-memory-status.cjs passed. Seven rooms, current request selection/completion fallback, full original action loops, account/reload/stale/delayed replies, local and journal retries, keyboard/native browser touch1366/390/320,4x CPU and preserved desktop key help. Test Pages verification pending. No DB changes. Physical Chromebook/pupil observation untested; item19 onward pending.",
+      "behavior": "One current walking-request goal replaces competing Momo, leaf and parcel banners. Accepted Momo/leaf/parcel and confirmed in-progress garden letter appear in an optional request notebook. Explicit acceptance or real progress focuses that request; manual selection persists per device/account, late history cannot steal it, and completed requests drop out. Selection never accepts, completes, unlocks or teleports. Storage/journal errors have explicit retries."
     },
     {
       "id": 19,
