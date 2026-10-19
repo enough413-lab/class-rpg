@@ -180,8 +180,8 @@
     {
       "id": 15,
       "title": "독후감 정렬",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/reading-order.cjs, reading-order.sql, reading-order-http.cjs and five existing reading regressions passed. Actual rollback SQL tests cover all orders and access controls; actual HTTP checks cover registration and invalid-session rejection only. Test deployment/live-file verification pending. No physical Chromebook or pupil observation.",
+      "status": "resolved",
+      "evidence": "Sorting UI/actual rollback SQL plus five reading regressions; HTTP endpoint registration and invalid-session rejection only passed; staging d1f04d710fd5009aaba7928e180c103b5a097b0b / main-test 0f68e64bfc338587879e270b7e41fb2140b408e5; Pages 39183280405, exact live bytes and main-outside-test preservation. outputs/student-reading-order-feature-deployment.json and database receipt (2026-09-30/a). Development-only read RPC; production unchanged. Native browser touch/keyboard,1366/390/320,4x CPU; physical Chromebook/pupil observation untested. Prior item14 isolated synthetic HTTP fixture cleanup remains separately pending after interrupted deletion calls. Item16 next.",
       "behavior": "Choose newest, oldest or title order in the existing reading shelf. Title/author filters apply before 20-item keyset pages. Equal titles use review IDs as a stable tie-breaker. Own/class access and authorized bookmarks retain their restrictions. Reopening defaults to newest."
     },
     {
