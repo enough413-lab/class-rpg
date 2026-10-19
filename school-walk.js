@@ -4,9 +4,9 @@ import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261019-controls';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261019-ground-labels';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
-import {installCampusNameplates} from './campus-nameplates.js?v=20261012-jump-polish';
+import {installCampusNameplates} from './campus-nameplates.js?v=20261019-ground-labels';
 import {decorateMomoPencil} from './momo-favor.js?v=20261019-controls';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
@@ -142,6 +142,7 @@ export function installSchoolWalk(ctx){
   for(const p of currentPlaces(true)){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
    if(decorateFlowerbed(b,p)){}else if(decorateTrioObject(b,p)){}else if(p.kind==='pencil')decorateMomoPencil(b);else if(next==='hallway'&&decorateHallwayObject(b,p)){}else if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
+   const tag=b.querySelector('.campus-object-caption');if(tag){b.dataset.groundLabel='true';const title=tag.querySelector('b');if(title)title.textContent=title.textContent.replace(/^\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*\s*/u,'')}
    b.onclick=()=>{stop();if(b.classList.contains('campus-npc')){doc.getElementById('campusTitle').focus({preventScroll:true});return}if(nearby()?.kind===p.kind)ctx.interact(p.kind);else doc.getElementById('campusTitle').focus({preventScroll:true})};objects.append(b);
   }
   rig();measureApproaches();background();hub.scrollTop=0;camera();markPlaces();ctx.onPosition();
