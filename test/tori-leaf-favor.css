@@ -6,7 +6,7 @@
 .tori-leaf-waiting .campus-object-caption{border-color:#b88c36}
 .tori-leaf-help{position:absolute;z-index:24;top:12px;left:12px;max-width:240px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;padding:8px 12px;color:#405d49;background:#fff7dcf2;border:1px solid #c4ad75;border-radius:6px 16px 12px 5px;box-shadow:0 2px 4px #354c3a33;font:14px/1.5 system-ui;box-sizing:border-box;pointer-events:none}.tori-leaf-help button{pointer-events:auto}.tori-leaf-help[hidden]{display:none}.tori-leaf-help>span{min-width:0;word-break:keep-all}
 #classroomHub .tori-leaf-help button{min-width:44px;min-height:44px;padding:7px 12px;border:1px solid #acb78a;border-radius:12px;background:#f4edd6;color:#405d49;font:700 14px/1.4 system-ui;white-space:nowrap}#classroomHub .tori-leaf-help button[hidden]{display:none}#classroomHub .tori-leaf-help button:disabled{opacity:.5}
-#classroomHub:has(.tori-leaf-help:not([hidden])) .campus-how{display:none!important}
-#classroomHub:has(.tori-leaf-help:not([hidden])) .parcel-tracker{display:none}
+#classroomHub:not(.has-current-goal):has(.tori-leaf-help:not([hidden])) .campus-how{display:none!important}
+#classroomHub:not(.has-current-goal):has(.tori-leaf-help:not([hidden])) .parcel-tracker{display:none}
 #classroomHub .notebook-help:has(.tori-leaf-take:not([hidden])) button{padding-inline:8px}
 @media(max-width:849px){.tori-leaf-help{font-size:13px;max-width:220px;padding:7px 10px}.tori-leaf-help>span{flex:1 1 160px}#classroomHub.campus-side .campus-tori .tori-leaf-memory{width:42px;height:30px}#classroomHub .notebook-help .tori-leaf-take{padding:7px 9px}}

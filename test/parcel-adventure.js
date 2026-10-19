@@ -12,7 +12,7 @@ export function installParcelAdventure(c){
  let acceptanceOwner=null,accepted=false,acceptanceStored=true;
  const acceptanceKey=id=>'classRpgParcelAccepted_v1_'+id;
  function activateAcceptance(){const id=student().id;if(id===acceptanceOwner)return;acceptanceOwner=id;accepted=false;acceptanceStored=true;try{accepted=id!=null&&localStorage.getItem(acceptanceKey(id))==='yes'}catch{acceptanceStored=false}}
- function accept(){activateAcceptance();if(student().id==null||level()<16&&!phase())return;accepted=true;try{localStorage.setItem(acceptanceKey(acceptanceOwner),'yes');acceptanceStored=true}catch{acceptanceStored=false}render()}
+ function accept(focus=true){activateAcceptance();if(student().id==null||level()<16&&!phase())return;accepted=true;try{localStorage.setItem(acceptanceKey(acceptanceOwner),'yes');acceptanceStored=true}catch{acceptanceStored=false}render();if(focus)c.onRequestAction?.()}
  const requestLabel=()=>phase()===3?'완료한 부탁':phase()>0||accepted?'받은 부탁':!acceptanceStored?'수락 기록 확인 필요':'살펴보는 부탁';
  const goal=()=>phase()===0?'교실의 꾸러미에서 단서 두 가지 찾기':phase()===1?'복도의 꾸러미 표식 안내판 살펴보기':phase()===2?'도서관에서 토리에게 꾸러미 전달하기':'도서 꾸러미 전달 완료';
  // Keep the walking HUD brief; the accessible label retains the complete goal.
@@ -62,7 +62,7 @@ export function installParcelAdventure(c){
   if(step==='parcel-1'&&!accepted)accept();
   const requestedOwner=student().id,requestedToken=c.getToken(),version=++saveVersion;busy=true;c.stopMovement();const buttons=[...dialog.querySelectorAll('button')].map(b=>[b,b.disabled]);buttons.forEach(([b])=>b.disabled=true);feedback.textContent='발견한 발자국을 수첩에 담고 있어요…';
   try{const {data,error:e}=await c.db.rpc('student_parcel_adventure',{p_token:requestedToken,p_step:step,p_clues:values});if(e||!data)throw e||Error('No result');if(requestedOwner!==student().id||requestedToken!==c.getToken())return;
-   if(version!==saveVersion)return;if(!data.correct){feedback.textContent='꾸러미의 파란 책 봉인과 잎 표식을 안내판과 나란히 살펴봐요. 토리가 있는 도서관으로 향해요.';return}if(data.step_id!==step)throw Error('Unexpected progress');done.add(step);render();doc.dispatchEvent(new CustomEvent('student-parcel-updated'));
+   if(version!==saveVersion)return;if(!data.correct){feedback.textContent='꾸러미의 파란 책 봉인과 잎 표식을 안내판과 나란히 살펴봐요. 토리가 있는 도서관으로 향해요.';return}if(data.step_id!==step)throw Error('Unexpected progress');done.add(step);render();c.onRequestAction?.();doc.dispatchEvent(new CustomEvent('student-parcel-updated'));
    feedback.innerHTML='<b>✓ 발자국 '+phase()+' / 3을 저장했어요.</b><p>'+(phase()===1?'꾸러미를 챙겼어요. 복도 안내판에서 두 표식의 주인을 찾아봐요.':phase()===2?'두 표식이 도서관을 가리켜요. 토리에게 직접 걸어가 보세요.':'토리: “꼼꼼히 찾아와 줘서 고마워!”')+'</p><button class="parcel-primary" data-parcel-next>'+(phase()===3?'기념 책갈피 보기':'다음 단서로 걷기 →')+'</button>';feedback.querySelector('button').focus({preventScroll:true});
   }catch{if(version===saveVersion&&requestedOwner===student().id&&requestedToken===c.getToken())feedback.textContent='아직 저장을 확인하지 못했어요. 발견한 단서는 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
   finally{if(version===saveVersion){busy=false;buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled||done.has(step)&&b.matches('[data-parcel-save],[data-parcel-route],[data-parcel-clue]')})}}
@@ -73,7 +73,7 @@ export function installParcelAdventure(c){
   if(b.hasAttribute('data-parcel-close')||b.hasAttribute('data-parcel-back')){close();return}
   if(b.hasAttribute('data-parcel-retry')){loaded=false;start();return}
   if(owner!==student().id||token!==c.getToken()){loaded=false;done.clear();clues.clear();start();return}
-  if(b.hasAttribute('data-parcel-accept-retry')){accept();start();return}
+  if(b.hasAttribute('data-parcel-accept-retry')){accept(false);start();return}
   if(b.hasAttribute('data-parcel-go')){if(!phase()&&!accepted)accept();go(b.dataset.parcelGo,b.dataset.target);return}
   if(b.hasAttribute('data-parcel-next')){if(phase()===3)finish();else {const target=phase()===1?['hallway','notice']:['library','tori'];go(...target)}return}
   if(b.hasAttribute('data-parcel-clue')){const id=b.dataset.parcelClue;if(!['book','leaf'].includes(id)||phase()!==0)return;clues.add(id);dialog.querySelectorAll('[data-parcel-clue="'+id+'"]').forEach(el=>{el.classList.add('found');el.setAttribute('aria-pressed','true')});doc.getElementById('parcelClues').innerHTML='<b>발견한 단서 '+clues.size+' / 2</b><ul>'+[...clues].map(x=>'<li>'+(x==='book'?'📖 파란 책 모양 봉인':'🌿 작은 잎 장식')+'</li>').join('')+'</ul>';return}
@@ -81,5 +81,6 @@ export function installParcelAdventure(c){
   if(b.hasAttribute('data-parcel-save')){save(b.dataset.parcelSave,b.dataset.parcelSave==='parcel-1'?[...clues].sort():['tori'])}
  });
  new MutationObserver(render).observe(c.objects,{childList:true});doc.addEventListener('student-dashboard-updated',()=>{if(owner!==student().id||token!==c.getToken()){view++;loadVersion++;saveVersion++;busy=false;loaded=false;done.clear();clues.clear();if(dialog.open)dialog.close();render()}load()});
- load();render();return {start,inspect,collected:()=>loaded&&phase()>0,snapshot:()=>({loaded:loaded&&owner===student().id&&token===c.getToken(),phase:phase()})};
+ function request(){activateAcceptance();const ready=loaded&&owner===student().id&&token===c.getToken();return {id:'parcel',title:'책 향기 꾸러미',loaded:ready||error||!student().id||!c.getToken(),active:ready&&phase()<3&&(phase()>0||accepted&&level()>=16),text:goal(),error:error?'수첩 기록을 불러오지 못했어요.':!acceptanceStored?'수락 기억을 이 기기에 저장하지 못했어요.':null,retry:()=>{if(error){loaded=false;load()}else if(accepted)accept(false);else{acceptanceOwner=null;render()}}}}
+ load();render();return {start,inspect,request,collected:()=>loaded&&phase()>0,snapshot:()=>({loaded:loaded&&owner===student().id&&token===c.getToken(),phase:phase()})};
 }
