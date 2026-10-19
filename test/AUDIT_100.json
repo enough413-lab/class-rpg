@@ -187,8 +187,9 @@
     {
       "id": 16,
       "title": "NPC 대표 의뢰 하나",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/npc-request.cjs and eight regressions passed: audit-first-items, momo-favor, tori-leaf-favor, parcel-world, parcel-adventure, campus-journey, campus-smooth-walk, reading-order. Native browser touch/keyboard,1366/390/320,4x CPU, full direct-action loops, account/reload/delayed/error/retry and economy preservation. Test Pages verification pending. No physical Chromebook/pupil observation; items17 onward remain pending.",
+      "behavior": "Each walking NPC keeps one representative errand at the front: teacher uses the existing parcel when eligible or already begun, otherwise walks the player to Momo for the existing pencil favor; Momo keeps pencil progress with shop access; Tori keeps active parcel handoff priority or the available leaf-rubbing favor. Other teacher quests/records/crafting are optional notebook choices. Referral never accepts or completes the other NPC favor remotely."
     },
     {
       "id": 17,
