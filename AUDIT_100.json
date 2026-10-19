@@ -201,8 +201,8 @@
     {
       "id": 18,
       "title": "현재 목표 하나",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/current-goal.cjs, tests/request-acceptance.cjs, tests/npc-request.cjs, tests/audit-first-items.cjs, tests/momo-favor.cjs, tests/tori-leaf-favor.cjs, tests/parcel-world.cjs, tests/parcel-adventure.cjs, tests/campus-story.cjs, tests/garden-letter.cjs, tests/campus-journey.cjs, tests/campus-smooth-walk.cjs, tests/reading-order.cjs, tests/campus-memory-status.cjs passed. Seven rooms, current request selection/completion fallback, full original action loops, account/reload/stale/delayed replies, local and journal retries, keyboard/native browser touch1366/390/320,4x CPU and preserved desktop key help. Test Pages verification pending. No DB changes. Physical Chromebook/pupil observation untested; item19 onward pending.",
+      "status": "resolved",
+      "evidence": "tests/current-goal.cjs plus13 regressions passed: one current request across seven rooms, real original action/completion loops, account/reload/late/stale controls, preference/request/journal retry,1366/390/320/native browser touch/keyboard/4xCPU and desktop key help. Staging 6bc4d5b370dc040316fe11719121b83c1481d905 / main-test 6d5830efa9e770a993eb41d132c711b8c6369f30; Pages39197974312,29 exact live files and main-outside-test SHA preservation. outputs/student-current-goal-feature-deployment.json (2026-09-30/a). No DB/record/reward changes. Physical Chromebook/pupil observation untested; item19 next.",
       "behavior": "One current walking-request goal replaces competing Momo, leaf and parcel banners. Accepted Momo/leaf/parcel and confirmed in-progress garden letter appear in an optional request notebook. Explicit acceptance or real progress focuses that request; manual selection persists per device/account, late history cannot steal it, and completed requests drop out. Selection never accepts, completes, unlocks or teleports. Storage/journal errors have explicit retries."
     },
     {
