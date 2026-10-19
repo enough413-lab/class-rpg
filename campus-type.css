@@ -1,0 +1,11 @@
+/* Locally bundled Jua: friendly Korean game dialogue, without synthetic bold. */
+:root{--campus-game-font:SchoolJua,"Malgun Gothic",sans-serif}
+:is(.trio-dialog,.flowerbed-dialog,#campusGuide,#campusNpcDialog,#parcelAdventureDialog,.campus-request-book,#completedQuestHistory){font-family:var(--campus-game-font);font-weight:400;letter-spacing:0;font-synthesis:none}
+:is(.trio-dialog,.flowerbed-dialog,#campusGuide,#campusNpcDialog,#parcelAdventureDialog,.campus-request-book,#completedQuestHistory) :is(button,h2,h3,p,b,strong,small,span,label,output){font-family:var(--campus-game-font);font-weight:400;letter-spacing:0;font-synthesis:none}
+:is(.trio-dialog,.flowerbed-dialog) h2{font-size:22px;line-height:1.4}
+:is(.trio-conversation,.flowerbed-intro){font-size:19px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;text-align:left}
+:is(.trio-dialog,.flowerbed-dialog) button{font-size:17px;line-height:1.45}
+:is(.trio-dialog,.flowerbed-dialog) footer{font-size:14px;line-height:1.6}
+.trio-content>p,.trio-feedback{font-size:18px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+#classroomHub .current-goal-copy,#classroomHub .campus-current-goal button,#classroomHub [data-campus=use],#classroomHub .campus-control-hint{font-family:var(--campus-game-font);font-weight:400;letter-spacing:0;font-synthesis:none}
+@media(max-width:420px){:is(.trio-dialog,.flowerbed-dialog) h2{font-size:20px}.trio-conversation,.flowerbed-intro,.trio-content>p,.trio-feedback{font-size:18px;line-height:1.6}:is(.trio-dialog,.flowerbed-dialog) button{font-size:16px}:is(.trio-dialog,.flowerbed-dialog) footer{font-size:13px}.trio-books button{font-size:14px}}
