@@ -23,7 +23,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261019-controls';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261019-controls';
-import {installSchoolWalk} from './school-walk.js?v=20261019-controls';
+import {installSchoolWalk} from './school-walk.js?v=20261019-ground-labels';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -74,8 +74,8 @@ export function installStudentCampus(ctx){
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
-  action.disabled=false;const label=destination?'잠깐 멈추기':near?(notebook?.label(near.kind)||viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||near.label):'가까이 걸어와 ↑ 살펴보기';
-  const caption=near?'↑ '+label:label;if(action.textContent!==caption)action.textContent=caption;
+  action.disabled=false;const label=destination?'잠깐 멈추기':near?(notebook?.label(near.kind)||viewer?.label(near.kind)||fence?.label(near.kind)||ball?.label(near.kind)||cheer?.label(near.kind)||mat?.label(near.kind)||bench?.label(near.kind)||sprout?.label(near.kind)||nook?.label(near.kind)||gardenCare?.label(near.kind)||meal?.label(near.kind)||objects.querySelector('[data-place="'+near.kind+'"]')?.dataset.action||near.label):'가까이 걸어와 ↑ 살펴보기';
+  const resident=near&&objects.querySelector('[data-place="'+near.kind+'"].campus-npc'),name=resident?.querySelector('.campus-object-caption b')?.textContent||resident?.querySelector('.trio-name')?.textContent;const caption=name?'↑ '+name.replace(/^(문구지기 |책지기 )/,'')+'에게 말 걸기':near?'↑ '+label.replace(/^\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*\s*/u,''):label;if(action.textContent!==caption)action.textContent=caption;
   action.dataset.state=destination?'walking':near?'arrived':'guide';
  }
  function syncScene(){
