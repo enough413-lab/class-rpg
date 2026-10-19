@@ -194,8 +194,8 @@
     {
       "id": 17,
       "title": "의뢰 수락 표시",
-      "status": "verified_pending_deployment",
-      "evidence": "tests/request-acceptance.cjs and ten regressions passed: npc-request, audit-first-items, momo-favor, tori-leaf-favor, parcel-world, parcel-adventure, campus-journey, campus-smooth-walk, reading-order, campus-memory-status. Native browser keyboard/touch,1366/390/320,4x CPU, account/reload/delayed/error/retry, simultaneous walking/favor storage failure controls and unchanged economy. Test Pages verification pending. Physical Chromebook/pupil observation untested; item18 onward pending.",
+      "status": "resolved",
+      "evidence": "tests/request-acceptance.cjs and ten regressions passed; explicit view/accept distinction, device/account acceptance persistence and retry, closed old-account controls, actual existing request loops and economy preserved. Staging 48abbffe9c14a5312eae5bf7f69c11eb5506334d / main-test 3f2502964e527a72d52977254ccacfad08730f08; Pages39192587296,24 exact live files and main-outside-test SHA preservation. outputs/student-request-acceptance-feature-deployment.json (2026-09-30/a). Native browser keyboard/touch,1366/390/320,4x CPU, delayed/error/retry/account/reload and combined memory failure. No DB changes. Physical Chromebook/pupil observation untested; item18 next.",
       "behavior": "Momo pencil, Tori leaf and parcel distinguish viewing from an accepted request with visible received-request labels. Parcel acceptance is explicit, personal device/account memory, not a server step or an unlock; direct object users accept only when collecting both clues. Local save failures retain current play and provide retries. Closed stale parcel controls cannot accept for a switched account."
     },
     {
