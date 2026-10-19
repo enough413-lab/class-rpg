@@ -194,8 +194,9 @@
     {
       "id": 17,
       "title": "의뢰 수락 표시",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/request-acceptance.cjs and ten regressions passed: npc-request, audit-first-items, momo-favor, tori-leaf-favor, parcel-world, parcel-adventure, campus-journey, campus-smooth-walk, reading-order, campus-memory-status. Native browser keyboard/touch,1366/390/320,4x CPU, account/reload/delayed/error/retry, simultaneous walking/favor storage failure controls and unchanged economy. Test Pages verification pending. Physical Chromebook/pupil observation untested; item18 onward pending.",
+      "behavior": "Momo pencil, Tori leaf and parcel distinguish viewing from an accepted request with visible received-request labels. Parcel acceptance is explicit, personal device/account memory, not a server step or an unlock; direct object users accept only when collecting both clues. Local save failures retain current play and provide retries. Closed stale parcel controls cannot accept for a switched account."
     },
     {
       "id": 18,
