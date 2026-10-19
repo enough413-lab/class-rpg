@@ -1,5 +1,5 @@
-import {decorateFlowerbed} from './campus-flowerbed.js?v=20261019-flowerbed';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261019-controls';
+import {decorateFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261019-butterfly';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
@@ -16,7 +16,7 @@ const PLACES={
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[...roomDoors(room),...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:87,label:'📖 이곳의 이야기'}];
 PLACES.library.push(...TRIO_SEARCH_PLACES);
-PLACES.garden.push({kind:'flowerbed',x:65,label:'내 꽃밭 · 씨앗 심고 꾸미기'},{kind:'trio-garden',x:41,label:'새싹 · 물길 놀이'});
+PLACES.garden.push({kind:'flowerbed',x:65,label:'내 꽃밭 · 씨앗 심고 꾸미기'},{kind:'trio-garden',x:41,label:'새싹 · 말 걸기'});
 PLACES.playground.push({kind:'trio-duri',x:41,label:'두리 · 공 던지기'});
 export function installSchoolWalk(ctx){
  // CSS pixels per second, shared by keys, touch buttons and destination walking.
