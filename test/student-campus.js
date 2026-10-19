@@ -1,7 +1,7 @@
-import {installQuestSigns} from './campus-quest-signs.js?v=20261019-controls';
-import {installFlowerbed} from './campus-flowerbed.js?v=20261019-flowerbed';
-import {installNpcTrio} from './npc-trio.js?v=20261019-controls';
-import {installCurrentGoal} from './campus-current-goal.js?v=20261019-controls';
+import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
+import {installFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
+import {installNpcTrio} from './npc-trio.js?v=20261019-butterfly';
+import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
 import {installPondNotebook} from './pond-notebook.js?v=20261014-leaf-favor';
@@ -23,7 +23,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261019-controls';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261019-controls';
-import {installSchoolWalk} from './school-walk.js?v=20261019-ground-labels';
+import {installSchoolWalk} from './school-walk.js?v=20261019-butterfly';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -142,10 +142,10 @@ export function installStudentCampus(ctx){
  parcel=installParcelAdventure({onRequestAction:()=>currentGoal?.focus('parcel'),...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();people.refresh();if(parcel)syncNear()}});
  letter=installGardenLetter({onRequestAction:()=>currentGoal?.focus('letter'),onRequestUpdate:()=>currentGoal?.refresh(),...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  leafFavor=installToriLeafFavor({onRequestAction:()=>currentGoal?.focus('leaf'),...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
- flowerbed=installFlowerbed({...ctx,hub,objects,walk,stop});
- trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,visitFlowerbed:()=>doc.getElementById('campusTitle').focus({preventScroll:true}),flowerbedSummary:()=>flowerbed.summary(),focusGoal:id=>currentGoal?.focus(id)});
- currentGoal=installCurrentGoal({...ctx,hub,viewport:stage.parentElement,requests:()=>[...trio.requests(),momo?.request(),leafFavor?.request(),parcel?.request(),letter?.request()],stop:()=>{stop();walk.stop()},openParcel:()=>parcel.start()});
- signs=installQuestSigns({hub,objects,requests:()=>[...trio.requests(),momo.request()],parcel:()=>parcel.snapshot(),trio:()=>trio.signs(),level:()=>ctx.levelInfo(ctx.getStudent()?.xp||0).level,momoPhase:()=>momo.dialogue().action==='momo-accept'?0:1});
+ flowerbed=installFlowerbed({...ctx,hub,objects,walk,stop,onChange:()=>{currentGoal?.refresh();signs?.sync()},focusGoal:id=>currentGoal?.focus(id)});
+ trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,visitFlowerbed:()=>doc.getElementById('campusTitle').focus({preventScroll:true}),flowerbedSummary:()=>flowerbed.summary(),flowerbedOffer:()=>flowerbed.offer(),flowerbedRequest:()=>flowerbed.request(),flowerbedAct:action=>flowerbed.act(action),focusGoal:id=>currentGoal?.focus(id)});
+ currentGoal=installCurrentGoal({...ctx,hub,viewport:stage.parentElement,requests:()=>[...trio.requests(),flowerbed.request(),momo?.request(),leafFavor?.request(),parcel?.request(),letter?.request()],stop:()=>{stop();walk.stop()},openParcel:()=>parcel.start()});
+ signs=installQuestSigns({hub,objects,requests:()=>[...trio.requests(),momo.request()],parcel:()=>parcel.snapshot(),trio:()=>trio.signs(),flowerbed:()=>flowerbed.request(),level:()=>ctx.levelInfo(ctx.getStudent()?.xp||0).level,momoPhase:()=>momo.dialogue().action==='momo-accept'?0:1});
  signs.sync();
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},onStatus:memoryStatus,doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.

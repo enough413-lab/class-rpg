@@ -58,13 +58,15 @@ export function installNpcTrio(c){
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
-  if(active==='garden'){text=(c.flowerbedSummary?.()||'')+text;if(secondAction==='close'){secondAction='flowerbed';secondLabel='씨앗 심고 꽃밭 꾸미기'}}
+  if(active==='garden'){if(mode!=='flowerbed')text=(c.flowerbedSummary?.()||'')+text;if(secondAction==='close'){secondAction='flowerbed';secondLabel='씨앗 심고 꽃밭 꾸미기'}}
   const m=META[active];content().innerHTML='<div class="trio-conversation"><img alt="" src="maps/npcs/'+m.image+'"><p></p></div><div class="trio-choices"><button type="button" data-trio="'+action+'"></button><button type="button" data-trio="'+secondAction+'"></button></div>';content().querySelector('p').textContent=text;const buttons=content().querySelectorAll('button');buttons[0].textContent=label;buttons[1].textContent=secondLabel;content().querySelector('img').onerror=e=>e.target.hidden=true;
  }
  function nextClue(){return !(state.tori.clues&1)?'trio-clue-color':!(state.tori.clues&2)?'trio-clue-motif':'trio-books'}
  function searchText(){const r=state.tori,target=r.round%6;return '색 단서: '+(r.clues&1?COLORS[bookColor(target)]:'아직 못 찾음')+' · 무늬 단서: '+(r.clues&2?MOTIFS[bookMotif(target,r.round)]:'아직 못 찾음')}
- function talk(personal=false){mode='talk';shell();const m=META[active],r=state[active],l=state.link;
+ function flowerbedTalk(){mode='flowerbed';shell();dialog.querySelector('h2').textContent='새싹 · 나비 꽃길';const ask=c.flowerbedOffer();conversation(ask.text,'bed-'+ask.action,ask.label,'garden-other','다른 부탁 이야기');if(c.flowerbedRequest?.().error)feedback('꽃밭을 이 기기에 저장하지 못했어. 닫고 부탁 수첩에서 다시 저장해 줘.')}
+ function talk(personal=false,skipFlower=false){mode='talk';shell();const m=META[active],r=state[active],l=state.link;
   if(!personal&&r.phase!==2){
+   if(active==='garden'&&!skipFlower&&l.step!==4&&c.flowerbedRequest?.().active){flowerbedTalk();return}
    if(active==='garden'&&r.wins>0&&(l.step===0||l.step===5)){conversation(l.step===5?'두리와 함께 정원이 환해졌어! 다시 꽃 축제를 준비해 볼까?':'네가 피운 꽃을 두리에게 전해 줄래? 운동장 꽃 장식을 준비하고 있대.','link-start','꽃을 받아 두리에게 전할게','personal','물길 놀이 이야기');return}
    if(active==='garden'&&l.step===4){conversation('두리가 보낸 리본이구나! 네가 피운 꽃에 묶으면 축제 준비가 완성돼.','link-finish','새싹에게 리본 건네기','personal','물길 놀이 이야기');return}
    if(active==='garden'&&l.step>=1&&l.step<=3){conversation('꽃을 운동장 두리에게 전하고, 두리의 리본을 받아 와 줘. 연못 길을 지나면 운동장이야.','link-route','두리를 만나러 갈게','personal','물길 놀이 이야기');return}
@@ -99,7 +101,10 @@ export function installNpcTrio(c){
   const r=state[active],l=state.link,action=b.dataset.trio;
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(action==='legacy'){close();c.legacyTori();return}
-  if(action==='flowerbed'&&active==='garden'){close();c.visitFlowerbed?.();return}
+  if(action==='flowerbed'&&active==='garden'){flowerbedTalk();return}
+  if(action==='garden-other'&&active==='garden'){talk(false,true);return}
+  if(action==='bed-go'&&active==='garden'){close();c.visitFlowerbed?.();return}
+  if((action==='bed-accept'||action==='bed-finish')&&active==='garden'&&mode==='flowerbed'){if(c.flowerbedAct?.(action.slice(4))){if(action==='bed-accept'){close();c.visitFlowerbed?.()}else flowerbedTalk()}return}
   if(action==='personal'){talk(true);return}
   if(action==='search'&&active==='tori'&&r.phase===1){search();return}
   if(action==='note'&&active==='tori'&&r.phase===1&&mode==='clue'){r.clues|=opening.kind==='trio-clue-color'?1:2;changed();close();doc.getElementById('campusTitle').focus({preventScroll:true});return}
