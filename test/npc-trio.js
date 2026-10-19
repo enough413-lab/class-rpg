@@ -58,6 +58,7 @@ export function installNpcTrio(c){
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
+  if(active==='garden'){text=(c.flowerbedSummary?.()||'')+text;if(secondAction==='close'){secondAction='flowerbed';secondLabel='씨앗 심고 꽃밭 꾸미기'}}
   const m=META[active];content().innerHTML='<div class="trio-conversation"><img alt="" src="maps/npcs/'+m.image+'"><p></p></div><div class="trio-choices"><button type="button" data-trio="'+action+'"></button><button type="button" data-trio="'+secondAction+'"></button></div>';content().querySelector('p').textContent=text;const buttons=content().querySelectorAll('button');buttons[0].textContent=label;buttons[1].textContent=secondLabel;content().querySelector('img').onerror=e=>e.target.hidden=true;
  }
  function nextClue(){return !(state.tori.clues&1)?'trio-clue-color':!(state.tori.clues&2)?'trio-clue-motif':'trio-books'}
@@ -98,6 +99,7 @@ export function installNpcTrio(c){
   const r=state[active],l=state.link,action=b.dataset.trio;
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(action==='legacy'){close();c.legacyTori();return}
+  if(action==='flowerbed'&&active==='garden'){close();c.visitFlowerbed?.();return}
   if(action==='personal'){talk(true);return}
   if(action==='search'&&active==='tori'&&r.phase===1){search();return}
   if(action==='note'&&active==='tori'&&r.phase===1&&mode==='clue'){r.clues|=opening.kind==='trio-clue-color'?1:2;changed();close();doc.getElementById('campusTitle').focus({preventScroll:true});return}
