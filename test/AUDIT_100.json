@@ -180,8 +180,9 @@
     {
       "id": 15,
       "title": "독후감 정렬",
-      "status": "pending",
-      "evidence": null
+      "status": "verified_pending_deployment",
+      "evidence": "tests/reading-order.cjs, reading-order.sql, reading-order-http.cjs and five existing reading regressions passed. Actual rollback SQL tests cover all orders and access controls; actual HTTP checks cover registration and invalid-session rejection only. Test deployment/live-file verification pending. No physical Chromebook or pupil observation.",
+      "behavior": "Choose newest, oldest or title order in the existing reading shelf. Title/author filters apply before 20-item keyset pages. Equal titles use review IDs as a stable tie-breaker. Own/class access and authorized bookmarks retain their restrictions. Reopening defaults to newest."
     },
     {
       "id": 16,
