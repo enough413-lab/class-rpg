@@ -21,7 +21,7 @@ import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-n
 import {installParcelAdventure} from './parcel-adventure.js?v=20261012-parcel-world';
 import {installSchoolWalk} from './school-walk.js?v=20261014-platforms';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
-import {installCampusNpcs} from './campus-npcs.js?v=20261012-momo';
+import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';
@@ -59,7 +59,7 @@ export function installStudentCampus(ctx){
  const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
- const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a)});
+ const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,getToken:ctx.getToken,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a),onVisitMomo:()=>{stop();walk.goTo('shop');doc.getElementById('campusTitle').focus({preventScroll:true})}});
  let held=null,returnFocus=null,lastScene='',isOpen=false,memory=null;
  const open=()=>!hub.classList.contains('hidden');
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
@@ -133,7 +133,7 @@ export function installStudentCampus(ctx){
  bench=installGardenBench({...ctx,hub,stage,objects,walk,stop,refresh:syncNear});
   sprout=installGardenSprout({...ctx,hub,objects,walk,stop,refresh:syncNear,openLetter:()=>letter.start('garden')});
  meal=installCafeteriaPlay({...ctx,hub,walk,stop,refresh:syncNear});
- parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();if(parcel)syncNear()}});
+ parcel=installParcelAdventure({...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();people.refresh();if(parcel)syncNear()}});
  letter=installGardenLetter({...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  leafFavor=installToriLeafFavor({...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},onStatus:memoryStatus,doc});

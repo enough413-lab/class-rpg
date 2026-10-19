@@ -1,0 +1,42 @@
+const assert=require('node:assert/strict'),fs=require('fs'),path=require('path');
+const {chromium}=require('playwright'),{server,shots}=require('./student-fixture.cjs');
+(async()=>{await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({channel:'msedge',headless:true});try{
+ const p=await browser.newPage({viewport:{width:1366,height:768},hasTouch:true}),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('https://**',r=>r.abort());await p.goto('http://127.0.0.1:'+server.address().port);let f;fs.mkdirSync(shots,{recursive:true});
+ const ready=async()=>{f=p.frames().find(x=>x.url().includes('app-core'));await f.waitForFunction(()=>window.studentCampus?.parcel.snapshot().loaded);await f.evaluate(()=>document.fonts.ready)};
+ const account=async(id,xp=0)=>{await f.evaluate(async({id,xp})=>{mockRpg.student.id=id;mockRpg.student.xp=xp;await loadDashboard();enterHubScene('classroom')},{id,xp});await f.waitForFunction(()=>studentCampus.parcel.snapshot().loaded);await f.locator('.campus-scene-status').waitFor({state:'hidden'})};
+ const go=async kind=>{await p.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').tap();await f.locator('[data-finder-place='+kind+']').tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor()};
+ const teacher=async()=>{await go('quests');await f.locator('[data-campus=use]').tap();await f.locator('#campusNpcDialog').waitFor()};
+ const primary=()=>f.locator('.npc-choices>button'),speech=()=>f.locator('.npc-conversation p').first(),memory=()=>f.evaluate(()=>JSON.parse(localStorage.getItem('classRpgMomoFavor_v1_'+mockRpg.student.id)||'null'));
+ await ready();const cdp=await p.context().newCDPSession(p);
+ for(const [i,[width,height]]of [[1366,768],[390,844],[320,640]].entries()){
+  await p.setViewportSize({width,height});await account(2200+i);await teacher();
+  assert.equal(await primary().count(),1);assert.match(await speech().textContent(),/모모.*연필/);assert(await f.locator('[data-npc-action=quests]').isHidden());assert(await f.locator('[data-npc-action=teacher]').isHidden());
+  const b=await primary().boundingBox();assert(b.width>=44&&b.height>=44);assert(b.x>=0&&b.x+b.width<=width+1&&b.y+b.height<=height+1);assert(await f.locator('#campusNpcDialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+  await p.screenshot({path:path.join(shots,'npc-request-'+width+'.png'),fullPage:true});
+  if(width===390)await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  if(width===1366){await primary().focus();await p.keyboard.press('Enter')}else await primary().tap();
+  assert(await f.locator('#campusNpcDialog').isHidden());assert.equal(await memory(),null,'Referral does not accept another NPC request remotely');
+  await f.locator('.campus-waypoint[data-state=arrived]').waitFor();await f.locator('[data-campus=use]').tap();assert.equal(await primary().count(),2);assert(await f.locator('[data-npc-action=shop]').isVisible());
+  await f.locator('[data-npc-action=momo-accept]').tap();assert.equal((await memory()).phase,1);await go('pencil');await f.locator('[data-campus=use]').tap();assert.equal((await memory()).phase,2);assert(await f.locator('.momo-held').isVisible());
+  await p.emulateMedia({reducedMotion:'no-preference'});await f.locator('#campusTitle').focus();await p.keyboard.down('ArrowRight');await p.waitForTimeout(180);await p.keyboard.up('ArrowRight');await f.locator('[data-campus=jump]').tap();await p.waitForTimeout(800);
+  await teacher();assert.match(await speech().textContent(),/찾은 연필.*건네/);await primary().tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor();await f.locator('[data-campus=use]').tap();await f.locator('[data-npc-action=momo-return]').tap();assert.equal((await memory()).phase,3);assert.match(await speech().textContent(),/고마워/);await p.keyboard.press('Escape');
+  await teacher();assert.match(await speech().textContent(),/가격표/);assert.match(await primary().textContent(),/인사/);assert(await f.locator('.momo-returned').isVisible());await p.keyboard.press('Escape');if(width===390)await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});
+ }
+ // School submissions and optional earned activities remain accessible on demand.
+ await teacher();await f.locator('#campusNpcDialog .npc-notebook summary').focus();await p.keyboard.press('Enter');for(const id of ['quests','teacher','kindness','art','frame','finale'])assert(await f.locator('[data-npc-action='+id+']').isVisible());
+ await f.locator('[data-npc-action=quests]').tap();assert(await f.locator('#questCenterModal').isVisible());await f.evaluate(()=>closeQuestCenter());
+ await teacher();await primary().tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor();await f.locator('[data-campus=use]').tap();await f.locator('[data-npc-action=shop]').tap();assert(await f.locator('#shopModal').isVisible());await f.evaluate(()=>closeShop());
+ await p.reload();await ready();await account(2202);await teacher();assert.match(await speech().textContent(),/가격표/);await p.keyboard.press('Escape');
+ // A stale dialogue cannot launch an errand or mutate another account.
+ await teacher();await f.evaluate(()=>{window.oldNpcButton=document.querySelector('[data-npc-action=visit-momo]');mockRpg.student.id=2203;document.dispatchEvent(new Event('student-dashboard-updated'))});assert(await f.locator('#campusNpcDialog').isHidden());await f.evaluate(()=>oldNpcButton.click());assert.equal(await memory(),null);await f.waitForFunction(()=>studentCampus.parcel.snapshot().loaded);await teacher();assert.match(await speech().textContent(),/잃어버렸/);await p.keyboard.press('Escape');
+ // Existing parcel phase wins at every level, including corrected XP after completion.
+ for(const phase of [0,1,2,3]){
+  await f.evaluate(phase=>localStorage.setItem('fixtureExploration',JSON.stringify(['parcel-1','parcel-2','parcel-3'].slice(0,phase))),phase);await p.reload();await ready();await account(987,phase?0:1360);await teacher();assert.equal(await primary().count(),1);assert.equal(await primary().getAttribute('data-npc-action'),'parcel');assert.match(await speech().textContent(),[/전할 책 꾸러미/,/복도 안내판/,/토리가 기다리고/,/잘 전해/][phase]);await primary().tap();assert(await f.locator('#parcelAdventureDialog').isVisible());await p.keyboard.press('Escape');
+ }
+ // Delayed journal refresh updates a visible teacher request without losing notebook focus.
+ await f.evaluate(()=>{window.baseNpcRpc=db.rpc.bind(db);window.npcReplies=[];db.rpc=async(name,args)=>{const result=await baseNpcRpc(name,args);if(name==='student_learning_journal')await new Promise(r=>npcReplies.push(r));return result};mockRpg.student.id=2210;mockRpg.student.xp=1360;document.dispatchEvent(new Event('student-dashboard-updated'))});
+ await teacher();assert.match(await speech().textContent(),/먼저 확인/);assert.equal(await primary().count(),1);await f.locator('#campusNpcDialog .npc-notebook summary').tap();await f.locator('[data-npc-action=quests]').focus();await f.evaluate(()=>{db.rpc=baseNpcRpc;npcReplies.splice(0).forEach(r=>r())});await f.waitForFunction(()=>document.querySelector('.npc-conversation p').textContent.includes('잘 전해'));assert.equal(await f.locator('#campusNpcDialog .npc-notebook').getAttribute('open'),'');assert.equal(await f.evaluate(()=>document.activeElement.dataset.npcAction),'quests');await p.keyboard.press('Escape');
+ // Failed journal does not advertise a fresh parcel; existing explicit retry recovers.
+ await f.evaluate(()=>{mockRpg.student.id=2211;mockRpg.failJournal=true;document.dispatchEvent(new Event('student-dashboard-updated'))});await teacher();assert.match(await speech().textContent(),/먼저 확인/);await primary().tap();await f.locator('[data-parcel-retry]').waitFor();await f.evaluate(()=>mockRpg.failJournal=false);await f.locator('[data-parcel-retry]').tap();await f.locator('.parcel-bookmark').waitFor();await p.keyboard.press('Escape');await teacher();assert.match(await speech().textContent(),/잘 전해/);await p.keyboard.press('Escape');
+ assert.deepEqual(await f.evaluate(()=>[mockRpg.student.xp,mockRpg.student.gold]),[1360,180]);assert.deepEqual(errors,[]);console.log('PASS: one teacher request, Lv1 referral → Momo accept/pick/carry/return/remember, optional school/crafting/shop routes, parcel phases/XP correction, late/error/retry/account/reload, native keyboard/touch1366/390/320 and4xCPU; no economy writes.');
+}finally{await browser.close();server.closeAllConnections();server.close()}})().catch(e=>{console.error(e);server.close();process.exitCode=1});
