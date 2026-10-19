@@ -5,12 +5,12 @@ export function installToriLeafFavor(c){
  const answer=doc.createElement('button');answer.type='button';answer.dataset.leafAction='answer';answer.innerHTML='<b></b><span></span>';book.append(answer);
  const help=doc.createElement('div');help.className='tori-leaf-help';help.hidden=true;
  const hint=doc.createElement('span');hint.setAttribute('role','status');const take=doc.createElement('button');take.type='button';take.className='tori-leaf-take';take.textContent='그림 챙기기';const retry=doc.createElement('button');retry.type='button';retry.className='tori-leaf-retry';retry.textContent='다시 저장';help.append(hint,retry);c.hub.querySelector('.campus-viewport').append(help);c.hub.querySelector('.notebook-help').append(take);
- let owner=null,phase=0,cells=[],stored=true,message='';
+ let owner=null,phase=0,cells=[],stored=true,message='',acceptedIn=null;
  const key=id=>'classRpgToriLeafFavor_v1_'+id,open=()=>!c.hub.classList.contains('hidden'),nearTori=()=>open()&&c.getScene()==='library'&&c.walk.nearby()?.kind==='tori';
  const playable=()=>phase>0||c.levelInfo(c.getStudent()?.xp||0).level>=6;
  const validCells=a=>Array.isArray(a)&&a.length>0&&a.length<=392&&a.every(n=>Number.isInteger(n)&&n>=0&&n<392);
  function activate(){
-  const id=c.getStudent()?.id;if(id===owner)return false;owner=id;phase=0;cells=[];message='';stored=true;delete guide.dataset.leafStory;
+  const id=c.getStudent()?.id;if(id===owner)return false;owner=id;phase=0;cells=[];message='';acceptedIn=null;stored=true;delete guide.dataset.leafStory;
   try{const s=JSON.parse(localStorage.getItem(key(id))||'null');if(id!=null&&s?.v===1&&[1,2,3].includes(s.phase)&&(s.phase===1||validCells(s.cells))){phase=s.phase;cells=phase>1?[...new Set(s.cells)]:[]}}catch{stored=false}
   return true;
  }
@@ -27,7 +27,7 @@ export function installToriLeafFavor(c){
   const parcel=choices.querySelector(':scope > [data-guide=parcel]');if(primary&&parcel)book.append(parcel);
   guide.dataset.leafStory=primary?'active':'none';
   answer.querySelector('b').textContent=['잎 그림을 가져올게!','어느 길로 가면 돼?','잎 그림 건네기','함께 만든 잎 그림'][phase];
-  answer.querySelector('span').textContent=['연못의 노트에서 만든 그림을 토리에게 줘요.','정원을 지나 연못의 질문 노트로 가요.','손에 든 그림을 토리에게 전해요.','도서관에 남겨 둔 내 그림이에요.'][phase];
+  answer.querySelector('span').textContent=['연못의 노트에서 만든 그림을 토리에게 줘요.','받은 부탁 · 정원을 지나 연못의 질문 노트로 가요.','받은 부탁 · 손에 든 그림을 토리에게 전해요.','도서관에 남겨 둔 내 그림이에요.'][phase];
   if(!primary||guide.dataset.inspection==='true')return;
   guide.querySelector('#campusGuideTitle').textContent=['그림책에 잎 한 장!','천천히 다녀와!','잎 그림을 가져왔구나!','네 잎 그림을 간직할게!'][phase];
   guide.querySelector('.campus-greeting p').textContent=[
@@ -39,10 +39,11 @@ export function installToriLeafFavor(c){
  }
  function sync(){
   const changed=activate();if(changed)renderDialogue();const snapshot=c.notebook.snapshot(),atNotebook=open()&&c.getScene()==='pond'&&c.walk.nearby()?.kind==='look-2';
-  const parcelPhase=c.getParcelStatus()?.phase||0;
-  help.hidden=!open()||owner==null||atNotebook&&stored||stored&&parcelPhase>0&&parcelPhase<3||!(phase===1||phase===2||!stored&&phase===3);
+  const parcelPhase=c.getParcelStatus()?.phase||0;if(acceptedIn!==c.getScene())acceptedIn=null;
+  help.dataset.requestState=phase===3?'completed':phase>0?'accepted':'available';
+  help.hidden=!open()||owner==null||atNotebook&&stored||stored&&parcelPhase>0&&parcelPhase<3&&!acceptedIn||!(phase===1||phase===2||!stored&&phase===3);
   take.hidden=!(phase===1&&atNotebook);take.disabled=snapshot.owner!==owner||!snapshot.cells.length||snapshot.busy||player.hasAttribute('data-jumping');retry.hidden=stored;
-  const text=(message||goal())+(stored?'':' 이 기기에 저장하지 못했어요. 다시 저장해 주세요.');if(hint.textContent!==text)hint.textContent=text;
+  const text=(phase===1||phase===2?'받은 부탁 · 토리의 잎 그림 · ':'')+(message||goal())+(stored?'':' 이 기기에 저장하지 못했어요. 다시 저장해 주세요.');if(hint.textContent!==text)hint.textContent=text;
   const rig=player.querySelector('.campus-rig');let held=player.querySelector('.tori-leaf-held');
   if(rig&&!held){held=doc.createElement('span');held.className='tori-leaf-held';held.setAttribute('aria-hidden','true');rig.append(held)}
   const signature=owner+':'+phase+':'+cells.join(',');
@@ -55,7 +56,7 @@ export function installToriLeafFavor(c){
  answer.onclick=()=>{
   activate();if(owner==null||!playable()||!guide.open||guide.dataset.inspection==='true')return;
   if(!nearTori()){guide.close();message='토리 곁으로 걸어가요.';if(c.getScene()==='library')c.walk.goTo('tori');sync();return}
-  c.stop();message='';if(phase===0){phase=1;save();guide.close()}else if(phase===1){guide.close()}else if(phase===2){phase=3;save();c.refreshStory()}else{guide.close()}
+  c.stop();message='';if(phase===0){phase=1;acceptedIn=c.getScene();save();guide.close()}else if(phase===1){guide.close()}else if(phase===2){phase=3;save();c.refreshStory()}else{guide.close()}
   sync();c.refresh();
  };
  take.onclick=()=>{
