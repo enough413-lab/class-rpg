@@ -1,4 +1,6 @@
 # Staging-first workflow
+Latest user direction (2026-10-19): use Page page_77a003a21af88191b2e431d04866ef6f (우리반 RPG 사이트 개선 기준과 50개 과제) as the current priority over the older ascending AUDIT_100 queue. Deepen Tori, Saessak and Duri into repeatable direct play: NPC request -> manipulation -> immediate result -> visible world change -> next request. Keep the old audit as backlog. Test-only publication; production and all school records/economy remain unchanged. New trio pilot uses explicitly disclosed device/account-local mastery, not cross-device sync. Preserve existing server-backed activities and original NPC requests.
+
 User instruction: all changes are developed and tested here first. Production release requires the user's explicit "공개해줘" instruction.
 Production URL: https://enough413-lab.github.io/class-rpg/
 Test URL: https://enough413-lab.github.io/class-rpg/test/

@@ -1,0 +1,19 @@
+{
+  "generator": "image_gen.imagegen",
+  "reference": "maps/npcs/tori-v1.webp (style reference only)",
+  "transparent_background": true,
+  "created": "2026-10-19",
+  "prompts": {
+    "saessak": "Create one original full-body NPC sprite on true transparent alpha background for a cozy Korean school RPG. The supplied owl is STYLE REFERENCE ONLY; do not recreate or edit the owl. Paint Saessak, a friendly tiny round rabbit garden keeper, warm cream fur, soft moss green overalls, leaf-shaped hat, small terracotta seed pouch, holding a little watering can down at their side. Upright frontal three-quarter view, both feet visible, silhouette fills frame with only small transparent margin. Same warm hand-painted storybook gouache finish, gently textured dark-brown outlines, simple readable shapes and moderate detail density as the reference. Cute confident curious face with large warm brown eyes, no text or UI, no floor, no scenery, no drop shadow beyond character shading. Not a commercial game character. A standalone polished in-game cutout, roughly 2.5 heads tall.",
+    "duri": "Create one original full-body NPC sprite on true transparent alpha background for a cozy Korean school RPG. The supplied owl is STYLE REFERENCE ONLY; do not recreate or edit the owl. Paint Duri, a friendly tiny round squirrel playground coach, warm cinnamon fur, big fluffy tail tucked to one side, cream muzzle, ochre and muted teal school sports outfit, small whistle on neck, holding a warm orange playground ball under one arm. Upright frontal three-quarter view, both feet visible, silhouette fills frame with only small transparent margin. Same warm hand-painted storybook gouache finish, gently textured dark-brown outlines, simple readable shapes and moderate detail density as reference. Cheerful encouraging face with large warm brown eyes, no text or UI, no floor or scenery, no cast shadow outside the silhouette. Not a commercial game character. Standalone polished in-game cutout, roughly 2.5 heads tall."
+  },
+  "assets": {
+    "saessak": "maps/npcs/saessak-v1.webp",
+    "duri": "maps/npcs/duri-v1.webp"
+  },
+  "originals": [
+    "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-1a8adef9-5794-4d8d-908f-ca74d1740a57.png",
+    "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-6be3d440-8f6a-43c0-a481-3adfc7e3510c.png"
+  ],
+  "processing": "Sharp inside300x440 WebP quality86; alpha preserved."
+}
