@@ -4,7 +4,7 @@ export function installCurrentGoal(c){
  box.className='campus-current-goal';box.setAttribute('aria-label','지금 할 일');
  box.innerHTML='<div class="current-goal-copy" role="status" aria-live="polite" aria-atomic="true"><b></b><span></span></div><button type="button" data-goal-book aria-label="받은 부탁 수첩 열기">부탁<br>수첩</button>';
  dialog.id='campusRequestBook';dialog.className='campus-request-book';dialog.setAttribute('aria-labelledby','requestBookTitle');
- dialog.innerHTML='<header><h2 id="requestBookTitle">받은 부탁</h2><button type="button" data-goal-close autofocus>닫기</button></header><p>지금 할 부탁 하나를 골라요.</p><div class="request-book-list"></div><p class="goal-save-status" role="status"></p><button type="button" data-goal-save hidden>목표 선택 다시 저장</button><button type="button" data-goal-parcel>꾸러미 수첩 열기</button>';
+ dialog.innerHTML='<header><h2 id="requestBookTitle">받은 부탁</h2><button type="button" data-goal-close autofocus>닫기</button></header><p>지금 할 부탁 하나를 골라요. ! 받을 부탁 · … 진행 중 · ? 완료 가능</p><div class="request-book-list"></div><p class="goal-save-status" role="status"></p><button type="button" data-goal-save hidden>목표 선택 다시 저장</button><button type="button" data-goal-parcel>꾸러미 수첩 열기</button>';
  c.viewport.append(box);doc.body.append(dialog);c.hub.classList.add('has-current-goal');
  const button=box.querySelector('button'),title=box.querySelector('b'),hint=box.querySelector('span'),list=dialog.querySelector('.request-book-list'),saveStatus=dialog.querySelector('.goal-save-status');
  const choices=new Map(),key=id=>'classRpgCurrentGoal_v1_'+id,ids=['momo','leaf','parcel','letter','trio-tori','trio-garden','trio-duri','trio-link'];

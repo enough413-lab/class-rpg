@@ -55,7 +55,7 @@ export function installToriLeafFavor(c){
  }
  answer.onclick=()=>{
   activate();if(owner==null||!playable()||!guide.open||guide.dataset.inspection==='true')return;
-  if(!nearTori()){guide.close();message='토리 곁으로 걸어가요.';if(c.getScene()==='library')c.walk.goTo('tori');sync();return}
+  if(!nearTori()){guide.close();message='토리 곁으로 걸어가요.';sync();return}
   c.stop();message='';if(phase===0){phase=1;acceptedIn=c.getScene();save();guide.close()}else if(phase===1){guide.close()}else if(phase===2){phase=3;save();c.refreshStory()}else{guide.close()}
   sync();c.refresh();c.onRequestAction?.();
  };

@@ -25,7 +25,7 @@ export function decorateCampusObject(button,place,room,tori){
  caption.append(name,action);button.dataset.walkX=place.x;button.setAttribute('aria-label',place.label.replace(/^\p{Extended_Pictographic}\ufe0f?\s*/u,'')+' · '+verbs[place.kind]);
  const sprite=(room==='classroom'?SPRITES:room==='library'?LIBRARY_SPRITES:room==='hallway'?HALLWAY_SPRITES:{})[place.kind];
  if(sprite){
-  button.classList.add('campus-sprite');button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
+  button.classList.add('campus-sprite');if(place.kind==='reading'){button.dataset.standBeside='true';button.dataset.cameraPair='true'}button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
   if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+(sprite.name===place.label?'':' · '+place.label)+' · 이야기하기')}
   const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+'-v1.webp';art.alt='';art.draggable=false;
   art.onerror=()=>{art.hidden=true;button.classList.add('art-missing')};

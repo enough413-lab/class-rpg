@@ -32,7 +32,7 @@ export function decorateTrioObject(b,p){
  }
  const id=p.kind==='trio-garden'?'garden':p.kind==='trio-duri'?'duri':null;if(!id)return false;
  b.classList.add('campus-npc','trio-resident');b.dataset.standBeside='true';b.dataset.cameraPair='true';b.dataset.walkX=p.x;b.setAttribute('aria-label',META[id].name+' · 말 걸기');
- b.innerHTML='<img alt="" width="110" height="160" src="maps/npcs/'+META[id].image+'"><span class="trio-name">'+META[id].name+'</span><span class="trio-mark" aria-hidden="true">!</span>';
+ b.innerHTML='<img alt="" width="110" height="160" src="maps/npcs/'+META[id].image+'"><span class="trio-name campus-object-caption">'+META[id].name+'</span><span class="trio-mark" aria-hidden="true">!</span>';
  b.querySelector('img').onerror=e=>{e.target.hidden=true;b.classList.add('trio-art-failed')};return true;
 }
 export function installNpcTrio(c){
@@ -77,7 +77,7 @@ export function installNpcTrio(c){
   conversation(r.phase===2?m.done+(active==='duri'&&r.attempts?' '+recordText(r)+'.':''):r.phase===1?'돌아왔구나! '+m.task:r.phase===3?(active==='duri'?'이번에는 '+((r.round+1)%4+1)+'번 바구니야. 각도와 힘을 다시 맞춰 볼까?':'또 놀러 왔구나! 이번에는 조금 다른 도전이야.'):m.task,r.phase===2?'return':r.phase===1?'play':'accept',r.phase===2?'함께 완성하기':r.phase===1?'계속 도전하기':r.phase===3?'다른 도전 받기':'좋아, 해 볼게!');
  }
  function launch(id,kind=id==='tori'?'tori':'trio-'+id){activate();active=id;opening={id:owner,token,room:c.getScene(),kind};focusBack=doc.activeElement;c.stop();c.walk.stop();talk();if(!dialog.open)dialog.showModal()}
- function search(){close();c.walk.goTo(nextClue());doc.getElementById('campusTitle').focus({preventScroll:true})}
+ function search(){close();doc.getElementById('campusTitle').focus({preventScroll:true})}
  function inspectSearch(kind){launch('tori',kind);mode='clue';shell();const r=state.tori;if(r.phase!==1){conversation(r.phase===2?'책은 이미 네 손에 있어. 토리에게 가져가자!':'먼저 토리의 부탁을 받아 보자.','close','계속 둘러보기');return}
   if(kind==='trio-books'){if(r.clues===3)bookGame();else conversation('아직 단서가 부족해. 창가 쪽지와 책장 틈의 책갈피를 모두 살펴보자. '+searchText(),'search','남은 단서 찾으러 가기');return}
   const color=kind==='trio-clue-color',target=r.round%6;content().innerHTML='<div class="trio-found-clue">'+(color?'<span class="trio-color-swatch color-'+bookColor(target)+'"></span>':glyph(bookMotif(target,r.round)))+'</div><p></p><button type="button" data-trio="note">단서를 수첩에 적기</button>';content().querySelector('p').textContent=color?'창가 쪽지: 잃어버린 책의 표지는 '+COLORS[bookColor(target)]+'색이래!':'책갈피의 자국: 표지에 '+MOTIFS[bookMotif(target,r.round)]+' 무늬가 있었대!';
@@ -108,7 +108,7 @@ export function installNpcTrio(c){
   if(action==='link-shot'&&active==='duri'&&l.step===2){shot(true);return}
   if(action==='link-take'&&active==='duri'&&l.step===3){l.step=4;changed('trio-link');close();return}
   if(action==='link-finish'&&active==='garden'&&l.step===4){l.step=5;l.wins=Math.min(999999,l.wins+1);changed('trio-link');talk();feedback('꽃과 리본으로 축제 준비 완성! 정원과 운동장에 장식이 남았어.');return}
-  if(action==='link-route'){close();c.walk.goTo('pond');return}
+  if(action==='link-route'){close();return}
   if(action==='accept'&&(r.phase===0||r.phase===3)){if(r.phase===3)r.round=(r.round+1)%999999;r.phase=1;if(active==='tori')r.clues=0;if(active==='duri')r.attempts=0;changed();play();return}
   if(action==='play'&&r.phase===1){play();return}
   if(action==='return'&&r.phase===2){r.phase=3;r.wins=Math.min(999999,r.wins+1);changed();talk();feedback('완성! 맵에 네가 해낸 흔적이 남았어. 다른 친구도 만나 봐!');return}
@@ -137,5 +137,5 @@ export function installNpcTrio(c){
  }
  const observer=new MutationObserver(()=>{if(c.hub.classList.contains('hidden'))close()});observer.observe(c.hub,{attributes:true,attributeFilter:['class','data-scene']});
  doc.addEventListener('visibilitychange',()=>{if(doc.hidden)close()});doc.addEventListener('student-dashboard-updated',sync);new MutationObserver(sync).observe(doc.getElementById('hubPlayer'),{childList:true});
- return {sync,visible,interact(kind){const prop=TRIO_SEARCH_PLACES.some(p=>p.kind===kind),id=kind==='tori'||prop?'tori':kind==='trio-garden'?'garden':kind==='trio-duri'?'duri':null;if(!id)return false;sync();if(prop&&!visible(kind))return true;if(c.walk.nearby()?.kind!==kind){c.walk.goTo(kind);return true}if(prop)inspectSearch(kind);else launch(id);return true},requests(){activate();return [...Object.keys(META).map(id=>({id:'trio-'+id,title:META[id].name+' · '+META[id].title,loaded:true,active:state[id].phase===1||state[id].phase===2,text:id==='tori'?(state.tori.phase===2?'도서관 · 들고 있는 책을 토리에게 건네기':state.tori.clues===3?'도서관 오른쪽 · 분실책 수레에서 책 골라 들기':!(state.tori.clues&1)?'도서관 왼쪽 · 창가 쪽지에서 색 단서 찾기':'도서관 오른쪽 · 책장 틈 책갈피에서 무늬 찾기'):state[id].phase===2?META[id].name+'에게 돌아가 완성해요.':META[id].task,error:saveError?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save})),{id:'trio-link',title:'새싹과 두리 · 꽃 축제 준비',loaded:true,active:state.link.step>=1&&state.link.step<=4,text:['','꽃을 두리에게 · 정원 → 연못 → 운동장','운동장 · 두리의 축제 바구니에 공 넣기','운동장 · 두리에게 돌아가 리본 받기','리본을 새싹에게 · 운동장 → 연못 → 정원'][state.link.step]||'꽃 축제 준비 완성!',error:saveError&&state.link.step>0?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save}]}};
+ return {signs(){activate();const a=r=>r.phase===2?'ready':r.phase===1?'active':'available',l=state.link;return {tori:a(state.tori),'trio-garden':state.garden.phase===2||l.step===4?'ready':l.step>=1&&l.step<=3?'active':a(state.garden),'trio-duri':state.duri.phase===2||l.step===1||l.step===3?'ready':l.step===2?'active':a(state.duri)}},sync,visible,interact(kind){const prop=TRIO_SEARCH_PLACES.some(p=>p.kind===kind),id=kind==='tori'||prop?'tori':kind==='trio-garden'?'garden':kind==='trio-duri'?'duri':null;if(!id)return false;sync();if(prop&&!visible(kind))return true;if(c.walk.nearby()?.kind!==kind)return true;if(prop)inspectSearch(kind);else launch(id);return true},requests(){activate();return [...Object.keys(META).map(id=>({id:'trio-'+id,title:META[id].name+' · '+META[id].title,loaded:true,active:state[id].phase===1||state[id].phase===2,text:id==='tori'?(state.tori.phase===2?'도서관 · 들고 있는 책을 토리에게 건네기':state.tori.clues===3?'도서관 오른쪽 · 분실책 수레에서 책 골라 들기':!(state.tori.clues&1)?'도서관 왼쪽 · 창가 쪽지에서 색 단서 찾기':'도서관 오른쪽 · 책장 틈 책갈피에서 무늬 찾기'):state[id].phase===2?META[id].name+'에게 돌아가 완성해요.':META[id].task,error:saveError?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save})),{id:'trio-link',title:'새싹과 두리 · 꽃 축제 준비',loaded:true,active:state.link.step>=1&&state.link.step<=4,text:['','꽃을 두리에게 · 정원 → 연못 → 운동장','운동장 · 두리의 축제 바구니에 공 넣기','운동장 · 두리에게 돌아가 리본 받기','리본을 새싹에게 · 운동장 → 연못 → 정원'][state.link.step]||'꽃 축제 준비 완성!',error:saveError&&state.link.step>0?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save}]}};
 }

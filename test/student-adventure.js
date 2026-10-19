@@ -414,8 +414,10 @@ export function installStudentAdventure(ctx){
   const editable=event.target.closest('input,textarea,select,[contenteditable="true"]');
   const overlay=doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
   if(editable||overlay||event.ctrlKey||event.metaKey||event.altKey||event.isComposing){window.studentCampus?.stop();event.stopImmediatePropagation();return}
+  if(hubOpen&&key==='enter'&&event.target.closest('[data-campus=use],[data-place]')){event.preventDefault();event.stopImmediatePropagation();return}
   if(key==='enter'&&event.target.closest('button,a[href]')){event.stopImmediatePropagation();return}
   event.preventDefault();event.stopImmediatePropagation();
+  if(hubOpen&&['e','w','s','arrowdown','enter'].includes(key))return;
   if(directions[key]){
    if(hubOpen&&window.studentCampus){if(directions[key][0])window.studentCampus.keyDown(key,directions[key][0],event.repeat);else if(!event.repeat){window.studentCampus.stop();if(directions[key][1]<0)window.hubUseNearby()}}
    else if(hubOpen)window.moveHub(...directions[key]);else window.moveExplorer?.(...directions[key]);
