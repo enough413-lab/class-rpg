@@ -1,3 +1,4 @@
+import {decorateTrioObject} from './npc-trio.js?v=20261019-trio';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
@@ -13,6 +14,8 @@ const PLACES={
  library:[roomDoors('library')[0],{kind:'reading',x:22,label:'✍️ 독후감 쓰기'},{kind:'tori',x:44,label:'책지기 토리'},{kind:'portfolio',x:62,label:'📖 독후감 책장'},{kind:'nook',x:79,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[...roomDoors(room),...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:87,label:'📖 이곳의 이야기'}];
+PLACES.garden.push({kind:'trio-garden',x:41,label:'새싹 · 물길 놀이'});
+PLACES.playground.push({kind:'trio-duri',x:41,label:'두리 · 공 던지기'});
 export function installSchoolWalk(ctx){
  // CSS pixels per second, shared by keys, touch buttons and destination walking.
  const GROUND=80,WALK_SPEED=100;
@@ -136,7 +139,7 @@ export function installSchoolWalk(ctx){
   stop();scene=next;hub.classList.toggle('campus-classroom-wide',next==='classroom');hub.classList.toggle('campus-wide',!!EXTRA_ROOMS[next]);hub.classList.toggle('campus-painted-place',!!PAINTED_PLACES[next]);hub.classList.toggle('campus-library-wide',next==='library');hub.classList.toggle('campus-hallway-wide',next==='hallway');ctx.setPosition(EXTRA_ROOMS[next]?12:next==='library'?36:44,GROUND);objects.replaceChildren();
   for(const p of currentPlaces(true)){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
-   if(p.kind==='pencil')decorateMomoPencil(b);else if(next==='hallway'&&decorateHallwayObject(b,p)){}else if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
+   if(decorateTrioObject(b,p)){}else if(p.kind==='pencil')decorateMomoPencil(b);else if(next==='hallway'&&decorateHallwayObject(b,p)){}else if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
    b.onclick=()=>{stop();ctx.interact(p.kind)};objects.append(b);
   }
   rig();measureApproaches();background();hub.scrollTop=0;camera();markPlaces();ctx.onPosition();

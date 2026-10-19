@@ -7,7 +7,7 @@ export function installCurrentGoal(c){
  dialog.innerHTML='<header><h2 id="requestBookTitle">받은 부탁</h2><button type="button" data-goal-close autofocus>닫기</button></header><p>지금 할 부탁 하나를 골라요.</p><div class="request-book-list"></div><p class="goal-save-status" role="status"></p><button type="button" data-goal-save hidden>목표 선택 다시 저장</button><button type="button" data-goal-parcel>꾸러미 수첩 열기</button>';
  c.viewport.append(box);doc.body.append(dialog);c.hub.classList.add('has-current-goal');
  const button=box.querySelector('button'),title=box.querySelector('b'),hint=box.querySelector('span'),list=dialog.querySelector('.request-book-list'),saveStatus=dialog.querySelector('.goal-save-status');
- const choices=new Map(),key=id=>'classRpgCurrentGoal_v1_'+id,ids=['momo','leaf','parcel','letter'];
+ const choices=new Map(),key=id=>'classRpgCurrentGoal_v1_'+id,ids=['momo','leaf','parcel','letter','trio-tori','trio-garden','trio-duri'];
  let owner=null,token=null,selected=null,stored=true,current=null,signature='',bookOwner=null,bookToken=null;
  const requests=()=>c.requests().filter(Boolean);
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token)return;owner=id;token=t;signature='';if(dialog.open)dialog.close();

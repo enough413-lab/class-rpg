@@ -8,7 +8,7 @@ const {chromium}=require('playwright'),{server,shots}=require('./student-fixture
  const book=async()=>{await f.locator('[data-goal-book]').tap();await f.locator('#campusRequestBook').waitFor()};
  const choose=async id=>{await book();await f.locator('[data-goal-pick='+id+']').tap();assert.equal(await current(),id)};
  const go=async kind=>{await p.emulateMedia({reducedMotion:'reduce'});await f.locator('[data-campus=find]').tap();await f.locator('[data-finder-place='+kind+']').tap();await f.locator('.campus-waypoint[data-state=arrived]').waitFor()};
- const talk=async kind=>{await go(kind);await f.locator('[data-campus=use]').tap()};
+ const talk=async kind=>{await go(kind);await f.locator('[data-campus=use]').tap();if(kind==='tori')await f.locator('[data-trio=legacy]').tap()};
  const scene=async room=>{await f.evaluate(room=>enterHubScene(room),room);await f.locator('.campus-scene-status').waitFor({state:'hidden'})};
  const saved=()=>f.evaluate(()=>JSON.parse(localStorage.getItem('classRpgCurrentGoal_v1_'+mockRpg.student.id)||'null'));
  const fit=async sel=>{const b=await f.locator(sel).boundingBox(),v=p.viewportSize();assert(b&&b.width>0&&b.x>=0&&b.y>=0&&b.x+b.width<=v.width+1&&b.y+b.height<=v.height+1,sel+' fits '+JSON.stringify({b,v}));assert(await f.locator(sel).evaluate(e=>e.scrollWidth<=e.clientWidth+1))};
