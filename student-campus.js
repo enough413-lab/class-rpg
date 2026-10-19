@@ -1,4 +1,5 @@
-import {installNpcTrio} from './npc-trio.js?v=20261019-duri-record';
+import {installFlowerbed} from './campus-flowerbed.js?v=20261019-flowerbed';
+import {installNpcTrio} from './npc-trio.js?v=20261019-flowerbed';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-journey';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-current-goal';
@@ -21,7 +22,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261019-current-goal';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261019-current-goal';
-import {installSchoolWalk} from './school-walk.js?v=20261019-duri-record';
+import {installSchoolWalk} from './school-walk.js?v=20261019-flowerbed';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -68,7 +69,7 @@ export function installStudentCampus(ctx){
  function stop(){held=null;walk.stop()}
  function syncNear(){
   if(!open())return;const near=walk.nearby(),closest=(walk.nearby()?walk.nearest():(momo?.goal()||walk.nearest())),destination=walk.destination(),action=footer.querySelector('[data-campus=use]');
-  memory?.capture();trio?.sync();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();platforms?.sync();currentGoal?.refresh();
+  memory?.capture();flowerbed?.sync();trio?.sync();meal?.position();momo?.sync();gardenCare?.sync();nook?.sync();sprout?.sync();bench?.sync();mat?.sync();cheer?.sync();ball?.sync();fence?.sync();viewer?.sync();notebook?.sync();leafFavor?.sync();platforms?.sync();currentGoal?.refresh();
   const direction=closest.x<ctx.getPosition().x?'왼쪽':'오른쪽';
   const hint=destination?destination.label+' 쪽으로 걷고 있어요.':near?'도착! 아래 버튼으로 살펴봐요.':direction+'을 살펴봐요 · '+closest.label;
   if(doc.getElementById('campusNear').textContent!==hint)doc.getElementById('campusNear').textContent=hint;
@@ -96,8 +97,9 @@ export function installStudentCampus(ctx){
   if(isOpen){returnFocus=doc.activeElement;syncScene();memory?.resume(false);doc.getElementById('campusTitle').focus({preventScroll:true})}
   else{memory?.flush();if(guide.open)guide.close();if(returnFocus?.isConnected&&returnFocus.getClientRects().length)returnFocus.focus({preventScroll:true})}
  }
- let trio=null,currentGoal=null,parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null,platforms=null;
+ let flowerbed=null,trio=null,currentGoal=null,parcel=null,letter=null,meal=null,momo=null,gardenCare=null,nook=null,sprout=null,bench=null,mat=null,cheer=null,ball=null,fence=null,viewer=null,notebook=null,leafFavor=null,platforms=null;
  function interact(kind){
+  if(flowerbed?.interact(kind))return;
   if(trio?.interact(kind))return;
   if(notebook?.interact(kind))return;
   if(viewer?.interact(kind))return;
@@ -139,7 +141,8 @@ export function installStudentCampus(ctx){
  parcel=installParcelAdventure({onRequestAction:()=>currentGoal?.focus('parcel'),...ctx,hub,objects,walk,viewport:stage.parentElement,stopMovement:()=>{stop();walk.stop()},onProgress:state=>{story.render(state);letter?.refreshTori();people.refresh();if(parcel)syncNear()}});
  letter=installGardenLetter({onRequestAction:()=>currentGoal?.focus('letter'),onRequestUpdate:()=>currentGoal?.refresh(),...ctx,hub,guide,walk,stopMovement:()=>{stop();walk.stop()}});
  leafFavor=installToriLeafFavor({onRequestAction:()=>currentGoal?.focus('leaf'),...ctx,hub,objects,walk,guide,notebook,stop,refresh:syncNear,refreshStory:()=>story.refresh(),getParcelStatus:()=>parcel?.snapshot()});
- trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,focusGoal:id=>currentGoal?.focus(id)});
+ flowerbed=installFlowerbed({...ctx,hub,objects,walk,stop});
+ trio=installNpcTrio({...ctx,hub,stage,objects,walk,stop,refresh:syncNear,legacyTori:talk,visitFlowerbed:()=>walk.goTo('flowerbed'),flowerbedSummary:()=>flowerbed.summary(),focusGoal:id=>currentGoal?.focus(id)});
  currentGoal=installCurrentGoal({...ctx,hub,viewport:stage.parentElement,requests:()=>[...trio.requests(),momo?.request(),leafFavor?.request(),parcel?.request(),letter?.request()],stop:()=>{stop();walk.stop()},openParcel:()=>parcel.start()});
  memory=installCampusMemory({getStudent:ctx.getStudent,getSpot:()=>({room:ctx.getScene(),x:ctx.getPosition().x}),restore:spot=>{window.enterHubScene(spot.room);syncScene();ctx.setPosition(spot.x,80);walk.camera();syncNear()},onStatus:memoryStatus,doc});
  // A direct room/quest link keeps its destination. Only the general walk entry resumes.
