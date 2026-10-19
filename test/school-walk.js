@@ -1,4 +1,4 @@
-import {decorateTrioObject} from './npc-trio.js?v=20261019-trio';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261019-journey';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
@@ -14,6 +14,7 @@ const PLACES={
  library:[roomDoors('library')[0],{kind:'reading',x:22,label:'✍️ 독후감 쓰기'},{kind:'tori',x:44,label:'책지기 토리'},{kind:'portfolio',x:62,label:'📖 독후감 책장'},{kind:'nook',x:79,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[...roomDoors(room),...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:87,label:'📖 이곳의 이야기'}];
+PLACES.library.push(...TRIO_SEARCH_PLACES);
 PLACES.garden.push({kind:'trio-garden',x:41,label:'새싹 · 물길 놀이'});
 PLACES.playground.push({kind:'trio-duri',x:41,label:'두리 · 공 던지기'});
 export function installSchoolWalk(ctx){
@@ -33,7 +34,7 @@ export function installSchoolWalk(ctx){
  const direction=()=>[...heldDirections.values()].at(-1)||0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
- const currentPlaces=(includeInactive=false)=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(includeInactive||p.kind!=='pencil'||ctx.isMomoPencilVisible?.()));
+ const currentPlaces=(includeInactive=false)=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(includeInactive||p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&(includeInactive||ctx.isTrioPlaceVisible?.(p.kind)!==false));
  function camera(x=ctx.getPosition().x){
   const width=stage.clientWidth,view=viewport.clientWidth;
   const playerFocus=width*x/100;let focus=playerFocus;
@@ -161,5 +162,5 @@ export function installSchoolWalk(ctx){
  new MutationObserver(rig).observe(player,{childList:true});
  window.addEventListener('blur',stop);window.addEventListener('pagehide',stop);doc.addEventListener('visibilitychange',stop);
  let studentId=ctx.getStudent()?.id;doc.addEventListener('student-dashboard-updated',()=>{const next=ctx.getStudent()?.id;if(next!==studentId)stop();studentId=next});
- return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,goToPoint,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.()))};
+ return {syncScene,nearby,nearest,stop,hold,release,nudge,camera,goTo,goToPoint,destination:()=>destination,places:room=>(PLACES[room]||[]).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&ctx.isTrioPlaceVisible?.(p.kind)!==false)};
 }
