@@ -27,7 +27,7 @@ export function decorateCampusObject(button,place,room,tori){
  if(sprite){
   button.classList.add('campus-sprite');if(['reading','teacher','titles','inventory','portfolio','notice'].includes(place.kind)){button.dataset.standBeside='true';button.dataset.cameraPair='true'}button.style.left=sprite.x+'%';button.style.width=sprite.width+'%';button.style.height=sprite.height*.75+'%';
   if(sprite.name){button.classList.add('campus-npc');name.textContent=sprite.name;button.dataset.action='이야기하기';button.setAttribute('aria-label',sprite.name+(sprite.name===place.label?'':' · '+place.label)+' · 이야기하기')}
-  const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+'-v1.webp';art.alt='';art.draggable=false;
+  const art=doc.createElement('img');art.className='campus-sprite-art';art.src='maps/npcs/'+sprite.art+(['tori','shopkeeper'].includes(sprite.art)?'-anime-v2.webp':'-v1.webp');art.alt='';art.draggable=false;
   art.onerror=()=>{art.hidden=true;button.classList.add('art-missing')};
   const missing=doc.createElement('span');missing.className='campus-sprite-missing';missing.textContent='그림을 못 불러왔어요. 이름을 눌러 이용해요.';missing.setAttribute('aria-hidden','true');
   button.append(art,missing,caption);return;

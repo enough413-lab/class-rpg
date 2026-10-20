@@ -1,6 +1,6 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
-import {installNpcTrio} from './npc-trio.js?v=20261020-tori-memory';
+import {installNpcTrio} from './npc-trio.js?v=20261020-anime';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
@@ -19,17 +19,17 @@ import {installCampusJump} from './campus-jump.js?v=20261019-controls';
 import {installCafeteriaPlay} from './cafeteria-play.js?v=20261014-meal-sync';
 import {campusIcon} from './campus-icons.js?v=20261012-icons';
 import {roomDoors} from './school-connections.js?v=20261008-paths';
-import {installGardenLetter} from './garden-letter.js?v=20261019-controls';
+import {installGardenLetter} from './garden-letter.js?v=20261020-anime';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
-import {installParcelAdventure} from './parcel-adventure.js?v=20261019-controls';
-import {installSchoolWalk} from './school-walk.js?v=20261020-alert';
+import {installParcelAdventure} from './parcel-adventure.js?v=20261020-anime';
+import {installSchoolWalk} from './school-walk.js?v=20261020-anime';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
-import {installCampusNpcs} from './campus-npcs.js?v=20261019-npc-request';
+import {installCampusNpcs} from './campus-npcs.js?v=20261020-anime';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
-const TORI_GREETING='<img src="maps/npcs/tori-greeting-v1.webp" alt="" width="115" height="165">';
-const TORI='<img src="maps/npcs/tori-v1.webp" alt="" width="115" height="165">';
+const TORI_GREETING='<img src="maps/npcs/tori-anime-v2.webp" alt="" width="115" height="165">';
+const TORI='<img src="maps/npcs/tori-anime-v2.webp" alt="" width="115" height="165">';
 const SCENES={classroom:{name:'우리 교실',hint:'선생님과 모모에게 말을 걸고, 옷장과 진열장을 살펴봐요.',routes:[['hallway','🚪 복도']]},hallway:{name:'별빛 복도',hint:'왼쪽은 우리 교실, 오른쪽은 도서관이에요. 긴 창가를 따라 걸어 봐요.',routes:[['classroom','🏫 교실'],['library','📚 도서관']]},library:{name:'이야기 도서관',hint:'오른쪽 창가를 지나면 정원으로 이어져요. 토리와 이야기도 나눠요.',routes:[['hallway','← 복도'],['garden','정원 →']]}};
 for(const [id,room] of Object.entries(EXTRA_ROOMS))SCENES[id]={name:room.name,hint:'길을 따라 걸으며 물건과 이야기를 발견해요.',routes:roomDoors(id).map(p=>[p.kind,p.label])};
 export function installStudentCampus(ctx){
@@ -60,7 +60,7 @@ export function installStudentCampus(ctx){
  }
  const guide=doc.createElement('dialog');guide.id='campusGuide';guide.className='campus-guide';guide.setAttribute('aria-labelledby','campusGuideTitle');
  guide.innerHTML='<div class="campus-guide-top"><span>이야기 도서관 · 책지기</span><button data-guide="close" autofocus>닫기</button></div><div class="campus-greeting"><span class="game-speaker-name">책지기 토리</span><div class="campus-portrait">'+TORI_GREETING+'</div><div><h2 id="campusGuideTitle">안녕! 나는 토리야.</h2><p>마음에 남은 책이 있니?<br>오늘은 어떤 이야기를 나눠 볼까?</p></div></div><div class="campus-guide-choices"><button data-guide="reading"><b>✍️ 책 이야기 쓰기</b><span>모든 레벨 · 내가 쓴 글과 선생님 답장도 봐요.</span></button><button data-guide="parcel"><b>📦 책 꾸러미 이야기</b><span>Lv.16부터 · 찾은 표식의 주인을 만나요.</span></button><button data-guide="letter"><b>🌿 새싹 이야기</b><span>Lv.19부터 · 정원에서 관찰 편지를 만들어요.</span></button><button data-guide="evidence"><b>🔎 책 속 단서 찾기</b><span>Lv. 11부터 · 시작한 탐험은 계속할 수 있어요.</span></button></div><div class="campus-real"><b>오늘 학교에서 해 볼까?</b><p>친구에게 좋아하는 장면 하나를 소개해 줘.<br>“나는 이 장면이 좋아. 왜냐하면…” 하고 말해 봐!</p></div><button class="campus-return" data-guide="close">다음에 또 이야기하자!</button>';
- const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-v1.webp'}else guide.querySelector('.campus-portrait').hidden=true};
+ const toriPortrait=guide.querySelector('.campus-portrait img');toriPortrait.onerror=()=>{if(!toriPortrait.dataset.fallback){toriPortrait.dataset.fallback='true';toriPortrait.src='maps/npcs/tori-anime-v2.webp'}else guide.querySelector('.campus-portrait').hidden=true};
  doc.body.append(guide);
  const story=installCampusStory({objects,guide});
  const people=installCampusNpcs({hub,getParcelStatus:()=>parcel?.snapshot(),getStudent:ctx.getStudent,getToken:ctx.getToken,levelInfo:ctx.levelInfo,getMomo:()=>momo?.dialogue(),onMomoAction:a=>momo?.action(a),onVisitMomo:()=>{stop();doc.getElementById('campusTitle').focus({preventScroll:true})}});

@@ -15,7 +15,7 @@ export function installGardenLetter(c){
  }
  function open(subtitle,html){c.stopMovement();if(!d.open)opener=doc.activeElement;d.innerHTML='<header><div><span>우리 학교 작은 의뢰 · Lv.19</span><h2 id="letterTitle">햇빛을 찾는 초록 편지</h2><p>'+subtitle+'</p></div><button data-letter="close" autofocus>닫기</button></header><div class="parcel-body">'+html+'</div>';if(!d.open)d.showModal();d.scrollTop=0}
  const feedback=()=>'<p id="letterFeedback" class="parcel-feedback" role="status" aria-live="polite"></p>';
- const portrait=text=>'<div class="parcel-tori"><img src="maps/npcs/tori-v1.webp" alt="책지기 토리"><p>'+text+'</p></div>';
+ const portrait=text=>'<div class="parcel-tori"><img src="maps/npcs/tori-anime-v2.webp" alt="책지기 토리"><p>'+text+'</p></div>';
  async function start(place='notebook'){
   if(busy)return;if(owner!==student().id||token!==c.getToken())reset();const request=++view;
   open('토리의 관찰 수첩을 펼치고 있어요.','<p>잠시만 기다려 주세요…</p>');const ok=await load();if(request!==view||!d.open)return;
