@@ -1,6 +1,6 @@
 // Separate nearby names without moving a character or running an idle animation.
 export function installCampusNameplates({hub,stage,viewport,player,objects}){
- let frame=0;const offsets=new WeakMap();
+ let frame=0;const offsets=new WeakMap(),alertOffsets=new WeakMap();
  function layout(){
   frame=0;if(hub.classList.contains('hidden'))return;
   const name=player.querySelector('.campus-player-name');if(!name)return;
@@ -9,6 +9,7 @@ export function installCampusNameplates({hub,stage,viewport,player,objects}){
   // so walking in air does not make neighbouring NPC names bounce around.
   const jumpY=player.dataset.jumping?parseFloat(getComputedStyle(name).translate.split(' ')[1])||0:0;
   const measure=label=>{const r=label.getBoundingClientRect(),old=offsets.get(label)||{x:0,y:0};return {label,left:r.left-old.x,top:r.top-old.y-(label===name?jumpY:0),width:r.width,height:r.height}};
+  const alerts=[...objects.querySelectorAll('.campus-quest-sign:not([hidden])')].filter(el=>el.getClientRects().length).map(el=>{const r=el.getBoundingClientRect(),old=alertOffsets.get(el)||0,left=r.left-old;return {el,x:Math.max(view.left+8,Math.min(left,view.right-8-r.width))-left}});
   const own=measure(name),clampX=r=>Math.max(view.left+8,Math.min(r.left,view.right-8-r.width))-r.left;
   const ownX=clampX(own),placements=[{...own,x:ownX,y:0}],bottom=Math.min(view.bottom,scene.bottom)-4;
   const boxes=()=>placements.filter(p=>!p.hidden).map(p=>({left:p.left+p.x,right:p.left+p.x+p.width,top:p.top+p.y,bottom:p.top+p.y+p.height}));
@@ -22,6 +23,7 @@ export function installCampusNameplates({hub,stage,viewport,player,objects}){
    const hidden=current.top+y+current.height>bottom&&!current.resident&&!current.important;placements.push({...current,x,y,hidden});
   }
   // All geometry reads precede writes. Only changed offsets touch the DOM.
+  for(const {el,x}of alerts){if(alertOffsets.get(el)===x)continue;el.style.setProperty('--campus-alert-x',x+'px');alertOffsets.set(el,x)}
   for(const {label,x,y,hidden=false}of placements){if(label!==name&&label.dataset.labelCrowded!==String(hidden))label.dataset.labelCrowded=String(hidden);const old=offsets.get(label);if(old?.x===x&&old?.y===y)continue;label.style.setProperty('--campus-name-x',x+'px');label.style.setProperty('--campus-name-y',y+'px');offsets.set(label,{x,y})}
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(layout)}
