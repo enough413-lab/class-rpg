@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-20",
+  "tool": "Built-in image_gen.imagegen; no fallback CLI",
+  "purpose": "Original illustrated game UI inspired by user-provided material and composition references; no reference artwork copied into the project.",
+  "assets": [
+    {
+      "file": "maps/ui/dialogue-paper-v1.webp",
+      "source": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-d8115a3f-134e-40cb-8d34-b6f7e8df3dc0.png",
+      "prompt": "Create one production-ready 2D hand-painted game UI asset, an EMPTY NPC dialogue panel for a cozy Korean school fantasy RPG. Original illustration, warm storybook gouache and polished casual RPG item art, creamy ivory handmade paper with subtle grain and soft honey watercolor shading, irregular organic softly scalloped silhouette, delicately rolled paper edges, painterly ochre contour, small green leaf and stitched linen detail only near top-left rim, a tiny warm wooden bead at bottom-right rim. Wide horizontal panel aspect 2:1, fully front facing orthographic no perspective, fills 94 percent of image with transparent outside. Center 85% must be clean pale ivory blank suitable for readable overlaid game text, no drawings in center. No text, no letters, no symbols, no UI mockup, no scene, no buttons, no characters. The panel itself must feel like a tangible lovingly illustrated game prop, not a flat CSS rounded rectangle. Transparent background with genuine alpha, soft close contact edge shadow only. Deliver single isolated panel.",
+      "export": "1400x700 WebP quality88, alpha preserved"
+    },
+    {
+      "file": "maps/ui/quest-lantern-v1.webp",
+      "source": "C:/Users/USER/.codex/generated_images/01a11397-95d9-7e21-9624-2eb97171ea52/exec-d3b5bf51-eaee-43f3-89c0-4c283a54346f.png",
+      "prompt": "Single isolated illustrated quest notification icon for a cozy hand-painted school fantasy RPG: a charming glowing lightbulb made from creamy pearl glass and warm golden brass, embedded in a small sculpted golden amber wooden shield/bookmark badge with a pointed lower tip. Strong clear silhouette, thick warm ochre hand-painted contour, brush-textured beveled edges, small dimensional highlights, gentle magical yellow glow near the bulb. Soft gouache painterly casual game inventory art, not flat vector or website icon. Centered front view, square composition, artwork fills 88% image, transparent genuine alpha outside. No text, no letters, no exclamation marks, no other objects, no scene, no frame around the image. Must remain readable as a 48px game quest icon. Original art.",
+      "export": "192x192 WebP quality90, alpha preserved"
+    }
+  ],
+  "implementation": "campus-painted-ui.css and npc-trio.js. Trio conversation uses a bottom scene-visible illustrated panel; puzzle/throw controls retain their existing layout. Completed quest history and request notebook reuse the paper art. Quest states retain accessible state labels and use gold bulb / blue repeat badge / green check badge. Live text, keyboard access, focus rings and min44px controls retained.",
+  "validation": "campus-type and campus-controls-polish browser suites:1366/390/320, actual manual Tori loop, Space jump/up dialogue, state transitions, no text overflow, unchanged fixture economy. Generated art visually inspected and integrated screenshots inspected. No physical student-device observation. No DB changes; test-only deployment."
+}
