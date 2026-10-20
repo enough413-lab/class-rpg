@@ -1,5 +1,5 @@
 import {decorateFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261020-painted';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261020-tori-memory';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
@@ -48,6 +48,14 @@ export function installSchoolWalk(ctx){
    const delta=a.center*width/100-playerFocus,d=Math.abs(delta),t=Math.max(0,Math.min(1,(a.gapCss+24-d)/24));
    focus+=Math.sign(delta)*Math.min(d,a.gapCss)/2*t*t*(3-2*t);
   }
+  // Frame Tori's fixed book stand and the side-standing player together. Nearby
+  // furniture must not pull this completed result beyond a narrow screen edge.
+  const tori=approaches.get('tori');
+  if(tori?.bookPair&&view<tori.pairView){
+   const center=tori.center*width/100,d=Math.abs(center-playerFocus),t=Math.max(0,Math.min(1,(tori.gapCss+24-d)/24)),b=tori.bookPair;
+   const left=Math.min(center-b.left,playerFocus-b.player),right=Math.max(center+b.right,playerFocus+b.player);
+   focus+=((left+right)/2-focus)*t*t*(3-2*t);
+  }
   const offset=Math.max(0,Math.min(width-view,focus-view/2));
   stage.style.transform='translateX('+(-offset)+'px)';
   nameplates.schedule();
@@ -60,7 +68,7 @@ export function installSchoolWalk(ctx){
   approaches.clear();const width=stage.clientWidth;if(!width)return;
   for(const npc of objects.querySelectorAll('.campus-npc,[data-stand-beside]')){
    const center=parseFloat(npc.style.left),gap=((npc.offsetWidth+player.offsetWidth)/2+10)/width*100;
-   approaches.set(npc.dataset.place,{center,cameraPair:npc.dataset.cameraPair==='true',gapCss:gap*width/100,pairView:player.offsetWidth+2*npc.offsetWidth+20,points:[{x:center-gap,side:-1},{x:center+gap,side:1}].filter(p=>p.x>=4&&p.x<=96)});
+   approaches.set(npc.dataset.place,{center,cameraPair:npc.dataset.cameraPair==='true',bookPair:npc.dataset.place==='tori'?{left:npc.offsetWidth/2+42,right:npc.offsetWidth/2,player:player.offsetWidth/2}:null,gapCss:gap*width/100,pairView:player.offsetWidth+2*npc.offsetWidth+20+(npc.dataset.place==='tori'?84:0),points:[{x:center-gap,side:-1},{x:center+gap,side:1}].filter(p=>p.x>=4&&p.x<=96)});
   }
  }
  function distance(place,x=ctx.getPosition().x){return Math.min(Math.abs(place.x-x),...(approaches.get(place.kind)?.points||[]).map(p=>Math.abs(p.x-x)))}
@@ -142,6 +150,7 @@ export function installSchoolWalk(ctx){
   for(const p of currentPlaces(true)){
    const b=doc.createElement('button');b.className=p.kind==='tori'?'campus-place campus-tori':'campus-place';b.dataset.place=p.kind;b.style.left=p.x+'%';
    if(decorateFlowerbed(b,p)){}else if(decorateTrioObject(b,p)){}else if(p.kind==='pencil')decorateMomoPencil(b);else if(next==='hallway'&&decorateHallwayObject(b,p)){}else if(p.door)decorateRoomDoor(b,p,next==='library'||next==='cafeteria');else if(p.kind==='nook'){b.classList.add('campus-nook');b.dataset.walkX=p.x;b.dataset.action='살펴보기';b.setAttribute('aria-label','창가 쉼터 · 살펴보기');b.innerHTML='<span class="campus-object-caption"><b>🌿 창가 쉼터</b><small class="campus-object-action">↗ 살펴보기</small></span>'}else if(decoratePlaceProp(b,p,next)){}else if(EXTRA_ROOMS[next]){b.classList.add('campus-world-object');const title=doc.createElement('b');title.textContent=p.label;b.append(title);b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기')}else decorateCampusObject(b,p,next,ctx.tori);
+   if(p.kind==='tori')b.dataset.cameraPair='true';
    const tag=b.querySelector('.campus-object-caption');if(tag){b.dataset.groundLabel='true';const title=tag.querySelector('b');if(title)title.textContent=title.textContent.replace(/^\p{Extended_Pictographic}[\uFE0F\u200D\p{Extended_Pictographic}]*\s*/u,'')}
    b.onclick=()=>{stop();if(b.classList.contains('campus-npc')){doc.getElementById('campusTitle').focus({preventScroll:true});return}if(nearby()?.kind===p.kind)ctx.interact(p.kind);else doc.getElementById('campusTitle').focus({preventScroll:true})};objects.append(b);
   }
