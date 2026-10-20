@@ -1,6 +1,6 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
-import {installNpcTrio} from './npc-trio.js?v=20261020-anime';
+import {installNpcTrio} from './npc-trio.js?v=20261020-tori-shelf';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
@@ -23,7 +23,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261020-anime';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261020-anime';
-import {installSchoolWalk} from './school-walk.js?v=20261020-anime';
+import {installSchoolWalk} from './school-walk.js?v=20261020-tori-shelf';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261020-anime';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';

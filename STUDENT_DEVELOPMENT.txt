@@ -769,3 +769,16 @@ Completed local feature and browser verification: 토리의 단서 발견·책 �
 통합 검증 기록: 작업 중 도착한 staging b9c3c7e의 손그림 종이 대화창·전구 부탁 표시와 maps/ui 원본/프롬프트를 그대로 보존했다. 최신 그림 위에서 토리 기억과 기존 기능을 재검증했다. 앞선 병렬 실행의 CPU4배 걷기 속도 검사 한 번은 부하 중 실패했으며, 코드·허용 범위를 바꾸지 않은 단독 실행에서 통과했다. 최종 통합본의 속도 검사도 단독 실행한다. 최종 배포 증거는 이 검사와 Pages 확인을 모두 통과해야 complete로 기록한다.
 
 이동 검사 보강: 최신 그림 통합 후 토리 대화 열기에서 한 번 시간 초과가 발생했다. tests/campus-smooth-walk.cjs의 명시적 길찾기 후 실제 arrived 표시를 기다리도록 보강했다. 다른 직접행동 검사와 같은 도착 기준이며, 키 입력·거리·대화 조건·이동 속도 허용 범위를 완화하지 않는다.
+
+
+## 후속: 돌려준 책이 모이는 토리의 작은 책장 (2026-10-20)
+
+- 사용자의 “앞으로 돌려주는 책들이 하나씩 모이고 가까이서 ↑사용으로 살펴보기” 요청을 구현했다. 기존 마지막 책 받침을 별도 작은 책장으로 옮겼다. 실제 근접 반환에서만 한 권을 더하고 같은 표지도 권수를 누적한다. 맵에는 앞쪽 최대12권과 총 권수 표찰을 표시하며, 책장 안에서는 실제 모인 여섯 표지 종류와 각각의 정확한 권수를 살펴본다. 표지를 고르면 토리가 해당 색/무늬와 권수를 짧게 기억한다. 새 퀘스트·보상·자동 이동은 없다.
+- 책장 근처에서 키보드 ↑ 또는 화면 ↑사용으로 연다. 맵 책장 클릭/Enter/E/W/Space는 열지 않으며 Space 연속 점프는 유지한다. 책장 열기·선택·닫기는 읽기 전용이다. 돌아오는 다음 책을 들고 있거나 새 부탁을 받아도 이미 모은 책은 그대로 남는다. 도서관의 독서 기록대·작은 책장·토리·독후감 책장 사이 간격을 확보하고 그림 위치와 실제 접근 위치를 같은 장소 좌표로 맞췄다. 작은 책장의 안내 이동은 기록대와 겹치지 않는 오른쪽 옆자리로 간다. 숨은 책 수레는 직접 찾으며 선택적 일반 장소 길찾기만 유지한다.
+- 기존 v1의 선택적 tori.returnedBooks는6개 종류별 정수 권수 배열이다. 합계가 기존 wins 이하인 유효한 배열만 읽는다. 저장 크기와 맵 렌더링은 누적 횟수에 비례해 무한히 커지지 않으며 기존999999 상한을 유지한다. 새 배열이 없으면 확실히 기록된 마지막 책만 한 권 이어받는다. 종류를 알 수 없는 과거 반납은 기존 wins를 그대로 보존하고 별도로 설명하며 추측해서 표지별 기록을 만들지 않는다. 읽기·재접속·살펴보기만으로 이전 저장을 다시 쓰지 않는다. 기존 returnedRound/phase/round/wins/clues, 새싹·두리 최고 기록·꽃리본·축제·나비 꽃밭과 학교 기록을 보존한다.
+- 저장 실패 중에도 현재 세션의 한 권 추가를 유지하고 기존 저장 재시도로 복구한다. 재시도는 책이나 완료 횟수를 중복 증가시키지 않는다. 학생/토큰/거리/장소·열린 대화 검사를 유지하며 다른 계정/먼 거리/닫힌 이전 버튼은 무효다. 기기·브라우저·학생별 로컬 저장이며 서버 동기화나 실제 크롬북·학생 관찰이 아니다. DB·계정·세션·학교 경험치·골드·아이템 쓰기와 자동 리필 없음.
+- tests/tori-bookshelf.cjs는 빈 책장/이전 자료의 정확한 한 권만 이어받기/잘못된 배열/큰 누적 수, 여섯 표지와 실제 반복 탐색→같은 책 추가 반환→권수 확인, ↑사용과 금지 입력, 읽기 무변경, 재접속·계정 분리·먼 거리와 오래된 버튼·저장 실패 재시도,1366/390/320 키보드·브라우저 터치 및390 CPU4배를 검사한다. 책장·캐릭터·토리/기록대 비겹침과 화면 캡처를 검토했다. 기존 tori-returned-book 검사는 마지막 책 표시 위치를 새 책장으로 갱신하고 실제 반환·기억·이전 자료·회차 순환 검증을 유지했다.
+- 회귀 범위: tori-returned-book, tori-discovery-feedback, npc-trio-journey, festival-decoration, flowerbed-request, campus-controls-polish, campus-ground-labels, campus-type, current-goal, tori-leaf-favor, campus-smooth-walk. 완료 판정은 최종 배포 증거의 통과 목록을 따른다. 동시 도착한34fbfb9의 전구/두루마리/펼친 책 알림·카메라 가장자리 보정과 그림/원본을 보존한다. 작은 책장/표지는 기존 코드 SVG·책 그림을 확장했고 종이창은 기존 생성 원본을 재사용한다.
+- 최종 배포 증거:2026-09-30/a/outputs/student-tori-bookshelf-deployment.json. complete, Pages 성공, 실제 파일 바이트, 전체 staging 트리와 main/test 밖 정확한 SHA 보존이 배포 완료 기준이다. 운영 DB/비공개 백업은 접근하지 않고 운영 공개는 새 명시적 승인 전 금지한다. 기존 주기·조용한 알림을 유지하고 전체50/100개 완료로 처리하지 않는다. 다음 작은 범위는 최신 사용자/Page 방향을 따르며 이번 누적 책장과 기존 놀이 기록을 다시 만들지 않는다.
+
+Integration note (2026-10-20): concurrent a00200b animal NPC artwork and bulb/scroll/book illustrations were preserved byte-for-byte, including original retained art. Targeted bookshelf/controls/labels/type/journey browser checks revalidate the final art integration; unchanged behavior regressions and isolated speed check passed before the art-only merge. Final receipt records the exact validated tree and live files.
