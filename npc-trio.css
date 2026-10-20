@@ -25,3 +25,6 @@
 @media(max-width:420px){.trio-dialog:has(.trio-court) .trio-content{padding-bottom:6px}.trio-dialog:has(.trio-court) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-shot-controls{margin:8px 0}}
 .trio-pipes .pipe-blocked{border-color:#98613d;border-style:dashed;background:#f4dfb3}.trio-pipes .trio-pipe-stop circle{fill:#fff8df;stroke:#80532e;stroke-width:2}.trio-pipes .trio-pipe-stop path{fill:none;stroke:#80532e;stroke-width:2.5;stroke-linecap:round}
 @media(max-width:420px){.trio-dialog:has(.trio-pipes) .trio-pipe-wrap{margin:8px 0}.trio-dialog:has(.trio-pipes) .trio-content>p{margin-bottom:8px}.trio-dialog:has(.trio-pipes) .trio-content{padding-bottom:6px}.trio-dialog:has(.trio-pipes) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-dialog:has(.trio-pipes) footer{padding:6px 12px}}
+
+.trio-shot-actions{display:flex;gap:8px;flex-wrap:wrap}.trio-shot-actions [data-trio=recall-shot]{background:#eee9cf}
+.trio-dialog .trio-shot-record{font-size:15px;line-height:1.4;margin-bottom:10px}@media(max-width:420px){.trio-dialog:has(.trio-court) footer{padding:6px 12px}}
