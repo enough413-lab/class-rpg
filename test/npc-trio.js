@@ -1,5 +1,5 @@
 // Personal play mastery only: no school economy, database or earned-record writes.
-const META={tori:{name:'토리',room:'library',image:'tori-v1.webp',title:'잃어버린 책 찾기',task:'단서 두 개로 책 표지를 찾아 줘!',done:'책 표지가 제자리를 찾았어!'},garden:{name:'새싹',room:'garden',image:'saessak-v1.webp',title:'꽃밭으로 물길 잇기',task:'구부러진 물길을 돌려 꽃까지 이어 줘!',done:'네가 이은 물길로 꽃이 피었어!'},duri:{name:'두리',room:'playground',image:'duri-v1.webp',title:'바람뜰 공 던지기',task:'각도와 힘을 바꿔 바구니에 공을 넣어 봐!',done:'멋진 골! 네 깃발을 운동장에 달았어!'}};
+const META={tori:{name:'토리',room:'library',image:'tori-anime-v2.webp',title:'잃어버린 책 찾기',task:'단서 두 개로 책 표지를 찾아 줘!',done:'책 표지가 제자리를 찾았어!'},garden:{name:'새싹',room:'garden',image:'saessak-anime-v2.webp',title:'꽃밭으로 물길 잇기',task:'구부러진 물길을 돌려 꽃까지 이어 줘!',done:'네가 이은 물길로 꽃이 피었어!'},duri:{name:'두리',room:'playground',image:'duri-anime-v2.webp',title:'바람뜰 공 던지기',task:'각도와 힘을 바꿔 바구니에 공을 넣어 봐!',done:'멋진 골! 네 깃발을 운동장에 달았어!'}};
 const PATHS=[[0,1,4,7,8,5,2],[3,0,1,2,5],[6,7,4,1,2,5,8]];
 const ports=tile=>tile.shape==='line'?[tile.turn%2,(tile.turn%2)+2]:[tile.turn,(tile.turn+1)%4];
 export function pipePuzzle(round){
