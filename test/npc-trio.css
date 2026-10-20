@@ -23,3 +23,4 @@
 
 .trio-last-shot{pointer-events:none}.trio-last-trajectory{fill:none;stroke:#936039;stroke-width:3;opacity:.8}.trio-landing-mark circle{fill:#fff4ce;stroke:#936039;stroke-width:2}.trio-landing-mark path{fill:none;stroke:#744526;stroke-width:3;stroke-linecap:round}.trio-dialog .trio-shot-last{font-size:15px;line-height:1.4;margin:6px 0 0;color:#69492e;min-height:1.4em}.trio-dialog:has(.trio-court) .trio-content>p:first-child{font-size:15px;margin-bottom:8px}
 @media(max-width:420px){.trio-dialog:has(.trio-court) .trio-content{padding-bottom:6px}.trio-dialog:has(.trio-court) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-shot-controls{margin:8px 0}}
+.trio-pipes .pipe-blocked{border-color:#98613d;border-style:dashed;background:#f4dfb3}.trio-pipes .trio-pipe-stop circle{fill:#fff8df;stroke:#80532e;stroke-width:2}.trio-pipes .trio-pipe-stop path{fill:none;stroke:#80532e;stroke-width:2.5;stroke-linecap:round}
