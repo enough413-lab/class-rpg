@@ -6,7 +6,7 @@ import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-pat
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
 import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261019-ground-labels';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
-import {installCampusNameplates} from './campus-nameplates.js?v=20261019-ground-labels';
+import {installCampusNameplates} from './campus-nameplates.js?v=20261020-alert';
 import {decorateMomoPencil} from './momo-favor.js?v=20261019-controls';
 // One horizontal ground plane: the avatar, interaction points and camera share coordinates.
 const PLACES={
