@@ -20,3 +20,6 @@
 @media(max-width:420px){.trio-shelf-collection{gap:7px;padding:8px}.trio-shelf-collection .trio-book{height:54px;max-width:46px;border-left-width:7px}.trio-dialog .trio-shelf-collection button{font-size:14px;padding:5px 3px}.trio-dialog:has(.trio-shelf-collection) .trio-feedback{padding:0 12px;min-height:0;font-size:15px}}
 
 #npcTrio[data-presentation=shelf] h2{position:relative;z-index:1;padding:3px 8px;background:#fff3d5ed;border-radius:5px}#classroomHub.campus-side .campus-place.trio-return-shelf[data-ground-label]>.campus-object-caption{white-space:normal;text-align:center}
+
+.trio-last-shot{pointer-events:none}.trio-last-trajectory{fill:none;stroke:#936039;stroke-width:3;opacity:.8}.trio-landing-mark circle{fill:#fff4ce;stroke:#936039;stroke-width:2}.trio-landing-mark path{fill:none;stroke:#744526;stroke-width:3;stroke-linecap:round}.trio-dialog .trio-shot-last{font-size:15px;line-height:1.4;margin:6px 0 0;color:#69492e;min-height:1.4em}.trio-dialog:has(.trio-court) .trio-content>p:first-child{font-size:15px;margin-bottom:8px}
+@media(max-width:420px){.trio-dialog:has(.trio-court) .trio-content{padding-bottom:6px}.trio-dialog:has(.trio-court) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-shot-controls{margin:8px 0}}
