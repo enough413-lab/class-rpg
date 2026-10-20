@@ -1,0 +1,14 @@
+/* The fixed player is the visual scale reference; keep the walking plane intact. */
+#classroomHub.campus-side .campus-place[data-place=tori]{width:96px!important;height:138px!important;min-width:96px;min-height:138px;bottom:20%}
+#classroomHub.campus-side .campus-place.trio-resident{width:94px;height:140px;min-width:94px;min-height:140px}
+#classroomHub.campus-side .trio-resident>img{width:94px;height:140px}
+#classroomHub.campus-side [data-place=shop]>.campus-sprite-art{transform:scale(.9);transform-origin:center bottom}
+#classroomHub.campus-side .campus-place.trio-return-shelf{width:116px;height:126px;min-width:116px;min-height:126px;z-index:13}
+.trio-return-shelf>.trio-shelf-art{display:block;width:100%;height:100%;object-fit:fill;object-position:center bottom;filter:drop-shadow(0 3px 1px #61492b40);pointer-events:none}
+.trio-return-shelf>.trio-shelf-books{transform:scale(1.16);transform-origin:top left}
+#classroomHub.campus-side .trio-return-shelf>.trio-returned-book{left:14px;top:30px;width:31px;height:40px}
+#classroomHub.campus-side .trio-search-prop:not([data-place=trio-books]){width:44px;height:54px;min-width:44px;min-height:54px}
+#classroomHub.campus-side .trio-search-prop .trio-clue-prop{position:absolute;bottom:0;left:50%;width:32px;height:42px;transform:translateX(-50%) rotate(-3deg);padding:5px;border-width:2px;box-shadow:2px 3px 0 #6b684433}
+#classroomHub.campus-side .trio-clue-noted .trio-clue-prop:after{right:-6px;top:-8px;width:18px;height:18px;line-height:18px;font-size:13px}
+#classroomHub.campus-side [data-ground-label]:not(.campus-npc):not(.is-near):not(.is-destination):not(:focus-visible)>.campus-object-caption{opacity:.75}
+#classroomHub.campus-side [data-ground-label]:is(.is-near,.is-destination,:focus-visible)>.campus-object-caption{opacity:1}
