@@ -16,6 +16,14 @@ export function traceWater(tiles,start,end){
 }
 export const shotLanding=(angle,power)=>30+power*power*Math.sin(2*angle*Math.PI/180)/10;
 export const TRIO_SEARCH_PLACES=[{kind:'trio-clue-color',x:14,label:'창가에 붙은 쪽지'},{kind:'trio-clue-motif',x:70,label:'책장 틈의 책갈피'},{kind:'trio-books',x:91,label:'분실책 수레'}];
+// A round keeps its layout across reopening; every six requests use all target positions.
+export function bookCartOrder(round){
+ const target=round%6,order=[0,1,2,3,4,5].filter(i=>i!==target);
+ let seed=(round+1)>>>0;
+ for(let i=order.length-1;i>0;i--){seed=(Math.imul(seed,1664525)+1013904223)>>>0;const j=seed%(i+1);[order[i],order[j]]=[order[j],order[i]]}
+ order.splice((Math.floor(round/6)+target*5+2)%6,0,target);
+ return order;
+}
 const freshBest=()=>[null,null,null,null];
 const count=n=>Number.isInteger(n)&&n>=0&&n<=999999?n:0;
 // A draft belongs to one unfinished round; old saves are read without inventing a layout.
@@ -111,7 +119,7 @@ export function installNpcTrio(c){
  }
  function bookGame(){
   const r=state.tori,colors=['초록','파랑','분홍'],motifs=['달','잎','별'],round=r.round,target=round%6;mode='books';shell();dialog.querySelector('h2').textContent='토리 · 책 수레';
-  const order=[0,1,2,3,4,5].map(i=>(i+round)%6),color=i=>Math.floor(i/2),motif=i=>(Math.floor(i/2)+i%2+round)%3;const goalColor=colors[color(target)],goalMotif=motifs[motif(target)],glyph=n=>'<svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><path fill="#fff8d3" d="'+['M40 8C12 3 3 43 32 52C17 38 20 19 40 8Z','M48 10C14 7 7 24 15 42C34 49 51 33 48 10ZM12 48L39 20','M30 5L37 22L55 30L37 37L30 55L23 37L5 30L23 23Z'][n]+'" stroke="#fff8d3" stroke-width="3" stroke-linejoin="round"/></svg>';
+  const order=bookCartOrder(round),color=i=>Math.floor(i/2),motif=i=>(Math.floor(i/2)+i%2+round)%3;const goalColor=colors[color(target)],goalMotif=motifs[motif(target)],glyph=n=>'<svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><path fill="#fff8d3" d="'+['M40 8C12 3 3 43 32 52C17 38 20 19 40 8Z','M48 10C14 7 7 24 15 42C34 49 51 33 48 10ZM12 48L39 20','M30 5L37 22L55 30L37 37L30 55L23 37L5 30L23 23Z'][n]+'" stroke="#fff8d3" stroke-width="3" stroke-linejoin="round"/></svg>';
   content().innerHTML='<p class="trio-clue">토리의 단서: <b>'+goalColor+' 표지</b>에 <b>'+goalMotif+' 무늬</b>가 있어!</p><div class="trio-books" role="group" aria-label="책 표지 고르기">'+order.map(i=>'<button type="button" data-book="'+i+'" aria-label="'+colors[color(i)]+' 표지, '+motifs[motif(i)]+' 무늬 책 들기"><span class="trio-book color-'+color(i)+'"><span>' +glyph(motif(i))+'</span></span><span>'+colors[color(i)]+' · '+motifs[motif(i)]+'</span></button>').join('')+'</div><div class="trio-book-drop" data-book-drop>여기로 옮겨 들고 가기</div>';
   feedback('책을 아래 자리로 끌거나 눌러 들어 줘. 두 단서와 맞춰 봐!');
  }
