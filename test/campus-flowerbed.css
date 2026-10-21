@@ -4,3 +4,5 @@
 .flowerbed-dialog header>button{flex-shrink:0}.flowerbed-goal{margin:10px 16px;padding:8px 10px;background:#e9efd2;border-radius:10px;font-size:14px}.flowerbed-board{position:relative}.flowerbed-butterfly{display:block;position:absolute;top:-28px;right:5px;width:40px;height:35px;pointer-events:none;z-index:2}.flowerbed-butterfly svg{width:100%;height:100%;display:block}.flowerbed-board>.flowerbed-butterfly{top:-25px;right:8px;width:48px;height:40px}
 
 .campus-flowerbed>.flowerbed-butterfly{top:34px;right:14px;width:28px;height:24px}.flowerbed-board>.flowerbed-butterfly{top:calc(50% - 14px);right:8px;width:32px;height:28px}
+
+.flowerbed-board button.has-plant{touch-action:none;cursor:grab}.flowerbed-board button.is-dragging{opacity:.35}.flowerbed-board button.is-drop-target{outline:3px dashed #fff5cb;outline-offset:2px;border-color:#3d7047;background:#deebad}.flowerbed-drag-ghost{position:fixed;display:block;transform:translate(-50%,-50%);pointer-events:none;z-index:5;filter:drop-shadow(0 5px 3px #35523d55)}.flowerbed-drag-ghost svg{width:100%;height:100%}.flowerbed-dialog.is-dragging-flower{user-select:none;cursor:grabbing;overflow-anchor:none}
