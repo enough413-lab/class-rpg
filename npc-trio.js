@@ -54,9 +54,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,pipeUndo=null,bookDrag=null,bookClick=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -70,7 +70,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -161,15 +161,52 @@ export function installNpcTrio(c){
   feedback('골라서 연습해도 원래 부탁은 그대로 이어갈 수 있어.');dialog.querySelector('[data-practice-basket]:not(:disabled)')?.focus({preventScroll:true});
  }
  function finishPractice(){
-  practice.done=true;content().querySelectorAll('button,input').forEach(el=>el.disabled=true);content().querySelector('p').textContent='실선과 ×가 방금 던진 공이야.';content().querySelector('.trio-shot-controls').hidden=true;content().querySelector('.trio-shot-actions').hidden=true;
+  practice.done=true;content().querySelector('.trio-practice-distance').hidden=true;content().querySelectorAll('button,input').forEach(el=>el.disabled=true);content().querySelector('p').textContent='실선과 ×가 방금 던진 공이야.';content().querySelector('.trio-shot-controls').hidden=true;content().querySelector('.trio-shot-actions').hidden=true;
   feedback('연습 성공! '+practice.attempts+'번 만에 넣었어. 다시 던져 볼까?');
   const actions=doc.createElement('div');actions.className='trio-practice-actions';actions.innerHTML='<button type="button" data-trio="practice-again">한 번 더</button><button type="button" data-trio="practice-menu">다른 바구니</button>';content().append(actions);actions.firstElementChild.focus({preventScroll:true});
  }
- function shot(link=false,practiceIndex=null){lastShot=null;practice=practiceIndex==null?null:{round:practiceIndex,attempts:0,done:false};mode=practice?'practice-shot':link?'link-shot':'shot';shell();const target=215+shotRound().round%4*22;content().innerHTML='<p>공을 오른쪽 위로 끌어 조준해 봐.</p><p class="trio-shot-record" data-shot-record aria-live="polite"></p><div class="trio-court-wrap"><svg class="trio-court" viewBox="0 0 480 210" role="img" aria-label="왼쪽에서 오른쪽 바구니로 공 던지기"><path d="M0 180H480" stroke="#839c60" stroke-width="8"/><path d="M'+(target-18)+' 172h36l-5 24h-26z" fill="#c88e54" stroke="#795934" stroke-width="3"/><g class="trio-last-shot" visibility="hidden" aria-hidden="true"><path class="trio-last-trajectory"/><g class="trio-landing-mark"><circle r="12"/><path d="M-6-6L6 6M-6 6L6-6"/></g></g><path class="trio-trajectory" fill="none" stroke="#447c8c" stroke-width="2" stroke-dasharray="4 5"/><circle class="trio-projectile" cx="30" cy="172" r="9" fill="#eab45c" stroke="#89632d" stroke-width="2"/></svg><button type="button" class="trio-aim-grip" data-trio="aim-grip" aria-label="공을 끌어 조준하기. 키보드는 아래 각도와 힘 막대를 사용하세요."></button></div><p class="trio-shot-last" data-shot-last>아직 던지기 전이야.</p><div class="trio-shot-controls"><label>각도 <output data-angle>40°</output><input aria-label="던지는 각도" data-shot="angle" type="range" min="30" max="70" value="40"></label><label>힘 <output data-power>38</output><input aria-label="던지는 힘" data-shot="power" type="range" min="35" max="65" value="38"></label></div><div class="trio-shot-actions"><button type="button" data-trio="throw">공 던지기</button><button type="button" data-trio="recall-shot" hidden>방금 조준으로</button></div>';trajectory();drawRecord();feedback('막대로도 조절할 수 있어. 점선을 맞추고 공 던지기를 눌러 줘!');if(practice){practiceNotice();dialog.querySelector('h2').textContent='두리 · 바구니 연습';dialog.querySelector('.trio-aim-grip').focus({preventScroll:true})}}
+ function shot(link=false,practiceIndex=null,practiceTarget=null){lastShot=null;practice=practiceIndex==null?null:{round:practiceIndex,target:practiceTarget??215+practiceIndex*22,attempts:0,done:false};mode=practice?'practice-shot':link?'link-shot':'shot';shell();const target=shotTarget();content().innerHTML='<p>공을 오른쪽 위로 끌어 조준해 봐.</p><p class="trio-shot-record" data-shot-record aria-live="polite"></p><div class="trio-court-wrap"><svg class="trio-court" viewBox="0 0 480 210" role="img" aria-label="왼쪽에서 오른쪽 바구니로 공 던지기"><path d="M0 180H480" stroke="#839c60" stroke-width="8"/><path d="M'+(target-18)+' 172h36l-5 24h-26z" fill="#c88e54" stroke="#795934" stroke-width="3"/><g class="trio-last-shot" visibility="hidden" aria-hidden="true"><path class="trio-last-trajectory"/><g class="trio-landing-mark"><circle r="12"/><path d="M-6-6L6 6M-6 6L6-6"/></g></g><path class="trio-trajectory" fill="none" stroke="#447c8c" stroke-width="2" stroke-dasharray="4 5"/><circle class="trio-projectile" cx="30" cy="172" r="9" fill="#eab45c" stroke="#89632d" stroke-width="2"/></svg><button type="button" class="trio-aim-grip" data-trio="aim-grip" aria-label="공을 끌어 조준하기. 키보드는 아래 각도와 힘 막대를 사용하세요."></button></div><p class="trio-shot-last" data-shot-last>아직 던지기 전이야.</p><div class="trio-shot-controls"><label>각도 <output data-angle>40°</output><input aria-label="던지는 각도" data-shot="angle" type="range" min="30" max="70" value="40"></label><label>힘 <output data-power>38</output><input aria-label="던지는 힘" data-shot="power" type="range" min="35" max="65" value="38"></label></div><div class="trio-shot-actions"><button type="button" data-trio="throw">공 던지기</button><button type="button" data-trio="recall-shot" hidden>방금 조준으로</button></div>';trajectory();drawRecord();feedback('막대로도 조절할 수 있어. 점선을 맞추고 공 던지기를 눌러 줘!');if(practice){installPracticeTarget();practiceNotice();dialog.querySelector('h2').textContent='두리 · 바구니 연습';dialog.querySelector('.trio-aim-grip').focus({preventScroll:true})}}
  function trajectory(){const angle=Number(dialog.querySelector('[data-shot=angle]').value),power=Number(dialog.querySelector('[data-shot=power]').value),landing=shotLanding(angle,power),height=Math.sin(angle*Math.PI/180)*power*1.5;dialog.querySelector('[data-angle]').textContent=angle+'°';dialog.querySelector('[data-power]').textContent=power;dialog.querySelector('.trio-trajectory').setAttribute('d','M30 172 Q'+((30+landing)/2)+' '+(172-height*2)+' '+landing+' 172');const ball=dialog.querySelector('.trio-projectile');ball.setAttribute('cx',30);ball.setAttribute('cy',172);return {landing,height,angle,power}}
- function showShotResult({landing,angle,power,target}){lastShot={angle,power};dialog.querySelector('[data-trio=recall-shot]').hidden=false;const result=Math.abs(landing-target)<=18?'바구니 안':landing<target?'바구니 앞':'바구니 너머',court=dialog.querySelector('.trio-court'),last=dialog.querySelector('.trio-last-shot');last.querySelector('.trio-last-trajectory').setAttribute('d',dialog.querySelector('.trio-trajectory').getAttribute('d'));last.querySelector('.trio-landing-mark').setAttribute('transform','translate('+landing+' 194)');last.setAttribute('visibility','visible');last.dataset.result=result;dialog.querySelector('[data-shot-last]').textContent='방금 '+angle+'° · 힘 '+power+' → '+result;court.setAttribute('aria-label','공 던지기. 방금 각도 '+angle+'도, 힘 '+power+', '+result+'에 도착. 실선과 ×가 방금 공, 점선이 다음 공의 예상 길.')}
+ function showShotResult({landing,angle,power,target}){lastShot={angle,power,target};dialog.querySelector('[data-trio=recall-shot]').hidden=false;const result=Math.abs(landing-target)<=18?'바구니 안':landing<target?'바구니 앞':'바구니 너머',court=dialog.querySelector('.trio-court'),last=dialog.querySelector('.trio-last-shot');last.querySelector('.trio-last-trajectory').setAttribute('d',dialog.querySelector('.trio-trajectory').getAttribute('d'));last.querySelector('.trio-landing-mark').setAttribute('transform','translate('+landing+' 194)');last.setAttribute('visibility','visible');last.dataset.result=result;dialog.querySelector('[data-shot-last]').textContent='방금 '+angle+'° · 힘 '+power+' → '+result;court.setAttribute('aria-label','공 던지기. 방금 각도 '+angle+'도, 힘 '+power+', '+result+'에 도착. 실선과 ×가 방금 공, 점선이 다음 공의 예상 길.');lastShot.text=dialog.querySelector('[data-shot-last]').textContent;lastShot.label=court.getAttribute('aria-label')}
  function complete(){if(mode==='practice-shot'){finishPractice();return}const record=(mode==='shot'||mode==='link-shot')?rememberShot():'';if(active==='tori'){state.tori.phase=2;changed();close();doc.getElementById('campusTitle').focus({preventScroll:true});return}if(mode==='link-shot'){state.link.step=3;changed('trio-link')}else{state[active].phase=2;if(active==='garden'){pipeUndo=null;delete state.garden.pipeDraft;}changed()}feedback('성공! '+record+META[active].name+'에게 돌아가 마무리하자.');content().querySelectorAll('button,input').forEach(el=>el.disabled=true);if(mode==='shot'||mode==='link-shot'){content().querySelector('p').textContent='실선과 ×가 방금 던진 공이야.';content().querySelector('.trio-shot-controls').hidden=true;content().querySelector('.trio-shot-actions').hidden=true}const b=doc.createElement('button');b.type='button';b.dataset.trio='close';b.textContent='맵으로 돌아가기';content().append(b);b.focus({preventScroll:true})}
  function play(){if(active==='tori')search();else if(active==='garden')pipes();else shot()}
+
+
+ const shotTarget=()=>mode==='practice-shot'?practice.target:215+shotRound().round%4*22;
+ const canMoveBasket=()=>canAim()&&mode==='practice-shot'&&!aimDrag;
+ function installPracticeTarget(){
+  content().querySelector('p').textContent='공은 위로, 바구니는 좌우로 끌어 봐.';
+  const wrap=dialog.querySelector('.trio-court-wrap'),grip=doc.createElement('button');grip.type='button';grip.className='trio-basket-grip';grip.dataset.trio='basket-grip';grip.setAttribute('aria-label','연습 바구니를 좌우로 옮기기. Enter를 누르면 거리 막대로 이동해요.');grip.innerHTML='<span aria-hidden="true">↔</span>';wrap.append(grip);
+  const row=doc.createElement('div');row.className='trio-practice-distance';row.innerHTML='<label><span>거리</span><input type="range" min="170" max="350" step="1" data-practice-distance aria-label="연습 바구니 거리"></label><button type="button" data-trio="basket-reset">원래 자리</button>';wrap.after(row);drawPracticeTarget(practice.target);
+ }
+ function drawPracticeTarget(target){
+  const grip=dialog.querySelector('.trio-basket-grip');if(!grip)return;
+  dialog.querySelector('.trio-court>path:nth-of-type(2)').setAttribute('d','M'+(target-18)+' 172h36l-5 24h-26z');grip.style.left='calc('+target/480*100+'% - 22px)';dialog.querySelector('[data-practice-distance]').value=target;
+  if(lastShot?.text){const moved=target!==lastShot.target;dialog.querySelector('[data-shot-last]').textContent=(moved?'옮기기 전: ':'')+lastShot.text;dialog.querySelector('.trio-court').setAttribute('aria-label',(moved?'바구니를 옮겼어요. 다음 기록은 옮기기 전 결과예요. ':'')+lastShot.label)}
+ }
+ function setPracticeTarget(target){
+  if(!canMoveBasket())return;target=Math.max(170,Math.min(350,Math.round(target)));const changed=target!==practice.target;practice.target=target;drawPracticeTarget(target);
+  if(changed)feedback('바구니를 옮겼어. 지금 조준으로 다시 던져 봐!');
+ }
+ function endBasketDrag(commit){
+  const d=basketDrag;if(!d)return;basketDrag=null;d.grip.parentElement?.classList.remove('moving-basket');for(const [el,disabled]of d.controls)if(el.isConnected)el.disabled=disabled;
+  if(commit&&canMoveBasket())setPracticeTarget(d.target);else if(practice&&d.grip.isConnected)drawPracticeTarget(practice.target);
+  try{if(d.grip.hasPointerCapture(d.id))d.grip.releasePointerCapture(d.id)}catch{}
+ }
+ function moveBasketDrag(e){
+  const d=basketDrag;if(!d||d.id!==e.pointerId)return;if(!canMoveBasket()||!d.grip.isConnected){endBasketDrag(false);return}
+  if(Math.abs(e.clientX-d.x)<6&&!d.moved)return;d.moved=true;d.target=Math.max(170,Math.min(350,Math.round(d.original+(e.clientX-d.x)/d.scale)));drawPracticeTarget(d.target);
+ }
+ dialog.addEventListener('pointerdown',e=>{
+  const grip=e.target.closest('.trio-basket-grip');if(!grip||grip.disabled||!content().contains(grip)||!canMoveBasket()||basketDrag||e.button!==0||e.isPrimary===false)return;
+  const rect=dialog.querySelector('.trio-court').getBoundingClientRect();basketDrag={id:e.pointerId,grip,x:e.clientX,scale:rect.width/480,rect,original:practice.target,target:practice.target,moved:false,controls:[...content().querySelectorAll('button,input')].filter(el=>el!==grip).map(el=>[el,el.disabled])};for(const [el]of basketDrag.controls)el.disabled=true;grip.setPointerCapture(e.pointerId);grip.parentElement.classList.add('moving-basket');grip.focus({preventScroll:true});
+ });
+ dialog.addEventListener('pointermove',moveBasketDrag);
+ dialog.addEventListener('pointerup',e=>{const d=basketDrag;if(!d||d.id!==e.pointerId)return;moveBasketDrag(e);const inside=e.clientX>=d.rect.left&&e.clientX<=d.rect.right&&e.clientY>=d.rect.top&&e.clientY<=d.rect.bottom;endBasketDrag(d.moved&&inside&&canMoveBasket())});
+ for(const name of ['pointercancel','lostpointercapture'])dialog.addEventListener(name,e=>{if(basketDrag?.id===e.pointerId)endBasketDrag(false)});
+ for(const name of ['blur','resize'])doc.defaultView.addEventListener(name,()=>endBasketDrag(false));
+ dialog.addEventListener('scroll',()=>endBasketDrag(false));
+ dialog.addEventListener('input',e=>{if(e.target.matches('[data-practice-distance]')&&content().contains(e.target)&&!e.target.disabled&&!basketDrag&&canMoveBasket())setPracticeTarget(Number(e.target.value))});
 
  const canAim=()=>valid()&&active==='duri'&&!frame&&(mode==='practice-shot'?practice&&!practice.done:mode==='shot'?state.duri.phase===1:mode==='link-shot'&&state.link.step===2);
  function setAim(angle,power){dialog.querySelector('[data-shot=angle]').value=angle;dialog.querySelector('[data-shot=power]').value=power;trajectory()}
@@ -190,7 +227,7 @@ export function installNpcTrio(c){
   setAim(angle,power);d.changed=true;
  }
  dialog.addEventListener('pointerdown',e=>{
-  const grip=e.target.closest('.trio-aim-grip');if(!grip||grip.disabled||!canAim()||aimDrag||e.button!==0||e.isPrimary===false)return;
+  const grip=e.target.closest('.trio-aim-grip');if(!grip||grip.disabled||!canAim()||aimDrag||basketDrag||e.button!==0||e.isPrimary===false)return;
   const rect=dialog.querySelector('.trio-court').getBoundingClientRect();
   aimDrag={id:e.pointerId,grip,x:e.clientX,y:e.clientY,scale:rect.width/480,rect,angle:Number(dialog.querySelector('[data-shot=angle]').value),power:Number(dialog.querySelector('[data-shot=power]').value),moved:false,changed:false};
   grip.setPointerCapture(e.pointerId);grip.parentElement.classList.add('aiming');grip.focus({preventScroll:true});
@@ -204,7 +241,7 @@ export function installNpcTrio(c){
  });
  for(const name of ['pointercancel','lostpointercapture'])dialog.addEventListener(name,e=>{if(aimDrag?.id===e.pointerId)endAimDrag(false)});
  for(const name of ['blur','resize'])doc.defaultView.addEventListener(name,()=>endAimDrag(false));
- dialog.addEventListener('input',e=>{if(canAim()&&e.target.matches('[data-shot]')){const value=e.target.value;endAimDrag(false);e.target.value=value;trajectory()}});
+ dialog.addEventListener('input',e=>{if(canAim()&&!basketDrag&&content().contains(e.target)&&e.target.matches('[data-shot]')){const value=e.target.value;endAimDrag(false);e.target.value=value;trajectory()}});
 
 
  const canPickBook=()=>valid()&&active==='tori'&&mode==='books'&&opening.kind==='trio-books'&&state.tori.phase===1&&state.tori.clues===3;
@@ -227,7 +264,7 @@ export function installNpcTrio(c){
  dialog.addEventListener('scroll',cancelBookDrag);
  dialog.addEventListener('click',e=>{if(bookClick&&performance.now()<bookClick.until&&e.detail!==0&&(e.pointerId===bookClick.id||e.pointerId==null)){bookClick=null;e.preventDefault();e.stopImmediatePropagation()}},true);
 
- dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}if(bookDrag)return;
+ dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}if(bookDrag||basketDrag)return;
   const r=state[active],l=state.link,action=b.dataset.trio;
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(mode==='shelf'){
@@ -239,7 +276,7 @@ export function installNpcTrio(c){
   if(active==='duri'&&!frame&&!aimDrag){
    if(action==='practice-menu'&&['talk','practice-shot'].includes(mode)&&state.duri.best.some(Boolean)){practiceMenu();return}
    if(b.dataset.practiceBasket!=null&&mode==='practice-menu'){const i=Number(b.dataset.practiceBasket);if(Number.isInteger(i)&&i>=0&&i<4&&state.duri.best[i]!=null)shot(false,i);return}
-   if(action==='practice-again'&&mode==='practice-shot'&&practice?.done){shot(false,practice.round);return}
+   if(action==='practice-again'&&mode==='practice-shot'&&practice?.done){shot(false,practice.round,practice.target);return}
    if(action==='practice-back'&&mode==='practice-menu'){talk();return}
   }
   if(action==='legacy'){close();c.legacyTori();return}
@@ -267,9 +304,11 @@ export function installNpcTrio(c){
   if(b.dataset.tile!=null&&mode==='pipes'){const index=Number(b.dataset.tile);if(!Number.isInteger(index)||index<0||index>=9)return;stopPipeFlow();rememberPipeTurn(index);const tile=board.tiles[index];tile.turn=(tile.turn+1)%4;r.pipeDraft={round:r.round,turns:board.tiles.map(t=>t.turn)};drawPipes();save();feedback(saveError?'물길을 돌렸어. 아래에서 저장을 다시 해 줘.':'물길을 돌렸어. 이어졌는지 물을 흘려 보자!');return}
   if(action==='pipe-undo'&&mode==='pipes'&&active==='garden'){undoPipeTurn();return}
   if(action==='water'&&mode==='pipes'){if(pipeFlow){stopPipeFlow(true);feedback('물을 멈췄어. 조각을 돌리거나 다시 흘려 봐!')}else runWater();return}
+  if(action==='basket-grip'){if(e.detail===0&&canMoveBasket())dialog.querySelector('[data-practice-distance]').focus({preventScroll:true});return}
+  if(action==='basket-reset'&&canMoveBasket()){setPracticeTarget(215+practice.round*22);return}
   if(action==='aim-grip'){if(e.detail===0&&canAim()&&!aimDrag){dialog.querySelector('[data-shot=angle]').focus({preventScroll:true});feedback('각도와 힘 막대를 방향키로 조절하고 공 던지기를 눌러 줘!')}return}
   if(action==='recall-shot'&&canAim()&&!aimDrag&&lastShot){dialog.querySelector('[data-shot=angle]').value=lastShot.angle;dialog.querySelector('[data-shot=power]').value=lastShot.power;trajectory();feedback('방금 던진 각도와 힘이야. 여기서 조금씩 바꿔 봐!');return}
-  if(action==='throw'&&canAim()&&!aimDrag){const challenge=shotRound();challenge.attempts=Math.min(999999,challenge.attempts+1);if(mode!=='practice-shot')save();drawRecord();const {landing,height,angle,power}=trajectory(),target=215+challenge.round%4*22,ball=dialog.querySelector('.trio-projectile'),start=performance.now(),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?180:850;content().querySelectorAll('button,input').forEach(el=>el.disabled=true);
+  if(action==='throw'&&canAim()&&!aimDrag){const challenge=shotRound();challenge.attempts=Math.min(999999,challenge.attempts+1);if(mode!=='practice-shot')save();drawRecord();const {landing,height,angle,power}=trajectory(),target=shotTarget(),ball=dialog.querySelector('.trio-projectile'),start=performance.now(),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?180:850;content().querySelectorAll('button,input').forEach(el=>el.disabled=true);
    function tick(now){if(!valid()){frame=0;close();return}const t=Math.min(1,(now-start)/duration);ball.setAttribute('cx',30+(landing-30)*t);ball.setAttribute('cy',172-4*height*t*(1-t));if(t<1){frame=requestAnimationFrame(tick);return}frame=0;showShotResult({landing,angle,power,target});if(Math.abs(landing-target)<=18)complete();else{content().querySelectorAll('button,input').forEach(el=>el.disabled=false);feedback(landing<target?'조금 짧았어! 힘을 높이거나 각도를 바꿔 봐.':'조금 멀리 갔어! 힘을 낮춰서 다시 던져 봐.')}}frame=requestAnimationFrame(tick);
   }
  });
