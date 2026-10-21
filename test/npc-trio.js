@@ -54,9 +54,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,pipeUndo=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,pipeUndo=null,bookDrag=null,bookClick=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -70,7 +70,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -110,10 +110,10 @@ export function installNpcTrio(c){
   const color=kind==='trio-clue-color',target=r.round%6;content().innerHTML='<div class="trio-found-clue">'+(color?'<span class="trio-color-swatch color-'+bookColor(target)+'"></span>':glyph(bookMotif(target,r.round)))+'</div><p></p><button type="button" data-trio="note">단서를 수첩에 적기</button>';content().querySelector('p').textContent=color?'창가 쪽지: 잃어버린 책의 표지는 '+COLORS[bookColor(target)]+'색이래!':'책갈피의 자국: 표지에 '+MOTIFS[bookMotif(target,r.round)]+' 무늬가 있었대!';
  }
  function bookGame(){
-  const r=state.tori,colors=['초록','파랑','분홍'],motifs=['달','잎','별'],round=r.round,target=round%6;mode='books';shell();
+  const r=state.tori,colors=['초록','파랑','분홍'],motifs=['달','잎','별'],round=r.round,target=round%6;mode='books';shell();dialog.querySelector('h2').textContent='토리 · 책 수레';
   const order=[0,1,2,3,4,5].map(i=>(i+round)%6),color=i=>Math.floor(i/2),motif=i=>(Math.floor(i/2)+i%2+round)%3;const goalColor=colors[color(target)],goalMotif=motifs[motif(target)],glyph=n=>'<svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true"><path fill="#fff8d3" d="'+['M40 8C12 3 3 43 32 52C17 38 20 19 40 8Z','M48 10C14 7 7 24 15 42C34 49 51 33 48 10ZM12 48L39 20','M30 5L37 22L55 30L37 37L30 55L23 37L5 30L23 23Z'][n]+'" stroke="#fff8d3" stroke-width="3" stroke-linejoin="round"/></svg>';
-  content().innerHTML='<p class="trio-clue">토리의 단서: <b>'+goalColor+' 표지</b>에 <b>'+goalMotif+' 무늬</b>가 있어!</p><div class="trio-books" role="group" aria-label="책 표지 고르기">'+order.map(i=>'<button type="button" data-book="'+i+'" aria-label="'+colors[color(i)]+' 표지, '+motifs[motif(i)]+' 무늬 책 들기"><span class="trio-book color-'+color(i)+'"><span>' +glyph(motif(i))+'</span></span><span>'+colors[color(i)]+' · '+motifs[motif(i)]+'</span></button>').join('')+'</div>';
-  feedback('단서 두 개가 모두 맞는 책을 골라 들어 줘. 틀려도 다시 골라도 돼!');
+  content().innerHTML='<p class="trio-clue">토리의 단서: <b>'+goalColor+' 표지</b>에 <b>'+goalMotif+' 무늬</b>가 있어!</p><div class="trio-books" role="group" aria-label="책 표지 고르기">'+order.map(i=>'<button type="button" data-book="'+i+'" aria-label="'+colors[color(i)]+' 표지, '+motifs[motif(i)]+' 무늬 책 들기"><span class="trio-book color-'+color(i)+'"><span>' +glyph(motif(i))+'</span></span><span>'+colors[color(i)]+' · '+motifs[motif(i)]+'</span></button>').join('')+'</div><div class="trio-book-drop" data-book-drop>여기로 옮겨 들고 가기</div>';
+  feedback('책을 아래 자리로 끌거나 눌러 들어 줘. 두 단서와 맞춰 봐!');
  }
  function pipes(){mode='pipes';shell();dialog.querySelector('h2').textContent='새싹 · 물길 잇기';board=pipePuzzle(state.garden.round);const resumed=validPipeDraft(state.garden);if(resumed)board.tiles.forEach((tile,i)=>tile.turn=state.garden.pipeDraft.turns[i]);content().innerHTML='<p>조각을 누르면 돌아가요. 왼쪽 수도에서 오른쪽 꽃까지 이어 봐!</p><div class="trio-pipe-wrap"><span class="trio-source" style="grid-row:'+(board.start+1)+'" aria-label="수도">💧</span><div class="trio-pipes" role="group" aria-label="돌려서 잇는 아홉 물길"></div><span class="trio-flower" style="grid-row:'+(board.end+1)+'" aria-label="물을 기다리는 꽃">🌼</span></div><div class="trio-pipe-actions"><button type="button" data-trio="water">물 흘리기</button><button type="button" data-trio="pipe-undo" disabled>회전 되돌리기</button></div>';drawPipes();feedback(resumed?'돌려 둔 물길에서 이어 하자. 물을 흘려 다시 확인해 봐!':'시간 제한은 없어. 물을 흘려서 어디까지 가는지 확인해 봐!')}
  function pipeUndoControl(){const b=dialog.querySelector('[data-trio=pipe-undo]');if(b)b.disabled=!pipeUndo||pipeUndo.board!==board||pipeUndo.round!==state.garden.round||state.garden.phase!==1}
@@ -206,7 +206,28 @@ export function installNpcTrio(c){
  for(const name of ['blur','resize'])doc.defaultView.addEventListener(name,()=>endAimDrag(false));
  dialog.addEventListener('input',e=>{if(canAim()&&e.target.matches('[data-shot]')){const value=e.target.value;endAimDrag(false);e.target.value=value;trajectory()}});
 
- dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}
+
+ const canPickBook=()=>valid()&&active==='tori'&&mode==='books'&&opening.kind==='trio-books'&&state.tori.phase===1&&state.tori.clues===3;
+ function chooseBook(b){if(!canPickBook()||!content().contains(b))return;const r=state.tori;const picked=Number(b.dataset.book),target=r.round%6;if(!Number.isInteger(picked)||picked<0||picked>5)return;if(picked===target)complete();else{const colorSame=bookColor(picked)===bookColor(target),motifSame=bookMotif(picked,r.round)===bookMotif(target,r.round),reason=colorSame?'무늬 다름':motifSame?'색 다름':'둘 다 다름';feedback(colorSame?'표지 색은 맞아! '+MOTIFS[bookMotif(target,r.round)]+' 무늬를 다시 찾아보자.':motifSame?'무늬는 맞아! '+COLORS[bookColor(target)]+' 표지를 다시 찾아보자.':'색과 무늬가 둘 다 달라. 모은 두 단서와 다시 맞춰 보자.');b.classList.add('trio-wrong');let check=b.querySelector('.trio-book-check');if(!check){check=doc.createElement('span');check.className='trio-book-check';b.append(check)}check.textContent=reason;b.setAttribute('aria-label',COLORS[bookColor(picked)]+' 표지, '+MOTIFS[bookMotif(picked,r.round)]+' 무늬 · '+reason+' · 다시 살펴보기')}}
+ function clearBookDrag(){const d=bookDrag;if(!d)return null;bookDrag=null;d.ghost?.remove();d.el.classList.remove('is-lifted');dialog.querySelector('[data-book-drop]')?.classList.remove('is-book-target');dialog.classList.remove('is-dragging-book');try{if(d.el.hasPointerCapture(d.id))d.el.releasePointerCapture(d.id)}catch{}return d}
+ function blockBookClick(d){bookClick={id:d.id,until:performance.now()+800}}
+ function cancelBookDrag(){const d=clearBookDrag();if(d)blockBookClick(d)}
+ function bookDropAt(e){return !!doc.elementFromPoint(e.clientX,e.clientY)?.closest('#npcTrio [data-book-drop]')}
+ dialog.addEventListener('pointerdown',e=>{
+  if(bookDrag)return;bookClick=null;const b=e.target.closest('[data-book]');if(!b||!e.isPrimary||e.button!==0||!canPickBook()||!content().contains(b))return;
+  bookDrag={id:e.pointerId,el:b,x:e.clientX,y:e.clientY,round:state.tori.round,active:false};try{b.setPointerCapture(e.pointerId)}catch{bookDrag=null}
+ });
+ dialog.addEventListener('pointermove',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canPickBook()||d.round!==state.tori.round){close();return}if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;
+  if(!d.active){d.active=true;dialog.classList.add('is-dragging-book');d.el.classList.add('is-lifted');d.ghost=doc.createElement('span');d.ghost.className='trio-book-ghost';d.ghost.setAttribute('aria-hidden','true');d.ghost.append(d.el.querySelector('.trio-book').cloneNode(true));dialog.append(d.ghost)}
+  d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';dialog.querySelector('[data-book-drop]').classList.toggle('is-book-target',bookDropAt(e));
+ });
+ dialog.addEventListener('pointerup',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canPickBook()||d.round!==state.tori.round){close();return}const drop=bookDropAt(e);clearBookDrag();if(!d.active)return;blockBookClick(d);if(drop)chooseBook(d.el);else feedback('책을 수레에 그대로 두었어. 다시 골라 봐!');if(dialog.open)d.el.focus({preventScroll:true})});
+ for(const type of ['pointercancel','lostpointercapture'])dialog.addEventListener(type,e=>{if(bookDrag?.id===e.pointerId)cancelBookDrag()});
+ for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,cancelBookDrag);
+ dialog.addEventListener('scroll',cancelBookDrag);
+ dialog.addEventListener('click',e=>{if(bookClick&&performance.now()<bookClick.until&&e.detail!==0&&(e.pointerId===bookClick.id||e.pointerId==null)){bookClick=null;e.preventDefault();e.stopImmediatePropagation()}},true);
+
+ dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}if(bookDrag)return;
   const r=state[active],l=state.link,action=b.dataset.trio;
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(mode==='shelf'){
@@ -242,7 +263,7 @@ export function installNpcTrio(c){
   if(action==='play'&&r.phase===1){play();return}
   if(action==='return'&&r.phase===2){if(active==='tori'){const books=collectedBooks(r);if(shelfTotal(books)<999999)books[r.round%6]++;r.returnedBooks=books;r.returnedRound=r.round;}r.phase=3;r.wins=Math.min(999999,r.wins+1);changed();talk();feedback(active==='tori'?'고마워! 작은 책장에 한 권 더 모았어.':'완성! 맵에 네가 해낸 흔적이 남았어. 다른 친구도 만나 봐!');return}
   if(mode==='practice-shot'?(!practice||practice.done):r.phase!==1&&!(active==='duri'&&mode==='link-shot'&&l.step===2))return;
-  if(b.dataset.book!=null&&mode==='books'){const picked=Number(b.dataset.book),target=r.round%6;if(!Number.isInteger(picked)||picked<0||picked>5)return;if(picked===target)complete();else{const colorSame=bookColor(picked)===bookColor(target),motifSame=bookMotif(picked,r.round)===bookMotif(target,r.round),reason=colorSame?'무늬 다름':motifSame?'색 다름':'둘 다 다름';feedback(colorSame?'표지 색은 맞아! '+MOTIFS[bookMotif(target,r.round)]+' 무늬를 다시 찾아보자.':motifSame?'무늬는 맞아! '+COLORS[bookColor(target)]+' 표지를 다시 찾아보자.':'색과 무늬가 둘 다 달라. 모은 두 단서와 다시 맞춰 보자.');b.classList.add('trio-wrong');let check=b.querySelector('.trio-book-check');if(!check){check=doc.createElement('span');check.className='trio-book-check';b.append(check)}check.textContent=reason;b.setAttribute('aria-label',COLORS[bookColor(picked)]+' 표지, '+MOTIFS[bookMotif(picked,r.round)]+' 무늬 · '+reason+' · 다시 살펴보기')}return}
+  if(b.dataset.book!=null&&mode==='books'){chooseBook(b);return}
   if(b.dataset.tile!=null&&mode==='pipes'){const index=Number(b.dataset.tile);if(!Number.isInteger(index)||index<0||index>=9)return;stopPipeFlow();rememberPipeTurn(index);const tile=board.tiles[index];tile.turn=(tile.turn+1)%4;r.pipeDraft={round:r.round,turns:board.tiles.map(t=>t.turn)};drawPipes();save();feedback(saveError?'물길을 돌렸어. 아래에서 저장을 다시 해 줘.':'물길을 돌렸어. 이어졌는지 물을 흘려 보자!');return}
   if(action==='pipe-undo'&&mode==='pipes'&&active==='garden'){undoPipeTurn();return}
   if(action==='water'&&mode==='pipes'){if(pipeFlow){stopPipeFlow(true);feedback('물을 멈췄어. 조각을 돌리거나 다시 흘려 봐!')}else runWater();return}
