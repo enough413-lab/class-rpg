@@ -6,3 +6,5 @@
 .campus-flowerbed>.flowerbed-butterfly{top:34px;right:14px;width:28px;height:24px}.flowerbed-board>.flowerbed-butterfly{top:calc(50% - 14px);right:8px;width:32px;height:28px}
 
 .flowerbed-board button.has-plant{touch-action:none;cursor:grab}.flowerbed-board button.is-dragging{opacity:.35}.flowerbed-board button.is-drop-target{outline:3px dashed #fff5cb;outline-offset:2px;border-color:#3d7047;background:#deebad}.flowerbed-drag-ghost{position:fixed;display:block;transform:translate(-50%,-50%);pointer-events:none;z-index:5;filter:drop-shadow(0 5px 3px #35523d55)}.flowerbed-drag-ghost svg{width:100%;height:100%}.flowerbed-dialog.is-dragging-flower{user-select:none;cursor:grabbing;overflow-anchor:none}
+
+.flowerbed-seeds button{touch-action:none;cursor:grab}.flowerbed-seeds button.is-dragging{opacity:.4}.flowerbed-drag-ghost.is-seed{max-width:80px;max-height:98px;padding:3px;border:2px solid #ad8a55;border-radius:8px;background:#fff0c8;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;color:#664c30;box-sizing:border-box}.flowerbed-drag-ghost.is-seed b{font-size:13px;line-height:18px}
