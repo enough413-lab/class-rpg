@@ -50,3 +50,10 @@
 
 .trio-dialog .trio-basket-grip{background:transparent}.trio-basket-grip>span{position:absolute;left:0;right:0;top:-24px;font-size:20px;line-height:22px;pointer-events:none}.trio-practice-distance label{display:flex;gap:6px;align-items:center;flex:1;min-width:0;font-size:14px}.trio-practice-distance label>span{white-space:nowrap}
 .trio-dialog .trio-basket-grip:hover,.trio-dialog .trio-basket-grip:focus-visible{background:transparent}
+
+/* The collected cover moves only after release onto the existing front-place control. */
+.trio-shelf-collection [data-shelf-book]{touch-action:none;user-select:none;cursor:grab}
+.trio-shelf-collection [data-shelf-book].is-lifted>.trio-book{opacity:.25}
+[data-shelf-drop]{display:inline-flex;border-radius:14px}
+[data-shelf-drop].is-book-target{outline:3px dashed #457b60;outline-offset:2px;background:#dfebc9}
+.trio-dialog.is-dragging-book [data-shelf-drop] button{pointer-events:none}
