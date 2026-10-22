@@ -10,3 +10,7 @@
 .flowerbed-seeds button{touch-action:none;cursor:grab}.flowerbed-seeds button.is-dragging{opacity:.4}.flowerbed-drag-ghost.is-seed{max-width:80px;max-height:98px;padding:3px;border:2px solid #ad8a55;border-radius:8px;background:#fff0c8;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;color:#664c30;box-sizing:border-box}.flowerbed-drag-ghost.is-seed b{font-size:13px;line-height:18px}
 
 .flowerbed-toolbar{display:flex;align-items:center;gap:10px;margin:10px 16px}.flowerbed-toolbar .flowerbed-goal{margin:0;flex:1}.flowerbed-dialog [data-bed=can]{display:grid;justify-items:center;flex:0 0 76px;padding:3px;font-size:13px;touch-action:none;cursor:grab}.flowerbed-dialog [data-bed=can] svg{width:52px;height:36px;pointer-events:none}.flowerbed-dialog [data-bed=can].is-dragging{opacity:.4}.flowerbed-drag-ghost.is-water{width:94px!important;height:66px!important}.flowerbed-dialog.is-watering .flowerbed-board button.has-plant{cursor:crosshair}@media(max-width:420px){.flowerbed-toolbar{gap:6px;margin:8px 12px}.flowerbed-toolbar .flowerbed-goal{padding:6px;font-size:13px}.flowerbed-dialog [data-bed=can]{flex-basis:66px}}
+
+/* Short flights only after a deliberate flower selection; no continuous motion. */
+.flowerbed-butterfly svg{transform-origin:center}.flowerbed-board>.flowerbed-butterfly{filter:drop-shadow(0 2px 1px #6c573f55)}
+.flowerbed-board [data-bed-plot]{scroll-margin-top:76px;scroll-margin-bottom:12px}
