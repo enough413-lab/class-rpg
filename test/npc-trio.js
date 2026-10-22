@@ -71,9 +71,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,lastShot=null,shelfDraft=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -87,7 +87,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -100,8 +100,8 @@ export function installNpcTrio(c){
  function toriMemory(r){const round=knownReturn(r);return round==null?'전에 찾아준 책은 잘 있어!':returnedName(round)+', 네가 찾아줬지! 작은 책장에 잘 모아 뒀어.'}
  function toriGoal(){const r=state.tori,target=r.round%6,color=COLORS[bookColor(target)],motif=MOTIFS[bookMotif(target,r.round)];return r.phase===2?color+' · '+motif+' 책을 들었어 · 토리에게 건네기':r.clues===3?color+' · '+motif+' 확인 · 분실책 수레에서 책 들기':r.clues&1?color+' 표지 발견 · 책장 틈 책갈피 찾기':r.clues&2?motif+' 무늬 발견 · 창가 쪽지 찾기':'도서관 왼쪽 · 창가 쪽지에서 색 단서 찾기'}
  function flowerbedTalk(){mode='flowerbed';shell();dialog.querySelector('h2').textContent='새싹 · 나비 꽃길';const ask=c.flowerbedOffer();conversation(ask.text,'bed-'+ask.action,ask.label,'garden-other','다른 부탁 이야기');if(c.flowerbedRequest?.().error)feedback('꽃밭을 이 기기에 저장하지 못했어. 닫고 부탁 수첩에서 다시 저장해 줘.')}
- function festival(){mode='festival';festivalDraft=state.link.decor;shell();dialog.querySelector('h2').textContent='새싹 · 우리 꽃 축제';content().innerHTML='<p>두리와 가져온 리본에 어떤 모양을 걸까? 고른 뒤 직접 걸어 줘!</p><div class="trio-festival-preview" role="img"></div><div class="trio-festival-choices" role="group" aria-label="축제 장식 모양">'+FESTIVAL_NAMES.map((name,i)=>'<button type="button" data-festival-style="'+i+'" aria-pressed="'+(i===festivalDraft)+'"><span>'+festivalArt(i)+'</span>'+name+'</button>').join('')+'</div><div class="trio-choices"><button type="button" data-trio="festival-hang">이 모양으로 걸기</button><button type="button" data-trio="personal">물길·꽃밭 이야기</button></div>';previewFestival();feedback('고르는 동안은 미리 보기야. 걸면 정원과 운동장에 바로 나타나!')}
- function previewFestival(){const preview=dialog.querySelector('.trio-festival-preview');preview.innerHTML=festivalArt(festivalDraft);preview.setAttribute('aria-label',FESTIVAL_NAMES[festivalDraft]+' 장식 미리 보기');dialog.querySelectorAll('[data-festival-style]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.festivalStyle)===festivalDraft)))}
+ function festival(){mode='festival';festivalDraft=state.link.decor;shell();dialog.querySelector('h2').textContent='새싹 · 우리 꽃 축제';content().innerHTML='<p>장식을 위 리본으로 끌어 걸어 봐!</p><div class="trio-festival-preview" data-festival-drop role="img"></div><div class="trio-festival-choices" role="group" aria-label="축제 장식 모양">'+FESTIVAL_NAMES.map((name,i)=>'<button type="button" data-festival-style="'+i+'" aria-pressed="'+(i===festivalDraft)+'"><span>'+festivalArt(i)+'</span>'+name+'</button>').join('')+'</div><div class="trio-choices"><button type="button" data-trio="festival-hang">이 모양으로 걸기</button><button type="button" data-trio="personal">물길·꽃밭 이야기</button></div>';previewFestival();feedback('눌러 고른 뒤 ‘이 모양으로 걸기’도 돼!')}
+ function previewFestival(){const preview=dialog.querySelector('.trio-festival-preview');preview.innerHTML=festivalArt(festivalDraft)+'<span>여기로 끌어 걸기</span>';preview.setAttribute('aria-label',FESTIVAL_NAMES[festivalDraft]+' 장식 미리 보기 · 여기에 끌어 걸기');dialog.querySelectorAll('[data-festival-style]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.festivalStyle)===festivalDraft)))}
  function talk(personal=false,skipFlower=false){practice=null;lastShot=null;mode='talk';shell();const m=META[active],r=state[active],l=state.link;
   if(!personal&&r.phase!==2){
    if(active==='garden'&&!skipFlower&&l.step!==4&&c.flowerbedRequest?.().active){flowerbedTalk();return}
@@ -311,7 +311,32 @@ export function installNpcTrio(c){
  dialog.addEventListener('scroll',cancelBookDrag);
  dialog.addEventListener('click',e=>{if(bookClick&&performance.now()<bookClick.until&&e.detail!==0&&(e.pointerId===bookClick.id||e.pointerId==null)){bookClick=null;e.preventDefault();e.stopImmediatePropagation()}},true);
 
- dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}if(bookDrag||basketDrag)return;
+
+ const canHangFestival=()=>valid()&&active==='garden'&&mode==='festival'&&state.link.wins>0;
+ function hangFestival(choice,drag=false){
+  if(!canHangFestival()||!Number.isInteger(choice)||choice<0||choice>=FESTIVAL_NAMES.length)return;
+  if(drag&&state.link.decor===choice){feedback('이미 걸린 모양이야. 다른 장식도 걸어 봐!');return}
+  festivalDraft=choice;previewFestival();state.link.decor=choice;save();
+  if(saveError)feedback('장식은 걸었어. 저장하지 못했으니 다시 저장해 줘.');else{close();doc.getElementById('campusTitle').focus({preventScroll:true})}
+ }
+ function endFestivalDrag(){const d=festivalDrag;if(!d)return null;festivalDrag=null;d.ghost?.remove();d.el.classList.remove('is-lifted');dialog.querySelector('[data-festival-drop]')?.classList.remove('is-festival-target');dialog.classList.remove('is-dragging-festival');festivalClick={id:d.id,until:performance.now()+800};try{if(d.el.hasPointerCapture(d.id))d.el.releasePointerCapture(d.id)}catch{}return d}
+ const festivalDropAt=e=>!!doc.elementFromPoint(e.clientX,e.clientY)?.closest('#npcTrio [data-festival-drop]');
+ dialog.addEventListener('pointerdown',e=>{
+  if(festivalDrag)return;festivalClick=null;const b=e.target.closest('[data-festival-style]');if(!b||!e.isPrimary||e.button!==0||!content()?.contains(b)||!canHangFestival())return;
+  const choice=Number(b.dataset.festivalStyle);if(!Number.isInteger(choice)||choice<0||choice>=FESTIVAL_NAMES.length)return;
+  festivalDrag={id:e.pointerId,el:b,choice,x:e.clientX,y:e.clientY,active:false};try{b.setPointerCapture(e.pointerId)}catch{festivalDrag=null}
+ });
+ dialog.addEventListener('pointermove',e=>{const d=festivalDrag;if(!d||d.id!==e.pointerId)return;if(!canHangFestival()||!content().contains(d.el)){close();return}if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;
+  if(!d.active){d.active=true;dialog.classList.add('is-dragging-festival');d.el.classList.add('is-lifted');d.ghost=doc.createElement('span');d.ghost.className='trio-festival-ghost';d.ghost.setAttribute('aria-hidden','true');d.ghost.innerHTML=festivalArt(d.choice);dialog.append(d.ghost)}
+  d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';dialog.querySelector('[data-festival-drop]').classList.toggle('is-festival-target',festivalDropAt(e));
+ });
+ dialog.addEventListener('pointerup',e=>{const d=festivalDrag;if(!d||d.id!==e.pointerId)return;if(!canHangFestival()||!content().contains(d.el)){close();return}const drop=festivalDropAt(e);endFestivalDrag();if(!d.active){festivalClick=null;return}if(drop)hangFestival(d.choice,true);else feedback('걸린 장식은 그대로야. 리본으로 다시 옮겨 봐!');if(dialog.open)d.el.focus({preventScroll:true})});
+ for(const type of ['pointercancel','lostpointercapture'])dialog.addEventListener(type,e=>{if(festivalDrag?.id===e.pointerId)endFestivalDrag()});
+ for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,endFestivalDrag);
+ dialog.addEventListener('scroll',endFestivalDrag);
+ dialog.addEventListener('click',e=>{if(festivalClick&&performance.now()<festivalClick.until&&e.detail!==0&&(e.pointerId===festivalClick.id||e.pointerId==null)){festivalClick=null;e.preventDefault();e.stopImmediatePropagation()}},true);
+
+ dialog.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.trio==='close'){close();return}if(!valid()){close();sync();return}if(bookDrag||basketDrag||festivalDrag)return;
   const r=state[active],l=state.link,action=b.dataset.trio;
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(mode==='shelf'){
@@ -334,7 +359,7 @@ export function installNpcTrio(c){
   if((action==='bed-accept'||action==='bed-finish')&&active==='garden'&&mode==='flowerbed'){if(c.flowerbedAct?.(action.slice(4))){if(action==='bed-accept'){close();c.visitFlowerbed?.()}else flowerbedTalk()}return}
   if(action==='festival'&&active==='garden'&&l.wins>0){festival();return}
   if(b.dataset.festivalStyle!=null&&mode==='festival'&&active==='garden'&&l.wins>0){const choice=Number(b.dataset.festivalStyle);if(!Number.isInteger(choice)||choice<0||choice>=FESTIVAL_NAMES.length)return;festivalDraft=choice;previewFestival();feedback(FESTIVAL_NAMES[choice]+' 모양을 골랐어. 마음에 들면 걸어 줘!');return}
-  if(action==='festival-hang'&&mode==='festival'&&active==='garden'&&l.wins>0){l.decor=festivalDraft;save();if(saveError)feedback('장식은 걸었어. 이 기기에 저장하지 못했으니 아래에서 다시 저장해 줘.');else{close();doc.getElementById('campusTitle').focus({preventScroll:true})}return}
+  if(action==='festival-hang'){hangFestival(festivalDraft);return}
   if(action==='personal'){talk(true);return}
   if(action==='search'&&active==='tori'&&r.phase===1){search();return}
   if(action==='note'&&active==='tori'&&r.phase===1&&mode==='clue'){r.clues|=opening.kind==='trio-clue-color'?1:2;changed();close();doc.getElementById('campusTitle').focus({preventScroll:true});return}

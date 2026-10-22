@@ -60,3 +60,14 @@
 
 /* The optional practice guide shares the record row and never covers the court. */
 .trio-practice-heading{display:flex;gap:8px;align-items:center;margin-bottom:6px}.trio-dialog .trio-practice-heading .trio-shot-record{flex:1;min-width:0;margin:0;padding:4px 8px}.trio-dialog .trio-practice-heading button{flex-shrink:0;font-size:14px;padding:5px 8px;min-height:44px}.trio-practice-heading button[aria-pressed=false]{border-style:dashed;background:#eee9cf}
+
+/* Earned festival decorations can be hung directly on the existing preview ribbon. */
+.trio-festival-choices [data-festival-style]{touch-action:none;user-select:none;cursor:grab}
+.trio-festival-choices [data-festival-style].is-lifted>span{opacity:.25}
+.trio-festival-preview>span{font-size:14px;line-height:1.4;color:#53633d;pointer-events:none}
+.trio-festival-preview.is-festival-target{outline:3px dashed #55794a;outline-offset:-6px;background:#e0ebbf}
+.trio-festival-ghost{position:fixed;z-index:20;width:120px;height:38px;pointer-events:none;transform:translate(-50%,-75%) rotate(-5deg);filter:drop-shadow(2px 4px 2px #51402d66)}
+.trio-festival-ghost svg{width:100%;height:100%;overflow:visible}
+.trio-dialog.is-dragging-festival{overflow-anchor:none;cursor:grabbing}
+
+@media(max-width:420px){.trio-festival-preview{min-height:0;padding:8px;grid-template-rows:40px auto}.trio-festival-preview svg{max-height:40px}.trio-festival-choices{margin:8px 0}.trio-content:has([data-festival-drop]){padding-top:8px;padding-bottom:8px}.trio-content:has([data-festival-drop])>p{margin-bottom:8px}.trio-content:has([data-festival-drop])>.trio-choices{margin-top:8px}}
