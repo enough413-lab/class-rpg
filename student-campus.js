@@ -1,6 +1,6 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261022-plot-clear';
-import {installNpcTrio} from './npc-trio.js?v=20261022-practice-repeat';
+import {installNpcTrio} from './npc-trio.js?v=20261022-pipe-keys';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
@@ -193,5 +193,5 @@ export function installStudentCampus(ctx){
  new MutationObserver(syncNear).observe(doc.getElementById('hubPlayer'),{attributes:true,attributeFilter:['style']});
  new MutationObserver(syncOpen).observe(hub,{attributes:true,attributeFilter:['class']});
  syncScene();syncOpen();
- return {talk,find:wayfinder.open,parcel,letter,stop,keyDown:(key,dx,repeat)=>walk.hold('key:'+key,dx,repeat)};
+ return {talk,find:wayfinder.open,parcel,letter,stop,pipeKey:event=>trio.pipeKey(event),keyDown:(key,dx,repeat)=>walk.hold('key:'+key,dx,repeat)};
 }
