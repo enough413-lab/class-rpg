@@ -57,3 +57,6 @@
 [data-shelf-drop]{display:inline-flex;border-radius:14px}
 [data-shelf-drop].is-book-target{outline:3px dashed #457b60;outline-offset:2px;background:#dfebc9}
 .trio-dialog.is-dragging-book [data-shelf-drop] button{pointer-events:none}
+
+/* The optional practice guide shares the record row and never covers the court. */
+.trio-practice-heading{display:flex;gap:8px;align-items:center;margin-bottom:6px}.trio-dialog .trio-practice-heading .trio-shot-record{flex:1;min-width:0;margin:0;padding:4px 8px}.trio-dialog .trio-practice-heading button{flex-shrink:0;font-size:14px;padding:5px 8px;min-height:44px}.trio-practice-heading button[aria-pressed=false]{border-style:dashed;background:#eee9cf}
