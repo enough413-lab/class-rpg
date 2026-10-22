@@ -6,7 +6,16 @@ export function pipePuzzle(round){
  const path=PATHS[round%3],solution=Array.from({length:9},(_,i)=>({shape:i%2?'line':'bend',turn:(i+round)%4}));
  const side=(a,b)=>b===a-3?0:b===a+1?1:b===a+3?2:3;
  path.forEach((cell,i)=>{const pair=[i?side(cell,path[i-1]):3,i<path.length-1?side(cell,path[i+1]):1];const straight=Math.abs(pair[0]-pair[1])===2;solution[cell]={shape:straight?'line':'bend',turn:straight?pair[0]%2:([0,1,2,3].find(t=>pair.includes(t)&&pair.includes((t+1)%4)))}});
- return {start:Math.floor(path[0]/3),end:Math.floor(path.at(-1)/3),solution,tiles:solution.map((t,i)=>({...t,turn:(t.turn+1+(i%2))%4}))};
+ const start=Math.floor(path[0]/3),end=Math.floor(path.at(-1)/3),tiles=solution.map((t,i)=>({...t,turn:(t.turn+1+(i%2))%4})),cycle=Math.floor(round/3);
+ // Keep the introductory layouts; later rounds vary starts without changing routes or saved drafts.
+ if(cycle>0){
+  let seed=(round+1)>>>0;
+  tiles.forEach(t=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;t.turn=seed>>>30});
+  const anchor=path.find((cell,i)=>i>0&&solution[cell].shape==='bend');
+  tiles[anchor].turn=(solution[anchor].turn+1+(anchor%2)+cycle)%4;
+  if(traceWater(tiles,start,end).ok){const inlet=tiles[path[0]];while(ports(inlet).includes(3))inlet.turn=(inlet.turn+1)%4}
+ }
+ return {start,end,solution,tiles};
 }
 export function traceWater(tiles,start,end){
  let cell=start*3,incoming=3;const visited=[],wet=[],stop=(side,reason)=>({ok:false,visited,wet,blocked:{cell,side,reason}});
