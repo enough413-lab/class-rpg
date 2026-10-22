@@ -413,6 +413,8 @@ export function installStudentAdventure(ctx){
   if(!hubOpen&&!explorerOpen)return;
   const editable=event.target.closest('input,textarea,select,[contenteditable="true"]');
   const overlay=doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
+  // Let the active pipe board handle its own arrows before blocking legacy walking handlers.
+  if(overlay&&window.studentCampus?.pipeKey(event)){window.studentCampus.stop();event.preventDefault();event.stopImmediatePropagation();return}
   if(editable||overlay||event.ctrlKey||event.metaKey||event.altKey||event.isComposing){window.studentCampus?.stop();event.stopImmediatePropagation();return}
   if(hubOpen&&key==='enter'&&event.target.closest('[data-campus=use],[data-place]')){event.preventDefault();event.stopImmediatePropagation();return}
   if(key==='enter'&&event.target.closest('button,a[href]')){event.stopImmediatePropagation();return}
