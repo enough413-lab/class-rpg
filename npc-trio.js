@@ -118,9 +118,14 @@ export function installNpcTrio(c){
  }
  function launch(id,kind=id==='tori'?'tori':'trio-'+id){activate();active=id;opening={id:owner,token,room:c.getScene(),kind};focusBack=doc.activeElement;c.stop();c.walk.stop();talk();if(!dialog.open)dialog.showModal()}
  function inspectShelf(){launch('tori','trio-shelf');mode='shelf';shelfDraft=null;shell();dialog.dataset.presentation='shelf';dialog.querySelector('h2').textContent='토리의 작은 책장';const books=collectedBooks(state.tori),total=shelfTotal(books),unknown=state.tori.wins-total;
-  content().innerHTML='<p class="trio-shelf-intro">'+(total?'네가 돌려준 책 '+total+'권이 모였어. 표지를 눌러 살펴봐!':unknown?'예전에 돌려준 책도 잘 간직하고 있어.':'책장은 아직 비어 있어. 토리에게 책을 돌려주면 여기 모여!')+'</p><div class="trio-shelf-collection" role="group" aria-label="돌려준 책">'+books.map((n,i)=>n?'<button type="button" data-shelf-book="'+i+'" aria-label="'+returnedName(i)+' · '+n+'권" aria-pressed="false">'+bookArt(i,i)+'<span>'+COLORS[bookColor(i)]+' · '+MOTIFS[bookMotif(i,i)]+'</span><small>'+n+'권</small></button>':'').join('')+'</div>'+(total?'<div class="trio-shelf-actions"><button type="button" data-trio="shelf-display" disabled>앞에 세우기</button><button type="button" data-trio="shelf-latest" hidden>최근 책으로</button></div>':'')+(unknown?'<p class="trio-shelf-legacy">예전 '+unknown+'권은 표지 기록이 없어. 새로 돌려주는 책부터 하나씩 모을게.</p>':'');shelfControls();feedback(displayBook(state.tori)!=null?'토리: 앞에는 '+returnedName(displayBook(state.tori))+'을 세워 뒀어!':total?'책을 골라 토리의 기억을 읽어 봐.':'찾은 책을 직접 토리에게 건네줘.');
+  content().innerHTML='<p class="trio-shelf-intro">'+(total?'모은 책 '+total+'권. 눌러 살펴보거나 아래 앞자리로 끌어 봐!':unknown?'예전에 돌려준 책도 잘 간직하고 있어.':'책장은 아직 비어 있어. 토리에게 책을 돌려주면 여기 모여!')+'</p><div class="trio-shelf-collection" role="group" aria-label="돌려준 책">'+books.map((n,i)=>n?'<button type="button" data-shelf-book="'+i+'" aria-label="'+returnedName(i)+' · '+n+'권" aria-pressed="false">'+bookArt(i,i)+'<span>'+COLORS[bookColor(i)]+' · '+MOTIFS[bookMotif(i,i)]+'</span><small>'+n+'권</small></button>':'').join('')+'</div>'+(total?'<div class="trio-shelf-actions"><span data-shelf-drop aria-label="책을 놓을 앞자리"><button type="button" data-trio="shelf-display" disabled>앞에 세우기</button></span><button type="button" data-trio="shelf-latest" hidden>최근 책으로</button></div>':'')+(unknown?'<p class="trio-shelf-legacy">예전 '+unknown+'권은 표지 기록이 없어. 새로 돌려주는 책부터 하나씩 모을게.</p>':'');shelfControls();feedback(displayBook(state.tori)!=null?'토리: 앞에는 '+returnedName(displayBook(state.tori))+'을 세워 뒀어!':total?'책을 골라 토리의 기억을 읽어 봐.':'찾은 책을 직접 토리에게 건네줘.');
  }
  function shelfControls(){const selected=dialog.querySelector('[data-trio=shelf-display]'),latest=dialog.querySelector('[data-trio=shelf-latest]'),chosen=displayBook(state.tori);if(!selected)return;selected.disabled=shelfDraft==null||shelfDraft===chosen;selected.setAttribute('aria-label',shelfDraft==null?'표지를 고른 뒤 앞에 세우기':returnedName(shelfDraft)+' 앞에 세우기');latest.hidden=chosen==null;dialog.querySelectorAll('[data-shelf-book]').forEach(b=>b.dataset.displayed=String(Number(b.dataset.shelfBook)===chosen))}
+ const canDisplayShelf=()=>valid()&&active==='tori'&&mode==='shelf'&&opening.kind==='trio-shelf';
+ function placeShelfBook(i){
+  if(!canDisplayShelf()||!Number.isInteger(i)||i<0||i>5||!collectedBooks(state.tori)[i]||displayBook(state.tori)===i)return;
+  shelfDraft=i;state.tori.displayBook=i;save();dialog.querySelectorAll('[data-shelf-book]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.shelfBook)===i)));shelfControls();dialog.querySelector('[data-shelf-book="'+i+'"]').focus({preventScroll:true});feedback('토리: '+returnedName(i)+'을 앞에 세웠어!');
+ }
  function search(){close();doc.getElementById('campusTitle').focus({preventScroll:true})}
  function inspectSearch(kind){launch('tori',kind);mode='clue';shell();const r=state.tori;if(r.phase!==1){conversation(r.phase===2?'책은 이미 네 손에 있어. 토리에게 가져가자!':'먼저 토리의 부탁을 받아 보자.','close','계속 둘러보기');return}
   if(kind==='trio-books'){if(r.clues===3)bookGame();else conversation('아직 단서가 부족해. 창가 쪽지와 책장 틈의 책갈피를 모두 살펴보자. '+searchText(),'search','남은 단서 찾으러 가기');return}
@@ -274,19 +279,21 @@ export function installNpcTrio(c){
 
  const canPickBook=()=>valid()&&active==='tori'&&mode==='books'&&opening.kind==='trio-books'&&state.tori.phase===1&&state.tori.clues===3;
  function chooseBook(b){if(!canPickBook()||!content().contains(b))return;const r=state.tori;const picked=Number(b.dataset.book),target=r.round%6;if(!Number.isInteger(picked)||picked<0||picked>5)return;if(picked===target)complete();else{const colorSame=bookColor(picked)===bookColor(target),motifSame=bookMotif(picked,r.round)===bookMotif(target,r.round),reason=colorSame?'무늬 다름':motifSame?'색 다름':'둘 다 다름';feedback(colorSame?'표지 색은 맞아! '+MOTIFS[bookMotif(target,r.round)]+' 무늬를 다시 찾아보자.':motifSame?'무늬는 맞아! '+COLORS[bookColor(target)]+' 표지를 다시 찾아보자.':'색과 무늬가 둘 다 달라. 모은 두 단서와 다시 맞춰 보자.');b.classList.add('trio-wrong');let check=b.querySelector('.trio-book-check');if(!check){check=doc.createElement('span');check.className='trio-book-check';b.append(check)}check.textContent=reason;b.setAttribute('aria-label',COLORS[bookColor(picked)]+' 표지, '+MOTIFS[bookMotif(picked,r.round)]+' 무늬 · '+reason+' · 다시 살펴보기')}}
- function clearBookDrag(){const d=bookDrag;if(!d)return null;bookDrag=null;d.ghost?.remove();d.el.classList.remove('is-lifted');dialog.querySelector('[data-book-drop]')?.classList.remove('is-book-target');dialog.classList.remove('is-dragging-book');try{if(d.el.hasPointerCapture(d.id))d.el.releasePointerCapture(d.id)}catch{}return d}
+ function clearBookDrag(){const d=bookDrag;if(!d)return null;bookDrag=null;d.ghost?.remove();d.el.classList.remove('is-lifted');dialog.querySelectorAll('[data-book-drop],[data-shelf-drop]').forEach(el=>el.classList.remove('is-book-target'));dialog.classList.remove('is-dragging-book');try{if(d.el.hasPointerCapture(d.id))d.el.releasePointerCapture(d.id)}catch{}return d}
  function blockBookClick(d){bookClick={id:d.id,until:performance.now()+800}}
  function cancelBookDrag(){const d=clearBookDrag();if(d)blockBookClick(d)}
- function bookDropAt(e){return !!doc.elementFromPoint(e.clientX,e.clientY)?.closest('#npcTrio [data-book-drop]')}
+ function canDragBook(d){return content()?.contains(d.el)&&(d.shelf?canDisplayShelf()&&collectedBooks(state.tori)[d.book]>0:canPickBook()&&d.round===state.tori.round)}
+ function bookDropAt(e){return !!doc.elementFromPoint(e.clientX,e.clientY)?.closest('#npcTrio '+(bookDrag?.shelf?'[data-shelf-drop]':'[data-book-drop]'))}
  dialog.addEventListener('pointerdown',e=>{
-  if(bookDrag)return;bookClick=null;const b=e.target.closest('[data-book]');if(!b||!e.isPrimary||e.button!==0||!canPickBook()||!content().contains(b))return;
-  bookDrag={id:e.pointerId,el:b,x:e.clientX,y:e.clientY,round:state.tori.round,active:false};try{b.setPointerCapture(e.pointerId)}catch{bookDrag=null}
+  if(bookDrag)return;bookClick=null;const b=e.target.closest('[data-book],[data-shelf-book]'),shelf=mode==='shelf';if(!b||!e.isPrimary||e.button!==0||!content().contains(b))return;
+  const i=Number(shelf?b.dataset.shelfBook:b.dataset.book);if(shelf?b.dataset.shelfBook==null||!canDisplayShelf()||!Number.isInteger(i)||i<0||i>5||!collectedBooks(state.tori)[i]:b.dataset.book==null||!canPickBook())return;
+  bookDrag={id:e.pointerId,el:b,x:e.clientX,y:e.clientY,round:state.tori.round,shelf,book:i,active:false};try{b.setPointerCapture(e.pointerId)}catch{bookDrag=null}
  });
- dialog.addEventListener('pointermove',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canPickBook()||d.round!==state.tori.round){close();return}if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;
+ dialog.addEventListener('pointermove',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canDragBook(d)){close();return}if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;
   if(!d.active){d.active=true;dialog.classList.add('is-dragging-book');d.el.classList.add('is-lifted');d.ghost=doc.createElement('span');d.ghost.className='trio-book-ghost';d.ghost.setAttribute('aria-hidden','true');d.ghost.append(d.el.querySelector('.trio-book').cloneNode(true));dialog.append(d.ghost)}
-  d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';dialog.querySelector('[data-book-drop]').classList.toggle('is-book-target',bookDropAt(e));
+  d.ghost.style.left=e.clientX+'px';d.ghost.style.top=e.clientY+'px';dialog.querySelector(d.shelf?'[data-shelf-drop]':'[data-book-drop]').classList.toggle('is-book-target',bookDropAt(e));
  });
- dialog.addEventListener('pointerup',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canPickBook()||d.round!==state.tori.round){close();return}const drop=bookDropAt(e);clearBookDrag();if(!d.active)return;blockBookClick(d);if(drop)chooseBook(d.el);else feedback('책을 수레에 그대로 두었어. 다시 골라 봐!');if(dialog.open)d.el.focus({preventScroll:true})});
+ dialog.addEventListener('pointerup',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canDragBook(d)){close();return}const drop=bookDropAt(e);clearBookDrag();if(!d.active)return;blockBookClick(d);if(drop){if(d.shelf)placeShelfBook(d.book);else chooseBook(d.el)}else feedback(d.shelf?'진열은 그대로야. 앞자리로 다시 옮겨 봐!':'책을 수레에 그대로 두었어. 다시 골라 봐!');if(dialog.open)d.el.focus({preventScroll:true})});
  for(const type of ['pointercancel','lostpointercapture'])dialog.addEventListener(type,e=>{if(bookDrag?.id===e.pointerId)cancelBookDrag()});
  for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,cancelBookDrag);
  dialog.addEventListener('scroll',cancelBookDrag);
@@ -297,7 +304,7 @@ export function installNpcTrio(c){
   if(action==='save'){save();dialog.querySelector('.trio-storage').textContent=saveError?'아직 저장하지 못했어요.':'이 기기에 저장했어요.';b.hidden=!saveError;return}
   if(mode==='shelf'){
    if(b.dataset.shelfBook!=null){const i=Number(b.dataset.shelfBook),books=collectedBooks(state.tori);if(Number.isInteger(i)&&i>=0&&i<6&&books[i]){shelfDraft=i;dialog.querySelectorAll('[data-shelf-book]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));shelfControls();feedback('토리: '+returnedName(i)+', 네가 찾아줬지! '+books[i]+'권 모두 잘 간직하고 있어.')}return}
-   if(action==='shelf-display'&&shelfDraft!=null&&collectedBooks(state.tori)[shelfDraft]>0&&displayBook(state.tori)!==shelfDraft){state.tori.displayBook=shelfDraft;save();shelfControls();dialog.querySelector('[data-shelf-book="'+shelfDraft+'"]').focus({preventScroll:true});feedback('토리: '+returnedName(shelfDraft)+'을 앞에 세웠어!');return}
+   if(action==='shelf-display'){placeShelfBook(shelfDraft);return}
    if(action==='shelf-latest'&&displayBook(state.tori)!=null){delete state.tori.displayBook;save();shelfControls();dialog.querySelector('[data-shelf-book]').focus({preventScroll:true});feedback('토리: 가장 최근에 돌려준 책을 앞에 세울게!');return}
    return
   }
