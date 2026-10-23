@@ -1,5 +1,5 @@
 import {decorateFlowerbed} from './campus-flowerbed.js?v=20261019-butterfly';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261020-harmony';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261023-tori-search-places';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
@@ -35,7 +35,7 @@ export function installSchoolWalk(ctx){
  const direction=()=>[...heldDirections.values()].at(-1)||0;
  const overlay=()=>doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
  const canWalk=()=>!hub.classList.contains('hidden')&&!overlay()&&!doc.hidden;
- const currentPlaces=(includeInactive=false)=>(PLACES[ctx.getScene()]||PLACES.classroom).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(includeInactive||p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&(includeInactive||ctx.isTrioPlaceVisible?.(p.kind)!==false));
+ const currentPlaces=(includeInactive=false)=>(PLACES[ctx.getScene()]||PLACES.classroom).map(p=>ctx.trioSearchPlace?.(p)||p).filter(p=>(p.kind!=='parcel'||!ctx.isParcelCollected?.())&&(includeInactive||p.kind!=='pencil'||ctx.isMomoPencilVisible?.())&&(includeInactive||ctx.isTrioPlaceVisible?.(p.kind)!==false));
  function camera(x=ctx.getPosition().x){
   const width=stage.clientWidth,view=viewport.clientWidth;
   const playerFocus=width*x/100;let focus=playerFocus;

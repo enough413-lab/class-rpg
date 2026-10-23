@@ -83,3 +83,6 @@
 
 .trio-shelf-actions:has([data-trio=shelf-undo]:not([hidden])){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.trio-shelf-actions:has([data-trio=shelf-undo]:not([hidden])) button{width:100%;min-width:0;font-size:14px;padding:7px 5px;word-break:keep-all}
 @media(max-width:420px){.trio-dialog:has(.trio-shelf-collection) .trio-content{padding-top:6px}.trio-dialog:has(.trio-shelf-collection) .trio-shelf-intro{margin-bottom:4px}.trio-dialog:has(.trio-shelf-collection) .trio-feedback{margin-bottom:4px}.trio-shelf-actions{margin-top:8px}}
+
+/* The search cart stays behind the walking character at every discovery spot. */
+#classroomHub.campus-side .trio-search-prop[data-place=trio-books]{z-index:13}

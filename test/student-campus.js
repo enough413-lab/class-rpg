@@ -1,6 +1,6 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261023-flowerbed-pour';
-import {installNpcTrio} from './npc-trio.js?v=20261023-shelf-undo';
+import {installNpcTrio} from './npc-trio.js?v=20261023-tori-search-places';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
@@ -23,7 +23,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261020-anime';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261020-anime';
-import {installSchoolWalk} from './school-walk.js?v=20261020-harmony';
+import {installSchoolWalk} from './school-walk.js?v=20261023-tori-search-places';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261020-anime';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -124,7 +124,7 @@ export function installStudentCampus(ctx){
   if(kind==='portfolio')return window.openReadingShelf();
   return window.hubInteract(kind);
  }
- const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible(),isTrioPlaceVisible:kind=>trio?.visible(kind)??!['trio-clue-color','trio-clue-motif','trio-books'].includes(kind),constrainPosition:(a,b)=>platforms?.constrain(a,b)??b});
+ const walk=installSchoolWalk({...ctx,hub,stage,objects,tori:TORI,interact,onPosition:syncNear,isParcelCollected:()=>parcel?.collected(),isMomoPencilVisible:()=>momo?.visible(),trioSearchPlace:p=>trio?.searchPlace(p)||p,isTrioPlaceVisible:kind=>trio?.visible(kind)??!['trio-clue-color','trio-clue-motif','trio-books'].includes(kind),constrainPosition:(a,b)=>platforms?.constrain(a,b)??b});
  const jump=installCampusJump({hub,getStudent:ctx.getStudent,getScene:ctx.getScene,getTerrain:()=>platforms,onMealJumpBlocked:()=>meal?.explainJump()});
  platforms=installPlaygroundPlatforms({...ctx,hub,stage,walk,stop,refresh:syncNear,jump:jump.jump,cancelJump:jump.cancel});
  momo=installMomoFavor({...ctx,hub,objects,walk,refresh:syncNear,onRequestAction:()=>currentGoal?.focus('momo')});
