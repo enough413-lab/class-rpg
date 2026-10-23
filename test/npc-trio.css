@@ -86,3 +86,10 @@
 
 /* The search cart stays behind the walking character at every discovery spot. */
 #classroomHub.campus-side .trio-search-prop[data-place=trio-books]{z-index:13}
+
+/* Keep the original map return; undo is available on the next visit to this workbench. */
+.trio-content:has([data-festival-drop])>.trio-choices:has([data-trio=festival-undo]:not([hidden])){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.trio-content:has([data-festival-drop])>.trio-choices:has([data-trio=festival-undo]:not([hidden]))>[data-trio=personal]{grid-column:1/-1}.trio-content:has([data-festival-drop]) [data-trio=festival-undo]{min-height:44px}
+
+.trio-content:has([data-festival-drop])>.trio-choices:has([data-trio=festival-undo]:not([hidden]))>button{word-break:keep-all}
+
+@media(max-width:420px){.trio-content:has([data-festival-drop])>.trio-choices>button{font-size:15px;padding:7px 6px}.trio-dialog:has([data-festival-drop]) .trio-feedback{font-size:15px;line-height:1.4;min-height:0;margin-bottom:6px}}
