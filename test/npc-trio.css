@@ -71,3 +71,12 @@
 .trio-dialog.is-dragging-festival{overflow-anchor:none;cursor:grabbing}
 
 @media(max-width:420px){.trio-festival-preview{min-height:0;padding:8px;grid-template-rows:40px auto}.trio-festival-preview svg{max-height:40px}.trio-festival-choices{margin:8px 0}.trio-content:has([data-festival-drop]){padding-top:8px;padding-bottom:8px}.trio-content:has([data-festival-drop])>p{margin-bottom:8px}.trio-content:has([data-festival-drop])>.trio-choices{margin-top:8px}}
+
+.trio-pipes button{position:relative;touch-action:pan-y;cursor:grab}
+.trio-pipes .is-turn-preview{outline:3px dashed #547e54;outline-offset:1px;background:#f3edc9}
+.trio-pipes .is-turn-preview svg>path:first-child{transform:rotate(90deg);transform-origin:30px 30px}
+.trio-pipes .is-turn-preview .trio-pipe-stop{visibility:hidden}
+.trio-pipes .is-turn-preview:after{content:attr(data-turn-direction);position:absolute;right:1px;top:1px;width:22px;height:22px;border-radius:50%;background:#fff8df;color:#35533e;font:20px/22px sans-serif;pointer-events:none}
+.trio-dialog.is-turning-pipe{user-select:none;overflow-anchor:none;cursor:grabbing}
+
+.trio-pipes .is-turn-preview[data-turn-direction='↶'] svg>path:first-child{transform:rotate(-90deg)}
