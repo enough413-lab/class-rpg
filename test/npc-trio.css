@@ -106,3 +106,36 @@
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has([data-book-drop]) header{padding:6px 12px}.trio-dialog:has([data-book-drop]) .trio-content{padding:8px 12px}.trio-dialog:has([data-book-drop]) .trio-clue{margin-bottom:6px}.trio-dialog:has([data-book-drop]) .trio-books{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:4px 0}.trio-dialog:has([data-book-drop]) .trio-books button{padding:5px;gap:4px;font-size:14px;line-height:1.4;word-break:keep-all}.trio-dialog:has([data-book-drop]) .trio-book{height:54px}.trio-dialog:has([data-book-drop]) .trio-book-check{font-size:12px;padding:2px 3px}.trio-dialog:has([data-book-drop]) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-dialog:has([data-book-drop]) footer{padding:6px 12px}}
 @media(min-width:560px) and (max-height:350px){.trio-dialog:has([data-book-drop]) header{padding-block:4px}.trio-dialog:has([data-book-drop]) .trio-content{padding-block:6px}.trio-dialog:has([data-book-drop]) .trio-clue{font-size:15px;line-height:1.4;margin-bottom:2px}.trio-dialog:has([data-book-drop]) .trio-books button{padding:3px;gap:2px}.trio-dialog:has([data-book-drop]) .trio-book{height:44px}}
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has([data-book-drop]){scroll-padding-top:70px;scroll-padding-bottom:64px}}
+
+/* Keep the court, aim and throw/review controls together on short landscape screens. */
+@media(min-width:560px) and (max-height:520px){
+.trio-dialog:has(.trio-court){scroll-padding-top:64px;scroll-padding-bottom:12px;overflow-anchor:none}
+.trio-dialog:has(.trio-court) header{padding:4px 12px}
+.trio-dialog:has(.trio-court) h2{font-size:18px}
+.trio-dialog:has(.trio-court) .trio-content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(200px,1fr);grid-template-areas:"court controls" "review actions" "record record" "distance distance" "intro intro";gap:6px 8px;padding:6px 12px;align-items:start}
+.trio-dialog:has(.trio-court) .trio-court-wrap{grid-area:court}
+.trio-dialog:has(.trio-court) .trio-shot-controls{grid-area:controls;display:grid;gap:4px;margin:0}
+.trio-dialog:has(.trio-court) .trio-shot-controls label{display:grid;grid-template-columns:1fr auto;font-size:16px;line-height:1.3}
+.trio-dialog:has(.trio-court) .trio-shot-controls input{grid-column:1/-1;display:block;margin:0;height:44px}
+.trio-dialog:has(.trio-court) .trio-shot-review{grid-area:review;margin:0;gap:4px;min-height:44px}
+.trio-dialog:has(.trio-court) .trio-shot-review p{font-size:14px;line-height:1.35}
+.trio-dialog:has(.trio-court) .trio-shot-review button{padding:4px 6px;font-size:14px}
+.trio-dialog:has(.trio-court) :is(.trio-shot-actions,.trio-practice-actions){grid-area:actions;display:flex;flex-wrap:wrap;gap:4px;margin:0}
+.trio-dialog:has(.trio-court) :is(.trio-shot-actions,.trio-practice-actions)>button,.trio-dialog:has(.trio-court) .trio-content>button{padding:4px 6px;font-size:14px}
+.trio-dialog:has(.trio-court) .trio-content>button{grid-area:actions;justify-self:start}
+.trio-dialog:has(.trio-court) :is(.trio-practice-heading,.trio-content>.trio-shot-record){grid-area:record;margin:0}
+.trio-dialog:has(.trio-court) .trio-practice-distance{grid-area:distance;margin:0}
+.trio-dialog:has(.trio-court) .trio-content>p:first-child{grid-area:intro;margin:0;font-size:15px}
+.trio-dialog:has(.trio-court) :is(button,input){scroll-margin-top:64px;scroll-margin-bottom:12px}
+.trio-dialog:has(.trio-court) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}
+.trio-dialog:has(.trio-court) footer{padding:6px 12px}
+.trio-dialog:has(.trio-court) [hidden]{display:none}
+}
+
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-practice-baskets) .trio-practice-baskets{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:6px 0}.trio-dialog:has(.trio-practice-baskets) .trio-content{padding:6px 12px}.trio-dialog:has(.trio-practice-baskets) .trio-content>p{margin-bottom:6px}.trio-dialog:has(.trio-practice-baskets) .trio-practice-baskets button{font-size:14px;padding:4px}}
+
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-practice-baskets) header{padding:4px 12px}.trio-dialog:has(.trio-practice-baskets) h2{font-size:18px}}
+
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-court) :is(.trio-shot-actions,.trio-shot-review,.trio-practice-actions)>button{scroll-margin-top:204px;scroll-margin-bottom:0}}
+
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-court) :is(.trio-aim-grip,.trio-basket-grip){scroll-margin-top:174px;scroll-margin-bottom:0}}
