@@ -22,3 +22,26 @@
 .flowerbed-board button .flowerbed-pour-drops{position:absolute;left:45%;top:28%;width:38%;height:44%;max-height:none;overflow:visible}
 .flowerbed-pour-drops path{fill:none;stroke:#b8efff;stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 1px 1px #356b7e)}
 @media(prefers-reduced-motion:reduce){.flowerbed-pour{display:none}}
+
+/* Short landscape: keep draggable tools beside all six flower plots. */
+@media(min-width:560px) and (max-height:520px){
+ .flowerbed-dialog[open]{display:grid;grid-template-columns:minmax(210px,.9fr) minmax(0,1fr);grid-template-areas:"heading heading" "seeds board" "can board" "intro intro" "goal goal" "selection selection" "tools tools" "fences fences" "status status" "storage storage";scroll-padding-top:64px;scroll-padding-bottom:12px}
+ .flowerbed-dialog header{grid-area:heading;padding:4px 12px}
+ .flowerbed-dialog[open] h2{font-size:18px}
+ .flowerbed-seeds{grid-area:seeds;align-self:start;margin:8px 4px 0 12px;gap:4px}
+ .flowerbed-dialog .flowerbed-seeds button{padding:4px 2px;font-size:15px;word-break:keep-all}
+ .flowerbed-seeds svg{width:40px;height:40px}
+ .flowerbed-toolbar{display:contents}
+ .flowerbed-dialog [data-bed=can]{grid-area:can;justify-self:start;align-self:center;margin:4px 12px;width:80px}
+ .flowerbed-toolbar .flowerbed-goal{grid-area:goal;margin:4px 12px;padding:6px 8px}
+ .flowerbed-board{grid-area:board;align-self:start;margin:8px 12px 0 4px;padding:6px;gap:5px;height:clamp(152px,calc(100dvh - 170px),220px);box-sizing:border-box;grid-template-rows:repeat(2,minmax(0,1fr))}
+ .flowerbed-board button{aspect-ratio:auto;min-height:44px}
+ .flowerbed-board button svg{max-height:100%;height:100%}
+ .flowerbed-dialog .flowerbed-intro{grid-area:intro;margin:8px 12px 4px;font-size:14px}
+ .flowerbed-selection{grid-area:selection;margin:4px 12px}
+ .flowerbed-tools{grid-area:tools;margin:8px 12px;gap:6px}
+ .flowerbed-fences{grid-area:fences;margin:4px 12px}
+ .flowerbed-status{grid-area:status;margin:4px 12px}
+ .flowerbed-dialog footer{grid-area:storage;padding:8px 12px}
+ .flowerbed-dialog :is([data-bed-seed],[data-bed=can]){scroll-margin-top:64px;scroll-margin-bottom:12px}
+}
