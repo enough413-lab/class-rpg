@@ -139,3 +139,24 @@
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-court) :is(.trio-shot-actions,.trio-shot-review,.trio-practice-actions)>button{scroll-margin-top:204px;scroll-margin-bottom:0}}
 
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-court) :is(.trio-aim-grip,.trio-basket-grip){scroll-margin-top:174px;scroll-margin-bottom:0}}
+
+/* Short landscape: pipe board and explicit water controls stay in view together. */
+@media(min-width:560px) and (max-height:520px){
+ .trio-dialog:has(.trio-pipes){--trio-short-pipe-size:clamp(138px,calc(100dvh - 140px),210px);scroll-padding-top:60px;scroll-padding-bottom:8px;overflow-anchor:none}
+ .trio-dialog:has(.trio-pipes) header{padding:4px 12px}
+ .trio-dialog:has(.trio-pipes) h2{font-size:18px}
+ .trio-dialog:has(.trio-pipes) .trio-content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(180px,1fr);grid-template-areas:'board help' 'board actions';gap:6px 10px;padding:6px 12px;align-items:start}
+ .trio-dialog:has(.trio-pipes) .trio-content>p{grid-area:help;font-size:16px;line-height:1.4;margin:0}
+ .trio-dialog:has(.trio-pipes) .trio-pipe-wrap{grid-area:board;grid-template-columns:24px var(--trio-short-pipe-size) 24px;gap:4px;margin:0}
+ .trio-dialog:has(.trio-pipes) .trio-pipe-actions{grid-area:actions;flex-direction:column;gap:6px;align-items:stretch}
+ .trio-dialog:has(.trio-pipes) .trio-pipe-actions button{padding:4px 8px}
+ .trio-dialog:has(.trio-pipes) .trio-feedback{font-size:16px;line-height:1.4;padding:0 12px;min-height:0;margin:0 0 6px}
+ .trio-dialog:has(.trio-pipes) footer{padding:6px 12px}
+ .trio-dialog:has(.trio-pipes) button{scroll-margin-top:60px;scroll-margin-bottom:8px}
+}
+
+@media(min-width:560px) and (max-height:520px){
+ .trio-dialog:has(.trio-pipes) .trio-pipe-actions button{scroll-margin-top:calc(60px + var(--trio-short-pipe-size));scroll-margin-bottom:0}
+ .trio-dialog:has(.trio-pipes) .trio-pipes button:nth-child(n+4){scroll-margin-top:calc(60px + (var(--trio-short-pipe-size) + 3px)/3)}
+ .trio-dialog:has(.trio-pipes) .trio-pipes button:nth-child(n+7){scroll-margin-top:calc(60px + (var(--trio-short-pipe-size) + 3px)/3 + (var(--trio-short-pipe-size) + 3px)/3)}
+}
