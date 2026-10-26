@@ -1,5 +1,5 @@
 import {decorateFlowerbed} from './campus-flowerbed.js?v=20261026-flowerbed-keys';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261023-festival-undo';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261026-duri-replay';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
