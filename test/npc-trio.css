@@ -93,3 +93,11 @@
 .trio-content:has([data-festival-drop])>.trio-choices:has([data-trio=festival-undo]:not([hidden]))>button{word-break:keep-all}
 
 @media(max-width:420px){.trio-content:has([data-festival-drop])>.trio-choices>button{font-size:15px;padding:7px 6px}.trio-dialog:has([data-festival-drop]) .trio-feedback{font-size:15px;line-height:1.4;min-height:0;margin-bottom:6px}}
+
+.trio-shot-review{display:flex;align-items:center;gap:8px;margin:4px 0}.trio-dialog .trio-shot-review p{flex:1;min-width:0;margin:0;word-break:keep-all}.trio-dialog .trio-shot-review button{flex:none;padding:7px 9px;font-size:15px}.trio-shot-review button[aria-pressed=true]{background:#e0eddb;border-color:#447c8c}.trio-shot-replay{pointer-events:none}.trio-shot-replay circle{fill:#eab45c;stroke:#447c8c;stroke-width:3}.trio-replay-basket{fill:none;stroke:#447c8c;stroke-width:2;stroke-dasharray:4 3}.is-shot-replay .trio-projectile{visibility:hidden}
+
+@media(max-width:420px){.trio-dialog:has(.trio-shot-review) footer{padding-block:6px}}
+
+@media(max-width:420px){.trio-dialog:has(.trio-practice-distance) .trio-content{padding-top:6px}.trio-dialog:has(.trio-practice-distance) .trio-shot-review{margin:0}.trio-dialog:has(.trio-practice-distance) .trio-practice-distance{margin-top:0}.trio-dialog:has(.trio-practice-distance) .trio-shot-controls{margin:0}.trio-dialog:has(.trio-practice-distance) .trio-feedback{margin-bottom:4px}}
+
+@media(max-width:420px){.trio-dialog:has(.trio-practice-distance) .trio-practice-heading{margin-bottom:2px}}
