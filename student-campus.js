@@ -1,5 +1,5 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
-import {installFlowerbed} from './campus-flowerbed.js?v=20261023-flowerbed-pour';
+import {installFlowerbed} from './campus-flowerbed.js?v=20261026-flowerbed-keys';
 import {installNpcTrio} from './npc-trio.js?v=20261023-festival-undo';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261019-butterfly';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
@@ -23,7 +23,7 @@ import {installGardenLetter} from './garden-letter.js?v=20261020-anime';
 import {installCampusStory} from './campus-story.js?v=20261014-leaf-favor';
 import {EXTRA_ROOMS,WORLD_DETAILS} from './school-walking-places.js?v=20261008-names';
 import {installParcelAdventure} from './parcel-adventure.js?v=20261020-anime';
-import {installSchoolWalk} from './school-walk.js?v=20261023-festival-undo';
+import {installSchoolWalk} from './school-walk.js?v=20261026-flowerbed-keys';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261020-anime';
 import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
@@ -193,5 +193,5 @@ export function installStudentCampus(ctx){
  new MutationObserver(syncNear).observe(doc.getElementById('hubPlayer'),{attributes:true,attributeFilter:['style']});
  new MutationObserver(syncOpen).observe(hub,{attributes:true,attributeFilter:['class']});
  syncScene();syncOpen();
- return {talk,find:wayfinder.open,parcel,letter,stop,pipeKey:event=>trio.pipeKey(event),keyDown:(key,dx,repeat)=>walk.hold('key:'+key,dx,repeat)};
+ return {talk,find:wayfinder.open,parcel,letter,stop,flowerKey:event=>flowerbed.plotKey(event),pipeKey:event=>trio.pipeKey(event),keyDown:(key,dx,repeat)=>walk.hold('key:'+key,dx,repeat)};
 }
