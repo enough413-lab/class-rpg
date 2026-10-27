@@ -52,7 +52,8 @@
 .trio-dialog .trio-basket-grip:hover,.trio-dialog .trio-basket-grip:focus-visible{background:transparent}
 
 /* The collected cover moves only after release onto the existing front-place control. */
-.trio-shelf-collection [data-shelf-book]{touch-action:none;user-select:none;cursor:grab}
+#npcTrio[data-presentation=shelf]{scroll-padding-top:82px;scroll-padding-bottom:8px}
+.trio-shelf-collection [data-shelf-book]{touch-action:none;user-select:none;cursor:grab;scroll-margin-block:6px}
 .trio-shelf-collection [data-shelf-book].is-lifted>.trio-book{opacity:.25}
 [data-shelf-drop]{display:inline-flex;border-radius:14px}
 [data-shelf-drop].is-book-target{outline:3px dashed #457b60;outline-offset:2px;background:#dfebc9}
