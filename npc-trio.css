@@ -63,7 +63,8 @@
 .trio-practice-heading{display:flex;gap:8px;align-items:center;margin-bottom:6px}.trio-dialog .trio-practice-heading .trio-shot-record{flex:1;min-width:0;margin:0;padding:4px 8px}.trio-dialog .trio-practice-heading button{flex-shrink:0;font-size:14px;padding:5px 8px;min-height:44px}.trio-practice-heading button[aria-pressed=false]{border-style:dashed;background:#eee9cf}
 
 /* Earned festival decorations can be hung directly on the existing preview ribbon. */
-.trio-festival-choices [data-festival-style]{touch-action:none;user-select:none;cursor:grab}
+.trio-dialog:has([data-festival-drop]){scroll-padding-top:82px;scroll-padding-bottom:8px}
+.trio-festival-choices [data-festival-style]{touch-action:none;user-select:none;cursor:grab;scroll-margin-block:6px}
 .trio-festival-choices [data-festival-style].is-lifted>span{opacity:.25}
 .trio-festival-preview>span{font-size:14px;line-height:1.4;color:#53633d;pointer-events:none}
 .trio-festival-preview.is-festival-target{outline:3px dashed #55794a;outline-offset:-6px;background:#e0ebbf}
