@@ -36,6 +36,9 @@
 
 .trio-pipes .trio-water-front{stroke:#3f9bb4;stroke-width:14;stroke-linecap:butt;pointer-events:none}.trio-pipes .pipe-flowing{border-color:#428399;background:#f1edce}.trio-dialog [data-trio=water][aria-pressed=true]{border-color:#428399;background:#e2f0ec}
 
+.trio-dialog:has(.trio-practice-baskets){scroll-padding-top:82px;scroll-padding-bottom:8px}
+.trio-practice-baskets button{scroll-margin-block:6px}
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-practice-baskets){scroll-padding-top:58px;padding-bottom:1px}}
 .trio-practice-baskets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0 14px}.trio-dialog .trio-practice-baskets button{padding:6px;min-width:0}.trio-practice-baskets svg{display:block;width:100%;background:#dfefd8;border-radius:10px}.trio-practice-baskets span,.trio-practice-baskets small{display:block}.trio-practice-baskets small{font-size:13px}.trio-practice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:420px){.trio-practice-baskets{gap:6px;margin:6px 0 10px}.trio-dialog:has(.trio-practice-baskets) .trio-content{padding-bottom:6px}.trio-dialog:has(.trio-practice-baskets) .trio-feedback{padding:0 12px;margin-bottom:6px}.trio-dialog:has(.trio-practice-baskets) footer{padding:6px 12px}}
 
 .trio-pipe-actions{display:flex;gap:8px;flex-wrap:wrap}.trio-dialog .trio-pipe-actions button{padding-inline:10px}
