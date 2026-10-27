@@ -31,6 +31,17 @@ export function installFlowerbed(c){
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&c.getScene()==='garden'&&c.walk.nearby()?.kind==='flowerbed'&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  // Moving keyboard focus never performs a care action, invites a butterfly or replaces undo.
  // Seed browsing preserves the separately chosen seed and any pending care action.
+ // Fence arrows follow visible rows; browsing never applies a border or alters care history.
+ function fenceKey(e){
+  const fence=e.target.closest('[data-bed-border]'),section=dialog.querySelector('.flowerbed-fences');
+  if(!fence||!section?.contains(fence)||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.isComposing)return false;
+  if(!valid()){close();sync();return true}
+  if(drag||fence.disabled||!section.open)return true;
+  const origin=fence.getBoundingClientRect(),horizontal=e.key==='ArrowLeft'||e.key==='ArrowRight',sign=e.key==='ArrowLeft'||e.key==='ArrowUp'?-1:1;
+  const choices=[...section.querySelectorAll('[data-bed-border]')].filter(b=>b!==fence&&!b.disabled).map(b=>{const r=b.getBoundingClientRect(),dx=r.x+r.width/2-origin.x-origin.width/2,dy=r.y+r.height/2-origin.y-origin.height/2;return {fence:b,dx,dy}}).filter(p=>horizontal?Math.abs(p.dy)<1&&p.dx*sign>1:p.dy*sign>1).sort((a,b)=>horizontal?Math.abs(a.dx)-Math.abs(b.dx):Math.abs(a.dy)-Math.abs(b.dy)||Math.abs(a.dx)-Math.abs(b.dx));
+  const next=choices[0]?.fence||fence;next.focus({preventScroll:true});next.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+  return true;
+ }
  function seedKey(e){
   const seed=e.target.closest('[data-bed-seed]');
   if(!seed||!dialog.querySelector('.flowerbed-seeds')?.contains(seed)||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.isComposing)return false;
@@ -118,5 +129,5 @@ export function installFlowerbed(c){
  function request(){activate();return {id:'flowerbed',title:'새싹 · 나비 꽃길',loaded:true,active:state.goal===1,ready:state.goal===1&&flowerReady(state),text:goalText(state),error:error?'꽃밭을 이 기기에 저장하지 못했어요.':null,retry:save}}
  function offer(){activate();return state.goal===2?{text:'네가 만든 나비 꽃길을 기억해! 다른 줄도 네 마음대로 꾸며 볼래?',action:'go',label:'꽃밭 더 꾸미기'}:state.goal===1?flowerReady(state)?{text:'나비가 찾아왔네! 네가 키우고 옮긴 세 빛깔 꽃 덕분이야.',action:'finish',label:'새싹과 꽃길 완성하기'}:{text:'꽃밭 위나 아래 한 줄에 데이지·코스모스·라벤더를 한 송이씩 피워 줘. 자란 꽃을 옮겨도 돼!',action:'go',label:'직접 꽃밭 돌보러 갈게'}:{text:'나비가 쉬어 갈 꽃길을 만들자! 한 줄에 서로 다른 꽃 세 송이를 활짝 피워 줄래?',action:'accept',label:'좋아, 꽃길을 만들게'} }
  function act(action){activate();if(owner==null||c.getScene()!=='garden'||c.walk.nearby()?.kind!=='trio-garden'||c.hub.classList.contains('hidden')||doc.hidden)return false;if(action==='accept'&&state.goal===0){state.goal=1;save();c.focusGoal?.('flowerbed');return true}if(action==='finish'&&state.goal===1&&flowerReady(state)){state.goal=2;save();return true}return false}
- return {seedKey,plotKey,sync,open,request,offer,act,interact:kind=>{if(kind!=='flowerbed')return false;open();return true},summary:()=>{activate();const n=state.plots.filter(p=>p?.stage===3).length;return (state.goal===2?'나비 꽃길을 만들어 준 걸 기억해! ':'')+(n?'네 꽃밭에 꽃 '+n+'송이가 활짝 피었네! ':'')}};
+ return {fenceKey,seedKey,plotKey,sync,open,request,offer,act,interact:kind=>{if(kind!=='flowerbed')return false;open();return true},summary:()=>{activate();const n=state.plots.filter(p=>p?.stage===3).length;return (state.goal===2?'나비 꽃길을 만들어 준 걸 기억해! ':'')+(n?'네 꽃밭에 꽃 '+n+'송이가 활짝 피었네! ':'')}};
 }
