@@ -14,6 +14,7 @@
 /* Short flights only after a deliberate flower selection; no continuous motion. */
 .flowerbed-butterfly svg{transform-origin:center}.flowerbed-board>.flowerbed-butterfly{filter:drop-shadow(0 2px 1px #6c573f55)}
 .flowerbed-board [data-bed-plot]{scroll-margin-top:76px;scroll-margin-bottom:12px}
+.flowerbed-seeds [data-bed-seed]{scroll-margin-top:76px;scroll-margin-bottom:12px}
 
 /* A single local watering cue, attached to the plot so scrolling cannot detach it. */
 .flowerbed-pour{position:absolute;inset:0;display:block;pointer-events:none;z-index:2}
