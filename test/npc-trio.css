@@ -103,6 +103,9 @@
 @media(max-width:420px){.trio-dialog:has(.trio-practice-distance) .trio-practice-heading{margin-bottom:2px}}
 
 /* Keep the source books and drop target together on short landscape screens. */
+/* Keep the focused cart cover below the sticky title in every layout. */
+.trio-dialog:has([data-book-drop]){scroll-padding-top:76px;scroll-padding-bottom:8px}
+.trio-dialog:has([data-book-drop]) [data-book]{scroll-margin-block:6px}
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has([data-book-drop]) header{padding:6px 12px}.trio-dialog:has([data-book-drop]) .trio-content{padding:8px 12px}.trio-dialog:has([data-book-drop]) .trio-clue{margin-bottom:6px}.trio-dialog:has([data-book-drop]) .trio-books{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:4px 0}.trio-dialog:has([data-book-drop]) .trio-books button{padding:5px;gap:4px;font-size:14px;line-height:1.4;word-break:keep-all}.trio-dialog:has([data-book-drop]) .trio-book{height:54px}.trio-dialog:has([data-book-drop]) .trio-book-check{font-size:12px;padding:2px 3px}.trio-dialog:has([data-book-drop]) .trio-feedback{padding:0 12px;min-height:0;margin-bottom:6px}.trio-dialog:has([data-book-drop]) footer{padding:6px 12px}}
 @media(min-width:560px) and (max-height:350px){.trio-dialog:has([data-book-drop]) header{padding-block:4px}.trio-dialog:has([data-book-drop]) .trio-content{padding-block:6px}.trio-dialog:has([data-book-drop]) .trio-clue{font-size:15px;line-height:1.4;margin-bottom:2px}.trio-dialog:has([data-book-drop]) .trio-books button{padding:3px;gap:2px}.trio-dialog:has([data-book-drop]) .trio-book{height:44px}}
 @media(min-width:560px) and (max-height:520px){.trio-dialog:has([data-book-drop]){scroll-padding-top:70px;scroll-padding-bottom:64px}}
