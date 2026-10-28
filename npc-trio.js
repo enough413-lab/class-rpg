@@ -80,9 +80,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null,bookCheck=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;shelfUndo=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();festivalUndo=null;owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -96,7 +96,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -293,7 +293,7 @@ export function installNpcTrio(c){
  dialog.addEventListener('scroll',stopShotReplay);
  dialog.addEventListener('input',stopShotReplay,true);
  dialog.addEventListener('pointerdown',e=>{if(e.target.closest('.trio-aim-grip,.trio-basket-grip'))stopShotReplay()},true);
- const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches)stopShotReplay()});
+ const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches){stopShotReplay();stopBookCheck()}});
  function play(){if(active==='tori')search();else if(active==='garden')pipes();else shot()}
 
 
@@ -393,7 +393,12 @@ export function installNpcTrio(c){
   const next=choices[0]?.book||book;next.focus({preventScroll:true});if(matchMedia('(min-width:560px) and (max-height:520px)').matches)dialog.scrollTop=0;else next.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
   return true;
  }
- function chooseBook(b){if(!canPickBook()||!content().contains(b))return;const r=state.tori;const picked=Number(b.dataset.book),target=r.round%6;if(!Number.isInteger(picked)||picked<0||picked>5)return;if(picked===target)complete();else{const colorSame=bookColor(picked)===bookColor(target),motifSame=bookMotif(picked,r.round)===bookMotif(target,r.round),reason=colorSame?'무늬 다름':motifSame?'색 다름':'둘 다 다름';feedback(colorSame?'표지 색은 맞아! '+MOTIFS[bookMotif(target,r.round)]+' 무늬를 다시 찾아보자.':motifSame?'무늬는 맞아! '+COLORS[bookColor(target)]+' 표지를 다시 찾아보자.':'색과 무늬가 둘 다 달라. 모은 두 단서와 다시 맞춰 보자.');b.classList.add('trio-wrong');let check=b.querySelector('.trio-book-check');if(!check){check=doc.createElement('span');check.className='trio-book-check';b.append(check)}check.textContent=reason;b.setAttribute('aria-label',COLORS[bookColor(picked)]+' 표지, '+MOTIFS[bookMotif(picked,r.round)]+' 무늬 · '+reason+' · 다시 살펴보기')}}
+ // Only the last checked cover moves; feedback never advances or saves the request.
+ function stopBookCheck(){const current=bookCheck;bookCheck=null;current?.animation.cancel()}
+ function showBookCheck(b){stopBookCheck();if(!canPickBook()||replayMotion.matches)return;const cover=b.querySelector('.trio-book');if(!cover)return;const current=bookCheck={book:b,animation:cover.animate([{translate:'0 0'},{translate:'-3px 0'},{translate:'3px 0'},{translate:'0 0'}],{duration:300,easing:'ease-in-out'})};current.animation.finished.then(()=>{if(bookCheck===current)stopBookCheck()},()=>{})}
+ for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,stopBookCheck);
+ dialog.addEventListener('focusout',e=>{if(bookCheck?.book.contains(e.target))stopBookCheck()});
+ function chooseBook(b){if(!canPickBook()||!content().contains(b))return;const r=state.tori;const picked=Number(b.dataset.book),target=r.round%6;if(!Number.isInteger(picked)||picked<0||picked>5)return;stopBookCheck();if(picked===target)complete();else{const colorSame=bookColor(picked)===bookColor(target),motifSame=bookMotif(picked,r.round)===bookMotif(target,r.round),reason=colorSame?'무늬 다름':motifSame?'색 다름':'둘 다 다름';feedback(colorSame?'표지 색은 맞아! '+MOTIFS[bookMotif(target,r.round)]+' 무늬를 다시 찾아보자.':motifSame?'무늬는 맞아! '+COLORS[bookColor(target)]+' 표지를 다시 찾아보자.':'색과 무늬가 둘 다 달라. 모은 두 단서와 다시 맞춰 보자.');b.classList.add('trio-wrong');let check=b.querySelector('.trio-book-check');if(!check){check=doc.createElement('span');check.className='trio-book-check';b.append(check)}check.textContent=reason;b.setAttribute('aria-label',COLORS[bookColor(picked)]+' 표지, '+MOTIFS[bookMotif(picked,r.round)]+' 무늬 · '+reason+' · 다시 살펴보기');showBookCheck(b)}}
  function clearBookDrag(){const d=bookDrag;if(!d)return null;bookDrag=null;d.ghost?.remove();d.el.classList.remove('is-lifted');dialog.querySelectorAll('[data-book-drop],[data-shelf-drop]').forEach(el=>el.classList.remove('is-book-target'));dialog.classList.remove('is-dragging-book');try{if(d.el.hasPointerCapture(d.id))d.el.releasePointerCapture(d.id)}catch{}return d}
  function blockBookClick(d){bookClick={id:d.id,until:performance.now()+800}}
  function cancelBookDrag(){const d=clearBookDrag();if(d)blockBookClick(d)}
@@ -402,7 +407,7 @@ export function installNpcTrio(c){
  dialog.addEventListener('pointerdown',e=>{
   if(bookDrag)return;bookClick=null;const b=e.target.closest('[data-book],[data-shelf-book]'),shelf=mode==='shelf';if(!b||!e.isPrimary||e.button!==0||!content().contains(b))return;
   const i=Number(shelf?b.dataset.shelfBook:b.dataset.book);if(shelf?b.dataset.shelfBook==null||!canDisplayShelf()||!Number.isInteger(i)||i<0||i>5||!collectedBooks(state.tori)[i]:b.dataset.book==null||!canPickBook())return;
-  bookDrag={id:e.pointerId,el:b,x:e.clientX,y:e.clientY,round:state.tori.round,shelf,book:i,active:false};try{b.setPointerCapture(e.pointerId)}catch{bookDrag=null}
+  stopBookCheck();bookDrag={id:e.pointerId,el:b,x:e.clientX,y:e.clientY,round:state.tori.round,shelf,book:i,active:false};try{b.setPointerCapture(e.pointerId)}catch{bookDrag=null}
  });
  dialog.addEventListener('pointermove',e=>{const d=bookDrag;if(!d||d.id!==e.pointerId)return;if(!canDragBook(d)){close();return}if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)<8)return;
   if(!d.active){d.active=true;dialog.classList.add('is-dragging-book');d.el.classList.add('is-lifted');d.ghost=doc.createElement('span');d.ghost.className='trio-book-ghost';d.ghost.setAttribute('aria-hidden','true');d.ghost.append(d.el.querySelector('.trio-book').cloneNode(true));dialog.append(d.ghost)}
