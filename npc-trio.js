@@ -214,6 +214,16 @@ export function installNpcTrio(c){
  doc.defaultView.addEventListener('blur',()=>{if(pipeFlow){stopPipeFlow(true);if(valid())feedback('물을 멈췄어. 다시 흘려서 확인해 봐!')}});
 
  function practiceNotice(){dialog.querySelector('footer').firstChild.textContent='연습은 부탁과 최고 기록을 바꾸지 않아요.'}
+ function basketKey(e){
+  const grip=e.target.closest('.trio-basket-grip');
+  if(!grip||!content()?.contains(grip)||active!=='duri'||mode!=='practice-shot'||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.isComposing)return false;
+  if(!valid()){close();sync();return true}
+  if(grip.disabled||!canMoveBasket()||aimDrag||basketDrag)return true;
+  const target=Math.max(170,Math.min(350,practice.target+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)));
+  if(target!==practice.target){stopShotReplay();setPracticeTarget(target)}
+  if(matchMedia('(min-width:560px) and (max-height:520px)').matches)dialog.scrollTop=0;else dialog.querySelector('.trio-court-wrap').scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+  return true;
+ }
  function shotKey(e){
   const grip=e.target.closest('.trio-aim-grip');
   if(!grip||!content()?.contains(grip)||active!=='duri'||!['shot','link-shot','practice-shot'].includes(mode)||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.isComposing)return false;
@@ -281,8 +291,8 @@ export function installNpcTrio(c){
  const shotTarget=()=>mode==='practice-shot'?practice.target:215+shotRound().round%4*22;
  const canMoveBasket=()=>canAim()&&mode==='practice-shot'&&!aimDrag;
  function installPracticeTarget(){
-  content().querySelector('p').textContent='공: ↑↓ 각도 · ←→ 힘. 바구니는 끌어 봐!';
-  const wrap=dialog.querySelector('.trio-court-wrap'),grip=doc.createElement('button');grip.type='button';grip.className='trio-basket-grip';grip.dataset.trio='basket-grip';grip.setAttribute('aria-label','연습 바구니를 좌우로 옮기기. Enter를 누르면 거리 막대로 이동해요.');grip.innerHTML='<span aria-hidden="true">↔</span>';wrap.append(grip);
+  content().querySelector('p').textContent='공: ↑↓ 각도 · ←→ 힘. 바구니: ←→ 거리';
+  const wrap=dialog.querySelector('.trio-court-wrap'),grip=doc.createElement('button');grip.type='button';grip.className='trio-basket-grip';grip.dataset.trio='basket-grip';grip.setAttribute('aria-label','연습 바구니. 좌우 방향키로 거리를 조절하거나 끌어 보세요. Enter는 거리 막대로 이동해요.');grip.innerHTML='<span aria-hidden="true">↔</span>';wrap.append(grip);
   const row=doc.createElement('div');row.className='trio-practice-distance';row.innerHTML='<label><span>거리</span><input type="range" min="170" max="350" step="1" data-practice-distance aria-label="연습 바구니 거리"></label><button type="button" data-trio="basket-reset">원래 자리</button>';wrap.after(row);drawPracticeTarget(practice.target);
  }
  function drawPracticeTarget(target){
@@ -511,5 +521,5 @@ export function installNpcTrio(c){
  }
  const observer=new MutationObserver(()=>{if(c.getScene()!=='garden'||c.hub.classList.contains('hidden'))festivalUndo=null;if(c.hub.classList.contains('hidden'))close()});observer.observe(c.hub,{attributes:true,attributeFilter:['class','data-scene']});
  doc.addEventListener('visibilitychange',()=>{if(doc.hidden)close()});doc.addEventListener('student-dashboard-updated',sync);new MutationObserver(sync).observe(doc.getElementById('hubPlayer'),{childList:true});
- return {shotKey,practiceKey,festivalKey,bookKey,pipeKey,searchPlace(p){if(!TRIO_SEARCH_PLACES.some(x=>x.kind===p.kind))return p;activate();return toriSearchPlaces(state.tori).find(x=>x.kind===p.kind)},signs(){activate();const a=r=>r.phase===2?'ready':r.phase===1?'active':'available',l=state.link;return {tori:a(state.tori),'trio-garden':state.garden.phase===2||l.step===4?'ready':l.step>=1&&l.step<=3?'active':a(state.garden),'trio-duri':state.duri.phase===2||l.step===1||l.step===3?'ready':l.step===2?'active':a(state.duri)}},sync,visible,interact(kind){const prop=TRIO_SEARCH_PLACES.some(p=>p.kind===kind),id=kind==='tori'||kind==='trio-shelf'||prop?'tori':kind==='trio-garden'?'garden':kind==='trio-duri'?'duri':null;if(!id)return false;sync();if(prop&&!visible(kind))return true;if(c.walk.nearby()?.kind!==kind)return true;if(kind==='trio-shelf')inspectShelf();else if(prop)inspectSearch(kind);else launch(id);return true},requests(){activate();return [...Object.keys(META).map(id=>({id:'trio-'+id,title:META[id].name+' · '+META[id].title,loaded:true,active:state[id].phase===1||state[id].phase===2,text:id==='tori'?toriGoal():state[id].phase===2?META[id].name+'에게 돌아가 완성해요.':META[id].task,error:saveError?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save})),{id:'trio-link',title:'새싹과 두리 · 꽃 축제 준비',loaded:true,active:state.link.step>=1&&state.link.step<=4,text:['','꽃을 두리에게 · 정원 → 연못 → 운동장','운동장 · 두리의 축제 바구니에 공 넣기','운동장 · 두리에게 돌아가 리본 받기','리본을 새싹에게 · 운동장 → 연못 → 정원'][state.link.step]||'꽃 축제 준비 완성!',error:saveError&&state.link.step>0?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save}]}};
+ return {basketKey,shotKey,practiceKey,festivalKey,bookKey,pipeKey,searchPlace(p){if(!TRIO_SEARCH_PLACES.some(x=>x.kind===p.kind))return p;activate();return toriSearchPlaces(state.tori).find(x=>x.kind===p.kind)},signs(){activate();const a=r=>r.phase===2?'ready':r.phase===1?'active':'available',l=state.link;return {tori:a(state.tori),'trio-garden':state.garden.phase===2||l.step===4?'ready':l.step>=1&&l.step<=3?'active':a(state.garden),'trio-duri':state.duri.phase===2||l.step===1||l.step===3?'ready':l.step===2?'active':a(state.duri)}},sync,visible,interact(kind){const prop=TRIO_SEARCH_PLACES.some(p=>p.kind===kind),id=kind==='tori'||kind==='trio-shelf'||prop?'tori':kind==='trio-garden'?'garden':kind==='trio-duri'?'duri':null;if(!id)return false;sync();if(prop&&!visible(kind))return true;if(c.walk.nearby()?.kind!==kind)return true;if(kind==='trio-shelf')inspectShelf();else if(prop)inspectSearch(kind);else launch(id);return true},requests(){activate();return [...Object.keys(META).map(id=>({id:'trio-'+id,title:META[id].name+' · '+META[id].title,loaded:true,active:state[id].phase===1||state[id].phase===2,text:id==='tori'?toriGoal():state[id].phase===2?META[id].name+'에게 돌아가 완성해요.':META[id].task,error:saveError?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save})),{id:'trio-link',title:'새싹과 두리 · 꽃 축제 준비',loaded:true,active:state.link.step>=1&&state.link.step<=4,text:['','꽃을 두리에게 · 정원 → 연못 → 운동장','운동장 · 두리의 축제 바구니에 공 넣기','운동장 · 두리에게 돌아가 리본 받기','리본을 새싹에게 · 운동장 → 연못 → 정원'][state.link.step]||'꽃 축제 준비 완성!',error:saveError&&state.link.step>0?'이 기기에 놀이 기록을 저장하지 못했어요.':null,retry:save}]}};
 }
