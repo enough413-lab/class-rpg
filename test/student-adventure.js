@@ -411,6 +411,8 @@ export function installStudentAdventure(ctx){
   const hub=byId('classroomHub'),explorer=byId('schoolExplorerModal');
   const hubOpen=hub&&!hub.classList.contains('hidden'),explorerOpen=explorer&&!explorer.classList.contains('hidden');
   if(!hubOpen&&!explorerOpen)return;
+  // A late input from closed play content must not become walking or nearby use.
+  if(event.target.closest('#npcTrio:not([open]),#campusFlowerbed:not([open])')){event.preventDefault();event.stopImmediatePropagation();return}
   const editable=event.target.closest('input,textarea,select,[contenteditable="true"]');
   const overlay=doc.querySelector('dialog[open],.modal-backdrop:not(.hidden):not(#schoolExplorerModal),.reward-notice-backdrop');
   // Let the active play board handle its own arrows before blocking legacy walking handlers.
