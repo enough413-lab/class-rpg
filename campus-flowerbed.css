@@ -44,5 +44,6 @@
  .flowerbed-fences{grid-area:fences;margin:4px 12px}
  .flowerbed-status{grid-area:status;margin:4px 12px}
  .flowerbed-dialog footer{grid-area:storage;padding:8px 12px}
+ .flowerbed-dialog footer:has([data-bed=retry]:not([hidden])){margin-bottom:1px}
  .flowerbed-dialog :is([data-bed-seed],[data-bed=can]){scroll-margin-top:64px;scroll-margin-bottom:12px}
 }
