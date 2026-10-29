@@ -80,9 +80,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null,bookCheck=null,basketCatch=null,pipeTurnMotion=null,shelfPlacement=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null,bookCheck=null,basketCatch=null,pipeTurnMotion=null,shelfPlacement=null,pipeStopMotion=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){stopPipeStopMotion();stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;shelfUndo=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();festivalUndo=null;owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -96,7 +96,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){stopPipeStopMotion();stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -161,6 +161,17 @@ export function installNpcTrio(c){
  function pipes(){mode='pipes';shell();dialog.querySelector('h2').textContent='새싹 · 물길 잇기';board=pipePuzzle(state.garden.round);const resumed=validPipeDraft(state.garden);if(resumed)board.tiles.forEach((tile,i)=>tile.turn=state.garden.pipeDraft.turns[i]);content().innerHTML='<p>Enter로 회전 · Shift+Enter는 반대로! 방향키 선택·좌우 끌기</p><div class="trio-pipe-wrap"><span class="trio-source" style="grid-row:'+(board.start+1)+'" aria-label="수도">💧</span><div class="trio-pipes" role="group" aria-label="돌려서 잇는 아홉 물길"></div><span class="trio-flower" style="grid-row:'+(board.end+1)+'" aria-label="물을 기다리는 꽃">🌼</span></div><div class="trio-pipe-actions"><button type="button" data-trio="water">물 흘리기</button><button type="button" data-trio="pipe-undo" disabled>회전 되돌리기</button></div>';drawPipes();feedback(resumed?'돌려 둔 물길에서 이어 하자. 물을 흘려 다시 확인해 봐!':'시간 제한은 없어. 물을 흘려서 어디까지 가는지 확인해 봐!');if(matchMedia('(min-width: 560px) and (max-height: 520px)').matches)dialog.scrollTop=0}
  const canTurnPipe=()=>valid()&&active==='garden'&&mode==='pipes'&&state.garden.phase===1;
  function turnPipe(index,step=1){if(!canTurnPipe()||!Number.isInteger(index)||index<0||index>=9||![1,-1].includes(step))return;stopPipeFlow();rememberPipeTurn(index);board.tiles[index].turn=(board.tiles[index].turn+step+4)%4;state.garden.pipeDraft={round:state.garden.round,turns:board.tiles.map(t=>t.turn)};drawPipes();save();dialog.querySelector('[data-tile="'+index+'"]').focus({preventScroll:true});feedback(saveError?'물길을 돌렸어. 아래에서 저장을 다시 해 줘.':'물길을 돌렸어. 이어졌는지 물을 흘려 보자!');showPipeTurnMotion(index,step)}
+ // Draw attention only to the existing cross after water actually stops at a blocked connection.
+ function stopPipeStopMotion(){const current=pipeStopMotion;pipeStopMotion=null;current?.cancel()}
+ function showPipeStopMotion(){
+  stopPipeStopMotion();if(!canTurnPipe()||replayMotion.matches)return;
+  const cross=dialog.querySelector('.trio-pipe-stop path');if(!cross)return;
+  const current=pipeStopMotion=cross.animate([{transform:'scale(1)',transformOrigin:'0px 0px'},{transform:'scale(1.5)',transformOrigin:'0px 0px'},{transform:'scale(1)',transformOrigin:'0px 0px'}],{duration:320,easing:'ease-in-out'});
+  current.finished.then(()=>{if(pipeStopMotion===current)stopPipeStopMotion()},()=>{});
+ }
+ for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,stopPipeStopMotion);
+ dialog.addEventListener('pointerdown',stopPipeStopMotion);
+ dialog.addEventListener('focusout',stopPipeStopMotion);
  function stopPipeTurnMotion(){const current=pipeTurnMotion;pipeTurnMotion=null;current?.cancel()}
  function showPipeTurnMotion(index,step){
   stopPipeTurnMotion();if(!canTurnPipe()||replayMotion.matches)return;
@@ -203,7 +214,7 @@ export function installNpcTrio(c){
  function pipeUndoControl(){const b=dialog.querySelector('[data-trio=pipe-undo]');if(b)b.disabled=!pipeUndo||pipeUndo.board!==board||pipeUndo.round!==state.garden.round||state.garden.phase!==1}
  function rememberPipeTurn(index){pipeUndo={board,round:state.garden.round,index,turn:board.tiles[index].turn,draft:validPipeDraft(state.garden)?{round:state.garden.round,turns:[...state.garden.pipeDraft.turns]}:null};pipeUndoControl()}
  function undoPipeTurn(){const previous=pipeUndo;if(!previous||previous.board!==board||previous.round!==state.garden.round)return;stopPipeFlow();board.tiles[previous.index].turn=previous.turn;if(previous.draft)state.garden.pipeDraft={round:previous.draft.round,turns:[...previous.draft.turns]};else delete state.garden.pipeDraft;pipeUndo=null;drawPipes();pipeUndoControl();save();dialog.querySelector('[data-tile="'+previous.index+'"]').focus({preventScroll:true});feedback(saveError?'회전을 되돌렸어. 아래에서 저장을 다시 해 줘.':'방금 돌린 조각을 되돌렸어. 물을 흘려 다시 확인해 봐!')}
- function drawPipes(wet=[],blocked=null){stopPipeTurnMotion();endPipeDrag();const container=dialog.querySelector('.trio-pipes'),focused=doc.activeElement?.dataset.tile,directions=['위','오른쪽','아래','왼쪽'];container.innerHTML=board.tiles.map((tile,i)=>{const p=ports(tile),ends=[[30,0],[60,30],[30,60],[0,30]],a=ends[p[0]],b=ends[p[1]],stopped=blocked?.cell===i,marker=stopped?'<g class="trio-pipe-stop" transform="translate('+[[30,10],[50,30],[30,50],[10,30]][blocked.side].join(' ')+')"><circle r="8"/><path d="M-3-3L3 3M-3 3L3-3"/></g>':'';return '<button type="button" data-tile="'+i+'" aria-label="'+(Math.floor(i/3)+1)+'행 '+(i%3+1)+'열 물길 · '+p.map(s=>directions[s]).join('·')+(stopped?' · 물이 멈춘 곳 · '+directions[blocked.side]+' 연결 확인':'')+'" class="'+(wet.includes(i)?'wet ':'')+(stopped?'pipe-blocked':'')+'"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M '+a.join(' ')+' L 30 30 L '+b.join(' ')+'"/>'+marker+'</svg></button>'}).join('');if(focused!=null)container.querySelector('[data-tile="'+focused+'"]').focus({preventScroll:true})}
+ function drawPipes(wet=[],blocked=null){stopPipeStopMotion();stopPipeTurnMotion();endPipeDrag();const container=dialog.querySelector('.trio-pipes'),focused=doc.activeElement?.dataset.tile,directions=['위','오른쪽','아래','왼쪽'];container.innerHTML=board.tiles.map((tile,i)=>{const p=ports(tile),ends=[[30,0],[60,30],[30,60],[0,30]],a=ends[p[0]],b=ends[p[1]],stopped=blocked?.cell===i,marker=stopped?'<g class="trio-pipe-stop" transform="translate('+[[30,10],[50,30],[30,50],[10,30]][blocked.side].join(' ')+')"><circle r="8"/><path d="M-3-3L3 3M-3 3L3-3"/></g>':'';return '<button type="button" data-tile="'+i+'" aria-label="'+(Math.floor(i/3)+1)+'행 '+(i%3+1)+'열 물길 · '+p.map(s=>directions[s]).join('·')+(stopped?' · 물이 멈춘 곳 · '+directions[blocked.side]+' 연결 확인':'')+'" class="'+(wet.includes(i)?'wet ':'')+(stopped?'pipe-blocked':'')+'"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M '+a.join(' ')+' L 30 30 L '+b.join(' ')+'"/>'+marker+'</svg></button>'}).join('');if(focused!=null)container.querySelector('[data-tile="'+focused+'"]').focus({preventScroll:true})}
 
  function stopPipeFlow(clear=false){
   if(!pipeFlow)return;cancelAnimationFrame(pipeFlow.frame);pipeFlow=null;delete dialog.dataset.waterFlow;
@@ -211,7 +222,7 @@ export function installNpcTrio(c){
   dialog.querySelectorAll('.trio-water-front').forEach(el=>el.remove());dialog.querySelectorAll('.pipe-flowing').forEach(el=>el.classList.remove('pipe-flowing'));
   if(clear&&mode==='pipes'&&dialog.querySelector('.trio-pipes'))drawPipes();
  }
- function finishWater(result){stopPipeFlow();drawPipes(result.wet,result.blocked);if(result.ok)complete();else feedback(result.blocked.reason==='inlet'?'물이 여기서 멈췄어. × 표시 쪽으로 물길이 열리게 돌려 줘!':result.blocked.reason==='loop'?'물이 같은 곳으로 돌아왔어. × 표시에서 꽃 쪽으로 이어 줘!':'물이 꽃 밖으로 흘렀어. × 표시에서 꽃이 있는 줄의 오른쪽으로 이어 줘!');}
+ function finishWater(result){stopPipeFlow();drawPipes(result.wet,result.blocked);if(result.ok)complete();else{feedback(result.blocked.reason==='inlet'?'물이 여기서 멈췄어. × 표시 쪽으로 물길이 열리게 돌려 줘!':result.blocked.reason==='loop'?'물이 같은 곳으로 돌아왔어. × 표시에서 꽃 쪽으로 이어 줘!':'물이 꽃 밖으로 흘렀어. × 표시에서 꽃이 있는 줄의 오른쪽으로 이어 줘!');showPipeStopMotion()}}
  function runWater(){
   const result=traceWater(board.tiles,board.start,board.end);
   if(matchMedia('(prefers-reduced-motion: reduce)').matches||!result.wet.length){finishWater(result);return}
@@ -317,7 +328,7 @@ export function installNpcTrio(c){
  dialog.addEventListener('scroll',stopShotReplay);
  dialog.addEventListener('input',stopShotReplay,true);
  dialog.addEventListener('pointerdown',e=>{if(e.target.closest('.trio-aim-grip,.trio-basket-grip'))stopShotReplay()},true);
- const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches){stopShelfPlacement();stopShotReplay();stopBookCheck();stopBasketCatch();stopPipeTurnMotion()}});
+ const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches){stopPipeStopMotion();stopShelfPlacement();stopShotReplay();stopBookCheck();stopBasketCatch();stopPipeTurnMotion()}});
  function play(){if(active==='tori')search();else if(active==='garden')pipes();else shot()}
 
 
