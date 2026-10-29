@@ -230,3 +230,6 @@
  .trio-content:has(.trio-found-clue)>[data-trio=note]{grid-area:action;justify-self:start;scroll-margin-top:60px;scroll-margin-bottom:8px}
  .trio-dialog:has(.trio-found-clue) .trio-feedback:empty{display:none}
 }
+
+/* Leave the full storage error footer reachable after fractional short-screen scrolling. */
+@media(min-width:560px) and (max-height:520px){.trio-dialog:has(.trio-pipes):has(.trio-storage:not(:empty)){padding-bottom:1px}}
