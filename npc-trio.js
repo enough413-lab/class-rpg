@@ -144,7 +144,7 @@ export function installNpcTrio(c){
  function search(){close();doc.getElementById('campusTitle').focus({preventScroll:true})}
  function inspectSearch(kind){launch('tori',kind);mode='clue';shell();const r=state.tori;if(r.phase!==1){conversation(r.phase===2?'책은 이미 네 손에 있어. 토리에게 가져가자!':'먼저 토리의 부탁을 받아 보자.','close','계속 둘러보기');return}
   if(kind==='trio-books'){if(r.clues===3)bookGame();else conversation((validSearchLayout(r)?'아직 단서가 부족해. 도서관의 쪽지와 책갈피를 모두 살펴보자. ':'아직 단서가 부족해. 창가 쪽지와 책장 틈의 책갈피를 모두 살펴보자. ')+searchText(),'search','남은 단서 찾으러 가기');return}
-  const color=kind==='trio-clue-color',target=r.round%6;content().innerHTML='<div class="trio-found-clue">'+(color?'<span class="trio-color-swatch color-'+bookColor(target)+'"></span>':glyph(bookMotif(target,r.round)))+'</div><p></p><button type="button" data-trio="note">단서를 수첩에 적기</button>';content().querySelector('p').textContent=color?(validSearchLayout(r)?'쪽지: 잃어버린 책의 표지는 ':'창가 쪽지: 잃어버린 책의 표지는 ')+COLORS[bookColor(target)]+'색이래!':'책갈피의 자국: 표지에 '+MOTIFS[bookMotif(target,r.round)]+' 무늬가 있었대!';
+  const color=kind==='trio-clue-color',target=r.round%6;content().innerHTML='<div class="trio-found-clue">'+(color?'<span class="trio-color-swatch color-'+bookColor(target)+'"></span>':glyph(bookMotif(target,r.round)))+'</div><p></p><button type="button" data-trio="note">'+(r.clues&(color?1:2)?'계속 둘러보기':'단서를 수첩에 적기')+'</button>';content().querySelector('p').textContent=color?(validSearchLayout(r)?'쪽지: 잃어버린 책의 표지는 ':'창가 쪽지: 잃어버린 책의 표지는 ')+COLORS[bookColor(target)]+'색이래!':'책갈피의 자국: 표지에 '+MOTIFS[bookMotif(target,r.round)]+' 무늬가 있었대!';
  }
  function bookGame(){
   const r=state.tori,colors=['초록','파랑','분홍'],motifs=['달','잎','별'],round=r.round,target=round%6;mode='books';shell();dialog.querySelector('h2').textContent='토리 · 책 수레';
@@ -511,7 +511,7 @@ export function installNpcTrio(c){
   if(action==='festival-undo'){undoFestival();return}
   if(action==='personal'){talk(true);return}
   if(action==='search'&&active==='tori'&&r.phase===1){search();return}
-  if(action==='note'&&active==='tori'&&r.phase===1&&mode==='clue'){r.clues|=opening.kind==='trio-clue-color'?1:2;changed();close();doc.getElementById('campusTitle').focus({preventScroll:true});return}
+  if(action==='note'&&active==='tori'&&r.phase===1&&mode==='clue'){const clue=opening.kind==='trio-clue-color'?1:2;if(!(r.clues&clue)){r.clues|=clue;changed()}close();doc.getElementById('campusTitle').focus({preventScroll:true});return}
   if(action==='link-start'&&active==='garden'&&r.wins>0&&(l.step===0||l.step===5)){if(l.step===5)l.round=(l.round+1)%999999;l.step=1;l.attempts=0;changed('trio-link');close();return}
   if(action==='link-flower'&&active==='duri'&&l.step===1){l.step=2;changed('trio-link');talk();return}
   if(action==='link-shot'&&active==='duri'&&l.step===2){shot(true);return}
