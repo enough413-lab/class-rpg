@@ -80,9 +80,9 @@ export function decorateTrioObject(b,p){
 export function installNpcTrio(c){
  const doc=c.hub.ownerDocument,dialog=doc.createElement('dialog');dialog.id='npcTrio';dialog.className='trio-dialog';dialog.setAttribute('aria-labelledby','trioTitle');doc.body.append(dialog);
  const records=new Map(),blank=()=>({...Object.fromEntries(Object.keys(META).map(id=>[id,{phase:0,round:0,wins:0,...(id==='tori'?{clues:0}:id==='duri'?{attempts:0,best:freshBest()}:{})}])),link:{step:0,round:0,wins:0,attempts:0,decor:0}});
- let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null,bookCheck=null,basketCatch=null,pipeTurnMotion=null;
+ let owner=null,token=null,state=blank(),saveError=false,loaded=false,active=null,opening=null,frame=0,board=null,mode='talk',focusBack=null,festivalDraft=0,festivalUndo=null,lastShot=null,shotReplay=null,shelfDraft=null,shelfUndo=null,aimDrag=null,pipeFlow=null,practice=null,basketDrag=null,pipeUndo=null,bookDrag=null,bookClick=null,festivalDrag=null,festivalClick=null,pipeDrag=null,pipeClick=null,bookCheck=null,basketCatch=null,pipeTurnMotion=null,shelfPlacement=null;
  const key=id=>'classRpgNpcTrio_v1_'+id;
- function cancel(){stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
+ function cancel(){stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();endAimDrag(false);cancelAnimationFrame(frame);frame=0}
  function close(){cancel();pipeUndo=null;practice=null;lastShot=null;shelfDraft=null;shelfUndo=null;if(dialog.open)dialog.close();if(focusBack?.isConnected&&!c.hub.classList.contains('hidden'))focusBack.focus({preventScroll:true})}
  function activate(){const id=c.getStudent()?.id,t=c.getToken();if(id===owner&&t===token&&loaded)return;close();festivalUndo=null;owner=id;token=t;loaded=true;saveError=false;state=blank();
   if(records.has(id)){({state,saveError}=records.get(id));return}
@@ -96,7 +96,7 @@ export function installNpcTrio(c){
  function rememberShot(){const r=shotRound(),index=r.round%4,old=state.duri.best[index];if(r.attempts<1)return '';const improved=old==null||r.attempts<old;if(improved)state.duri.best[index]=r.attempts;drawRecord();return (improved?'내 최고 기록! ':r.attempts===old?'내 최고 기록과 같아! ':'')+'기록 깃발에 남겼어. '}
  const valid=()=>dialog.open&&opening?.id===c.getStudent()?.id&&opening?.token===c.getToken()&&opening?.room===c.getScene()&&opening?.kind===c.walk.nearby()?.kind&&!c.hub.classList.contains('hidden')&&!doc.hidden;
  function changed(id='trio-'+active){save();c.focusGoal?.(id)}
- function shell(){stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
+ function shell(){stopShelfPlacement();stopPipeTurnMotion();stopBasketCatch();stopBookCheck();stopShotReplay();shelfUndo=null;endPipeDrag();endFestivalDrag();endBasketDrag(false);cancelBookDrag();stopPipeFlow();pipeUndo=null;endAimDrag(false);dialog.dataset.presentation="play";const m=META[active];dialog.innerHTML='<header><h2 id="trioTitle">'+m.name+' · '+m.title+'</h2><button type="button" data-trio="close" aria-label="놀이 닫기">닫기</button></header><div class="trio-content"></div><p class="trio-feedback" role="status" aria-live="polite"></p><footer>놀이 기록은 이 기기·이 학생에게 저장돼요. 학교 경험치·골드는 그대로예요.<button type="button" data-trio="save" '+(saveError?'':'hidden')+'>저장 다시 시도</button><span class="trio-storage" role="status">'+(saveError?'저장하지 못했어요. 지금은 이어 놀 수 있어요.':'')+'</span></footer>'}
  const content=()=>dialog.querySelector('.trio-content');
  function feedback(text){dialog.querySelector('.trio-feedback').textContent=text}
  function conversation(text,action,label,secondAction='close',secondLabel='조금 더 둘러볼게'){
@@ -131,12 +131,18 @@ export function installNpcTrio(c){
  }
  function shelfControls(){const selected=dialog.querySelector('[data-trio=shelf-display]'),latest=dialog.querySelector('[data-trio=shelf-latest]'),chosen=displayBook(state.tori),front=chosen??knownReturn(state.tori);if(!selected)return;selected.disabled=shelfDraft==null||shelfDraft===chosen;selected.setAttribute('aria-label',shelfDraft==null?'표지를 고른 뒤 앞에 세우기':returnedName(shelfDraft)+' 앞에 세우기');latest.hidden=chosen==null;dialog.querySelector('[data-trio=shelf-undo]').hidden=!shelfUndo;dialog.querySelectorAll('[data-shelf-book]').forEach(b=>b.dataset.displayed=String(front!=null&&Number(b.dataset.shelfBook)===front%6))}
  const canDisplayShelf=()=>valid()&&active==='tori'&&mode==='shelf'&&opening.kind==='trio-shelf';
+ // The displayed cover settles only after an actual change of the visible front book.
+ function stopShelfPlacement(){const current=shelfPlacement;shelfPlacement=null;current?.animation.cancel()}
+ function showShelfPlacement(previous){stopShelfPlacement();const front=displayBook(state.tori)??knownReturn(state.tori);if(!canDisplayShelf()||replayMotion.matches||front==null||previous!=null&&previous%6===front%6)return;const book=dialog.querySelector('[data-shelf-book="'+front%6+'"]'),cover=book?.querySelector('.trio-book');if(!cover)return;const current=shelfPlacement={book,animation:cover.animate([{translate:'0 -4px'},{translate:'0 0'}],{duration:240,easing:'ease-out'})};current.animation.finished.then(()=>{if(shelfPlacement===current)stopShelfPlacement()},()=>{})}
+ for(const type of ['blur','resize'])doc.defaultView.addEventListener(type,stopShelfPlacement);
+ dialog.addEventListener('pointerdown',stopShelfPlacement);
+ dialog.addEventListener('focusout',e=>{if(shelfPlacement?.book.contains(e.target))stopShelfPlacement()});
  function placeShelfBook(i){
   if(!canDisplayShelf()||!Number.isInteger(i)||i<0||i>5||!collectedBooks(state.tori)[i]||displayBook(state.tori)===i)return;
-  shelfUndo={book:displayBook(state.tori)};shelfDraft=i;state.tori.displayBook=i;save();dialog.querySelectorAll('[data-shelf-book]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.shelfBook)===i)));shelfControls();dialog.querySelector('[data-shelf-book="'+i+'"]').focus({preventScroll:true});feedback('토리: '+returnedName(i)+'을 앞에 세웠어!');
+  const previous=displayBook(state.tori)??knownReturn(state.tori);shelfUndo={book:displayBook(state.tori)};shelfDraft=i;state.tori.displayBook=i;save();dialog.querySelectorAll('[data-shelf-book]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.shelfBook)===i)));shelfControls();dialog.querySelector('[data-shelf-book="'+i+'"]').focus({preventScroll:true});feedback('토리: '+returnedName(i)+'을 앞에 세웠어!');showShelfPlacement(previous);
  }
  function undoShelf(){
-  if(!canDisplayShelf()||!shelfUndo)return;const previous=shelfUndo.book;shelfUndo=null;
+  if(!canDisplayShelf()||!shelfUndo)return;stopShelfPlacement();const previous=shelfUndo.book;shelfUndo=null;
   if(previous==null)delete state.tori.displayBook;else state.tori.displayBook=previous;
   save();shelfControls();const focus=dialog.querySelector('[data-shelf-book="'+(shelfDraft??previous)+'"]')||dialog.querySelector('[data-shelf-book]');focus?.focus({preventScroll:true});
   feedback('토리: '+(previous==null?'최근에 돌려준 책을 다시 앞에 세웠어!':returnedName(previous)+'을 다시 앞에 세웠어!'));
@@ -311,7 +317,7 @@ export function installNpcTrio(c){
  dialog.addEventListener('scroll',stopShotReplay);
  dialog.addEventListener('input',stopShotReplay,true);
  dialog.addEventListener('pointerdown',e=>{if(e.target.closest('.trio-aim-grip,.trio-basket-grip'))stopShotReplay()},true);
- const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches){stopShotReplay();stopBookCheck();stopBasketCatch();stopPipeTurnMotion()}});
+ const replayMotion=matchMedia('(prefers-reduced-motion: reduce)');replayMotion.addEventListener('change',e=>{if(e.matches){stopShelfPlacement();stopShotReplay();stopBookCheck();stopBasketCatch();stopPipeTurnMotion()}});
  function play(){if(active==='tori')search();else if(active==='garden')pipes();else shot()}
 
 
@@ -490,7 +496,7 @@ export function installNpcTrio(c){
    if(b.dataset.shelfBook!=null){const i=Number(b.dataset.shelfBook),books=collectedBooks(state.tori);if(Number.isInteger(i)&&i>=0&&i<6&&books[i]){shelfDraft=i;dialog.querySelectorAll('[data-shelf-book]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));shelfControls();feedback('토리: '+returnedName(i)+', 네가 찾아줬지! '+books[i]+'권 모두 잘 간직하고 있어.')}return}
    if(action==='shelf-display'){placeShelfBook(shelfDraft);return}
    if(action==='shelf-undo'){undoShelf();return}
-   if(action==='shelf-latest'&&displayBook(state.tori)!=null){shelfUndo={book:displayBook(state.tori)};delete state.tori.displayBook;save();shelfControls();dialog.querySelector('[data-shelf-book]').focus({preventScroll:true});feedback('토리: 가장 최근에 돌려준 책을 앞에 세울게!');return}
+   if(action==='shelf-latest'&&displayBook(state.tori)!=null){const previous=displayBook(state.tori);shelfUndo={book:displayBook(state.tori)};delete state.tori.displayBook;save();shelfControls();dialog.querySelector('[data-shelf-book]').focus({preventScroll:true});feedback('토리: 가장 최근에 돌려준 책을 앞에 세울게!');showShelfPlacement(previous);return}
    return
   }
   if(action==='practice-guide'&&mode==='practice-shot'&&canAim()&&!aimDrag&&content().contains(b)){practice.guide=!practice.guide;drawPracticeGuide();return}
