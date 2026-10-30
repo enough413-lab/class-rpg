@@ -145,7 +145,7 @@ export function installFlowerbed(c){
   if(b.dataset.bedPlot!=null){const i=Number(b.dataset.bedPlot);if(moving!==null){if(i!==moving){movePlant(moving,i)}else{status('같은 자리여서 그대로 두었어.');moving=null;selected=i;board()}return}if(!state.plots[i]){plantSeed(i,state.seed);return}selected=i;const invite=hasVisitor(state)&&state.plots[i].stage===3&&landing!==i;if(invite)landing=i;board(invite);if(invite)dialog.querySelector('[data-bed-plot="'+i+'"]').scrollIntoView({block:'nearest'});sync();status(invite?(i+1)+'번 '+SEEDS[state.plots[i].seed]+' 꽃으로 나비를 불렀어!':plotLabel(state.plots[i],i)+'를 골랐어.');return}
   const p=state.plots[selected],action=b.dataset.bed;
   if(action==='water'){waterPlant(selected);return}
-  if(action==='move'&&p){moving=selected;board();status('꽃을 옮길 빈 자리나 다른 꽃을 눌러 줘.');return}
+  if(action==='move'&&p){moving=selected;board();const source=dialog.querySelector('[data-bed-plot="'+moving+'"]');source.focus({preventScroll:true});source.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});status('꽃을 옮길 빈 자리나 다른 꽃을 눌러 줘.');return}
   if(action==='replace'&&p){if(p.seed===state.seed&&p.stage===1){moving=null;board();status('같은 씨앗이 이미 심겨 있어. 물을 줘 볼까?');return}remember('다시 심기');moving=null;state.plots[selected]={seed:state.seed,stage:1};save();board();showPlanting(selected);status('이 자리만 '+SEEDS[state.seed]+' 씨앗으로 바꿨어. 다시 물을 줘서 키워 보자!');return}
   if(action==='clear'&&p){remember('자리 비우기');moving=null;state.plots[selected]=null;save();board();status((selected+1)+'번 자리를 빈 흙으로 비웠어. 한 번 되돌리면 방금 모습으로 돌아와.');dialog.querySelector('[data-bed=undo]').focus();return}
   if(action==='cancel'){moving=null;board();status('꽃을 그대로 두었어.');return}
