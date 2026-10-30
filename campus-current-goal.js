@@ -4,7 +4,7 @@ export function installCurrentGoal(c){
  box.className='campus-current-goal';box.setAttribute('aria-label','지금 할 일');
  box.innerHTML='<div class="current-goal-copy" role="status" aria-live="polite" aria-atomic="true"><b></b><span></span></div><button type="button" data-goal-book aria-label="받은 부탁 수첩 열기">부탁<br>수첩</button>';
  dialog.id='campusRequestBook';dialog.className='campus-request-book';dialog.setAttribute('aria-labelledby','requestBookTitle');
- dialog.innerHTML='<header><h2 id="requestBookTitle">받은 부탁</h2><button type="button" data-goal-close autofocus>닫기</button></header><p>지금 할 부탁 하나를 골라요. ! 받을 부탁 · … 진행 중 · ? 완료 가능</p><div class="request-book-list"></div><p class="goal-save-status" role="status"></p><button type="button" data-goal-save hidden>목표 선택 다시 저장</button><button type="button" data-goal-parcel>꾸러미 수첩 열기</button>';
+ dialog.innerHTML='<header><h2 id="requestBookTitle">받은 부탁</h2><button type="button" data-goal-close autofocus>닫기</button></header><p>지금 할 부탁 하나를 골라요.</p><ul class="request-state-legend" aria-label="친구 머리 위 부탁 표시"><li><img src="maps/ui/quest-bulb-v2.svg?v=20261020-harmony" width="36" height="36" alt="">새 부탁</li><li><img src="maps/ui/quest-compass-v1.svg?v=20261030-quest-polish" width="36" height="36" alt="">진행 중</li><li><img src="maps/ui/quest-book-v2.svg?v=20261020-harmony" width="36" height="36" alt="">완료 가능</li></ul><div class="request-book-list"></div><p class="goal-save-status" role="status"></p><button type="button" data-goal-save hidden>목표 선택 다시 저장</button><button type="button" data-goal-parcel>꾸러미 수첩 열기</button>';
  c.viewport.append(box);doc.body.append(dialog);c.hub.classList.add('has-current-goal');
  const button=box.querySelector('button'),title=box.querySelector('b'),hint=box.querySelector('span'),list=dialog.querySelector('.request-book-list'),saveStatus=dialog.querySelector('.goal-save-status');
  const choices=new Map(),key=id=>'classRpgCurrentGoal_v1_'+id,ids=['momo','leaf','parcel','letter','trio-tori','trio-garden','trio-duri','trio-link','flowerbed'];
@@ -22,7 +22,7 @@ export function installCurrentGoal(c){
   // Do not let a late journal reply steal a selected local request, or erase a pending choice.
   current=active.find(r=>r.id===selected)||active[0]||null;
   box.dataset.request=current?.id||'';box.dataset.state=current?'active':errors.length?'error':pending?'loading':'free';
-  text(title,current?'받은 부탁 · '+current.title:errors.length?'부탁을 확인해 주세요':pending?'부탁을 확인하는 중':'지금은 자유롭게');
+  text(title,current?current.title:errors.length?'부탁을 확인해 주세요':pending?'부탁을 확인하는 중':'지금은 자유롭게');
   text(hint,current?current.text:errors.length?'수첩에서 다시 확인해요.':pending?'수첩에서 확인할 수 있어요.':'가까운 친구나 물건을 살펴봐요.');
   const warning=errors.length||!stored;text(button,warning?'수첩 확인':'부탁 수첩'+(active.length?' '+active.length:''));button.setAttribute('aria-label','받은 부탁 수첩 열기'+(warning?' · 확인 필요':''));
   if(!dialog.open)return;
