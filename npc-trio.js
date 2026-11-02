@@ -66,7 +66,7 @@ const displayBook=r=>Number.isInteger(r.displayBook)&&r.displayBook>=0&&r.displa
 const shelfTotal=books=>books.reduce((a,b)=>a+b,0);
 const SHELF='<img class="trio-shelf-art" src="maps/npcs/tori-bookshelf-v2.webp" alt="" width="116" height="126">';
 export function decorateTrioObject(b,p){
- if(p.kind==='trio-shelf'){b.classList.add('trio-return-shelf');b.dataset.walkX=p.x;b.dataset.standBeside='true';b.dataset.cameraPair='true';b.dataset.upOnly='true';b.dataset.approachSide='right';b.dataset.action='토리의 작은 책장 살펴보기';b.setAttribute('aria-label','토리의 작은 책장 · 가까이서 ↑사용');b.innerHTML=SHELF+'<span class="trio-shelf-books" aria-hidden="true"></span><span class="campus-object-caption">토리의 작은 책장</span>';return true}
+ if(p.kind==='trio-shelf'){b.classList.add('trio-return-shelf');b.dataset.walkX=p.x;b.dataset.standBeside='true';b.dataset.cameraPair='true';b.dataset.upOnly='true';b.dataset.approachSide='right';b.dataset.action='모은 책 살펴보기';b.setAttribute('aria-label','토리의 작은 책장 · 가까이서 ↑사용');b.innerHTML=SHELF+'<span class="trio-shelf-books" aria-hidden="true"></span><span class="campus-object-caption">토리의 작은 책장</span>';return true}
 
  if(TRIO_SEARCH_PLACES.some(x=>x.kind===p.kind)){
   b.classList.add('trio-search-prop');b.dataset.walkX=p.x;b.setAttribute('aria-label',p.label+' · 살펴보기');
