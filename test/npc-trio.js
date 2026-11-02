@@ -547,7 +547,7 @@ export function installNpcTrio(c){
   if(action==='link-route'){close();return}
   if(action==='accept'&&(r.phase===0||r.phase===3)){if(active==='tori'){r.returnedBooks=collectedBooks(r);if(knownReturn(r)!=null)r.returnedRound=knownReturn(r);}if(r.phase===3)r.round=(r.round+1)%999999;r.phase=1;if(active==='tori'){r.clues=0;const shift=nextToriSearchShift(r.round);if(shift)r.searchLayout={round:r.round,shift};else delete r.searchLayout;}if(active==='duri')r.attempts=0;if(active==='garden')delete r.pipeDraft;changed();play();return}
   if(action==='play'&&r.phase===1){play();return}
-  if(action==='return'&&r.phase===2){if(active==='tori'){const books=collectedBooks(r);if(shelfTotal(books)<999999)books[r.round%6]++;r.returnedBooks=books;r.returnedRound=r.round;}r.phase=3;r.wins=Math.min(999999,r.wins+1);changed();talk();feedback(active==='tori'?'고마워! 작은 책장에 한 권 더 모았어.':'완성! 맵에 네가 해낸 흔적이 남았어. 다른 친구도 만나 봐!');return}
+  if(action==='return'&&r.phase===2){if(active==='tori'){const books=collectedBooks(r);if(shelfTotal(books)<999999)books[r.round%6]++;r.returnedBooks=books;r.returnedRound=r.round;}r.phase=3;r.wins=Math.min(999999,r.wins+1);changed();talk();feedback(active==='tori'?'고마워! 모은 책은 '+shelfTotal(collectedBooks(r))+'권이야.':'완성! 맵에 네가 해낸 흔적이 남았어. 다른 친구도 만나 봐!');return}
   if(mode==='practice-shot'?(!practice||practice.done):r.phase!==1&&!(active==='duri'&&mode==='link-shot'&&l.step===2))return;
   if(b.dataset.book!=null&&mode==='books'){chooseBook(b);return}
   if(b.dataset.tile!=null&&mode==='pipes'&&content().contains(b)){turnPipe(Number(b.dataset.tile));return}
