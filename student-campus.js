@@ -1,5 +1,5 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
-import {installFlowerbed} from './campus-flowerbed.js?v=20261103-water-growth-guide';
+import {installFlowerbed} from './campus-flowerbed.js?v=20261103-care-tools';
 import {installNpcTrio} from './npc-trio.js?v=20261102-returned-book-count';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261030-goal-marker-space';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
