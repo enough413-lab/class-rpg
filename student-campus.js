@@ -26,7 +26,7 @@ import {installParcelAdventure} from './parcel-adventure.js?v=20261020-anime';
 import {installSchoolWalk} from './school-walk.js?v=20261026-duri-replay';
 import {installCampusMemory} from './campus-memory.js?v=20261014-spot-save';
 import {installCampusNpcs} from './campus-npcs.js?v=20261020-anime';
-import {installCampusWayfinder} from './campus-wayfinder.js?v=20261012-classroom-interactions';
+import {installCampusWayfinder} from './campus-wayfinder.js?v=20261103-garden-roles';
 // Walking scenes stay a doorway to school activities; they never award XP or gold.
 const TORI_GREETING='<img src="maps/npcs/tori-anime-v2.webp" alt="" width="115" height="165">';
 const TORI='<img src="maps/npcs/tori-anime-v2.webp" alt="" width="115" height="165">';
