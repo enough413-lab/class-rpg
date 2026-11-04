@@ -56,3 +56,6 @@
 .flowerbed-tools{display:block}
 .flowerbed-tools>div{display:flex;flex-wrap:wrap;gap:inherit}
 .flowerbed-tools>div+div{margin-top:10px;padding-top:10px;border-top:1px solid #c1af77}
+
+/* Explain both existing undo histories without changing their behavior. */
+.flowerbed-undo-guide{margin:8px 0 0;font-size:14px;line-height:1.5;word-break:keep-all}
