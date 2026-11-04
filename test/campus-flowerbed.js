@@ -18,6 +18,40 @@ const flowerReady=s=>flowerRows(s).includes(3);
 const hasVisitor=s=>s.goal===2||s.goal===1&&flowerReady(s);
 const visitor=s=>hasVisitor(s)?'<span class="flowerbed-butterfly" role="img" aria-label="세 빛깔 꽃길을 찾은 나비">'+butterfly+'</span>':'';
 const goalText=s=>s.goal===2?'새싹과 완성한 나비 꽃길':flowerReady(s)?'나비가 왔어! 새싹에게 직접 돌아가 알려 주기':'한 줄에 서로 다른 꽃 세 송이 피우기 · '+Math.max(...flowerRows(s))+'/3';
+// The editor can point to the next care action. Map and notebook summaries stay short.
+function flowerbedGoalText(state) {
+  if (state.goal !== 1 || flowerReady(state)) return goalText(state);
+
+  const rows = [state.plots.slice(0, 3), state.plots.slice(3)];
+  const [top, bottom] = flowerRows(state);
+  const variety = row => new Set(row.filter(Boolean).map(plant => plant.seed)).size;
+  const index = bottom > top || (bottom === top && variety(rows[1]) > variety(rows[0])) ? 1 : 0;
+  const row = rows[index];
+  const blooming = new Set(row.filter(plant => plant?.stage === 3).map(plant => plant.seed));
+  const prefix = (index ? '아랫줄' : '윗줄') + '에 핀 꽃 종류 ' + blooming.size + '/3 · ';
+  const needed = plant => plant && !blooming.has(plant.seed);
+  const growing = row.find(plant => needed(plant) && plant.stage === 2) || row.find(needed);
+  if (growing) {
+    const plot = index * 3 + row.indexOf(growing) + 1;
+    const stage = growing.stage === 1 ? '씨앗' : '새싹';
+    return prefix + plot + '번 ' + SEEDS[growing.seed] + ' ' + stage + '에 물을 줘.';
+  }
+
+  // Use an empty plot first. A spare plant can be exchanged if its kind already blooms elsewhere in this row.
+  const empty = row.indexOf(null);
+  const spare = empty >= 0 ? empty : row.findIndex((plant, i) =>
+    row.some((other, j) => i !== j && other?.stage === 3 && other.seed === plant.seed));
+  const to = index * 3 + spare + 1;
+  const otherRow = rows[1 - index];
+  const source = otherRow.find(plant => needed(plant) && plant.stage === 3) || otherRow.find(needed);
+  if (source) {
+    const from = (1 - index) * 3 + otherRow.indexOf(source) + 1;
+    const stage = ['씨앗', '새싹', '꽃'][source.stage - 1];
+    return prefix + from + '번 ' + SEEDS[source.seed] + ' ' + stage + '을 ' + to + '번으로 옮겨 봐.';
+  }
+  const missing = SEEDS.find((name, seed) => !blooming.has(seed));
+  return prefix + to + (empty >= 0 ? '번에 ' + missing + ' 씨앗을 심어 봐.' : '번을 ' + missing + ' 씨앗으로 바꿔 봐.');
+}
 const gardenMarkup=s=>'<span class="flowerbed-ground border-'+s.border+'">'+s.plots.map(p=>'<span>'+flowerArt(p)+'</span>').join('')+'</span>'+visitor(s);
 export function decorateFlowerbed(b,p){if(p.kind!=='flowerbed')return false;b.classList.add('campus-flowerbed');b.dataset.walkX=p.x;b.dataset.standBeside='true';b.dataset.cameraPair='true';b.setAttribute('aria-label','내 꽃밭 · 씨앗 심고 꾸미기');b.innerHTML=gardenMarkup(empty())+'<span class="campus-object-caption"><b>내 꽃밭</b><small>씨앗 심고 꾸미기</small></span>';return true}
 export function installFlowerbed(c){
@@ -108,7 +142,7 @@ export function installFlowerbed(c){
   v.style.left=(p.left-r.left-root.clientLeft+p.width*.64-v.offsetWidth/2)+'px';v.style.top=(p.top-r.top-root.clientTop+(map?-.04:.16)*p.height-v.offsetHeight/2)+'px';v.style.right='auto';v.setAttribute('aria-label',(landing+1)+'번 '+SEEDS[state.plots[landing].seed]+' 꽃에 쉬는 나비');
  }
  function settleVisitor(){stopFlight();positionVisitor(dialog.querySelector('.flowerbed-board'));positionVisitor(c.objects.querySelector('[data-place=flowerbed]'),true)}
- function controls(){dialog.querySelector('.flowerbed-intro').textContent=hasVisitor(state)&&state.plots.some(p=>p?.stage===3)?'활짝 핀 꽃을 누르면 나비가 와! 방향키로 고르고 Enter를 눌러도 돼.':'씨앗·꽃자리는 방향키로 살펴보고 Enter로 골라! 씨앗·물뿌리개를 끌어도 돼.';const borderUndo=dialog.querySelector('[data-bed=border-undo]');borderUndo.disabled=lastBorder===null;borderUndo.setAttribute('aria-label',lastBorder===null?'울타리 되돌리기':'울타리 되돌리기 · '+BORDERS[lastBorder]+'로');const undo=dialog.querySelector('[data-bed=undo]');undo.disabled=lastCare===null;undo.setAttribute('aria-label',lastCare?'방금 '+lastCare.label+' 되돌리기':'한 번 되돌리기');const goal=dialog.querySelector('.flowerbed-goal');if(goal){goal.hidden=state.goal===0;goal.textContent=goalText(state)}const plant=state.plots[selected];dialog.querySelector('[data-bed=water]').disabled=!plant||plant.stage===3;dialog.querySelector('[data-bed=move]').disabled=!plant;dialog.querySelector('[data-bed=replace]').disabled=!plant;const clear=dialog.querySelector('[data-bed=clear]');clear.disabled=!plant;clear.setAttribute('aria-label',(selected+1)+'번 자리 비우기'+(plant?' · '+SEEDS[plant.seed]:''));const can=dialog.querySelector('[data-bed=can]');can.disabled=!state.plots.some(p=>p&&p.stage<3);can.setAttribute('aria-pressed',String(watering));dialog.classList.toggle('is-watering',watering);const cancel=dialog.querySelector('[data-bed=cancel]');cancel.hidden=moving===null&&!watering;cancel.textContent=watering?'물 주기 취소':'옮기기 취소';dialog.querySelector('.flowerbed-selection').textContent=watering?'물 줄 씨앗이나 새싹을 눌러 줘. 빈 흙과 활짝 핀 꽃은 그대로야.':moving!==null?(moving+1)+'번 꽃을 옮길 자리를 눌러요. 다른 꽃과 자리도 바꿀 수 있어요.':plotLabel(plant,selected);}
+ function controls(){dialog.querySelector('.flowerbed-intro').textContent=hasVisitor(state)&&state.plots.some(p=>p?.stage===3)?'활짝 핀 꽃을 누르면 나비가 와! 방향키로 고르고 Enter를 눌러도 돼.':'씨앗·꽃자리는 방향키로 살펴보고 Enter로 골라! 씨앗·물뿌리개를 끌어도 돼.';const borderUndo=dialog.querySelector('[data-bed=border-undo]');borderUndo.disabled=lastBorder===null;borderUndo.setAttribute('aria-label',lastBorder===null?'울타리 되돌리기':'울타리 되돌리기 · '+BORDERS[lastBorder]+'로');const undo=dialog.querySelector('[data-bed=undo]');undo.disabled=lastCare===null;undo.setAttribute('aria-label',lastCare?'방금 '+lastCare.label+' 되돌리기':'한 번 되돌리기');const goal=dialog.querySelector('.flowerbed-goal');if(goal){goal.hidden=state.goal===0;goal.textContent=flowerbedGoalText(state)}const plant=state.plots[selected];dialog.querySelector('[data-bed=water]').disabled=!plant||plant.stage===3;dialog.querySelector('[data-bed=move]').disabled=!plant;dialog.querySelector('[data-bed=replace]').disabled=!plant;const clear=dialog.querySelector('[data-bed=clear]');clear.disabled=!plant;clear.setAttribute('aria-label',(selected+1)+'번 자리 비우기'+(plant?' · '+SEEDS[plant.seed]:''));const can=dialog.querySelector('[data-bed=can]');can.disabled=!state.plots.some(p=>p&&p.stage<3);can.setAttribute('aria-pressed',String(watering));dialog.classList.toggle('is-watering',watering);const cancel=dialog.querySelector('[data-bed=cancel]');cancel.hidden=moving===null&&!watering;cancel.textContent=watering?'물 주기 취소':'옮기기 취소';dialog.querySelector('.flowerbed-selection').textContent=watering?'물 줄 씨앗이나 새싹을 눌러 줘. 빈 흙과 활짝 핀 꽃은 그대로야.':moving!==null?(moving+1)+'번 꽃을 옮길 자리를 눌러요. 다른 꽃과 자리도 바꿀 수 있어요.':plotLabel(plant,selected);}
  function revealSelection(){const line=dialog.querySelector('.flowerbed-selection'),r=line.getBoundingClientRect(),h=dialog.querySelector('header').getBoundingClientRect(),d=dialog.getBoundingClientRect();if(r.top<h.bottom||r.bottom>d.bottom-dialog.clientTop)line.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'})}
  function plantSeed(i,seed){if(state.plots[i])return false;selected=i;remember('씨앗 심기');state.plots[i]={seed,stage:1};moving=null;save();board();showPlanting(i);status((i+1)+'번 자리에 '+SEEDS[seed]+' 씨앗을 심었어. 물을 줘 볼까?');revealSelection();return true}
  function waterPlant(i){const p=state.plots[i];if(!p||p.stage===3)return false;selected=i;remember('물 주기');moving=null;watering=false;p.stage++;save();board();pourWater(i);if(p.stage===3)dialog.querySelector('[data-bed-plot="'+i+'"]').focus({preventScroll:true});status(p.stage===3?SEEDS[p.seed]+' 꽃이 활짝 피었어! 맵에서도 네 꽃밭을 볼 수 있어.':'작은 새싹이 올라왔어! 물을 한 번 더 주면 꽃이 피어.');return true}
