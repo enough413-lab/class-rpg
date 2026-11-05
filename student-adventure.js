@@ -19,7 +19,7 @@ const button=(action,label,kind='',attrs='')=>'<button class="sa-button '+kind+'
 const typeName={daily:'매일 도전',weekly:'이번 주 도전',main:'선생님 의뢰'};
 export function questAction(q){
  if(q.status==='approved')return {label:'해냈어요!',kind:'done'};
- if(q.status==='submitted')return {label:q.quest_type==='main'?'확인 기다리는 중':'기록 추가·수정',kind:q.quest_type==='main'?'waiting':'report'};
+ if(q.status==='submitted')return {label:'제출 내용 수정하기',kind:'report'};
  if(q.quest_type!=='main'||q.status==='accepted')return {label:q.status==='rejected'?'다듬어서 다시 보내기':'완료 기록 보내기',kind:'report'};
  return {label:q.status==='rejected'?'다시 도전하기':'의뢰 살펴보기',kind:'accept'};
 }
