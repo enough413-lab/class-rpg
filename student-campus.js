@@ -1,6 +1,6 @@
 import {installQuestSigns} from './campus-quest-signs.js?v=20261019-butterfly';
 import {installFlowerbed} from './campus-flowerbed.js?v=20261104-butterfly-readiness';
-import {installNpcTrio} from './npc-trio.js?v=20261105-duri-moved-result';
+import {installNpcTrio} from './npc-trio.js?v=20261105-duri-miss-guide';
 import {installCurrentGoal} from './campus-current-goal.js?v=20261030-goal-marker-space';
 import {installPlaygroundPlatforms} from './playground-platforms.js?v=20261014-platforms';
 import {installToriLeafFavor} from './tori-leaf-favor.js?v=20261019-controls';
