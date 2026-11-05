@@ -349,7 +349,7 @@ export function installNpcTrio(c){
  function installPracticeTarget(){
   content().querySelector('p').textContent='공: ↑↓ 각도 · ←→ 힘. 바구니: ←→ 거리';
   const wrap=dialog.querySelector('.trio-court-wrap'),grip=doc.createElement('button');grip.type='button';grip.className='trio-basket-grip';grip.dataset.trio='basket-grip';grip.setAttribute('aria-label','연습 바구니. 좌우 방향키로 거리를 조절하거나 끌어 보세요. Enter는 거리 막대로 이동해요.');grip.innerHTML='<span aria-hidden="true">↔</span>';wrap.append(grip);
-  const row=doc.createElement('div');row.className='trio-practice-distance';row.innerHTML='<label><span>거리</span><input type="range" min="170" max="350" step="1" data-practice-distance aria-label="연습 바구니 거리"></label><button type="button" data-trio="basket-reset">원래 자리</button>';wrap.after(row);drawPracticeTarget(practice.target);
+  const row=doc.createElement('div');row.className='trio-practice-distance';row.innerHTML='<label><span>가까이</span><input type="range" min="170" max="350" step="1" data-practice-distance aria-label="연습 바구니 거리"><span>멀리</span></label><button type="button" data-trio="basket-reset">원래 자리</button>';wrap.after(row);drawPracticeTarget(practice.target);
  }
  function drawPracticeTarget(target){
   const grip=dialog.querySelector('.trio-basket-grip');if(!grip)return;
