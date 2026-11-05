@@ -354,7 +354,7 @@ export function installNpcTrio(c){
  function drawPracticeTarget(target){
   const grip=dialog.querySelector('.trio-basket-grip');if(!grip)return;
   dialog.querySelector('.trio-court>path:nth-of-type(2)').setAttribute('d','M'+(target-18)+' 172h36l-5 24h-26z');grip.style.left='calc('+target/480*100+'% - 22px)';dialog.querySelector('[data-practice-distance]').value=target;
-  if(lastShot?.text){const moved=target!==lastShot.target;dialog.querySelector('[data-shot-last]').textContent=(moved?'옮기기 전: ':'')+lastShot.text;dialog.querySelector('.trio-court').setAttribute('aria-label',(moved?'바구니를 옮겼어요. 다음 기록은 옮기기 전 결과예요. ':'')+lastShot.label)}
+  if(lastShot?.text){const moved=target!==lastShot.target;dialog.querySelector('[data-shot-last]').textContent=(moved?'옮기기 전: ':'')+lastShot.text;dialog.querySelector('.trio-court').setAttribute('aria-label',(moved?'실선·×는 바구니를 옮기기 전 결과예요. ':'')+lastShot.label)}
   drawPracticeGuide(target);
  }
  function installPracticeGuide(){
@@ -366,7 +366,7 @@ export function installNpcTrio(c){
   button.textContent=practice.guide?'점선 숨기기':'점선 보기';button.setAttribute('aria-pressed',String(practice.guide));button.hidden=practice.done;
   dialog.querySelector('.trio-trajectory').setAttribute('visibility',practice.guide?'visible':'hidden');
   const moved=lastShot&&target!==lastShot.target,base=lastShot?lastShot.label.replace('실선과 ×가 방금 공, 점선이 다음 공의 예상 길.','실선과 ×가 방금 공이에요.'):'왼쪽에서 오른쪽 바구니로 공 던지기.';
-  dialog.querySelector('.trio-court').setAttribute('aria-label',(moved?'바구니를 옮겼어요. 다음 기록은 옮기기 전 결과예요. ':'')+base+' 조준 점선은 '+(practice.guide?'보여요.':'숨겼어요.'));
+  dialog.querySelector('.trio-court').setAttribute('aria-label',(moved?'실선·×는 바구니를 옮기기 전 결과예요. ':'')+base+' 조준 점선은 '+(practice.guide?'보여요.':'숨겼어요.'));
  }
  function setPracticeTarget(target){
   if(!canMoveBasket())return;target=Math.max(170,Math.min(350,Math.round(target)));const changed=target!==practice.target;practice.target=target;drawPracticeTarget(target);
