@@ -1,5 +1,25 @@
 import {questPeriod} from './quest-schedule.js?v=20260930-weekday';
 import {readEvidenceImages} from './quest-photos.js?v=20260928-multi-photo';
+// Serialize refreshes; a change arriving during a read always schedules another read.
+export function coalesceRefresh(task, delay = 60) {
+  let running = false, timer = null, waiting = [];
+  async function drain() {
+    timer = null;
+    if(running) return;
+    running = true;
+    while(waiting.length) {
+      const batch = waiting; waiting = [];
+      try { await task(); batch.forEach(w => w.resolve()); }
+      catch(error) { batch.forEach(w => w.reject(error)); }
+    }
+    running = false;
+  }
+  return () => new Promise((resolve, reject) => {
+    waiting.push({resolve, reject});
+    if(!running && timer === null) timer = setTimeout(drain, delay);
+  });
+}
+
 // One selection scope: a quest and, optionally, one submission period.
 export function groupQuestReviews(quests, submissions) {
   const groups = new Map(quests.map(q => [String(q.id), { ...q, rows: [], records: [] }]));
@@ -41,7 +61,7 @@ function studentAvatar(student,appearances){
  const img=(src,layer)=>src?`<img src="${escape(aliases[src]||src)}" alt="" style="z-index:${layer}" loading="lazy">`:'';
  return `<div class="qr-avatar" role="img" aria-label="${escape(student.nickname||'학생')}의 아바타">${img(back,0)}${img('1. character/character_'+gender+'.png',1)}${items.filter(i=>i.slot!=='hair').map(i=>img(i.image,z[i.slot]||6)).join('')}${img(front,6)}</div>`;
 }
-export function createQuestReviews({ root, db, refresh, onCount }) {
+export function createQuestReviews({ root, db, refresh, refreshSummary, onCount }) {
   const doc = root.ownerDocument;
   const win = doc.defaultView;
   root.dataset.questReviews = 'true';
@@ -114,6 +134,15 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     @media(max-width:1050px){.qr-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
     @media(max-width:820px){.qr-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media(max-width:600px){.qr-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}.qr-record{padding:6px}.qr-record .qr-mini-card{min-height:90px;gap:4px}.qr-record .qr-avatar{width:42px;flex-basis:42px;height:64px}.qr-mini-text strong{font-size:12px}.qr-mini-text small{font-size:10px}.qr-card-check{right:5px;top:5px}.qr-head{padding:12px}.qr-head h2{font-size:19px}}
+    .qr-dialog .qr-footer{z-index:3}
+    .qr-list.qr-review-list{grid-template-columns:1fr}
+    .qr-review-list .qr-record{padding:14px}
+    .qr-review-list .qr-mini-card{min-height:64px}
+    .qr-review-list .qr-report{font-size:16px;margin:10px 0}
+    .qr-review-list .qr-photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+    .qr-review-list .qr-photo img{width:100%;max-height:220px;object-fit:contain}
+    .qr-review-list .qr-photo span{display:block;overflow-wrap:anywhere}
+    .qr-review-list .qr-record-actions button{min-height:44px}
   `;
   doc.head.appendChild(style);
   const dialog = doc.createElement('dialog');
@@ -162,14 +191,27 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     const filters=[['all',`전체 ${roster.length}명`],['submitted',`🔔 요청 ${count('submitted')}명`],['approved',`✓ 완료 ${count('approved')}명`],['incomplete',`미완료 ${roster.filter(r=>!['approved','excluded'].includes(r.status)).length}명`]];
     find('[data-summary]').innerHTML=filters.map(([key,label])=>`<button class="btn qr-filter" data-filter="${key}" aria-pressed="${statusFilter===key}">${label}</button>`).join('');
     const shown=roster.filter(r=>statusFilter==='all'||r.status===statusFilter||(statusFilter==='incomplete'&&!['approved','excluded'].includes(r.status)));
+    find('.qr-list').classList.toggle('qr-review-list',statusFilter==='submitted');
     find('.qr-list').innerHTML=shown.length?shown.map(({student,row,status})=>{
       const id=escape(row?.id),name=`${student.student_number}번 · ${student.nickname||'닉네임 미설정'}`,pending=status==='submitted';
       return `<article class="qr-record qr-state-${escape(status)}" data-student="${escape(student.id)}">
       ${pending?`<input class="qr-card-check" type="checkbox" aria-label="${escape(name)} 승인 선택" data-row="${id}" ${selected.has(String(row.id))?'checked':''}>`:''}
-      <button type="button" class="qr-mini-card" data-open-student="${escape(student.id)}" aria-haspopup="dialog">${studentAvatar(student,appearances)}<span class="qr-mini-text"><strong>${escape(name)}</strong><span class="qr-status">${statusLabels[status]||'진행 중'}</span><small>활동 내역 보기 ›</small></span></button></article>`;
+      <button type="button" class="qr-mini-card" data-open-student="${escape(student.id)}" aria-haspopup="dialog">${studentAvatar(student,appearances)}<span class="qr-mini-text"><strong>${escape(name)}</strong><span class="qr-status">${statusLabels[status]||'진행 중'}</span><small>활동 내역 보기 ›</small></span></button>
+      ${pending&&statusFilter==='submitted'?reviewContent(row,name):''}</article>`;
     }).join(''):'<div class="qr-empty">해당하는 학생이 없어요.</div>';
     if(detail.open)renderDetail();
     controls();
+  }
+
+
+  function reviewContent(row,name){
+    const id=escape(row.id),photos=readEvidenceImages(row.evidence_image);
+    return `<div class="qr-student-content">
+      <div class="qr-meta">제출 · ${escape(dateLabel(row.submitted_at))}</div>
+      <p class="qr-report">${escape(row.report_text||'작성된 수행 내용이 없어요.')}</p>
+      ${photos.length?`<p class="qr-meta">첨부 사진 ${photos.length}장 · 누르면 크게 보여요</p><div class="qr-photos">${photos.map((photo,i)=>`<button class="qr-photo" data-photo="${id}" data-photo-index="${i}" aria-label="${escape(name)} 수행 사진 ${i+1} 확대"><img src="${escape(photo)}" alt="학생 수행 사진 ${i+1}" loading="lazy"><span>${escape(row.evidence_captions?.[i]||'')}</span></button>`).join('')}</div>`:''}
+      <div class="qr-record-actions"><button class="btn" data-reject="${id}">보완 요청</button><button class="btn good" data-single="${id}">승인</button></div>
+    </div>`;
   }
 
   function renderDetail(){
@@ -207,26 +249,94 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     }
   }
 
-  async function load() {
+
+  function renderDialogPreservingFocus() {
+    const active = doc.activeElement;
+    const card = active?.closest('[data-student]');
+    const inside = card && dialog.contains(card);
+    const studentId = inside ? card.dataset.student : null;
+    const attrs = ['data-row','data-single','data-reject','data-open-student','data-photo'];
+    const attr = inside ? attrs.find(a => active.hasAttribute(a)) : null;
+    const value = attr ? active.getAttribute(attr) : null;
+    const photoIndex = active?.getAttribute('data-index');
+    const scroll = dialog.scrollTop;
+    renderDialog();
+    if(studentId === null || active.isConnected) return;
+    const sameCard = [...dialog.querySelectorAll('[data-student]')].find(e => e.dataset.student === studentId);
+    const sameControl = attr && sameCard ? [...sameCard.querySelectorAll('['+attr+']')].find(e =>
+      e.getAttribute(attr) === value && (attr !== 'data-photo' || e.getAttribute('data-index') === photoIndex)) : null;
+    const target = sameControl || sameCard || find('.qr-list .qr-record') || find('[data-close]');
+    if(target.matches('.qr-record')) target.tabIndex = -1;
+    target.focus({preventScroll:true});
+    if(sameCard) dialog.scrollTop = scroll;
+    else target.scrollIntoView({block:'nearest'});
+  }
+
+  let pendingFull = false, pendingScopes = new Map(), waitingLoads = [];
+  let loading = false, loadTimer = null, reconciling = false;
+  function queueLoad(scope, immediate) {
+    const promise = new Promise((resolve, reject) => waitingLoads.push({resolve, reject}));
+    if(scope?.questId != null && scope.periodKey) {
+      if(!pendingFull) pendingScopes.set(JSON.stringify([String(scope.questId),String(scope.periodKey)]), scope);
+    } else {
+      pendingFull = true; pendingScopes.clear();
+    }
+    if(immediate) drainLoads();
+    else if(loadTimer === null && !loading) loadTimer = win.setTimeout(drainLoads, 60);
+    return promise;
+  }
+  async function drainLoads() {
+    if(loadTimer !== null) { win.clearTimeout(loadTimer); loadTimer = null; }
+    if(loading || (busy && !reconciling)) return;
+    loading = true;
+    while(waitingLoads.length && (!busy || reconciling)) {
+      const scopes = pendingFull ? [{}] : [...pendingScopes.values()];
+      const batch = waitingLoads;
+      pendingFull = false; pendingScopes.clear(); waitingLoads = [];
+      try {
+        for(const scope of scopes) await readScope(scope);
+        batch.forEach(w => w.resolve());
+      } catch(error) { batch.forEach(w => w.reject(error)); }
+    }
+    loading = false;
+  }
+  function load(scope = {}) { return queueLoad(scope, true); }
+  function invalidate(change) {
+    const id = change?.new?.id ?? change?.old?.id;
+    const cached = groups.flatMap(g => g.records || []).find(r => String(r.id) === String(id));
+    const records = [cached, change?.old, change?.new].filter(r => r?.quest_id != null && r.period_key);
+    // DELETE payloads may contain only the key; use the cached scope or reconcile fully.
+    if(!records.length) return queueLoad({}, false);
+    return Promise.all(records.map(r => queueLoad({questId:r.quest_id, periodKey:r.period_key}, false)));
+  }
+  async function readScope(scope = {}) {
+    const scopedGroup = groups.find(g=>String(g.id)===String(scope.questId));
+    const partial = Boolean(scopedGroup && scope.periodKey);
     const generation = ++request;
     try {
       const [quests, rows, rosterStudents, looks] = await Promise.all([
-        pages(() => db.from('quests').select('id,title,quest_type,weekly_reset_day,active,target_student_ids').eq('active', true).order('id')),
-        pages(() => db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,evidence_captions,rejection_reason,students(student_number,nickname),quests(title,quest_type,weekly_reset_day,active)').order('id')),
-        pages(() => db.from('students').select('id,student_number,nickname,gender').order('id')),
-        db.rpc('teacher_student_appearances')
+        partial ? Promise.resolve([]) : pages(() => db.from('quests').select('id,title,quest_type,weekly_reset_day,active,target_student_ids').eq('active', true).order('id')),
+        pages(() => {
+          let query=db.from('quest_submissions').select('id,student_id,quest_id,status,period_key,submitted_at,report_text,evidence_image,evidence_captions,rejection_reason,students(student_number,nickname),quests(title,quest_type,weekly_reset_day,active)').order('id');
+          if(partial)query=query.eq('quest_id',scope.questId).eq('period_key',scope.periodKey);
+          return query;
+        }),
+        partial ? Promise.resolve(students) : pages(() => db.from('students').select('id,student_number,nickname,gender').order('id')),
+        partial ? Promise.resolve({data:appearances}) : db.rpc('teacher_student_appearances')
       ]);
       if (generation !== request) return;
       if(looks.error)throw looks.error;
       appearances=looks.data||[];students=rosterStudents;
-      groups = groupQuestReviews(quests, rows).filter(g=>g.active!==false||g.rows.length);
+      if(partial){
+        const records=[...(scopedGroup.records||[]).filter(r=>String(r.period_key||'')!==String(scope.periodKey)),...rows];
+        groups=groups.map(g=>g===scopedGroup?{...g,records,rows:records.filter(r=>r.status==='submitted')}:g);
+      }else groups = groupQuestReviews(quests, rows).filter(g=>g.active!==false||g.rows.length);
       // Keep an open quest visible even after its last pending record is processed.
       if (currentId && !current()) groups.push({ id: currentId, title: find('#qrTitle').textContent, rows: [] });
       const versions = new Map(visibleRows().map(r => [String(r.id), rowVersion(r)]));
       for (const [id, version] of selected) if (versions.get(id) !== version) selected.delete(id);
-      onCount(rows.filter(r=>r.status==='submitted').length);
-      renderBanners();
-      renderDialog();
+      onCount(groups.reduce((total,g)=>total+g.rows.length,0));
+      renderBanners(); renderDialogPreservingFocus();
     } catch (error) {
       if (generation !== request) return;
       selected.clear();
@@ -245,6 +355,9 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
     if (busy) return;
     const candidates = visibleRows().filter(r => ids.includes(String(r.id)));
     if (!candidates.length) return;
+    const scope={questId:currentId,periodKey:period};
+    const quickReview=statusFilter==='submitted'&&!detail.open;
+    let focusNext=false;
     let reason = '';
     if (!approve) {
       reason = win.prompt('학생에게 전달할 보완 요청을 적어 주세요.', '조금 더 확인해서 다시 제출해 주세요.');
@@ -257,23 +370,39 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
         ? await db.rpc('teacher_bulk_review_submissions', { p_submission_ids: candidates.map(r => r.id), p_approve: true })
         : await db.rpc('review_submission_with_reason', { target_submission: candidates[0].id, approve: false, p_reason: reason.trim() });
       if (error) throw error;
+      reconciling = true;
       selected.clear();
       message = approve ? '승인 처리가 완료됐어요.' : '보완 요청을 보냈어요.';
-      await refresh();
+      if(refreshSummary){
+        await load(scope);
+        Promise.resolve().then(()=>refreshSummary()).catch(()=>{});
+      }else await refresh();
+      focusNext=quickReview;
     } catch (error) {
       selected.clear();
       message = `처리 결과를 확인해 주세요. ${error?.message || '연결에 문제가 생겼어요.'}`;
       failed = true;
       // No automatic retry: refresh the pending rows before allowing another action.
+      reconciling = true;
       try { await load(); } catch { /* load renders a safe error state */ }
-    } finally { busy = false; controls(); }
+    } finally {
+      busy = false; reconciling = false; controls(); drainLoads();
+      if(focusNext){
+        const target=find('.qr-list .qr-record')||find('[data-close]');
+        if(target.matches('.qr-record'))target.tabIndex=-1;
+        target.focus({preventScroll:true});
+        target.scrollIntoView({block:'start'});
+      }
+    }
   }
 
   root.addEventListener('click', event => {
     if (event.target.closest('[data-retry]')) { load().catch(() => {}); return; }
     const button = event.target.closest('[data-quest]');
     if (!button || busy) return;
-    statusFilter='all';currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type,new Date(),current()?.weekly_reset_day); selected.clear(); message = ''; failed = false;
+    currentId = button.dataset.quest; period = currentQuestPeriod(current()?.quest_type,new Date(),current()?.weekly_reset_day);
+    const pending=(current()?.rows||[]).filter(r=>r.period_key===period);
+    statusFilter=pending.length?'submitted':'all'; selected.clear(); message = ''; failed = false;
     dialog.showModal(); renderDialog(); find('[data-close]').focus();
   });
   dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
@@ -313,7 +442,7 @@ export function createQuestReviews({ root, db, refresh, onCount }) {
       doc.body.appendChild(zoom); zoom.showModal();
     }
   });
-  return { load };
+  return { load, invalidate };
 }
 
 
