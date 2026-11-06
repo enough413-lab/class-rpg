@@ -248,3 +248,6 @@
 /* Match the existing held-ball cue while both aim values are being adjusted. */
 .trio-content:has(>.trio-court-wrap.aiming) .trio-shot-controls label{background:#e9f6f5;border-radius:8px;box-shadow:inset 0 -3px 0 #447c8c}
 .trio-content:has(>.trio-court-wrap.aiming) .trio-shot-controls input{accent-color:#447c8c}
+
+.trio-dialog:has(.trio-court) :is(.trio-practice-actions>[data-trio=practice-again],.trio-content>[data-trio=close]){background:#e6efbd;border-color:#537a4d}
+.trio-dialog:has(.trio-court) :is(.trio-practice-actions>[data-trio=practice-again],.trio-content>[data-trio=close]):hover{background:#d8e6a6}
