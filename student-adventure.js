@@ -384,6 +384,7 @@ export function installStudentAdventure(ctx){
    if(!journal){open('탐험 이야기','잠깐, 연결을 확인하고 있어요.',errorView('retry-map'));return}
    chapter(id);return;
   }
+  if(a==='map'&&home.contains(b)){window.openAdventureMap();return}
   if(a==='map'||a==='retry-map'){await map(a==='retry-map');return}
   if(a==='growth'||a==='retry-growth'){await growth(a==='retry-growth');return}
   if(a==='next'){stepIndex++;renderChapter();return}

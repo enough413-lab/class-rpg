@@ -37,7 +37,8 @@ import {installStudentDialogs} from './student-dialogs.js?v=20260930-workshop';
 import {LEVEL_NEEDS,levelInfo} from './rpg-progression.js?v=20260930-workshop';
 window.rpgLevelInfo=levelInfo;
 import {installStudentCampus} from './student-campus.js?v=20261105-duri-miss-guide';
-import {installStudentAdventure} from './student-adventure.js?v=20261028-closed-play-keys';
+import {installSchoolLife} from './school-life.js?v=20261109-life';
+import {installStudentAdventure} from './student-adventure.js?v=20261109-life';
 import {weeklyResetLabel,nextResetLabel} from './quest-schedule.js?v=20261013-quests';
 import {submissionRules,validateSubmission} from './quest-submission.js?v=20260930-weekday';
 import {readEvidenceImages,encodeEvidenceImages,prepareEvidencePhotos} from './quest-photos.js?v=20261013-photos';
@@ -275,6 +276,7 @@ window.studentQuestHistory=installStudentQuestHistory({db,getToken:()=>token,get
 window.studentShop=installStudentShop({db,getToken:()=>token,getStudent:()=>current,getItems:()=>shopItems,loadShop,refresh:()=>window.loadDashboard()});
 window.studentAdventure=installStudentAdventure({db,getToken:()=>token,getStudent:()=>current,getQuests:()=>dashboardQuests,levelInfo,refresh:()=>window.loadDashboard()});
 window.studentCampus=installStudentCampus({db,getToken:()=>token,levelInfo,getScene:()=>hubScene,getPosition:()=>({x:hubX,y:hubY}),setPosition:(x,y)=>{hubX=x;hubY=y;updateHubPlayer()},getStudent:()=>current});
+window.schoolLife=installSchoolLife({getStudent:()=>current,getToken:()=>token,levelInfo,openLegacy:()=>window.studentAdventure.map()});window.openAdventureMap=()=>window.schoolLife.open();
 </script>
 <div id="changePinModal" class="modal-backdrop hidden" onclick="if(event.target===this)closeChangePin()">
 <section class="inventory-modal" style="width:min(440px,100%)" role="dialog" aria-modal="true" aria-labelledby="changePinTitle">
