@@ -17,3 +17,11 @@
 #schoolLife .life-use>span{white-space:nowrap;font-size:17px;letter-spacing:-.5px}
 
 #schoolLife{word-break:keep-all;overflow-wrap:break-word}#schoolLife .life-title-profile{max-width:90%}
+
+#schoolLife .life-prompt{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;line-height:1.35}
+#schoolLife .life-prompt svg{width:24px;height:28px;flex:none}
+#schoolLife .life-task{white-space:normal;line-height:1.4;max-width:min(340px,35%)}
+#schoolLife .life-use:disabled{opacity:.4;cursor:default}
+#schoolLife .life-book p{white-space:pre-line}
+@media(max-width:700px){#schoolLife .life-task{max-width:calc(100% - 30px)}}
+@media(max-height:500px){#schoolLife .life-task{max-width:38%;top:82px;font-size:14px}}

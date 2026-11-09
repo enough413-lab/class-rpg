@@ -13,11 +13,13 @@ export const DUST=[[620,650],[860,640],[750,810],[560,790]];
 export const FLOWER_NAMES=['햇살꽃','분홍 코스모스','푸른 수레국화'];
 export const FISH_NAMES=['송사리','붕어','블루길'];
 const uniq=(a,max)=>Array.isArray(a)?[...new Set(a.filter(n=>Number.isInteger(n)&&n>=0&&n<max))]:[];
-export function freshLife(){return {v:1,started:false,intro:false,scene:'room',position:{x:800,y:725},weeds:[],branches:[],dust:[],wood:0,flowers:Array.from({length:6},()=>({kind:0,stage:0})),projects:[],fish:[0,0,0],seed:0,roomPlant:-1,savedAt:null};}
+export function freshLife(){return {v:1,started:false,intro:false,opening:{step:0,legacy:false},scene:'room',position:{x:800,y:725},weeds:[],branches:[],dust:[],wood:0,flowers:Array.from({length:6},()=>({kind:0,stage:0})),projects:[],fish:[0,0,0],seed:0,roomPlant:-1,savedAt:null};}
 export function readLife(raw){
  if(!raw)return freshLife();
  const d=JSON.parse(raw);if(!d||d.v!==1)throw new Error('unknown save');
  const state=freshLife();
+ if(d.opening!==undefined&&(!d.opening||!Number.isInteger(d.opening.step)||d.opening.step<0||d.opening.step>7||typeof d.opening.legacy!=='boolean'))throw new Error('invalid opening');
+ state.opening=d.opening?{step:d.opening.step,legacy:d.opening.legacy}:{step:0,legacy:!!d.started};
  Object.assign(state,{started:!!d.started,intro:!!d.intro,scene:['room','campus','classroom'].includes(d.scene)?d.scene:'room',weeds:uniq(d.weeds,6),branches:uniq(d.branches,8),dust:uniq(d.dust,4),projects:Array.isArray(d.projects)?[...new Set(d.projects.filter(id=>PROJECTS.some(p=>p.id===id)))]:[],wood:Number.isInteger(d.wood)?Math.max(0,Math.min(8,d.wood)):0,seed:[0,1,2].includes(d.seed)?d.seed:0,roomPlant:[0,1,2].includes(d.roomPlant)?d.roomPlant:-1,savedAt:typeof d.savedAt==='string'?d.savedAt:null});
  if(d.position&&Number.isFinite(d.position.x)&&Number.isFinite(d.position.y))state.position={x:Math.max(80,Math.min(1520,d.position.x)),y:Math.max(430,Math.min(990,d.position.y))};
  state.flowers=state.flowers.map((f,i)=>({kind:[0,1,2].includes(d.flowers?.[i]?.kind)?d.flowers[i].kind:0,stage:[0,1,2,3].includes(d.flowers?.[i]?.stage)?d.flowers[i].stage:0}));
