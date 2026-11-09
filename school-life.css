@@ -44,3 +44,14 @@
 @media(max-width:700px){#schoolLife .life-dialog{padding:22px 20px 18px}#schoolLife .life-dialog p{font-size:20px}#schoolLife .life-choice{font-size:17px;padding:10px 15px}#schoolLife .life-speaker{font-size:20px}#schoolLife .life-name{font-size:14px}}
 @media(max-height:500px){#schoolLife .life-dialog{padding:18px 24px 15px}#schoolLife .life-dialog p{font-size:18px;line-height:1.5}#schoolLife .life-speaker{margin-bottom:8px;font-size:19px}}
 
+
+#schoolLife .life-sync-status{position:absolute;right:18px;top:82px;z-index:12;border:1px solid #8b704c;border-radius:12px;background:#fff5df;padding:8px 14px;min-height:44px;font-size:16px}
+#schoolLife .life-sync-panel{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);width:min(480px,calc(100% - 28px));max-height:calc(100% - 50px);overflow:auto;touch-action:pan-y;background:#fff5df;border:2px solid #8b704c;border-radius:20px;padding:22px;box-shadow:0 7px 0 #654e3540,0 20px 80px #362c2545}
+#schoolLife .life-sync-panel h2{font:400 23px/1.35 SchoolLife,sans-serif;margin:0 0 12px}
+#schoolLife .life-sync-panel p{font-size:18px;line-height:1.6;margin:0 0 18px}
+#schoolLife .life-sync-panel .life-sync-compare{font-size:16px;border-left:3px solid #9eab7c;padding-left:12px}
+#schoolLife .life-sync-actions{display:flex;gap:10px;flex-wrap:wrap}
+#schoolLife .life-sync-actions button{font-size:17px;line-height:1.5;min-height:46px;padding:9px 14px;border:1px solid #8a7954;border-bottom-width:3px;border-radius:12px;background:#e8eacb}
+#schoolLife .life-sync-actions button:first-child{background:#f1dbab}
+@media(max-width:700px){#schoolLife .life-sync-panel{padding:20px}#schoolLife .life-sync-panel p{font-size:17px}#schoolLife .life-sync-status{top:77px;right:12px;font-size:14px}}
+
