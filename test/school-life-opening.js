@@ -50,7 +50,7 @@ export function installSchoolOpening(api){
  function memory(){return step()===7?'교실에 첫 햇살이 들어왔고, 토리와 만났어요.\n종 아래 글귀: “학교의 종이 잠든 날, 우리는 작은 씨앗을 남겼다.”':goal();}
  function draw(g,scene,assets){
   g.save();
-  const note=(x,y)=>{g.drawImage(assets.invitation,x-26,y-42,52,55);};
+  const note=(x,y)=>{g.drawImage(assets.invitation,x-30,y-30,60,34);};
   if(scene==='room'&&step()===0)note(920,700);
   if(scene==='campus'){
    if(!enterable()){
