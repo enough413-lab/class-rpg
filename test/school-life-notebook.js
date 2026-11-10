@@ -27,6 +27,7 @@ export function installLifeNotebook(api){
    ['돌아온 친구','토리와 인사하기','교실에서 토리 만나기','교실','library'],
    ['토리의 쪽지','종 아래 글귀 읽기','토리의 쪽지 읽기','교실','invitation']
   ];
+  if(n===7&&api.storyPage?.())return api.storyPage()+'<button class="life-choice life-return" data-return>계속 둘러보기</button>';
   if(n===7)return empty('첫 교실 복원','교실에 햇살이 들고 토리가 돌아왔다.')+'<button class="life-choice" data-memory>남긴 기억 보기</button>';
   const [label,title,body,place,icon]=choices[n];
   const wish=n>=2&&n<=4?'<p class="life-request-wish">새싹: “교실에서 다시 같이 책을 읽고 싶어.”</p>':'';

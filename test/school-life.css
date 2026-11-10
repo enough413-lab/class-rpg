@@ -163,3 +163,37 @@
 @media(max-width:360px){#schoolLife .life-arrival-overlay{padding:10px;}#schoolLife .life-arrival-panel{padding:13px;}#schoolLife .life-arrival-button{padding:8px 10px;font-size:15px;}}
 
 #schoolLife .life-wish-close{position:absolute;right:12px;top:12px}#schoolLife .life-wish .life-speaker{max-width:calc(100% - 50px)}#schoolLife .life-wish .life-choice:disabled{opacity:.55}
+
+#schoolLife .life-woods,#schoolLife .life-story-ending{position:absolute;inset:0;overflow:hidden;background:#8cae75}
+#schoolLife .life-woods-canvas,#schoolLife .life-story-ending>canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#schoolLife .life-woods-return{position:absolute;right:18px;top:18px;width:auto;min-width:95px;padding:8px 14px;font-size:17px;border-radius:22px}
+#schoolLife .life-woods-goal{position:absolute;top:89px;left:23px;margin:0;background:#35573ed9;border-radius:18px;padding:7px 14px;color:#fff7df;font-size:16px}
+#schoolLife .life-dir[data-woods-dir=u]{left:46px;top:0}#schoolLife .life-dir[data-woods-dir=l]{left:0;top:46px}#schoolLife .life-dir[data-woods-dir=d]{left:46px;top:46px}#schoolLife .life-dir[data-woods-dir=r]{left:92px;top:46px}
+#schoolLife .life-woods .life-controls{transform:none}
+#schoolLife .life-woods-use{width:90px;font-size:18px;line-height:1.35;padding:5px;word-break:keep-all}
+#schoolLife .life-woods-prompt{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);background:#fff4dbe8;border:2px solid #83764f;border-radius:20px;padding:8px 15px;font-size:17px;pointer-events:none}
+#schoolLife .life-woods-prompt:empty{display:none}
+#schoolLife:has(.life-woods)>.life-hud,#schoolLife:has(.life-story-ending)>.life-hud{visibility:hidden}
+#schoolLife .life-story-puzzle{height:auto;max-height:calc(100dvh - 60px)}
+#schoolLife .life-gate-turns,#schoolLife .life-story-display{display:flex;justify-content:center;gap:16px;margin:20px 0}
+#schoolLife .life-gate-symbol,#schoolLife .life-display-slot{width:100px;min-width:44px;height:110px;padding:12px;border:3px solid #826d43;border-radius:9px;background:#d8b47a;box-shadow:0 4px #78613b44}
+#schoolLife .life-gate-symbol svg{width:60px;height:68px;max-width:100%;fill:none;stroke:#604c31;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
+#schoolLife .life-display-slot{background:#e9d4a3;width:120px;height:130px}
+#schoolLife .life-display-slot :is(img,svg){width:100%;height:100%;object-fit:contain}
+#schoolLife .life-display-slot[aria-pressed=true]{outline:3px solid #39724f;outline-offset:3px;background:#f6eab6}
+#schoolLife .life-story-result{min-height:30px;color:#5b4b35}
+#schoolLife .life-bell-work{position:relative;width:min(360px,100%);aspect-ratio:500/480;margin:auto}
+#schoolLife .life-bell-work canvas{width:100%;height:100%;display:block}
+#schoolLife .life-bell-socket,#schoolLife .life-clapper-pick{position:absolute;min-height:44px;min-width:88px;padding:8px;border:2px solid #8a774c;border-radius:14px;background:#fff4cfe8;font-size:16px;left:50%;transform:translateX(-50%)}
+#schoolLife .life-bell-socket{top:35%}#schoolLife .life-clapper-pick{bottom:0}#schoolLife .life-clapper-pick[aria-pressed=true]{background:#d9e6b4;border-color:#4a7654}
+#schoolLife .life-rope-work{position:relative;width:100%;max-width:480px;aspect-ratio:420/220;margin:12px auto;background:#d0ad78;border:2px solid #967047;border-radius:12px}
+#schoolLife .life-rope-work svg{width:100%;height:100%;display:block;stroke-linejoin:round;stroke-linecap:round;fill:none}
+#schoolLife .life-rope-guide{stroke:#8e683d;stroke-width:7}#schoolLife .life-rope-line{stroke:#f7e7b4;stroke-width:7}
+#schoolLife .life-rope-work button{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;min-width:44px;border-radius:50%;border:3px solid #826340;color:#4e432f;background:#e8d09e;font-size:18px}
+#schoolLife .life-rope-work [data-eye="0"]{left:58.33%;top:15.9%}#schoolLife .life-rope-work [data-eye="1"]{left:58.33%;top:79.55%}#schoolLife .life-rope-work [data-eye="2"]{left:89.29%;top:47.73%}
+#schoolLife .life-rope-work button[aria-pressed=true]{background:#f8eec3;border-color:#4e7952}
+#schoolLife .life-ending-copy{position:absolute;left:50%;bottom:max(25px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 32px));padding:20px 25px;background:#fff5df;border:2px solid #8b704c;border-radius:18px 24px 21px 18px;box-shadow:0 5px #654e353b}
+#schoolLife .life-ending-copy p{font:400 22px/1.6 SchoolLifeText,sans-serif;word-break:keep-all;margin:0 0 15px;color:#493e2e}
+#schoolLife .life-ending-copy button{float:right}
+@media(max-width:700px){#schoolLife .life-woods-goal{left:15px;top:80px;font-size:15px}#schoolLife .life-woods-return{top:15px;right:12px;min-width:88px;font-size:15px}#schoolLife .life-woods .life-place{min-width:0;max-width:calc(100% - 120px)}#schoolLife .life-woods-prompt{bottom:158px;max-width:calc(100% - 32px);white-space:nowrap}#schoolLife .life-gate-turns,#schoolLife .life-story-display{gap:10px;margin:15px 0}#schoolLife .life-gate-symbol,#schoolLife .life-display-slot{width:calc((100% - 20px)/3);padding:8px;height:100px}#schoolLife .life-ending-copy{padding:18px}#schoolLife .life-ending-copy p{font-size:20px}}
+@media(max-height:500px){#schoolLife .life-woods-prompt{bottom:22px}#schoolLife .life-woods-goal{top:79px}#schoolLife .life-ending-copy{bottom:14px;padding:14px 20px}#schoolLife .life-ending-copy p{font-size:18px;margin-bottom:8px}#schoolLife .life-story-puzzle{max-height:calc(100dvh - 48px)}}
