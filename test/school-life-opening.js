@@ -42,11 +42,11 @@ export function installSchoolOpening(api){
   if(e.id==='saessak'){
    if(step()===0)api.talk('새싹','네 방에 편지를 두고 왔는데.\n아직 못 봤어?',[{label:'읽고 올게!'}],'saessak');
    else if(step()===1)api.conversation('wish',()=>advance(1,2));
-   else if(step()===2)api.talk('새싹',keyReady()?'잡초 아래에서 반짝이는 게 보여!\n직접 가까이 가서 살펴봐.':'꽃을 심는 흙 바로 아래를 살펴봐.\n나란히 난 잡초 세 곳을 뽑아 보자.',[{label:'찾아볼게!'}],'saessak');
-   else if(step()===3)api.talk('새싹','찾았다! 그게 교실 열쇠야.',[{label:'문을 열어 볼게!'}],'saessak');
-   else if(step()===4)api.talk('새싹','문이 열렸네!\n안은 먼지투성이야. 바닥을 쓸고 창문부터 열자.',[{label:'다녀올게!'}],'saessak');
-   else if(step()===5&&!old())api.talk('새싹','방금 누가 교실로 들어갔어.\n저 뒷모습… 토리인가?',[{label:'가서 볼게'}],'saessak');
-   else if(step()>=6&&!old())api.talk('새싹','토리가 돌아왔다고?\n그럼 그 책, 끝까지 읽을 수 있겠네.',[{label:'교실에서 만나자'}],'saessak');
+   else if(step()===2)api.talk('새싹',keyReady()?'잡초 아래에서 반짝이는 게 보여!\n직접 가까이 가서 살펴봐.':'꽃을 심는 흙 바로 아래를 살펴봐.\n나란히 난 잡초 세 곳을 뽑아 보자.',[{label:'찾아볼게!'},api.wishChoice()],'saessak');
+   else if(step()===3)api.talk('새싹','찾았다! 그게 교실 열쇠야.',[{label:'문을 열어 볼게!'},api.wishChoice()],'saessak');
+   else if(step()===4)api.talk('새싹','문이 열렸네!\n안은 먼지투성이야. 바닥을 쓸고 창문부터 열자.',[{label:'다녀올게!'},api.wishChoice()],'saessak');
+   else if(step()===5&&!old())api.talk('새싹','방금 누가 교실로 들어갔어.\n저 뒷모습… 토리인가?',[{label:'가서 볼게'},api.wishChoice()],'saessak');
+   else if(step()>=6&&!old())api.talk('새싹',api.remember('saessak','토리가 돌아왔다고?\n그럼 그 책, 끝까지 읽을 수 있겠네.'),[{label:'교실에서 만나자'},api.wishChoice()],'saessak');
    else return false;
    return true;
   }
