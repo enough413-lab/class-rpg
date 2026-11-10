@@ -123,3 +123,6 @@
 @media(max-width:500px){#schoolLife .life-prologue-top{font-size:15px;align-items:flex-start}#schoolLife .life-prologue-top>div{flex-direction:column;gap:4px}#schoolLife .life-prologue-top button{font-size:14px;padding:7px 12px}#schoolLife .life-prologue-actions{gap:4px}#schoolLife .life-prologue-actions button{font-size:15px;padding:8px 12px}#schoolLife .life-prologue-kicker{font-size:16px}#schoolLife .life-prologue-caption{line-height:1.6;margin-bottom:18px}}
 @media(max-height:450px){#schoolLife .life-prologue{padding:12px 22px}#schoolLife .life-prologue-caption{font-size:18px;line-height:1.35;margin-bottom:8px;min-height:2.7em}#schoolLife .life-prologue-kicker{font-size:15px;margin-bottom:5px}#schoolLife .life-prologue-top{font-size:15px}#schoolLife .life-prologue-top>div{flex-direction:row}}
 
+
+#schoolLife .life-memory-picture{display:block;width:min(100%,360px);height:auto;margin:0 auto 20px}#schoolLife .life-memory-book{display:block;width:170px;max-width:100%;height:auto;margin:0 auto 16px}#schoolLife .life-memory-note{text-align:center;line-height:1.8;word-break:keep-all;font:18px/1.8 SchoolLifeText,sans-serif}
+@media(max-height:450px){#schoolLife .life-memory-picture{width:230px}#schoolLife .life-memory-book{width:130px}}
