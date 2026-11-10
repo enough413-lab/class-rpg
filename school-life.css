@@ -126,3 +126,22 @@
 
 #schoolLife .life-memory-picture{display:block;width:min(100%,360px);height:auto;margin:0 auto 20px}#schoolLife .life-memory-book{display:block;width:170px;max-width:100%;height:auto;margin:0 auto 16px}#schoolLife .life-memory-note{text-align:center;line-height:1.8;word-break:keep-all;font:18px/1.8 SchoolLifeText,sans-serif}
 @media(max-height:450px){#schoolLife .life-memory-picture{width:230px}#schoolLife .life-memory-book{width:130px}}
+
+#schoolLife .life-invitation-overlay{align-items:center;justify-content:center;padding:26px 14px;overflow:auto;background:#26382e55}
+#schoolLife .life-invitation-panel{box-sizing:border-box;width:min(580px,100%);max-height:100%;overflow:auto;background:#fff5dd;border:3px solid #887b50;border-radius:24px;padding:22px;text-align:center;box-shadow:0 12px 35px #162c3138}
+#schoolLife .life-invitation-panel h2{font:26px SchoolLife,sans-serif;color:#41634e;margin:0 0 10px}
+#schoolLife .life-letter-envelope{display:block;width:min(100%,370px);height:auto;margin:0 auto}
+#schoolLife .life-letter-message{font:20px/1.8 SchoolLifeText,sans-serif;white-space:pre-line;word-break:keep-all;background:#fff9e9;border:1px solid #d5c298;border-radius:7px;padding:16px;margin:8px 0 20px}
+#schoolLife .life-letter-hint{font:17px/1.6 SchoolLifeText,sans-serif;margin:8px 0 20px;word-break:keep-all}
+#schoolLife .life-letter-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+#schoolLife .life-letter-button{font:18px SchoolLifeText,sans-serif;min-height:48px;padding:9px 15px;border:1px solid #ac8b4e;border-radius:14px;background:#f3deac;color:#4c4c34;cursor:pointer}
+#schoolLife .life-letter-primary{background:#d8e5b4;border-color:#7f9559}
+#schoolLife .life-letter-button:disabled{opacity:.65;cursor:default}
+#schoolLife .life-letter-button:focus-visible{outline:3px solid #347e9e;outline-offset:3px}
+#schoolLife .life-invitation-overlay[data-letter=lift]{background:transparent;align-items:flex-end;pointer-events:auto}
+#schoolLife [data-letter=lift] .life-invitation-panel{width:auto;max-width:100%;padding:15px 20px}
+#schoolLife [data-letter=lift] h2{font-size:20px}
+#schoolLife [data-letter=read] .life-letter-envelope{width:180px}
+@media(max-width:360px){#schoolLife .life-invitation-panel{padding:18px 14px}#schoolLife .life-invitation-panel h2{font-size:23px}#schoolLife .life-letter-message{font-size:18px;padding:12px}#schoolLife .life-letter-button{font-size:17px;padding:9px 12px}}
+@media(max-height:450px){#schoolLife .life-invitation-overlay{padding:12px 18px}#schoolLife .life-invitation-panel{width:720px;padding:12px 18px}#schoolLife .life-letter-envelope{width:220px}#schoolLife .life-invitation-panel h2{font-size:22px;margin-bottom:4px}#schoolLife [data-letter=read] .life-letter-envelope{display:none}#schoolLife .life-letter-message{font-size:18px;line-height:1.45;padding:10px;margin:6px 0 12px}#schoolLife .life-letter-hint{margin:4px 0 10px}}
+

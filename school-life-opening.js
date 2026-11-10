@@ -14,7 +14,7 @@ export function installSchoolOpening(api){
  }
  function entities(scene){
   const n=step(),items=[];
-  if(scene==='room'&&n===0)items.push({id:'invitation',x:920,y:700,label:'잎사귀 초대장',action:'읽기',kind:'opening'});
+  if(scene==='room'&&n===0)items.push({id:'invitation',x:920,y:700,label:'잎사귀 초대장',action:'집기',kind:'opening'});
   if(scene==='campus'&&n===2&&keyReady())items.push({id:'schoolKey',x:790,y:678,label:'풀 아래 작은 열쇠',action:'줍기',kind:'opening'});
   if(scene==='classroom'&&n===4)items.push({id:'firstWindow',x:400,y:470,label:'굳게 닫힌 창문',action:'열기',kind:'opening'});
   if(scene==='classroom'&&n===6)items.push({id:'bellNote',x:950,y:740,label:'토리가 놓은 쪽지',action:'읽기',kind:'opening'});
@@ -27,7 +27,7 @@ export function installSchoolOpening(api){
   }
   if(e.id==='schoolDoor'&&!enterable()&&step()!==3){api.talk('잠긴 교실','아직은 갈 수 없어요.\n문이 잠겨 있어요. 새싹이라면 열쇠를 알지도 몰라요.');return true;}
   if(e.id==='invitation'){
-   api.talk('새싹의 초대장','이 학교에서 다시 웃음소리가 나면 좋겠어.\n마당에서 기다릴게. — 새싹',[{label:'초대장 챙기기',run:()=>advance(0,1,'초대장을 주머니에 넣었어요.')},{label:'잠깐 내려놓기'}]);return true;
+   api.invitation(e,()=>advance(0,1,'초대장을 주머니에 넣었어요.'));return true;
   }
   if(e.id==='schoolKey'){
    if(step()===2&&keyReady()&&advance(2,3,'잎사귀 무늬 열쇠를 찾았어요!'))api.burst(e.x,e.y);return true;
@@ -58,7 +58,7 @@ export function installSchoolOpening(api){
   };
   g.save();
   const note=(x,y)=>{glow(x,y+1);g.drawImage(assets.invitation,x-30,y-30,60,34);};
-  if(scene==='room'&&step()===0)note(920,700);
+  if(scene==='room'&&step()===0&&!api.invitationActive())note(920,700);
   if(scene==='campus'){
    if(!enterable()){
     g.translate(815,330);g.lineWidth=2;g.strokeStyle='#6d5137';g.fillStyle='#a88757';
