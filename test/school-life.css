@@ -104,3 +104,22 @@
 @media(max-height:500px){#schoolLife .life-tool{right:109px;bottom:22px;width:65px;height:65px}}
 
 #schoolLife .life-tool{padding:5px;white-space:nowrap}#schoolLife .life-tool span{font-size:15px}
+
+#schoolLife .life-prologue[hidden]{display:none}
+#schoolLife .life-prologue{position:absolute;inset:0;z-index:20;color:#fff8e6;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(16px,3vw,36px);font-family:SchoolLifeText,sans-serif}
+#schoolLife .life-prologue-top{display:flex;align-items:center;justify-content:space-between;gap:12px;font:18px SchoolLife,sans-serif}
+#schoolLife .life-prologue-top>div{display:flex;gap:8px}
+#schoolLife .life-prologue button{font:16px SchoolLifeText,sans-serif;min-height:44px;padding:9px 16px;border:1px solid #efdfaa88;border-radius:22px;background:#183b35b3;color:#fff9e7;cursor:pointer}
+#schoolLife .life-prologue button:focus-visible{outline:3px solid #fff2b2;outline-offset:4px}
+#schoolLife .life-prologue button:hover{background:#315b4c}
+#schoolLife .life-prologue-bottom{width:min(100%,820px);margin:0 auto}
+#schoolLife .life-prologue-copy{text-align:center;text-shadow:0 2px 6px #152b2a;word-break:keep-all}
+#schoolLife .life-prologue-kicker{color:#e9d6a3;font:18px SchoolLife,sans-serif;letter-spacing:.08em;margin:0 0 13px}
+#schoolLife .life-prologue-caption{font-size:clamp(18px,2.3vw,27px);line-height:1.65;white-space:pre-line;margin:0 0 24px;min-height:3.3em}
+#schoolLife .life-prologue-actions{display:flex;align-items:center;gap:12px}
+#schoolLife .life-prologue-count{font-size:14px;letter-spacing:.18em;margin-right:auto;color:#eddfbb}
+#schoolLife [data-intro=next]{background:#f6e7b9;color:#304d3b;border-color:#f6e7b9;font-family:SchoolLife;min-width:124px}
+#schoolLife [data-intro=skip]{border-color:transparent;background:transparent;color:#e4dfcd}
+@media(max-width:500px){#schoolLife .life-prologue-top{font-size:15px;align-items:flex-start}#schoolLife .life-prologue-top>div{flex-direction:column;gap:4px}#schoolLife .life-prologue-top button{font-size:14px;padding:7px 12px}#schoolLife .life-prologue-actions{gap:4px}#schoolLife .life-prologue-actions button{font-size:15px;padding:8px 12px}#schoolLife .life-prologue-kicker{font-size:16px}#schoolLife .life-prologue-caption{line-height:1.6;margin-bottom:18px}}
+@media(max-height:450px){#schoolLife .life-prologue{padding:12px 22px}#schoolLife .life-prologue-caption{font-size:18px;line-height:1.35;margin-bottom:8px;min-height:2.7em}#schoolLife .life-prologue-kicker{font-size:15px;margin-bottom:5px}#schoolLife .life-prologue-top{font-size:15px}#schoolLife .life-prologue-top>div{flex-direction:row}}
+
