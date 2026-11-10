@@ -1,4 +1,4 @@
-import {createLifeStorage} from './school-life-storage.js?v=20261109-cloud';
+import {createLifeStorage} from './school-life-storage.js?v=20261110-arrival';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createSchoolLifeSync({host,getIdentity,rpc,onChange}){
  const panel=document.createElement('section');panel.id='lifeSyncPanel';panel.className='life-sync-panel';panel.hidden=true;panel.setAttribute('aria-label','내 이야기 저장');panel.setAttribute('role','region');
@@ -9,15 +9,15 @@ export function createSchoolLifeSync({host,getIdentity,rpc,onChange}){
  const key=s=>[s.owner,s.status,s.revision,s.pending?.p_request_id||'',s.error||''].join(':');
  const summary=s=>{const places={room:'내 방',campus:'학교 마당',classroom:'교실'};return (places[s?.scene]||'학교')+' · 잡초 '+(s?.weeds?.length||0)+'곳 · 청소 '+(s?.dust?.length||0)+'곳';};
  const info={
-  import:['이 기기에 남은 이야기','처음 한 번, 이 기기의 이야기를 내 계정에 옮겨요. 원래 기록도 그대로 남겨 둬요.','이 기기 이야기로 이어가기','import'],
-  pending:['아직 확인하지 못한 저장','지난 저장의 결과를 확인할게요. 했던 행동을 다시 하지는 않아요.','저장 확인하기','retry'],
-  error:['저장을 마치지 못했어요','지금 모습은 보관 중이에요. 연결이 돌아오면 같은 이야기를 다시 저장할 수 있어요.','다시 저장','retry'],
-  offline:['이야기를 불러오지 못했어요','연결을 확인한 뒤 다시 불러와 주세요. 원래 기록은 그대로 두었어요.','다시 불러오기','retry'],
-  'storage-error':['이 기기에 임시 기록을 남기지 못했어요','이 창에 지금 모습을 보관하고 있어요. 창을 닫기 전에 저장을 다시 시도해 주세요.','다시 저장','retry'],
-  'local-conflict':['다른 창의 이야기가 있어요','이 창에서 하던 이야기를 따로 보관하고 다른 창의 기록을 확인해요. 두 기록을 합치지는 않아요.','다른 창 기록 확인','reload'],
-  conflict:['다른 기기에서 이야기가 이어졌어요','이 창의 진행을 따로 보관한 뒤, 계정의 최신 이야기로 이어갈 수 있어요.','계정 이야기로 이어가기','server'],
-  unreadable:['기록을 읽을 수 없어요','원래 기록을 그대로 보관하고 있어요. 기록을 지우거나 처음부터 시작하지 않아요.','다시 읽기','read'],
-  recovery:['저장 확인이 필요한 이야기가 있어요','어느 이야기를 확인할지 골라 주세요. 각각 따로 보관하며 합치거나 덮어쓰지 않아요.','','']
+  import:['이 기기에 남은 이야기','이 기기의 진행을 계정에 옮깁니다. 기존 기록도 유지됩니다.','이 기기 이야기로 이어가기','import'],
+  pending:['아직 확인하지 못한 저장','지난 저장 결과를 확인합니다. 행동은 반복되지 않습니다.','저장 확인하기','retry'],
+  error:['저장 실패','현재 진행은 보관 중입니다. 연결 복구 후 다시 저장할 수 있습니다.','다시 저장','retry'],
+  offline:['불러오기 실패','연결 확인 필요. 기존 기록은 유지됩니다.','다시 불러오기','retry'],
+  'storage-error':['임시 저장 실패','현재 진행은 이 창에만 남아 있습니다. 창을 닫기 전에 저장을 마쳐야 합니다.','다시 저장','retry'],
+  'local-conflict':['다른 창에서 진행 변경','현재 진행을 따로 보관한 뒤 다른 창의 기록을 불러옵니다. 두 기록은 합쳐지지 않습니다.','다른 창 기록 확인','reload'],
+  conflict:['다른 기기에서 진행 변경','현재 진행을 따로 보관한 뒤 계정의 최신 기록을 불러옵니다.','계정 이야기로 이어가기','server'],
+  unreadable:['기록을 읽을 수 없음','기존 기록은 유지됩니다. 삭제나 초기화 없이 다시 읽습니다.','다시 읽기','read'],
+  recovery:['저장 확인 필요','확인할 기록 선택. 각 기록은 별도로 보관됩니다.','','']
  };
  function render(s){
   if(!s)return;const k=key(s),ready=s.status==='ready',busy=s.status==='saving'||s.status==='loading';

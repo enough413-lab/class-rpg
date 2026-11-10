@@ -25,12 +25,12 @@ export function createSchoolMemories(api){
  }
  function handle(e,assets){
   if(e.kind!=='memory')return false;
-  if(e.id==='oldClock')api.talk('멈춘 시계','시곗바늘이 가만히 멈춰 있어요.\n이 아래에서 아이들은 종이 울리기를 기다렸겠지요.',[{label:'조용히 바라보기'}]);
+  if(e.id==='oldClock')api.talk('멈춘 시계','종이 울리던 시각에 멈춘 시계.\n초침은 움직이지 않는다.',[{label:'조용히 바라보기'}]);
   else if(e.id==='oldPhoto'){
-   api.book('먼지 쌓인 사진','<canvas class="life-memory-picture" width="480" height="360" aria-label="학교 앞에 함께 선 새싹, 토리, 두리의 오래된 사진" role="img"></canvas><p class="life-memory-note">새싹과 토리, 두리가 학교 앞에 함께 서 있어요.<br>사진 아래에는 작게 적혀 있어요.<br>“우리, 다음 봄에도 여기서 만나자.”</p>');
+   api.book('먼지 쌓인 사진','<canvas class="life-memory-picture" width="480" height="360" aria-label="학교 앞에 함께 선 새싹, 토리, 두리의 오래된 사진" role="img"></canvas><p class="life-memory-note">학교 앞에 선 새싹, 토리, 두리.<br>사진 아래 작은 글씨가 남아 있다.<br>“우리, 다음 봄에도 여기서 만나자.”</p>');
    const canvas=api.overlay().querySelector('canvas');photo(canvas.getContext('2d'),assets,480,360);
   }else if(e.id==='waitingBook'){
-   api.book('책갈피가 꽂힌 책','<canvas class="life-memory-book" width="220" height="170" aria-label="금빛 책갈피가 꽂힌 초록색 책" role="img"></canvas><p class="life-memory-note">반쯤 읽은 책에 책갈피가 꽂혀 있어요.<br>“다음 이야기는 친구들과 함께.”<br>이 교실에도 다시 책 읽는 소리가 날까요?</p>');
+   api.book('책갈피가 꽂힌 책','<canvas class="life-memory-book" width="220" height="170" aria-label="금빛 책갈피가 꽂힌 초록색 책" role="img"></canvas><p class="life-memory-note">반쯤 읽다 만 책.<br>책갈피에 한 문장이 적혀 있다.<br>“다음 이야기는 친구들과 함께.”</p>');
    const canvas=api.overlay().querySelector('canvas');book(canvas.getContext('2d'),200,145);
   }else return false;
   return true;
