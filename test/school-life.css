@@ -145,3 +145,12 @@
 @media(max-width:360px){#schoolLife .life-invitation-panel{padding:18px 14px}#schoolLife .life-invitation-panel h2{font-size:23px}#schoolLife .life-letter-message{font-size:18px;padding:12px}#schoolLife .life-letter-button{font-size:17px;padding:9px 12px}}
 @media(max-height:450px){#schoolLife .life-invitation-overlay{padding:12px 18px}#schoolLife .life-invitation-panel{width:720px;padding:12px 18px}#schoolLife .life-letter-envelope{width:220px}#schoolLife .life-invitation-panel h2{font-size:22px;margin-bottom:4px}#schoolLife [data-letter=read] .life-letter-envelope{display:none}#schoolLife .life-letter-message{font-size:18px;line-height:1.45;padding:10px;margin:6px 0 12px}#schoolLife .life-letter-hint{margin:4px 0 10px}}
 
+
+/* First arrival: the school remains the scene, with only a short dialogue below. */
+#schoolLife .life-arrival-overlay{background:linear-gradient(0deg,#243c3670,transparent 55%);align-items:flex-end;padding:14px;}
+#schoolLife .life-arrival-panel{box-sizing:border-box;width:min(520px,100%);padding:16px 20px;border:2px solid #8a7651;border-radius:20px 20px 11px 11px;background:#fff3d9;color:#454d35;box-shadow:0 8px 24px #233d3e30;}
+#schoolLife .life-arrival-panel h2{margin:0 0 9px;font:22px SchoolLife;}#schoolLife .life-arrival-panel p{margin:0 0 14px;font:18px/1.5 SchoolLifeText;white-space:pre-line;word-break:keep-all;}
+#schoolLife .life-arrival-actions{display:flex;gap:8px;flex-wrap:wrap;}#schoolLife .life-arrival-button{min-height:44px;padding:8px 14px;border:1px solid #9b8963;border-radius:10px;background:#f1e4c6;color:#454d35;font:16px SchoolLifeText;cursor:pointer;}#schoolLife .life-arrival-primary{background:#426449;color:#fff7e4;border-color:#36543d;}#schoolLife .life-arrival-button:focus-visible{outline:3px solid #4786ae;outline-offset:3px;}
+#schoolLife:has(.life-arrival-overlay:not([hidden])) :is(.life-controls,.life-corner,.life-level,.life-place,.life-task,.life-prompt,.life-use,.life-tool,.life-toast){visibility:hidden;}
+@media(max-height:450px){#schoolLife .life-arrival-overlay{padding:8px;}#schoolLife .life-arrival-panel{padding:9px 16px;}#schoolLife .life-arrival-panel h2{margin-bottom:4px;font-size:19px;}#schoolLife .life-arrival-panel p{margin-bottom:7px;font-size:16px;line-height:1.3;}#schoolLife .life-arrival-actions{gap:6px;}}
+@media(max-width:360px){#schoolLife .life-arrival-overlay{padding:10px;}#schoolLife .life-arrival-panel{padding:13px;}#schoolLife .life-arrival-button{padding:8px 10px;font-size:15px;}}

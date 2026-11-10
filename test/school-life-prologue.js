@@ -6,10 +6,10 @@ export function createLifePrologue({host,valid,finish,cancel,tone,toggleSound,so
  panel.innerHTML='<div class="life-prologue-top"><span>우리학교, 다시 봄</span><div><button type="button" data-intro="sound" aria-pressed="false">소리 켜기</button><button type="button" data-intro="cancel">타이틀로</button></div></div><div class="life-prologue-bottom"><div class="life-prologue-copy" aria-live="polite" aria-atomic="true"><p class="life-prologue-kicker"></p><p class="life-prologue-caption"></p></div><div class="life-prologue-actions"><span class="life-prologue-count" aria-label="이야기 장면"></span><button type="button" data-intro="skip">건너뛰기</button><button type="button" data-intro="next">다음 장면</button></div></div>';
  host.append(panel);
  const captions=[
-  ['오래전, 이 학교에서','마지막 종소리가 운동장에 퍼졌어요.'],
-  ['그리고 시간이 흘러','교실은 조용해지고,\n책들은 친구들을 기다렸어요.'],
-  ['닫힌 문 너머에는','다시 웃음소리가 나길 바라는\n작은 마음이 남아 있었어요.'],
-  ['어느 봄날, 너에게','잎사귀 초대장 한 통이 도착했어요.\n이 학교의 다음 이야기는, 너와 함께.']
+  ['오래전, 이 학교에서','마지막 종이 울렸다.'],
+  ['그리고 시간이 흘러','교실에는 아무도 돌아오지 않았다.'],
+  ['닫힌 문 너머에는','학교의 문은 오래도록 닫혀 있었다.'],
+  ['어느 봄날, 너에게','잎사귀 봉인이 찍힌 편지 한 통이 도착했다.']
  ];
  let active=false,index=0,elapsed=0,last=0,advancedAt=0,ending=false;
  const nextButton=panel.querySelector('[data-intro=next]');

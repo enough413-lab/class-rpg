@@ -1,10 +1,10 @@
 export const LIFE_VERSION=1;
 export const PROJECTS=[
- {id:'bench',name:'나무 벤치',level:3,wood:3,description:'모은 나뭇가지로 쉴 자리를 고쳐요.'},
- {id:'school',name:'학교에 새 봄빛',level:5,wood:5,description:'낡은 지붕과 벽을 산뜻하게 고쳐요.'},
- {id:'garden',name:'넓어진 꽃밭',level:7,wood:0,description:'꽃을 심을 자리가 여섯 곳으로 늘어요.'},
- {id:'library',name:'교실의 작은 책쉼터',level:10,wood:0,description:'깨끗한 교실에 책과 방석을 놓아요.'},
- {id:'lights',name:'반짝이는 등굣길',level:15,wood:0,description:'마당에 따뜻한 꽃등을 걸어요.'}
+ {id:'bench',name:'나무 벤치',level:3,wood:3,description:'나뭇가지로 벤치 수리'},
+ {id:'school',name:'학교에 새 봄빛',level:5,wood:5,description:'낡은 지붕과 벽 수리'},
+ {id:'garden',name:'넓어진 꽃밭',level:7,wood:0,description:'꽃자리 6곳으로 확장'},
+ {id:'library',name:'교실의 작은 책쉼터',level:10,wood:0,description:'교실에 책과 방석 배치'},
+ {id:'lights',name:'반짝이는 등굣길',level:15,wood:0,description:'등굣길에 꽃등 설치'}
 ];
 export const WEEDS=[[620,650],[688,690],[790,678],[852,731],[716,796],[955,807]];
 export const BRANCHES=[[475,655],[520,787],[970,538],[1015,698],[1110,825],[410,875],[1045,910],[650,928]];
@@ -27,12 +27,12 @@ export function readLife(raw){
  return state;
 }
 export function projectRequirement(state,id,level){
- const p=PROJECTS.find(p=>p.id===id);if(!p)return '아직 없는 일이에요.';
- if(state.projects.includes(id))return '이미 고친 곳이에요.';
- if(level<p.level)return `학교생활로 Lv. ${p.level}이 되면 함께 고칠 수 있어요.`;
- if(state.wood<p.wood)return `마당의 나뭇가지를 ${p.wood-state.wood}개 더 모아 와요.`;
- if(id==='garden'&&state.flowers.slice(0,3).some(f=>f.stage!==3))return '작은 화단의 꽃 세 송이를 먼저 피워 보아요.';
- if(id==='library'&&state.dust.length<4)return '교실 바닥의 먼지 네 곳을 먼저 쓸어 보아요.';
- if(id==='lights'&&!state.projects.includes('school'))return '학교에 새 봄빛을 먼저 칠해 주세요.';
+ const p=PROJECTS.find(p=>p.id===id);if(!p)return '수리할 대상 없음';
+ if(state.projects.includes(id))return '수리 완료';
+ if(level<p.level)return `학교생활로 Lv. ${p.level} 필요`;
+ if(state.wood<p.wood)return `마당의 나뭇가지를 ${p.wood-state.wood}개 부족`;
+ if(id==='garden'&&state.flowers.slice(0,3).some(f=>f.stage!==3))return '작은 화단의 꽃 3송이 개화 필요';
+ if(id==='library'&&state.dust.length<4)return '교실 먼지 4곳 청소 필요';
+ if(id==='lights'&&!state.projects.includes('school'))return '학교 외관 수리 필요';
  return '';
 }
