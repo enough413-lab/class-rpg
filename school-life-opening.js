@@ -41,7 +41,7 @@ export function installSchoolOpening(api){
   }
   if(e.id==='saessak'){
    if(step()===0)api.talk('새싹','네 방에 편지를 두고 왔는데.\n아직 못 봤어?',[{label:'읽고 올게!'}],'saessak');
-   else if(step()===1)api.talk('새싹','저 교실에서 토리랑 두리랑 다시 책을 읽고 싶어.\n열쇠가 저 화단 어딘가에 있을 텐데…',[{label:'같이 찾자',run:()=>advance(1,2)},{label:'나중에'}],'saessak');
+   else if(step()===1)api.conversation('wish',()=>advance(1,2));
    else if(step()===2)api.talk('새싹',keyReady()?'잡초 아래에서 반짝이는 게 보여!\n직접 가까이 가서 살펴봐.':'꽃을 심는 흙 바로 아래를 살펴봐.\n나란히 난 잡초 세 곳을 뽑아 보자.',[{label:'찾아볼게!'}],'saessak');
    else if(step()===3)api.talk('새싹','찾았다! 그게 교실 열쇠야.',[{label:'문을 열어 볼게!'}],'saessak');
    else if(step()===4)api.talk('새싹','문이 열렸네!\n안은 먼지투성이야. 바닥을 쓸고 창문부터 열자.',[{label:'다녀올게!'}],'saessak');
@@ -50,6 +50,7 @@ export function installSchoolOpening(api){
    else return false;
    return true;
   }
+  if(e.id==='tori'&&step()===5&&!old()){api.conversation('reunion',()=>advance(5,6));return true;}
   if(e.id==='tori'&&step()===5){api.talk('토리',old()?'창문을 열어 줬구나! 교실이 더 환해졌어.\n고마워. 책을 읽다가 이 쪽지를 찾았어.':'불빛이 보여서 돌아왔어. 이 교실이 그리웠거든.\n고마워! 책 사이에 있던 쪽지를 놓아둘게.',[{label:'다시 만나서 반가워!',run:()=>advance(5,6)}],'tori');return true;}
   return false;
  }
