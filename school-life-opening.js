@@ -9,7 +9,7 @@ export function installSchoolOpening(api){
  function advance(from,to,message){
   if(step()!==from)return false;
   if(!api.mutate(s=>s.opening.step=to))return false;
-  if(message)api.toast(message);
+  if(message){api.toast(message);api.thought?.('!');}
   return true;
  }
  function entities(scene){
@@ -21,7 +21,11 @@ export function installSchoolOpening(api){
   return items;
  }
  function handle(e){
-  if(e.id==='schoolDoor'&&!enterable()&&step()!==3){api.talk('잠긴 교실','오랫동안 닫혀 있던 문이에요.\n새싹이라면 열쇠를 알지도 몰라요.');return true;}
+  if(e.id==='schoolDoor'&&step()===3&&!old()){
+   if(advance(3,4,''))api.unlock?.();
+   return true;
+  }
+  if(e.id==='schoolDoor'&&!enterable()&&step()!==3){api.talk('잠긴 교실','아직은 갈 수 없어요.\n문이 잠겨 있어요. 새싹이라면 열쇠를 알지도 몰라요.');return true;}
   if(e.id==='invitation'){
    api.talk('새싹의 초대장','이 학교에서 다시 웃음소리가 나면 좋겠어.\n마당에서 기다릴게. — 새싹',[{label:'초대장 챙기기',run:()=>advance(0,1,'초대장을 주머니에 넣었어요.')},{label:'잠깐 내려놓기'}]);return true;
   }
@@ -40,7 +44,7 @@ export function installSchoolOpening(api){
    else if(step()===1)api.talk('새싹','학교가 오래 잠들어 있었어.\n화단 아래 잡초 세 곳에서 열쇠를 찾아 줄래?',[{label:'함께 찾아보자!',run:()=>advance(1,2)},{label:'조금 이따가'}],'saessak');
    else if(step()===2)api.talk('새싹',keyReady()?'잡초 아래에서 반짝이는 게 보여!\n직접 가까이 가서 살펴봐.':'꽃을 심는 흙 바로 아래를 살펴봐.\n나란히 난 잡초 세 곳을 뽑아 보자.',[{label:'찾아볼게!'}],'saessak');
    else if(step()===3)api.talk('새싹','그 잎사귀 무늬, 교실 열쇠가 맞아!\n학교 문에 한번 맞춰 볼래?',[{label:'문을 열어 볼게!'}],'saessak');
-   else if(step()===4)api.talk('새싹','교실을 다시 쓸 수 있으면 좋겠어.\n먼지를 쓸고 창문을 열어 보자.',[{label:'다녀올게!'}],'saessak');
+   else if(step()===4)api.talk('새싹','학교 문이 열렸어! 네가 찾아 준 열쇠 덕분이야.\n안에도 봄이 오게, 먼지를 쓸고 창문을 열어 보자.',[{label:'다녀올게!'}],'saessak');
    else return false;
    return true;
   }
