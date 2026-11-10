@@ -11,19 +11,25 @@ export function createLifePrologue({host,valid,finish,cancel,tone,toggleSound,so
   ['닫힌 문 너머에는','학교의 문은 오래도록 닫혀 있었다.'],
   ['어느 봄날, 너에게','잎사귀 봉인이 찍힌 편지 한 통이 도착했다.']
  ];
- let active=false,index=0,elapsed=0,last=0,advancedAt=0,ending=false;
- const nextButton=panel.querySelector('[data-intro=next]');
+ let active=false,index=0,elapsed=0,last=0,advancedAt=0,ending=false,replay=false,generation=0,currentFinish=finish,currentCancel=cancel;
+ let nextButton=panel.querySelector('[data-intro=next]');
  function syncSound(){const b=panel.querySelector('[data-intro=sound]');b.textContent=soundEnabled()?'소리 끄기':'소리 켜기';b.setAttribute('aria-pressed',String(soundEnabled()));}
  function ring(){if(index!==0)return;tone(523.25,1.7);tone(1046.5,1.1);}
- function show(){elapsed=0;last=0;advancedAt=performance.now();panel.dataset.scene=String(index);panel.querySelector('.life-prologue-kicker').textContent=captions[index][0];panel.querySelector('.life-prologue-caption').textContent=captions[index][1];panel.querySelector('.life-prologue-count').textContent=(index+1)+' / '+captions.length;nextButton.textContent=index===3?'내 방으로':'다음 장면';nextButton.focus({preventScroll:true});ring();}
- function stop(){active=false;ending=false;last=0;panel.hidden=true;host.removeAttribute('data-prologue');}
- function end(){if(!active||ending||!valid())return;ending=true;finish();}
+ function show(){elapsed=0;last=0;advancedAt=performance.now();panel.dataset.scene=String(index);panel.querySelector('.life-prologue-kicker').textContent=captions[index][0];panel.querySelector('.life-prologue-caption').textContent=captions[index][1];panel.querySelector('.life-prologue-count').textContent=(index+1)+' / '+captions.length;nextButton.textContent=index===3?(replay?'수첩으로':'내 방으로'):'다음 장면';nextButton.focus({preventScroll:true});ring();}
+ function stop(){generation++;active=false;ending=false;last=0;panel.hidden=true;host.removeAttribute('data-prologue');}
+ function end(){if(!active||ending||!valid())return;ending=true;currentFinish();}
  function next(){if(!active||ending||!valid()||performance.now()-advancedAt<300)return;if(index===3)end();else{index++;show();}}
- panel.querySelector('[data-intro=next]').onclick=next;
- panel.querySelector('[data-intro=skip]').onclick=()=>{if(active&&performance.now()-advancedAt>=300)end();};
- panel.querySelector('[data-intro=cancel]').onclick=()=>{if(active&&valid()){stop();cancel();}};
- panel.querySelector('[data-intro=sound]').onclick=()=>{if(!active||!valid())return;toggleSound();syncSound();if(soundEnabled())ring();};
- function start(){index=0;active=true;ending=false;panel.hidden=false;host.dataset.prologue='true';syncSound();show();}
+ function start(options={}){
+  generation++;const run=generation;replay=options.replay===true;currentFinish=options.onFinish||finish;currentCancel=options.onCancel||cancel;
+  // New controls per viewing invalidate detached buttons from a prior account/view.
+  for(const b of panel.querySelectorAll('button'))b.replaceWith(b.cloneNode(true));
+  const allowed=b=>run===generation&&active&&!ending&&valid()&&panel.contains(b);
+  nextButton=panel.querySelector('[data-intro=next]');nextButton.onclick=()=>{if(allowed(nextButton))next();};
+  const skip=panel.querySelector('[data-intro=skip]');skip.textContent=replay?'그만 보기':'건너뛰기';skip.onclick=()=>{if(allowed(skip)&&performance.now()-advancedAt>=300)end();};
+  const back=panel.querySelector('[data-intro=cancel]');back.textContent=replay?'수첩으로':'타이틀로';back.onclick=()=>{if(allowed(back)){const done=currentCancel;stop();done();}};
+  const sound=panel.querySelector('[data-intro=sound]');sound.onclick=()=>{if(!allowed(sound))return;toggleSound();syncSound();if(soundEnabled())ring();};
+  panel.setAttribute('aria-label',replay?'도입 장면 다시 보기':'학교에서 온 초대장');index=0;active=true;ending=false;panel.hidden=false;host.dataset.prologue='true';syncSound();show();
+ }
  function draw(g,assets,W,H,t,reduced,paused){
   if(!active)return;
   if(!paused&&last)elapsed+=Math.min(50,t-last);last=t;
@@ -51,6 +57,6 @@ export function createLifePrologue({host,valid,finish,cancel,tone,toggleSound,so
   }
   const shade=g.createLinearGradient(0,0,0,H);shade.addColorStop(0,'#122d3877');shade.addColorStop(.25,'#122d3800');shade.addColorStop(.48,'#122d3800');shade.addColorStop(.73,'#152d3299');shade.addColorStop(1,'#152d32f2');g.fillStyle=shade;g.fillRect(0,0,W,H);g.restore();
  }
- return {start,stop,next,draw,snapshot:()=>active?{scene:index,elapsed}:null};
+ return {start,stop,next,draw,snapshot:()=>active?{scene:index,elapsed,replay}:null};
 }
 
