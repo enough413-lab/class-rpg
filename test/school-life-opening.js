@@ -48,9 +48,12 @@ export function installSchoolOpening(api){
   return false;
  }
  function memory(){return step()===7?'교실에 첫 햇살이 들어왔고, 토리와 만났어요.\n종 아래 글귀: “학교의 종이 잠든 날, 우리는 작은 씨앗을 남겼다.”':goal();}
- function draw(g,scene,assets){
+ function draw(g,scene,assets,time=0,reduced=false){
+  const glow=(x,y)=>{const pulse=reduced?0.5:(Math.sin(time*.002)+1)/2;g.save();g.translate(x,y);g.scale(1,.38);const light=g.createRadialGradient(0,0,6,0,0,57);light.addColorStop(0,'#fffbdccc');light.addColorStop(.42,'#ffe8a18c');light.addColorStop(1,'#f3c96b00');g.fillStyle=light;g.beginPath();g.ellipse(0,0,53+pulse*4,53+pulse*4,0,0,Math.PI*2);g.fill();g.strokeStyle='#fff8d2';g.globalAlpha=.65+pulse*.2;g.lineWidth=2.5;g.beginPath();g.ellipse(0,0,37+pulse*3,34+pulse*3,0,0,Math.PI*2);g.stroke();g.restore();
+   for(const [dx,dy,size]of [[-35,-31,4],[32,-15,3]]){g.save();g.translate(x+dx,y+dy);const r=size+(reduced?0:pulse);g.fillStyle='#fff6cf';g.strokeStyle='#b58b43';g.lineWidth=1;g.beginPath();g.moveTo(0,-r*1.7);g.lineTo(r*.45,-r*.45);g.lineTo(r*1.3,0);g.lineTo(r*.45,r*.45);g.lineTo(0,r*1.7);g.lineTo(-r*.45,r*.45);g.lineTo(-r*1.3,0);g.lineTo(-r*.45,-r*.45);g.closePath();g.fill();g.stroke();g.restore();}
+  };
   g.save();
-  const note=(x,y)=>{g.drawImage(assets.invitation,x-30,y-30,60,34);};
+  const note=(x,y)=>{glow(x,y+1);g.drawImage(assets.invitation,x-30,y-30,60,34);};
   if(scene==='room'&&step()===0)note(920,700);
   if(scene==='campus'){
    if(!enterable()){
@@ -59,6 +62,7 @@ export function installSchoolOpening(api){
     g.fillStyle='#e4bd68';g.fillRect(-8,-22,16,19);g.strokeRect(-8,-22,16,19);g.translate(-815,-330);
    }
    if(step()===2&&keyReady()){
+    glow(793,689);
     g.strokeStyle='#fff3bf';g.lineWidth=9;g.beginPath();g.arc(780,670,8,0,Math.PI*2);g.moveTo(787,676);g.lineTo(805,691);g.stroke();
     g.strokeStyle='#b48c48';g.lineWidth=4;g.beginPath();g.arc(780,670,8,0,Math.PI*2);g.moveTo(787,676);g.lineTo(805,691);g.lineTo(811,685);g.moveTo(798,685);g.lineTo(804,679);g.stroke();
    }
