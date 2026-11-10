@@ -3,9 +3,9 @@ import {createSchoolConversations} from './school-life-conversations.js?v=202611
 import {createSchoolArrival} from './school-life-arrival.js?v=20261110-arrival';
 import {createInvitationAction} from './school-life-invitation.js?v=20261110-arrival';
 import {createSchoolMemories} from './school-life-memories.js?v=20261110-arrival';
-import {createLifePrologue} from './school-life-prologue.js?v=20261110-arrival';
+import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawBroom,drawWater,drawTarget,waterTarget,lookDirection,VECTORS} from './school-life-feedback.js?v=20261110-field-feedback';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261110-wish';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261110-replay';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261110-arrival';
 import {installSchoolOpening} from './school-life-opening.js?v=20261110-memory';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261110-arrival';
@@ -24,7 +24,7 @@ export function installSchoolLife(ctx){
  let mode='title',state=freshLife(),owner='',ownerToken='',readError=false,saveError=false,cloudStatus='loading',ownWrite=false,pos={x:800,y:725},keys=new Set(),path=[],near=null,nearId='',frame=0,lastTime=0,clock=0,scene='room',facing=1,jump=0,moving=false,fish=null,effect=[],toastTimer=0,actionUntil=0,focusBack=null,audio=null,sound=false,audioTimer=0,stopped=false,heldTool='',gesture=null;
  let W=1,H=1,DPR=1,S=1,camera={x:0,y:0},assets={},assetsReady=false,assetError=false,avatar=[];
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),feedback=createLifeFeedback();
- let look='d',queuedToast=null,queuedArrival=null;const arrivalsSeen=new Set();
+ let look='d',queuedToast=null,queuedArrival=null,replayOrigin=null;const arrivalsSeen=new Set();
  function laterToast(text,delay=950){queuedToast={text,at:performance.now()+delay,scene};}
  let blockedNotice=null;
  function cannotGo(){
@@ -39,7 +39,7 @@ export function installSchoolLife(ctx){
  const memories=createSchoolMemories({talk,book,overlay:()=>overlay});
  const names={room:'나의 작은 방',campus:'봄빛 학교',classroom:'우리 교실'};
  const manifest={saessakPoint:'maps/npcs/saessak-point-v1.webp',toriNote:'maps/npcs/tori-note-v1.webp',duri:'maps/npcs/duri-anime-v2.webp',prologueBell:'maps/life/prologue-bell-v1.webp',invitation:'maps/life/invitation-harmony-v2.webp',campus:'maps/life/campus-harmony-v2.webp',restored:'maps/life/restored-harmony-v2.webp',room:'maps/life/room-harmony-v2.webp',classroom:'maps/life/classroom-harmony-v2.webp',classroomClosed:'maps/life/classroomClosed-harmony-v2.webp',saessak:'maps/npcs/saessak-anime-v2.webp',tori:'maps/npcs/tori-anime-v2.webp',bench:'maps/life/bench-harmony-v2.webp',weed:'maps/life/weed-harmony-v2.webp',branch:'maps/life/branch-harmony-v2.webp',soil:'maps/life/soil-harmony-v2.webp',sprout:'maps/life/sprout-harmony-v2.webp',flower:'maps/life/flower-harmony-v2.webp',flowerPink:'maps/life/flowerPink-harmony-v2.webp',flowerBlue:'maps/life/flowerBlue-harmony-v2.webp',brokenBench:'maps/life/brokenBench-harmony-v2.webp',readingNook:'maps/life/readingNook-harmony-v2.webp',lantern:'maps/life/lantern-harmony-v2.webp'};
- const notebook=installLifeNotebook({state:()=>state,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
+ const notebook=installLifeNotebook({state:()=>state,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
  const arrival=createSchoolArrival({overlay,hide:hideOverlay,reduced:()=>reduced.matches,tone,toggleSound,soundEnabled:()=>sound});
  const dialogue=createSchoolConversations({overlay,hide:hideOverlay,reduced:()=>reduced.matches,assets:()=>assets});
  const invitation=createInvitationAction({overlay,hide:hideOverlay,reduced:()=>reduced.matches});
@@ -53,6 +53,7 @@ export function installSchoolLife(ctx){
   if(!valid()||s.owner!==owner)return;
   cloudStatus=s.status;readError=s.status==='unreadable';saveError=!!s.pending&&s.status!=='saving'||['error','offline','storage-error','local-conflict','conflict','recovery'].includes(s.status);
   const changed=JSON.stringify(state)!==JSON.stringify(s.state);
+  if(mode==='replay'&&(changed||s.status!=='ready'))endReplay(false);
   if(mode==='intro'&&!ownWrite&&(s.status!=='ready'||changed)){prologue.stop();mode='title';$('lifeTitle').hidden=false;$('lifeHud').hidden=true;keys.clear();path=[];}
   if(changed){state=s.state;if(!ownWrite){scene=state.scene;pos={...state.position};if(blocked(pos.x,pos.y))pos=scene==='campus'?{x:800,y:550}:{x:800,y:780};keys.clear();path=[];fish=null;$('lifeFish').hidden=true;if(!overlay.hidden)hideOverlay();}}
   updateSave();updateTitle();if(mode==='play')refresh();
@@ -80,14 +81,29 @@ export function installSchoolLife(ctx){
 
  function resize(){W=host.clientWidth||innerWidth;H=host.clientHeight||innerHeight;DPR=Math.min(2,devicePixelRatio||1);canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';S=W<700?.78:Math.min(1.12,W/1400);keys.clear();path=[];fish=null;$('lifeFish').hidden=true;}
  function avatarImages(){const imgs=['avatarHairBack','avatarBase','avatarShoes','avatarBottom','avatarTop','avatarEquipment','avatarHairFront','avatarHat','avatarAccessory'].map(id=>document.getElementById(id)).filter(el=>el&&el.src&&!el.classList.contains('hidden'));avatar=imgs;}
- function open(){if(!ctx.getStudent()?.id)return;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void wish.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
- function close(){if(!host.open)return;wish.close();wish.store.deactivate();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();blockedNotice=null;gesture=null;heldTool='';if(mode==='play'&&!saveError&&!readError&&valid())mutate(s=>{s.position={...pos};s.scene=scene;});keys.clear();path=[];fish=null;host.close();cancelAnimationFrame(frame);stopSound();focusBack?.focus?.({preventScroll:true});}
+ function open(){if(!ctx.getStudent()?.id)return;replayOrigin=null;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void wish.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
+ function close(){if(!host.open)return;replayOrigin=null;wish.close();wish.store.deactivate();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();blockedNotice=null;gesture=null;heldTool='';if(mode==='play'&&!saveError&&!readError&&valid())mutate(s=>{s.position={...pos};s.scene=scene;});keys.clear();path=[];fish=null;host.close();cancelAnimationFrame(frame);stopSound();focusBack?.focus?.({preventScroll:true});}
  function finishPrologue(){
   if(!valid()||mode!=='intro')return;
   if(cloudStatus!=='ready'){prologue.stop();title();cloud.show();return;}
   prologue.stop();mode='play';$('lifeTitle').hidden=true;$('lifeHud').hidden=false;
   if(!mutate(s=>{s.started=true;s.intro=true;})){title();cloud.show();return;}
   refresh();canvas.focus({preventScroll:true});
+ }
+ function replayPrologue(){
+  if(!valid()||mode!=='play'||!state.started)return;
+  if(cloudStatus!=='ready'){cloud.show();return;}
+  const origin={owner,token:ownerToken,state,scene,position:{...pos}};
+  hideOverlay();feedback.cancel();replayOrigin=origin;keys.clear();path=[];fish=null;$('lifeFish').hidden=true;
+  mode='replay';$('lifeHud').hidden=true;$('lifeTitle').hidden=true;
+  prologue.start({replay:true,onFinish:()=>endReplay(),onCancel:()=>endReplay()});
+ }
+ function endReplay(showNotebook=true){
+  if(mode!=='replay')return;const origin=replayOrigin;replayOrigin=null;prologue.stop();keys.clear();path=[];
+  mode='play';$('lifeHud').hidden=false;
+  if(!valid())return;
+  if(showNotebook&&origin&&origin.owner===owner&&origin.token===ownerToken&&origin.state===state&&origin.scene===scene&&distance(origin.position,pos)<1)notebook.journal('memory');
+  else hideOverlay();
  }
  function start(){
   if(assetError){$('lifeStart').disabled=true;loadAssets();return;}
@@ -99,7 +115,7 @@ export function installSchoolLife(ctx){
   if(!state.started)mutate(s=>s.started=true);
   canvas.focus({preventScroll:true});
  }
- function title(){wish.close();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();keys.clear();path=[];fish=null;$('lifeFish').hidden=true;if(mode==='play'&&!saveError&&!readError)mutate(()=>{});mode='title';overlay.hidden=true;$('lifeTitle').hidden=false;$('lifeHud').hidden=true;updateTitle();$('lifeStart').focus();}
+ function title(){replayOrigin=null;wish.close();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();keys.clear();path=[];fish=null;$('lifeFish').hidden=true;if(mode==='play'&&!saveError&&!readError)mutate(()=>{});mode='title';overlay.hidden=true;$('lifeTitle').hidden=false;$('lifeHud').hidden=true;updateTitle();$('lifeStart').focus();}
  function refresh(){if(!host.open)return;$('lifePlace').textContent=names[scene];$('lifeClock').textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());$('lifeLevel').textContent=`${ctx.getStudent()?.nickname||'모험가'} · Lv. ${level()}`;$('lifeTask').innerHTML=svg('book')+'<span><small>받은 부탁</small><strong>'+esc(opening.goal())+'</strong></span>';$('lifeTask').hidden=!opening.goal();updateSave();nearId=null;}
  function hideOverlay(){wish.close();arrival.stop();dialogue.stop();queuedArrival=null;invitation.stop();gesture=null;overlay.hidden=true;overlay.replaceChildren();keys.clear();path=[];($('lifeUse').hidden?canvas:$('lifeUse')).focus({preventScroll:true});}
  function showConversation(kind,finish){hideOverlay();const origin={scene,state,position:{...pos},owner,token:ownerToken};fish=null;$('lifeFish').hidden=true;dialogue.start(kind,()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible()&&owner===origin.owner&&ownerToken===origin.token&&scene===origin.scene&&state===origin.state&&distance(pos,origin.position)<=1,finish);}
@@ -153,7 +169,7 @@ export function installSchoolLife(ctx){
  function reel(){if(!fish)return;const good=fish.phase==='bite';fish=null;nearId=null;$('lifeFish').hidden=true;if(good){const n=state.fish.reduce((a,b)=>a+b,0)%3;if(mutate(s=>s.fish[n]=Math.min(999,s.fish[n]+1))){burst(1165,786,'#d6eff0');toast(FISH_NAMES[n]+' 발견. 낚시 기록에 남기고 방생했다.');tone(880,.3);}}else toast('너무 일찍 낚싯대를 올렸다.');}
  function tone(freq,duration){if(!sound||!audio||stopped||document.hidden)return;const o=audio.createOscillator(),v=audio.createGain();o.type='sine';o.frequency.value=freq;v.gain.setValueAtTime(0,audio.currentTime);v.gain.linearRampToValueAtTime(.035,audio.currentTime+.025);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.03);}
  function stopSound(){clearInterval(audioTimer);audio?.suspend?.();}
- function startMusic(){clearInterval(audioTimer);if(!sound||!host.open||stopped||document.hidden)return;audio?.resume?.();let n=0;audioTimer=setInterval(()=>{if(!host.open||document.hidden||stopped||mode==='intro'||arrival.active())return;tone([523,659,784,659,587,440,523,0][n++%8],1.1);},2300);}
+ function startMusic(){clearInterval(audioTimer);if(!sound||!host.open||stopped||document.hidden)return;audio?.resume?.();let n=0;audioTimer=setInterval(()=>{if(!host.open||document.hidden||stopped||mode==='intro'||mode==='replay'||arrival.active())return;tone([523,659,784,659,587,440,523,0][n++%8],1.1);},2300);}
  function toggleSound(){sound=!sound;if(sound){try{audio=audio||new(window.AudioContext||window.webkitAudioContext)();startMusic();tone(523,.5);}catch{sound=false;toast('소리를 재생할 수 없다.');}}else stopSound();host.querySelectorAll('[data-life=sound]').forEach(b=>{b.setAttribute('aria-pressed',String(sound));b.setAttribute('aria-label',sound?'소리 끄기':'소리 켜기');});}
  function ellipse(x,y,rx,ry,fill){g.fillStyle=fill;g.beginPath();g.ellipse(x,y,rx,ry,0,0,Math.PI*2);g.fill();}
  function line(points,color,width=3){g.strokeStyle=color;g.lineWidth=width;g.lineJoin='round';g.lineCap='round';g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();}
@@ -179,7 +195,7 @@ export function installSchoolLife(ctx){
  function drawWorld(t){
   $('lifeNpcName').hidden=mode!=='play'||scene!=='campus'||arrival.snapshot()?.phase==='view'||dialogue.active();$('lifePlayerName').hidden=arrival.snapshot()?.phase==='view'||dialogue.active();
   g.setTransform(DPR,0,0,DPR,0,0);g.clearRect(0,0,W,H);g.fillStyle='#95b27c';g.fillRect(0,0,W,H);
-  if(mode==='intro'){prologue.draw(g,assets,W,H,t,reduced.matches,stopped||document.hidden);return;}
+  if(mode==='intro'||mode==='replay'){prologue.draw(g,assets,W,H,t,reduced.matches,stopped||document.hidden);return;}
   if(mode==='title'&&!assets.campus)return;if(mode!=='title'&&!assetsReady)return;
   if(mode==='title'){const s=Math.max(W/1536,H/1024)*1.05;g.drawImage(assets.campus,(W-1536*s)/2+Math.sin(t*.00004)*12,(H-1024*s)/2,1536*s,1024*s);if(!reduced.matches){for(let i=0;i<15;i++){const x=(i*139+t*.018)% (W+40)-20,y=(i*79+t*.009)%H;g.save();g.translate(x,y);g.rotate(t*.0006+i);ellipse(0,0,5,2.5,i%2?'#f8e6b6bb':'#d3e1a2aa');g.restore();}}return;}
   camera.x=clamp(pos.x-W/(2*S),0,Math.max(0,1600-W/S));camera.y=clamp(pos.y-H*.54/S,0,Math.max(0,1067-H/S));if(H/S>1067)camera.y=(1067-H/S)/2;
@@ -228,8 +244,8 @@ export function installSchoolLife(ctx){
  host.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(mode!=='play'||!overlay.hidden||syncVisible())return;e.preventDefault();b.setPointerCapture(e.pointerId);path=[];keys.add(b.dataset.dir);});for(const name of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(name,()=>keys.delete(b.dataset.dir));});
  $('lifeStart').onclick=start;$('lifeUse').onclick=use;$('lifeTool').onclick=useTool;
  host.addEventListener('click',e=>{const action=e.target.closest('[data-life]')?.dataset.life;if(!action)return;({exit:close,sound:toggleSound,bag,journal,map,retry}[action])?.();});
- host.addEventListener('cancel',e=>{e.preventDefault();if(syncVisible())cloud.dismiss();else if(mode==='intro')title();else if(!overlay.hidden)hideOverlay();else if(mode==='play')journal();else close();});
- window.addEventListener('keydown',e=>{if(!host.open)return;if(e.target.closest('input,textarea,select'))return;if(e.key==='Tab'){const items=[...host.querySelectorAll('button:not(:disabled)')].filter(b=>b.getClientRects().length&&(syncVisible()?$('lifeSyncPanel').contains(b):!overlay.hidden?overlay.contains(b):true));if(items.length){const at=items.indexOf(document.activeElement);if(at<0&&syncVisible()){e.preventDefault();(e.shiftKey?items.at(-1):items[0]).focus();}else if(e.shiftKey&&at<=0){e.preventDefault();items.at(-1).focus();}else if(!e.shiftKey&&at===items.length-1){e.preventDefault();items[0].focus();}}return;}if(mode==='intro'&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','e','E','Enter',' '].includes(e.key)){if(['Enter',' '].includes(e.key)&&e.target.closest('#lifePrologue button')&&!e.repeat)return;e.preventDefault();e.stopImmediatePropagation();if(e.key==='Enter'&&!e.repeat)prologue.next();return;}const dir={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',a:'l',s:'d',d:'r'}[e.key];if(mode==='play'&&overlay.hidden&&!syncVisible()&&(dir||['e','E','Enter',' '].includes(e.key))){e.preventDefault();e.stopImmediatePropagation();if(dir)keys.add(dir);else if(e.key===' '){if(!jump)jump=performance.now();}else if(!e.repeat){if(heldTool==='can'&&['e','E'].includes(e.key))useTool();else use();}}},true);
+ host.addEventListener('cancel',e=>{e.preventDefault();if(syncVisible())cloud.dismiss();else if(mode==='intro')title();else if(mode==='replay')endReplay();else if(!overlay.hidden)hideOverlay();else if(mode==='play')journal();else close();});
+ window.addEventListener('keydown',e=>{if(!host.open)return;if(e.target.closest('input,textarea,select'))return;if(mode==='replay'&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)endReplay();return;}if(e.key==='Tab'){const items=[...host.querySelectorAll('button:not(:disabled)')].filter(b=>b.getClientRects().length&&(syncVisible()?$('lifeSyncPanel').contains(b):!overlay.hidden?overlay.contains(b):true));if(items.length){const at=items.indexOf(document.activeElement);if(at<0&&syncVisible()){e.preventDefault();(e.shiftKey?items.at(-1):items[0]).focus();}else if(e.shiftKey&&at<=0){e.preventDefault();items.at(-1).focus();}else if(!e.shiftKey&&at===items.length-1){e.preventDefault();items[0].focus();}}return;}if((mode==='intro'||mode==='replay')&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','e','E','Enter',' '].includes(e.key)){if(['Enter',' '].includes(e.key)&&e.target.closest('#lifePrologue button')&&!e.repeat)return;e.preventDefault();e.stopImmediatePropagation();if(e.key==='Enter'&&!e.repeat)prologue.next();return;}const dir={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',a:'l',s:'d',d:'r'}[e.key];if(mode==='play'&&overlay.hidden&&!syncVisible()&&(dir||['e','E','Enter',' '].includes(e.key))){e.preventDefault();e.stopImmediatePropagation();if(dir)keys.add(dir);else if(e.key===' '){if(!jump)jump=performance.now();}else if(!e.repeat){if(heldTool==='can'&&['e','E'].includes(e.key))useTool();else use();}}},true);
  window.addEventListener('keyup',e=>{if(!host.open)return;const dir={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',a:'l',s:'d',d:'r'}[e.key];if(dir)keys.delete(dir);if(e.key===' '&&mode==='play'&&!syncVisible()&&!e.target.closest('.life-invitation-panel button,.life-arrival-panel button,.life-conversation-panel button')){e.preventDefault();e.stopImmediatePropagation();}},true);
  function pause(){queuedToast=null;feedback.cancel();gesture=null;keys.clear();path=[];fish=null;$('lifeFish').hidden=true;stopped=true;stopSound();}
  window.addEventListener('blur',pause);window.addEventListener('focus',()=>{stopped=false;startMusic();});document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else{stopped=false;startMusic();}});window.addEventListener('resize',resize);
