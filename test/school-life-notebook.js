@@ -29,7 +29,8 @@ export function installLifeNotebook(api){
   ];
   if(n===7)return empty('첫 교실 복원','교실에 햇살이 들고 토리가 돌아왔다.')+'<button class="life-choice" data-memory>남긴 기억 보기</button>';
   const [label,title,body,place,icon]=choices[n];
-  return `<article class="life-quest-sheet"><div class="life-quest-caption"><span>${label}</span><span class="life-status">${n===0?'도착':'진행 중'}</span></div><div class="life-quest-title">${img(icon)}<h3>${title}</h3></div><p class="life-quest-next">${body}</p>${n===2?progress(w,3,'잡초 뽑기'):n===4?progress(d,4,'먼지 쓸기'):''}<div class="life-quest-place"><span>찾아갈 곳</span><strong>${place}</strong></div></article><button class="life-choice life-return" data-return>계속 둘러보기</button>`;
+  const wish=n>=2&&n<=4?'<p class="life-request-wish">새싹: “교실에서 다시 같이 책을 읽고 싶어.”</p>':'';
+  return `<article class="life-quest-sheet"><div class="life-quest-caption"><span>${label}</span><span class="life-status">${n===0?'도착':'진행 중'}</span></div><div class="life-quest-title">${img(icon)}<h3>${title}</h3></div>${wish}<p class="life-quest-next">${body}</p>${n===2?progress(w,3,'잡초 뽑기'):n===4?progress(d,4,'먼지 쓸기'):''}<div class="life-quest-place"><span>찾아갈 곳</span><strong>${place}</strong></div></article><button class="life-choice life-return" data-return>계속 둘러보기</button>`;
  }
  function memories(s){
   const places=PROJECTS.filter(p=>s.projects.includes(p.id)||api.level()>=p.level);
