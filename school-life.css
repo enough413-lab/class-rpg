@@ -161,3 +161,5 @@
 #schoolLife:has(.life-arrival-overlay:not([hidden])) :is(.life-controls,.life-corner,.life-level,.life-place,.life-task,.life-prompt,.life-use,.life-tool,.life-toast){visibility:hidden;}
 @media(max-height:450px){#schoolLife .life-arrival-overlay{padding:8px;}#schoolLife .life-arrival-panel{padding:9px 16px;}#schoolLife .life-arrival-panel h2{margin-bottom:4px;font-size:19px;}#schoolLife .life-arrival-panel p{margin-bottom:7px;font-size:16px;line-height:1.3;}#schoolLife .life-arrival-actions{gap:6px;}}
 @media(max-width:360px){#schoolLife .life-arrival-overlay{padding:10px;}#schoolLife .life-arrival-panel{padding:13px;}#schoolLife .life-arrival-button{padding:8px 10px;font-size:15px;}}
+
+#schoolLife .life-wish-close{position:absolute;right:12px;top:12px}#schoolLife .life-wish .life-speaker{max-width:calc(100% - 50px)}#schoolLife .life-wish .life-choice:disabled{opacity:.55}
