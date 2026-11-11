@@ -1,3 +1,4 @@
+import {actionPose} from './school-life-action.js?v=20261111-actions';
 const TAU=Math.PI*2;
 function canvas(){const c=document.createElement('canvas');c.width=256;c.height=320;return c;}
 function context(c){const g=c.getContext('2d');g.scale(2,2);g.translate(64,145);return g;}
@@ -46,7 +47,38 @@ export function createWalkRig(body,hair,direction,selection,clothes,backHair=nul
   if(!side)part(legs[0],pose.legs[0]);part(legs[1],pose.legs[1]);paint(g,torso);
   if(!side)part(arms[0],pose.arms[0]);part(arms[1],pose.arms[1]);paint(g,hair);return pose;
  }
- return {draw};
+ // A resting hand overlaps shorts/skirt edges. Those garment pixels belong
+ // to the stationary body, not to the raised arm.
+ const tail=side?rect(sign>0?-3:-22,-45,25,19):rect(-32,-45,20,19),tails=side?[tail]:[tail,mirror(tail)];
+ const actionTorso=canvas(),at=context(actionTorso);paint(at,body);for(const mask of [...armMasks,...tails])erase(at,mask);
+ at.save();polygon(at,side?rect(sign>0?-3:-14,-65,17,23):rect(-14,-69,28,27));at.clip();paint(at,torso);at.restore();
+ if(selection.bottom){at.save();polygon(at,rect(-44,-45,88,22));at.clip();paint(at,bottom);at.restore();}
+ else{
+  const pixels=body.getContext('2d').getImageData(0,0,256,320).data,rows=[];for(let y=190;y<260;y++){let count=0;for(let x=96;x<160;x++){const i=(y*256+x)*4;if(pixels[i+3]>128&&pixels[i]>80&&pixels[i]<205&&Math.max(pixels[i],pixels[i+1],pixels[i+2])-Math.min(pixels[i],pixels[i+1],pixels[i+2])<18)count++;}rows.push({y,count});}
+  const groups=[];for(const row of rows){if(row.count<8)continue;let group=groups.at(-1);if(!group||group.at(-1)!==row.y-1){group=[];groups.push(group);}group.push(row.y);}const band=groups.sort((a,b)=>b.length-a.length)[0]||[],points=[];
+  for(const y of band)for(let x=80;x<176;x++){const i=(y*256+x)*4;if(pixels[i+3]>128&&pixels[i]>80&&pixels[i]<205&&Math.max(pixels[i],pixels[i+1],pixels[i+2])-Math.min(pixels[i],pixels[i+1],pixels[i+2])<18)points.push([x/2-64,y/2-145]);}
+  points.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cross=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]),half=ps=>{const h=[];for(const p of ps){while(h.length>1&&cross(h.at(-2),h.at(-1),p)<=0)h.pop();h.push(p);}return h;},hull=half(points).slice(0,-1).concat(half(points.slice().reverse()).slice(0,-1));
+  if(hull.length>2)for(const mask of tails){at.save();polygon(at,mask);at.clip();polygon(at,hull);at.fillStyle='#b7b8ba';at.fill();at.strokeStyle='#796e69';at.lineWidth=.7;at.stroke();at.restore();}
+ }
+ {const cx=actionTorso.getContext('2d'),data=cx.getImageData(0,0,256,320),p=data.data;
+  if(selection.bottom){const base=feetSource.getContext('2d').getImageData(0,0,256,320).data,cloth=bottom.getContext('2d').getImageData(0,0,256,320).data,skin=(a,i)=>a[i+3]>100&&a[i]>140&&a[i]-a[i+1]>14&&a[i+1]-a[i+2]>8,mask=new Uint8Array(256*320);
+   for(let y=206;y<244;y++)for(let x=80;x<176;x++){const i=(y*256+x)*4;if(skin(p,i)&&skin(base,i))for(let yy=y-2;yy<=y+2;yy++)for(let xx=x-2;xx<=x+2;xx++)mask[yy*256+xx]=1;}
+   for(let y=204;y<246;y++)for(let x=78;x<178;x++)if(mask[y*256+x]){const i=(y*256+x)*4;let source=-1;for(let step=0;step<32;step++){const xx=x+(x>128?-step:step),j=(y*256+xx)*4;if(cloth[j+3]>180&&!skin(cloth,j)&&Math.max(cloth[j],cloth[j+1],cloth[j+2])>85){source=j;break;}}if(source<0)p[i+3]=0;else for(let k=0;k<4;k++)p[i+k]=cloth[source+k];}
+  }
+  const seen=new Uint8Array(256*320);for(let k=0;k<seen.length;k++){if(seen[k]||!p[k*4+3])continue;const stack=[k],group=[];seen[k]=1;while(stack.length){const j=stack.pop();group.push(j);const x=j%256,y=Math.floor(j/256);for(const n of [x?j-1:-1,x<255?j+1:-1,y?j-256:-1,y<319?j+256:-1])if(n>=0&&!seen[n]&&p[n*4+3]){seen[n]=1;stack.push(n);}}if(group.length<128)for(const j of group)p[j*4+3]=0;}cx.putImageData(data,0,0);}
+ const actionArms=arms.map(source=>{const c=canvas(),cx=c.getContext('2d');cx.drawImage(source,0,0);const data=cx.getImageData(0,0,256,320),p=data.data,b=bottom?.getContext('2d').getImageData(0,0,256,320).data;
+  for(let y=206;y<240;y++)for(let x=0;x<256;x++){const i=(y*256+x)*4;if(!p[i+3])continue;const same=b&&b[i+3]>100&&[0,1,2].every(k=>Math.abs(p[i+k]-b[i+k])<4);const gray=!selection.bottom&&Math.max(p[i],p[i+1],p[i+2])-Math.min(p[i],p[i+1],p[i+2])<13;if(same||gray)p[i+3]=0;}
+  if(!selection.bottom){const skin=new Uint8Array(256*320);let lastSkin=200;for(let y=200;y<244;y++){let count=0;for(let x=0;x<256;x++){const i=(y*256+x)*4;if(p[i+3]>100&&p[i]>140&&p[i]-p[i+1]>14&&p[i+1]-p[i+2]>8){count++;for(let yy=y-3;yy<=y+3;yy++)for(let xx=Math.max(0,x-3);xx<=Math.min(255,x+3);xx++)skin[yy*256+xx]=1;}}if(count>=3)lastSkin=y;}for(let y=206;y<244;y++)for(let x=0;x<256;x++)if(!skin[y*256+x]||y>lastSkin+2)p[(y*256+x)*4+3]=0;}
+  const seen=new Uint8Array(256*320);for(let k=0;k<seen.length;k++){if(seen[k]||!p[k*4+3])continue;const stack=[k],group=[];seen[k]=1;while(stack.length){const j=stack.pop();group.push(j);const x=j%256,y=Math.floor(j/256);for(const n of [x?j-1:-1,x<255?j+1:-1,y?j-256:-1,y<319?j+256:-1])if(n>=0&&!seen[n]&&p[n*4+3]){seen[n]=1;stack.push(n);}}if(group.length<32)for(const j of group)p[j*4+3]=0;}
+  cx.putImageData(data,0,0);return c;
+ });
+ function drawAction(g,frame,facing){const pose=actionPose(direction,frame,facing);
+  if(backHair)paint(g,backHair);
+  paint(g,actionTorso);
+  for(const i of side?[1]:[0,1]){g.save();transform(g,pose.arms[i]);paint(g,actionArms[i]);g.restore();}
+  paint(g,hair);return pose;
+ }
+ return {draw,drawAction};
 }
 
 
