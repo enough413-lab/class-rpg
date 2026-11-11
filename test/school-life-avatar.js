@@ -1,4 +1,5 @@
-import {createWalkRig,walkPose,walkPoint} from './school-life-walk.js?v=20261111-walk';
+import {actionPose} from './school-life-action.js?v=20261111-actions';
+import {createWalkRig,walkPose,walkPoint} from './school-life-walk.js?v=20261111-actions';
 const SLOTS=['avatarHairBack','avatarBase','avatarShoes','avatarBottom','avatarTop','avatarEquipment','avatarHairFront','avatarHat','avatarAccessory'];
 const DIRS={u:0,l:1,r:2},ROOT='./maps/life/avatar-v1/';
 const readable=i=>i?.complete&&i.naturalWidth>0;
@@ -38,8 +39,8 @@ export function createLifeAvatar(){
  function canvasImage(paint){const c=document.createElement('canvas');c.width=256;c.height=320;const g=c.getContext('2d');g.scale(2,2);g.translate(64,145);paint(g);return c;}
  function original(g,part='all'){const [x,y,w,h]=frontGeometry();for(const i of sources)if(readable(i)&&(part==='all'||(part==='hairFront'?i.id==='avatarHairFront':part==='hairBack'?i.id==='avatarHairBack':part==='clothes'?['avatarTop','avatarBottom'].includes(i.id):part==='bottom'?i.id==='avatarBottom':part==='feet'?['avatarBase','avatarShoes'].includes(i.id):!i.id.includes('Hair')))){const scale=133/i.naturalHeight;g.drawImage(i,-x/w*i.naturalWidth*scale,-y/h*133,i.naturalWidth*scale,133);}if(!sources.length){g.fillStyle='#ebc69f';g.fillRect(-12,-50,24,50);}}
  function draw(g,direction='d',motion=null){
-  lastDirection=direction;lastMotion=motion?.walking&&status==='ready'?{phase:motion.phase,carry:!!motion.carry}:null;
-  if(lastMotion){if(direction==='d'&&!rigs.d&&sources.every(readable))rigs.d=createWalkRig(canvasImage(g=>original(g,'body')),canvasImage(g=>original(g,'hairFront')),'d',chosen,canvasImage(g=>original(g,'clothes')),canvasImage(g=>original(g,'hairBack')),canvasImage(g=>original(g,'bottom')),canvasImage(g=>original(g,'feet')));if(rigs[direction]){rigs[direction].draw(g,lastMotion.phase,lastMotion.carry);return true;}lastMotion=null;}if(direction==='d'||status!=='ready'){original(g);return false;}
+  lastDirection=direction;lastMotion=status==='ready'?(motion?.action?{action:{...motion.action},facing:motion.facing}:motion?.walking?{phase:motion.phase,carry:!!motion.carry}:null):null;
+  if(lastMotion){if(direction==='d'&&!rigs.d&&sources.every(readable))rigs.d=createWalkRig(canvasImage(g=>original(g,'body')),canvasImage(g=>original(g,'hairFront')),'d',chosen,canvasImage(g=>original(g,'clothes')),canvasImage(g=>original(g,'hairBack')),canvasImage(g=>original(g,'bottom')),canvasImage(g=>original(g,'feet')));if(rigs[direction]){if(lastMotion.action)rigs[direction].drawAction(g,lastMotion.action,lastMotion.facing);else rigs[direction].draw(g,lastMotion.phase,lastMotion.carry);return true;}lastMotion=null;}if(direction==='d'||status!=='ready'){original(g);return false;}
   if(!sprites[direction]){original(g);return false;}g.drawImage(sprites[direction],-64,-145,128,160);return true;
  }
  function paintClothes(g,col,bottomOnly=false){const foot=FEET[chosen.gender][Object.keys(DIRS)[col]];g.save();g.translate(-foot[0]*.134,-foot[1]*.134);g.scale(.134,.134);for(const n of bottomOnly?[chosen.bottom]:[chosen.bottom,chosen.top])if(n)g.drawImage(images[n],col*512,0,512,1024,0,0,512,1024);g.restore();}
@@ -62,7 +63,7 @@ export function createLifeAvatar(){
   g.restore();
  }
  function restingHand(direction,facing=1){if(status!=='ready'||direction==='d'){const [x,y,w,h]=frontGeometry(),scale=133/h;return {x:((-22*facing+53)/106*w-x)*scale,y:86-y*scale};}const col=DIRS[direction],foot=FEET[chosen.gender][direction],old=direction==='u'?{x:-22,y:-32}:direction==='l'?{x:3.5,y:-35}:{x:-4,y:-35};return {x:old.x+([278,228,256][col]-foot[0])*.134,y:old.y+125-foot[1]*.134};}
- function hand(direction,facing=1,motion=null){const p=restingHand(direction,facing);if(!motion?.walking||status!=='ready'||motion.carry)return p;const index=direction==='u'||direction==='d'?(facing>0?0:1):1;return walkPoint(p,walkPose(direction,motion.phase).arms[index]);}
+ function hand(direction,facing=1,motion=null){const p=restingHand(direction,facing);if(motion?.action&&status==='ready'){const pose=actionPose(direction,motion.action,facing);return walkPoint(p,pose.arms[pose.working]);}if(!motion?.walking||status!=='ready'||motion.carry)return p;const index=direction==='u'||direction==='d'?(facing>0?0:1):1;return walkPoint(p,walkPose(direction,motion.phase).arms[index]);}
  return {update,reset,draw,hand,snapshot:()=>({status,direction:lastDirection,motion:lastMotion&&{...lastMotion},selection:chosen&&{...chosen},sources:sources.map(i=>({slot:i.id,file:name(i.src)}))})};
 }
 export {SLOTS};

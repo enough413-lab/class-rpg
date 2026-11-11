@@ -1,3 +1,4 @@
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261111-actions';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const VECTORS={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
 export function lookDirection(dx,dy,previous='d'){
@@ -19,7 +20,7 @@ export function drawTarget(g,target){
 export function drawWater(g,action,time,reduced){
  if(action?.kind!=='water')return;
  const age=time-action.at;if(age<0||age>950)return;
- const phase=age/950,alpha=Math.min(1,phase*7,(1-phase)*5);
+ const phase=age/ACTION_MS,frame=actionFrame('water',phase,reduced);if(!frame.stream)return;const alpha=Math.min(1,phase*7,(1-phase)*5);
  g.save();g.globalAlpha=alpha;g.strokeStyle='#d6f2ee';g.fillStyle='#c0e4e6';g.lineWidth=2.5;
  const from=action.spout||{x:action.from.x,y:action.from.y-45};
  for(let i=0;i<7;i++){
@@ -29,7 +30,7 @@ export function drawWater(g,action,time,reduced){
  const spread=reduced?.5:phase;g.beginPath();g.ellipse(action.x,action.y,11+spread*12,4+spread*3,0,0,Math.PI*2);g.stroke();g.restore();
 }
 export function drawBroom(g,phase,reduced){
- const swing=reduced?0:Math.sin(phase*Math.PI*3)*.26;
+ const swing=actionFrame('dust',phase,reduced).sweep*.26;
  g.save();g.translate(-22,-41);g.rotate(-.3+swing);g.lineCap='round';g.strokeStyle='#6a503a';g.lineWidth=7;
  g.beginPath();g.moveTo(0,-18);g.lineTo(-12,32);g.stroke();g.strokeStyle='#cba771';g.lineWidth=3;g.stroke();
  g.fillStyle='#dec281';g.strokeStyle='#79633e';g.lineWidth=2;g.beginPath();g.moveTo(-20,24);g.lineTo(-4,28);g.lineTo(-1,55);g.quadraticCurveTo(-20,61,-32,47);g.closePath();g.fill();g.stroke();
