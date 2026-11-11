@@ -1,5 +1,5 @@
-import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261111-proportions';
-import {createSchoolStory} from './school-life-story.js?v=20261111-proportions';
+import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261111-walk';
+import {createSchoolStory} from './school-life-story.js?v=20261111-walk';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261110-scenes';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261110-arrival';
@@ -26,6 +26,7 @@ export function installSchoolLife(ctx){
  let mode='title',state=freshLife(),owner='',ownerToken='',readError=false,saveError=false,cloudStatus='loading',ownWrite=false,pos={x:800,y:725},keys=new Set(),path=[],near=null,nearId='',frame=0,lastTime=0,clock=0,scene='room',facing=1,jump=0,moving=false,fish=null,effect=[],toastTimer=0,actionUntil=0,focusBack=null,audio=null,sound=false,audioTimer=0,stopped=false,heldTool='',gesture=null;
  let W=1,H=1,DPR=1,S=1,camera={x:0,y:0},assets={},assetsReady=false,assetError=false,avatar=[];
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),feedback=createLifeFeedback(),playerAvatar=createLifeAvatar();
+ let walkPhase=0,walkMoving=false;
  let look='d',queuedToast=null,queuedArrival=null,replayOrigin=null;const arrivalsSeen=new Set();
  function laterToast(text,delay=950){queuedToast={text,at:performance.now()+delay,scene};}
  let blockedNotice=null;
@@ -39,7 +40,7 @@ export function installSchoolLife(ctx){
  const opening=installSchoolOpening({state:()=>state,mutate,talk,wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),unlock:()=>{feedback.unlock();keys.clear();path=[];tone(660,.3);laterToast('교실 문이 열렸다.',2200);}});
  const wish=createSchoolWish({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_wish',args),talk,hide:hideOverlay,overlay,valid});
  const memories=createSchoolMemories({talk,book,overlay:()=>overlay});
- const story=createSchoolStory({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d)=>playerAvatar.draw(g,d),avatarHand:(d,f)=>playerAvatar.hand(d,f),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
+ const story=createSchoolStory({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d,m)=>playerAvatar.draw(g,d,m),avatarHand:(d,f,m)=>playerAvatar.hand(d,f,m),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
  const names={room:'나의 작은 방',campus:'봄빛 학교',classroom:'우리 교실'};
  const manifest={woods:'maps/life/woods-v1.webp',bellFrame:'maps/life/bell-frame-v1.webp',saessakPoint:'maps/npcs/saessak-point-v1.webp',toriNote:'maps/npcs/tori-note-v1.webp',duri:'maps/npcs/duri-anime-v2.webp',prologueBell:'maps/life/prologue-bell-v1.webp',invitation:'maps/life/invitation-harmony-v2.webp',campus:'maps/life/campus-harmony-v2.webp',restored:'maps/life/restored-harmony-v2.webp',room:'maps/life/room-harmony-v2.webp',classroom:'maps/life/classroom-harmony-v2.webp',classroomClosed:'maps/life/classroomClosed-harmony-v2.webp',saessak:'maps/npcs/saessak-anime-v2.webp',tori:'maps/npcs/tori-anime-v2.webp',bench:'maps/life/bench-harmony-v2.webp',weed:'maps/life/weed-harmony-v2.webp',branch:'maps/life/branch-harmony-v2.webp',soil:'maps/life/soil-harmony-v2.webp',sprout:'maps/life/sprout-harmony-v2.webp',flower:'maps/life/flower-harmony-v2.webp',flowerPink:'maps/life/flowerPink-harmony-v2.webp',flowerBlue:'maps/life/flowerBlue-harmony-v2.webp',brokenBench:'maps/life/brokenBench-harmony-v2.webp',readingNook:'maps/life/readingNook-harmony-v2.webp',lantern:'maps/life/lantern-harmony-v2.webp'};
  const notebook=installLifeNotebook({state:()=>state,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
@@ -182,11 +183,11 @@ export function installSchoolLife(ctx){
  function flag(x,y,text){line([[x,y],[x,y-42]],'#85734c',4);g.fillStyle='#e9d7a4';g.beginPath();g.roundRect(x-22,y-55,44,25,4);g.fill();g.strokeStyle='#8c8053';g.lineWidth=2;g.stroke();g.font='14px SchoolLife';g.textAlign='center';g.fillStyle='#695b3b';g.fillText(text,x,y-37);}
  function sprite(img,x,y,w,h,bob=0){if(!img?.complete||!img.naturalWidth)return;ellipse(x,y+4,w*.26,8,'#364e3930');g.drawImage(img,x-w/2,y-h+bob,w,h);}
  function drawPlayer(t){
-  const bob=moving&&!reduced.matches?Math.sin(t*.018)*2:0,j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
+  const j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=gesture&&t-gesture.at<950?gesture:null;if(!action)gesture=null;
   const phase=action?clamp((t-action.at)/950,0,1):0,bend=action&&!reduced.matches?Math.sin(phase*Math.PI):0;
-  ellipse(pos.x,pos.y+5,20,7,'#314b3b45');g.save();g.translate(pos.x,pos.y-j+bob);g.rotate(-bend*.24*facing);
-  playerAvatar.draw(g,look);const hand=playerAvatar.hand(look,facing);g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
+  ellipse(pos.x,pos.y+5,20,7,'#314b3b45');g.save();g.translate(pos.x,pos.y-j);g.rotate(-bend*.24*facing);
+  const motion={walking:walkMoving&&!jump&&!reduced.matches&&!action,phase:walkPhase,carry:!!(heldTool||fish||story.carrying()||invitation.active())};playerAvatar.draw(g,look,motion);const hand=playerAvatar.hand(look,facing,motion);g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
   const tool=fish?'rod':action?.kind==='dust'?'':action?.kind==='water'?'can':heldTool;
   if(tool&&assets[tool]&&!story.carrying()){g.save();g.translate(-22,-40);g.rotate(tool==='can'?(look==='u'?.6*facing:look==='d'?-.6*facing:0)+(action?.kind==='water'?-bend*.22:0):0);g.scale(-1,1);if(fish){line([[0,0],[30,-49]],'#795744',4);line([[4,-6],[30,-49]],'#c6a36a',2);}else g.drawImage(assets[tool],tool==='rod'?-17:-7,tool==='rod'?-63:-20,tool==='rod'?76:47,tool==='rod'?76:34);if(tool==='can'&&action?.kind==='water'){const point=g.getTransform().transformPoint({x:36.4,y:-9.1});action.spout={x:point.x/(DPR*S)+camera.x,y:point.y/(DPR*S)+camera.y};}g.restore();}
   if(action?.kind==='dust')drawBroom(g,phase,reduced.matches);
@@ -225,18 +226,20 @@ export function installSchoolLife(ctx){
  }
  function tick(t){if(!host.open)return;const dt=Math.min(.05,(t-(lastTime||t))/1000);lastTime=t;
   if(!valid()){close();return;}
-  moving=false;
+  moving=false;walkMoving=false;let walked=0;
   if(mode==='play'&&overlay.hidden&&!syncVisible()&&!document.hidden&&!stopped){let dx=0,dy=0;if(keys.has('l'))dx--;if(keys.has('r'))dx++;if(keys.has('u'))dy--;if(keys.has('d'))dy++;
    if(!fish&&!feedback.busy(t,reduced.matches)){if(dx||dy){gesture=null;path=[];const n=Math.hypot(dx,dy);dx/=n;dy/=n;}else if(path.length){const goal=path[0],dist=distance(pos,goal);if(dist<5)path.shift();else{dx=(goal.x-pos.x)/dist;dy=(goal.y-pos.y)/dist;}}
-    const speed=100/S,xx=pos.x+dx*speed*dt,yy=pos.y+dy*speed*dt;
+    const priorPosition={...pos},speed=100/S,xx=pos.x+dx*speed*dt,yy=pos.y+dy*speed*dt;
     const hitX=!!dx&&blocked(xx,pos.y);if(!hitX)pos.x=xx;
     const hitY=!!dy&&blocked(pos.x,yy);if(!hitY)pos.y=yy;
     if(blockedNotice&&(blockedNotice.scene!==scene||distance(blockedNotice,pos)>=28))blockedNotice=null;
     if(hitX||hitY)cannotGo();
+    walked=distance(priorPosition,pos)*S;walkMoving=walked>.001;
     moving=!!(dx||dy);look=lookDirection(dx,dy,look);if(dx)facing=dx<0?1:-1;if(moving)actionUntil=0;
    }
    nearest();if(heldTool==='can'&&near?.kind==='flower')$('lifeUse').hidden=true;else $('lifeUse').hidden=!near;$('lifeTool').hidden=heldTool!=='can'||!!fish||!overlay.hidden||syncVisible();$('lifeUse').querySelector('small').textContent=heldTool==='can'?'Enter':'E / Enter';if(fish){if(t>=fish.bite&&fish.phase==='wait'){fish.phase='bite';tone(1046,.15);}if(t>fish.bite+1800){fish=null;nearId=null;$('lifeFish').hidden=true;toast('물고기를 놓쳤다.');}else{$('lifeFish').innerHTML=fish.phase==='bite'?'지금!<meter min="0" max="1800" value="'+Math.max(0,1800-(t-fish.bite))+'"></meter>':'입질 기다리는 중';$('lifeUseText').textContent=fish.phase==='bite'?'낚기!':'기다리기';$('lifeUse').setAttribute('aria-label',fish.phase==='bite'?'지금 낚싯대 올리기':'찌를 보며 기다리기');}}
   }
+  walkPhase=walkMoving?(walkPhase+walked/56)%1:0;
   if(queuedArrival){const q=queuedArrival;if(!valid()||q.owner!==owner||q.token!==ownerToken||mode!=='play'||scene!=='campus'||state!==q.state||distance(pos,q.position)>1||!['saving','ready'].includes(cloudStatus))queuedArrival=null;else if(cloudStatus==='ready'&&overlay.hidden&&!syncVisible())startArrival();}
   if(queuedToast&&t>=queuedToast.at){const message=queuedToast;queuedToast=null;if(message.scene===scene&&overlay.hidden&&mode==='play')toast(message.text);}
   effect.forEach(e=>{e.x+=e.vx*dt;e.y+=e.vy*dt;e.life-=dt;});effect=effect.filter(e=>e.life>0);invitation.tick(t,stopped||document.hidden);arrival.tick(t,stopped||document.hidden);dialogue.tick(t,stopped||document.hidden);drawWorld(t);
