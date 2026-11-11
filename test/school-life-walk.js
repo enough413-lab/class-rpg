@@ -1,3 +1,4 @@
+import {createSeatRig} from './school-life-seat.js?v=20261111-sitting';
 import {actionPose} from './school-life-action.js?v=20261111-actions';
 const TAU=Math.PI*2;
 function canvas(){const c=document.createElement('canvas');c.width=256;c.height=320;return c;}
@@ -78,7 +79,8 @@ export function createWalkRig(body,hair,direction,selection,clothes,backHair=nul
   for(const i of side?[1]:[0,1]){g.save();transform(g,pose.arms[i]);paint(g,actionArms[i]);g.restore();}
   paint(g,hair);return pose;
  }
- return {draw,drawAction};
+ let seatRig=null;function drawSeat(g,amount){if(!seatRig){const seatBody=canvas(),sg=context(seatBody);paint(sg,actionTorso);sg.save();polygon(sg,rect(-64,-31,128,50));sg.clip();paint(sg,body);sg.restore();seatRig=createSeatRig(seatBody,direction,selection);}if(backHair)paint(g,backHair);seatRig.draw(g,amount);for(const i of side?[1]:[0,1])paint(g,actionArms[i]);paint(g,hair);}
+ return {draw,drawAction,drawSeat};
 }
 
 
