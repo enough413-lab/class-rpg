@@ -1,13 +1,13 @@
 import {createStoryStorage} from './school-life-story-store.js?v=20261110-story';
 import {STORY_GOALS,storyChapter} from './school-life-story-state.js?v=20261110-story';
-import {createSchoolWoods} from './school-life-woods.js?v=20261110-story';
+import {createSchoolWoods} from './school-life-woods.js?v=20261111-directions';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createSchoolStory(api){
  let view=null,serial=0,endingFrame=0;
  const store=createStoryStorage({rpc:api.rpc,identity:api.identity,onChange:s=>{api.changed();if(s.status==='loading'&&(view?.kind==='puzzle'||woods.active())){cancelView();api.hide();}if(view?.kind==='status'&&api.valid()){if(s.status==='ready'){const done=view.done,outcome=s.lastResult;cancelView();api.hide();if(outcome==='advanced')done?.();else if(outcome&&outcome!=='read')api.toast(outcome==='incorrect'?'아직 맞지 않는다.':outcome==='not_ready'?'아직 할 수 없는 일이다.':'이미 마친 일이다.');}else statusView();}}});
  const state=()=>store.snapshot().state;
  const eligible=()=>api.original().started&&(api.original().opening.legacy||api.original().opening.step===7);
- const woods=createSchoolWoods({overlay:api.overlay,valid:api.valid,state,assets:api.assets,avatars:api.avatars,reduced:api.reduced,nickname:api.nickname,announce:api.toast,drawClapper,exit:api.hide,action:send,say:(name,text,done)=>say(name,text,[{label:'알겠어',run:done}],name==='두리'?'duri':null)});
+ const woods=createSchoolWoods({overlay:api.overlay,valid:api.valid,state,assets:api.assets,avatars:api.avatars,drawAvatar:api.drawAvatar,avatarHand:api.avatarHand,reduced:api.reduced,nickname:api.nickname,announce:api.toast,drawClapper,exit:api.hide,action:send,say:(name,text,done)=>say(name,text,[{label:'알겠어',run:done}],name==='두리'?'duri':null)});
  function cancelView(){serial++;view=null;woods.stop();cancelAnimationFrame(endingFrame);}
  function guarded(fn){const revision=store.snapshot().revision,id=String(api.identity().id),token=String(api.identity().token);return()=>{if(api.valid()&&String(api.identity().id)===id&&String(api.identity().token)===token&&store.snapshot().status==='ready'&&store.snapshot().revision===revision)fn();};}
  function say(name,text,answers=[{label:'확인'}],face){if(face==='tori'&&state().phase===0){const remembered=api.wishMemory(face);if(remembered)text=remembered+'\n'+text;}api.talk(name,text,answers.map(a=>({...a,run:a.run&&guarded(a.run)})),face);}
