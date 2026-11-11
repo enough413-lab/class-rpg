@@ -16,7 +16,7 @@ export function installSchoolOpening(api){
   const n=step(),items=[];
   if(scene==='room'&&n===0)items.push({id:'invitation',x:920,y:700,label:'잎사귀 초대장',action:'집기',kind:'opening'});
   if(scene==='campus'&&n===2&&keyReady())items.push({id:'schoolKey',x:790,y:678,label:'풀 아래 작은 열쇠',action:'줍기',kind:'opening'});
-  if(scene==='classroom'&&n===4)items.push({id:'firstWindow',x:400,y:470,label:'굳게 닫힌 창문',action:'열기',kind:'opening'});
+  if(scene==='classroom'&&n===4)items.push({id:'firstWindow',x:400,y:470,face:{x:400,y:350},label:'굳게 닫힌 창문',action:'열기',kind:'opening'});
   if(scene==='classroom'&&n===6)items.push({id:'bellNote',x:950,y:740,label:'토리가 놓은 쪽지',action:'읽기',kind:'opening'});
   return items;
  }

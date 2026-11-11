@@ -1,6 +1,6 @@
 import {createStoryStorage} from './school-life-story-store.js?v=20261110-story';
 import {STORY_GOALS,storyChapter} from './school-life-story-state.js?v=20261110-story';
-import {createSchoolWoods} from './school-life-woods.js?v=20261111-walk';
+import {createSchoolWoods} from './school-life-woods.js?v=20261111-facing';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createSchoolStory(api){
  let view=null,serial=0,endingFrame=0;

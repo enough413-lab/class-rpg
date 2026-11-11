@@ -1,3 +1,4 @@
+import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {lookDirection} from './school-life-feedback.js?v=20261110-field-feedback';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function createSchoolWoods(api){
@@ -6,7 +7,7 @@ export function createSchoolWoods(api){
  function stop(){active=false;cancelAnimationFrame(frame);keys.clear();path=null;near=null;carried=false;jump=0;spaceHeld=false;walkPhase=0;}
  function blocked(x,y){if(x<150||x>1460||y<330||y>1000)return true;if(x>1110&&y<525)return true;return x>680&&x<910&&!(api.state().bridge===7&&y>=720&&y<=815);}
  function targets(){const s=api.state(),a=[{id:'return',x:260,y:955,label:'학교로',action:'돌아가기'}];if(s.phase===5){if(!carried)a.push({id:'boards',x:540,y:840,label:'남겨 둔 판자',action:'들기'});else for(let i=0;i<3;i++)if(!(s.bridge&(1<<i)))a.push({id:'slot'+i,slot:i,x:660,y:727+i*34,label:'다리 '+(i+1)+'번째 자리',action:'판자 놓기'});}if(s.phase===6)a.push({id:'clapper',x:1290,y:530,label:'나무 안의 종추',action:'챙기기'});if(s.phase>=5&&s.phase<=7)a.push({id:'duri',x:570,y:650,label:'두리',action:'대화'});return a;}
- function use(){if(!own()||paused||!near)return;const e={...near};keys.clear();path=null;
+ function use(){if(!own()||paused||!near)return;const e={...near};keys.clear();path=null;({look,facing}=faceTarget(position,e,look,facing));
   if(e.id==='return'){stop();api.exit();return;}
   if(e.id==='boards'){carried=true;api.announce('판자를 들었다.');return;}
   if(e.id.startsWith('slot')&&carried){carried=false;const at={...position};stop();api.action('place_plank',{slot:e.slot},()=>open(at));return;}
