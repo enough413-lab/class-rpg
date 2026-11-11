@@ -1,5 +1,5 @@
-import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261111-directions';
-import {createSchoolStory} from './school-life-story.js?v=20261111-directions';
+import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261111-proportions';
+import {createSchoolStory} from './school-life-story.js?v=20261111-proportions';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261110-scenes';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261110-arrival';
@@ -185,7 +185,7 @@ export function installSchoolLife(ctx){
   const bob=moving&&!reduced.matches?Math.sin(t*.018)*2:0,j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=gesture&&t-gesture.at<950?gesture:null;if(!action)gesture=null;
   const phase=action?clamp((t-action.at)/950,0,1):0,bend=action&&!reduced.matches?Math.sin(phase*Math.PI):0;
-  ellipse(pos.x,pos.y+5,20,7,'#314b3b45');g.save();g.translate(pos.x,pos.y-j+bob);g.rotate(-bend*.24*facing);g.scale(1,1-bend*.08);
+  ellipse(pos.x,pos.y+5,20,7,'#314b3b45');g.save();g.translate(pos.x,pos.y-j+bob);g.rotate(-bend*.24*facing);
   playerAvatar.draw(g,look);const hand=playerAvatar.hand(look,facing);g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
   const tool=fish?'rod':action?.kind==='dust'?'':action?.kind==='water'?'can':heldTool;
   if(tool&&assets[tool]&&!story.carrying()){g.save();g.translate(-22,-40);g.rotate(tool==='can'?(look==='u'?.6*facing:look==='d'?-.6*facing:0)+(action?.kind==='water'?-bend*.22:0):0);g.scale(-1,1);if(fish){line([[0,0],[30,-49]],'#795744',4);line([[4,-6],[30,-49]],'#c6a36a',2);}else g.drawImage(assets[tool],tool==='rod'?-17:-7,tool==='rod'?-63:-20,tool==='rod'?76:47,tool==='rod'?76:34);if(tool==='can'&&action?.kind==='water'){const point=g.getTransform().transformPoint({x:36.4,y:-9.1});action.spout={x:point.x/(DPR*S)+camera.x,y:point.y/(DPR*S)+camera.y};}g.restore();}
