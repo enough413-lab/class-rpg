@@ -1,9 +1,9 @@
 // Environmental memories are observations, not quests, inventory or saved progress.
 export function createSchoolMemories(api){
  const targets=[
-  {id:'oldClock',x:800,y:485,label:'멈춘 시계',action:'살펴보기',kind:'memory'},
-  {id:'oldPhoto',x:1240,y:485,label:'먼지 쌓인 사진',action:'살펴보기',kind:'memory'},
-  {id:'waitingBook',x:1150,y:545,label:'책갈피가 꽂힌 책',action:'살펴보기',kind:'memory'}
+  {id:'oldClock',x:800,y:485,face:{x:800,y:300},label:'멈춘 시계',action:'살펴보기',kind:'memory'},
+  {id:'oldPhoto',x:1240,y:485,face:{x:1222,y:268},label:'먼지 쌓인 사진',action:'살펴보기',kind:'memory'},
+  {id:'waitingBook',x:1150,y:545,face:{x:1075,y:457},label:'책갈피가 꽂힌 책',action:'살펴보기',kind:'memory'}
  ];
  function photo(g,assets,w,h){
   g.save();g.fillStyle='#785c40';g.strokeStyle='#5f4b36';g.lineWidth=w*.015;g.beginPath();g.roundRect(0,0,w,h,w*.025);g.fill();g.stroke();
