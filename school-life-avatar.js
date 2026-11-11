@@ -1,6 +1,8 @@
 const SLOTS=['avatarHairBack','avatarBase','avatarShoes','avatarBottom','avatarTop','avatarEquipment','avatarHairFront','avatarHat','avatarAccessory'];
 const DIRS={u:0,l:1,r:2},ROOT='./maps/life/avatar-v1/';
 const readable=i=>i?.complete&&i.naturalWidth>0;
+// Source-space foot centers measured from the unmodified body silhouettes.
+const FEET={boy:{d:[547.5,1363,1122,1402],u:[278,960],l:[205.5,962],r:[268.5,961]},girl:{d:[596,1265,1229,1280],u:[278,961],l:[206,962],r:[270,962]}};
 function name(src){try{return decodeURIComponent(new URL(src,location.href).pathname).split('/').pop();}catch{return '';}}
 function selection(layers){
  for(const i of layers){const folder={avatarBase:'1. character',avatarHairBack:'2.hair',avatarHairFront:'2.hair',avatarTop:'3.top',avatarBottom:'4.bottom',avatarShoes:'7.shoes'}[i.id];try{const url=new URL(i.src,location.href);if(!folder||url.origin!==location.origin||!decodeURIComponent(url.pathname).endsWith('/'+folder+'/'+name(i.src)))return null;}catch{return null;}}
@@ -31,14 +33,15 @@ export function createLifeAvatar(){
   Promise.all(names.map(async n=>[n,await load(n)])).then(entries=>{if(ticket!==serial)return;images=Object.fromEntries(entries);const next={};for(const [d,col]of Object.entries(DIRS)){const c=document.createElement('canvas');c.width=256;c.height=320;const g=c.getContext('2d');g.scale(2,2);g.translate(64,145);compose(g,col);next[d]=c;}sprites=next;images=null;for(const n of cache.keys())if(cache.size>12&&!names.includes(n))cache.delete(n);status='ready';}).catch(()=>{if(ticket===serial)status='error';});
  }
  function reset(){serial++;key='';sources=[];chosen=null;images=null;sprites=null;status='empty';}
- function original(g){for(const i of sources)if(readable(i))g.drawImage(i,-53,-126,106,133);if(!sources.length){g.fillStyle='#ebc69f';g.fillRect(-12,-50,24,50);}}
+ function frontGeometry(){const base=sources.find(i=>i.id==='avatarBase'),gender=/^character_(boy|girl)\.png$/.exec(name(base?.src||''))?.[1],foot=FEET[gender]?.d;return foot||[base?.naturalWidth/2||53,base?.naturalHeight||133,base?.naturalWidth||106,base?.naturalHeight||133];}
+ function original(g){const [x,y,w,h]=frontGeometry();for(const i of sources)if(readable(i)){const scale=133/i.naturalHeight;g.drawImage(i,-x/w*i.naturalWidth*scale,-y/h*133,i.naturalWidth*scale,133);}if(!sources.length){g.fillStyle='#ebc69f';g.fillRect(-12,-50,24,50);}}
  function draw(g,direction='d'){
   lastDirection=direction;if(direction==='d'||status!=='ready'){original(g);return false;}
   if(!sprites[direction]){original(g);return false;}g.drawImage(sprites[direction],-64,-145,128,160);return true;
  }
  function compose(g,col){
-  const center=[278,228,256][col],body=images[chosen.body],hair=chosen.hair&&images[chosen.hair],part=n=>{if(n)g.drawImage(images[n],col*512,0,512,1024,0,0,512,1024);};
-  g.save();g.translate(-center*.134,-125);g.scale(.134,.134);
+  const foot=FEET[chosen.gender][Object.keys(DIRS)[col]],body=images[chosen.body],hair=chosen.hair&&images[chosen.hair],part=n=>{if(n)g.drawImage(images[n],col*512,0,512,1024,0,0,512,1024);};
+  g.save();g.translate(-foot[0]*.134,-foot[1]*.134);g.scale(.134,.134);
   // The hairstyle supplies the outer scalp; the body supplies the face, ears and nape.
   g.save();g.beginPath();g.rect(0,435,512,589);
   if(!hair)g.rect(0,0,512,435);
@@ -53,7 +56,7 @@ export function createLifeAvatar(){
   if(hair)g.drawImage(hair,col*512,0,512,1024,0,0,512,1024);
   g.restore();
  }
- function hand(direction,facing=1){if(status!=='ready'||direction==='d')return {x:-22*facing,y:-40};return direction==='u'?{x:-22,y:-32}:direction==='l'?{x:3.5,y:-35}:{x:-4,y:-35};}
+ function hand(direction,facing=1){if(status!=='ready'||direction==='d'){const [x,y,w,h]=frontGeometry(),scale=133/h;return {x:((-22*facing+53)/106*w-x)*scale,y:86-y*scale};}const col=DIRS[direction],foot=FEET[chosen.gender][direction],old=direction==='u'?{x:-22,y:-32}:direction==='l'?{x:3.5,y:-35}:{x:-4,y:-35};return {x:old.x+([278,228,256][col]-foot[0])*.134,y:old.y+125-foot[1]*.134};}
  return {update,reset,draw,hand,snapshot:()=>({status,direction:lastDirection,selection:chosen&&{...chosen},sources:sources.map(i=>({slot:i.id,file:name(i.src)}))})};
 }
 export {SLOTS};
