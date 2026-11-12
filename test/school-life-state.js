@@ -19,7 +19,9 @@ export function readLife(raw){
  const d=JSON.parse(raw);if(!d||d.v!==1)throw new Error('unknown save');
  const state=freshLife();
  if(d.opening!==undefined&&(!d.opening||!Number.isInteger(d.opening.step)||d.opening.step<0||d.opening.step>7||typeof d.opening.legacy!=='boolean'))throw new Error('invalid opening');
+ if(d.opening?.windows!==undefined){const w=d.opening.windows,n=d.opening.step;if(!Array.isArray(w)||w.length>3||w.some((v,i)=>!Number.isInteger(v)||v<0||v>2||(i>0&&w[i-1]>=v))||(d.opening.legacy?w.length!==3:n<4?w.length!==0:n===4?w.length===3:w.length!==3)||(!d.opening.legacy&&w.length>0&&uniq(d.dust,4).length!==4))throw new Error('invalid windows');}
  state.opening=d.opening?{step:d.opening.step,legacy:d.opening.legacy}:{step:0,legacy:!!d.started};
+ if(d.opening?.windows!==undefined)state.opening.windows=[...d.opening.windows];
  Object.assign(state,{started:!!d.started,intro:!!d.intro,scene:['room','campus','classroom'].includes(d.scene)?d.scene:'room',weeds:uniq(d.weeds,6),branches:uniq(d.branches,8),dust:uniq(d.dust,4),projects:Array.isArray(d.projects)?[...new Set(d.projects.filter(id=>PROJECTS.some(p=>p.id===id)))]:[],wood:Number.isInteger(d.wood)?Math.max(0,Math.min(8,d.wood)):0,seed:[0,1,2].includes(d.seed)?d.seed:0,roomPlant:[0,1,2].includes(d.roomPlant)?d.roomPlant:-1,savedAt:typeof d.savedAt==='string'?d.savedAt:null});
  if(d.position&&Number.isFinite(d.position.x)&&Number.isFinite(d.position.y))state.position={x:Math.max(80,Math.min(1520,d.position.x)),y:Math.max(430,Math.min(990,d.position.y))};
  state.flowers=state.flowers.map((f,i)=>({kind:[0,1,2].includes(d.flowers?.[i]?.kind)?d.flowers[i].kind:0,stage:[0,1,2,3].includes(d.flowers?.[i]?.stage)?d.flowers[i].stage:0}));

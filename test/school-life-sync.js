@@ -1,4 +1,4 @@
-import {createLifeStorage} from './school-life-storage.js?v=20261110-arrival';
+import {createLifeStorage} from './school-life-storage.js?v=20261112-windows';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createSchoolLifeSync({host,getIdentity,rpc,onChange}){
  const panel=document.createElement('section');panel.id='lifeSyncPanel';panel.className='life-sync-panel';panel.hidden=true;panel.setAttribute('aria-label','내 이야기 저장');panel.setAttribute('role','region');

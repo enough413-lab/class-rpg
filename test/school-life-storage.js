@@ -1,4 +1,4 @@
-import {freshLife,readLife} from './school-life-state.js?v=20261110-arrival';
+import {freshLife,readLife} from './school-life-state.js?v=20261112-windows';
 const clone=x=>structuredClone(x);
 const stable=x=>JSON.stringify(x,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 const uuidPattern=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
