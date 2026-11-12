@@ -1,3 +1,4 @@
+import {dustFrame,drawSweptDust,drawSweepingBroom} from './school-life-dust-sweep.js?v=20261112-dust';
 import {weedMotion,drawWeedRoot,drawHeldWeed,drawWeedFragments} from './school-life-weed-pull.js?v=20261112-weed';
 import {createFurnitureDepth} from './school-life-depth.js?v=20261112-depth';
 import {createReaction} from './school-life-expression.js?v=20261112-expression';
@@ -13,7 +14,7 @@ import {createSchoolArrival} from './school-life-arrival.js?v=20261110-arrival';
 import {createInvitationAction} from './school-life-invitation.js?v=20261110-arrival';
 import {createSchoolMemories} from './school-life-memories.js?v=20261112-depth';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
-import {createLifeFeedback,drawBroom,drawWater,drawTarget,waterTarget,lookDirection,VECTORS} from './school-life-feedback.js?v=20261111-actions';
+import {createLifeFeedback,drawWater,drawTarget,waterTarget,lookDirection,VECTORS} from './school-life-feedback.js?v=20261111-actions';
 import {installLifeNotebook} from './school-life-notebook.js?v=20261112-windows';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261112-windows';
 import {installSchoolOpening} from './school-life-opening.js?v=20261112-weed';
@@ -180,7 +181,7 @@ export function installSchoolLife(ctx){
   if(memories.handle(e,assets)){story.decorateMemory(e);return;}if(story.handle(e)||opening.handle(e))return;
   if(e.kind==='exit'){const firstArrival=scene==='room'&&e.target==='campus'&&!state.opening.legacy&&state.opening.step===1&&!arrivalSeen();const target=e.target;const dest=target==='campus'?(scene==='room'?{x:295,y:575}:{x:815,y:485}):{x:800,y:860};if(mutate(s=>{s.scene=target;s.position=dest;if(target==='classroom'&&s.opening.step===3)s.opening.step=4})){scene=target;pos=dest;refresh();if(firstArrival)queuedArrival={owner,token:ownerToken,state,position:{...dest}};else toast(names[scene]);}return;}
   if(e.kind==='npc'){if(e.id==='saessak'){const text=state.weeds.length<6?'여기, 작은 초록빛이 숨어 있어.\n마당의 잡초를 뽑고 빈 흙에 꽃을 심어 볼래?\n나뭇가지는 벤치를 고칠 때 쓸 수 있어.':state.flowers.slice(0,3).some(f=>f.stage<3)?'마당이 훨씬 환해졌어!\n씨앗을 심고 두 번 물을 주면 꽃이 피어.\n어떤 꽃을 심을지는 주머니에서 골라 봐.':'우리가 돌본 학교에 꽃이 피었네!\n네가 고른 꽃이 학교와 참 잘 어울려.\n가끔 연못에서 쉬어 가는 것도 좋아.';talk('새싹',wish.remember('saessak',text),[{label:'둘러볼게'},{label:'이 학교 말인데',run:()=>wish.open('saessak')}],'saessak');}else talk('토리',wish.remember('tori',state.projects.includes('library')?'우리 교실에 책쉼터가 생겼네!\n여기 앉아서 한숨 돌려도 좋아.':'네가 들어오니 교실에 생기가 도네.\n여기서 다시 책을 읽을 수 있어 기뻐.'),[{label:'다녀올게'},{label:'이 학교 말인데',run:()=>wish.open('tori')}],'tori');return;}
-  if(['weed','branch','dust'].includes(e.kind)){const field={weed:'weeds',branch:'branches',dust:'dust'}[e.kind];if(mutate(s=>{if(!s[field].includes(e.index)){s[field].push(e.index);if(e.kind==='branch')s.wood++;}})){beginGesture({kind:e.kind,x:e.x,y:e.y});gesture.color=e.kind==='dust'?'#d8c9ab':'#fbe3a1';laterToast(e.kind==='weed'?'잡초를 뽑았다.':e.kind==='branch'?'나뭇가지 +1':'먼지를 쓸었다.');}return;}
+  if(['weed','branch','dust'].includes(e.kind)){const field={weed:'weeds',branch:'branches',dust:'dust'}[e.kind];if(mutate(s=>{if(!s[field].includes(e.index)){s[field].push(e.index);if(e.kind==='branch')s.wood++;}})){beginGesture({kind:e.kind,x:e.x,y:e.y,direction:look});gesture.color=e.kind==='dust'?'#d8c9ab':'#fbe3a1';laterToast(e.kind==='weed'?'잡초를 뽑았다.':e.kind==='branch'?'나뭇가지 +1':'먼지를 쓸었다.');}return;}
   if(e.kind==='flower'){const f=state.flowers[e.index];if(f.stage===3){talk(FLOWER_NAMES[f.kind],'꽃이 활짝 피었다.\n같은 꽃 모양의 화분을 방에 놓을 수 있다.',[{label:'내 방에 놓기',run:()=>{if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}},{label:'여기서 바라보기'}]);}else if(mutate(s=>{const f=s.flowers[e.index];if(!f.stage)f.kind=s.seed;f.stage++;})){beginGesture({kind:f.stage>0?'water':'plant',x:e.x,y:e.y,from:{...pos},spout:waterSpout()});burst(e.x,e.y,f.stage===2?'#ffeaaa':'#b9dfed');tone(880,.15);if(f.stage===2)react('joy',ACTION_MS);laterToast(state.flowers[e.index].stage===1?'씨앗을 심었다.':state.flowers[e.index].stage===2?'새싹이 돋았다.':'꽃이 피었다.');}return;}
   if(e.kind==='plant'){if(state.roomPlant<0)talk('작은 선반','학교에서 키운 꽃 모양의 화분을 놓는 자리.');else talk('나의 작은 화분',FLOWER_NAMES[state.roomPlant]+' 화분. 학교에서 키운 꽃과 같은 모양이다.');return;}
   if(e.kind==='project'){const p=PROJECTS.find(p=>p.id===e.id);if(state.projects.includes(e.id)){if(e.id==='bench'||e.id==='library'){sit(e.id);}else talk(p.name,'수리가 끝났다.');return;}const reason=projectRequirement(state,p.id,level());if(reason){talk(p.name,reason+`\n${p.description}`,[{label:'확인'},{label:'학교 수첩',run:journal}]);return;}talk(p.name,p.description+(p.wood?`\n나뭇가지 ${p.wood}개 필요`:''),[{label:'함께 고치기',run:()=>{if(projectRequirement(state,p.id,level()))return;if(mutate(s=>{s.projects.push(p.id);s.wood-=p.wood;})){burst(e.x,e.y);tone(1046,.3);toast(p.name+' 완성');react('joy');}}},{label:'조금 이따가'}]);return;}
@@ -214,18 +215,21 @@ export function installSchoolLife(ctx){
   const j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=gesture&&t-gesture.at<950?gesture:null;if(!action)gesture=null;
   const phase=action?clamp((t-action.at)/ACTION_MS,0,1):0,actionView=action?actionFrame(action.kind,phase,reduced.matches):null,bend=actionView?.lean||0;
-  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(action.kind!=='weed')burst(action.x,action.y,action.color);tone(660,.12);}
+  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(!['weed','dust'].includes(action.kind))burst(action.x,action.y,action.color);tone(660,.12);}
   const worldTransform=g.getTransform();
   ellipse(drawPos.x,seat?drawPos.y+15:pos.y+5,20,7,'#314b3b45');g.save();g.translate(drawPos.x,drawPos.y-j+(reactionView?.dy||0));g.rotate(-bend*.24*facing+(reactionView?.angle||0));
-  const motion={reaction:reactionView,seated:seat&&!seat.walking?seat.amount:undefined,action:action&&!reduced.matches?actionView:null,facing,walking:seat?seat.walking&&!reduced.matches:walkMoving&&!jump&&!reduced.matches&&!action,phase:seat?seat.walkPhase:walkPhase,carry:!!(heldTool||fish||story.carrying()||invitation.active())};playerAvatar.draw(g,drawLook,motion);const hand=playerAvatar.hand(drawLook,facing,motion);
+  const motion={reaction:reactionView,seated:seat&&!seat.walking?seat.amount:undefined,action:action&&!reduced.matches?actionView:null,facing,walking:seat?seat.walking&&!reduced.matches:walkMoving&&!jump&&!reduced.matches&&!action,phase:seat?seat.walkPhase:walkPhase,carry:!!(heldTool||fish||story.carrying()||invitation.active())};const hand=playerAvatar.hand(drawLook,facing,motion);
+  const broomBehind=action?.kind==='dust'&&drawLook==='u';
+  const broomAtHand=()=>{const h=worldTransform.inverse().transformPoint(g.getTransform().transformPoint(hand));g.save();g.setTransform(worldTransform);const broom=drawSweepingBroom(g,h,action,phase,reduced.matches);g.restore();toolAttachment={kind:'broom',hand:{x:h.x,y:h.y},grip:broom.grip,tip:broom.head,direction:broom.direction};};
+  if(broomBehind)broomAtHand();playerAvatar.draw(g,drawLook,motion);
   const tool=seat?'':fish?'rod':action?.kind==='water'?'can':action?.kind==='plant'?'spade':action?'':heldTool;
   if(tool&&!story.carrying()){
    const h=g.getTransform().transformPoint(hand);g.save();g.translate(hand.x,hand.y);const drawn=drawHeldTool(g,{kind:tool,asset:assets[tool],direction:drawLook,facing,action:actionView,fishing:!!fish});g.restore();
    if(drawn){const world=p=>p&&({x:p.x/(DPR*S)+camera.x,y:p.y/(DPR*S)+camera.y});toolAttachment={kind:tool,hand:world(h),grip:world(drawn.grip),tip:world(drawn.tip),spout:world(drawn.spout)};if(action?.kind==='water')action.spout=toolAttachment.spout;playerAvatar.drawGrip(g,drawLook,facing,motion);}
   }
   if(action?.kind==='weed'&&actionView.impact){const root=g.getTransform().inverse().transformPoint(worldTransform.transformPoint({x:action.x,y:action.y}));drawHeldWeed(g,assets.weed,phase,root,hand,reduced.matches);if(!reduced.matches&&weedMotion(phase).transfer>.9)playerAvatar.drawGrip(g,drawLook,facing,motion);}
+  if(action?.kind==='dust'){if(!broomBehind)broomAtHand();playerAvatar.drawGrip(g,drawLook,facing,motion);}
   g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
-  if(action?.kind==='dust')drawBroom(g,phase,reduced.matches);
   if(action?.kind==='branch'&&actionView.impact){g.save();g.globalAlpha=phase>.8?(1-phase)*5:1;g.drawImage(assets[action.kind],-43,-61,29,31);g.restore();}
   if(invitation.active()){const point=g.getTransform().transformPoint({x:-22,y:-45});invitation.hand({x:point.x/(DPR*S)+camera.x,y:point.y/(DPR*S)+camera.y});}
   story.held(g);g.restore();placeName($('lifePlayerName'),ctx.getStudent()?.nickname||'모험가',drawPos.x,drawPos.y+17);
@@ -233,7 +237,7 @@ export function installSchoolLife(ctx){
  function placeName(el,text,x,y){const scale=dialogue.view(W,H,S,camera,pos)?.scale||arrival.view(W,H,S)?.scale||S;if(el.textContent!==text)el.textContent=text;el.style.left=Math.round((x-camera.x)*scale)+'px';el.style.top=Math.round((y-camera.y)*scale)+'px';}
  function drawWorld(t){
   toolAttachment=null;
-  $('lifeNpcName').hidden=mode!=='play'||scene!=='campus'||arrival.snapshot()?.phase==='view'||dialogue.active();$('lifePlayerName').hidden=arrival.snapshot()?.phase==='view'||dialogue.active();
+  $('lifeNpcName').hidden=mode!=='play'||scene!=='campus'||arrival.snapshot()?.phase==='view'||dialogue.active();$('lifePlayerName').hidden=arrival.snapshot()?.phase==='view'||dialogue.active()||gesture?.kind==='dust';
   g.setTransform(DPR,0,0,DPR,0,0);g.clearRect(0,0,W,H);g.fillStyle='#95b27c';g.fillRect(0,0,W,H);
   if(mode==='intro'||mode==='replay'){prologue.draw(g,assets,W,H,t,reduced.matches,stopped||document.hidden);return;}
   if(mode==='title'&&!assets.campus)return;if(mode!=='title'&&!assetsReady)return;
@@ -253,8 +257,8 @@ export function installSchoolLife(ctx){
   if(gesture&&!reduced.matches&&!actionFrame(gesture.kind,(t-gesture.at)/ACTION_MS).impact){
    if(gesture.kind==='weed')drawWeedRoot(g,assets.weed,gesture,(t-gesture.at)/ACTION_MS,reduced.matches);
    if(gesture.kind==='branch')branch(gesture.x,gesture.y);
-   if(gesture.kind==='dust')for(let n=0;n<5;n++)ellipse(gesture.x+(n-2)*9,gesture.y+Math.sin(n)*6,12,6,'#b5a38399');
   }
+  if(gesture?.kind==='dust'&&scene==='classroom')drawSweptDust(g,gesture,(t-gesture.at)/ACTION_MS,reduced.matches);
   memories.draw(g,scene,assets,'photo');if(scene==='classroom')props.push({id:'waitingBook',y:527,draw:()=>memories.draw(g,scene,assets,'book')});opening.draw(g,scene,assets,t,reduced.matches);for(const part of story.depth(scene))props.push({...part,draw:()=>story.draw(g,scene,part.id)});
   if(!seating.active()&&heldTool==='can'&&!fish&&overlay.hidden&&scene==='campus')drawTarget(g,selectedWater());
   if(path.length){const goal=path[path.length-1];g.strokeStyle='#fff3b9aa';g.lineWidth=2;g.beginPath();g.ellipse(goal.x,goal.y,12,5,0,0,Math.PI*2);g.stroke();}
@@ -308,5 +312,5 @@ export function installSchoolLife(ctx){
  const avatarObserver=new MutationObserver(avatarChanged);
  for(const id of SLOTS){const image=document.getElementById(id);if(image){avatarObserver.observe(image,{attributes:true,attributeFilter:['src','class']});image.addEventListener('load',avatarChanged);}}
  document.addEventListener('student-dashboard-updated',()=>{if(!host.open)return;if(!valid())close();else{avatarImages();refresh();updateTitle();}});
- const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,weedPull:gesture?.kind==='weed'?weedMotion((performance.now()-gesture.at)/ACTION_MS,reduced.matches):null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
+ const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,dustSweep:gesture?.kind==='dust'?dustFrame((performance.now()-gesture.at)/ACTION_MS,gesture.direction,reduced.matches):null,weedPull:gesture?.kind==='weed'?weedMotion((performance.now()-gesture.at)/ACTION_MS,reduced.matches):null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
 }
