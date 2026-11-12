@@ -1,7 +1,7 @@
 import {loadExpressions} from './school-life-expression.js?v=20261112-expression';
 import {createSeatRig} from './school-life-seat.js?v=20261111-sitting';
-import {actionPose} from './school-life-action.js?v=20261112-weed';
-import {createWalkRig,walkPose,walkPoint} from './school-life-walk.js?v=20261112-weed';
+import {actionPose} from './school-life-action.js?v=20261112-door';
+import {createWalkRig,walkPose,walkPoint} from './school-life-walk.js?v=20261112-door';
 const SLOTS=['avatarHairBack','avatarBase','avatarShoes','avatarBottom','avatarTop','avatarEquipment','avatarHairFront','avatarHat','avatarAccessory'];
 const DIRS={u:0,l:1,r:2},ROOT='./maps/life/avatar-v1/';
 const readable=i=>i?.complete&&i.naturalWidth>0;
