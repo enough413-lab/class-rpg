@@ -1,4 +1,4 @@
-import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261110-arrival';
+import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const art={invitation:'invitation',weed:'weed',branch:'branch',flower:'flower',flowerPink:'flowerPink',flowerBlue:'flowerBlue',sprout:'sprout',bench:'bench',school:'restored',garden:'flowerPink',library:'readingNook',lights:'lantern'};
 const img=(name,cls='')=>`<img class="${cls}" src="maps/life/${art[name]||name}-harmony-v2.webp" alt="">`;
@@ -17,13 +17,14 @@ export function installLifeNotebook(api){
   for(const b of nav.children){b.onclick=()=>{if(!api.valid()||!root.contains(b))return;render(b.dataset.page);root.querySelector('[data-page="'+b.dataset.page+'"]').focus({preventScroll:true});};b.onkeydown=e=>{const at=items.findIndex(x=>x[0]===b.dataset.page),next=e.key==='ArrowRight'?(at+1)%items.length:e.key==='ArrowLeft'?(at+items.length-1)%items.length:e.key==='Home'?0:e.key==='End'?items.length-1:-1;if(next<0)return;e.preventDefault();nav.children[next].click();};}
  }
  function quest(s){
+  const opened=s.opening.legacy||s.opening.step>=5?3:(s.opening.windows||[]).length;
   const n=s.opening.step,w=[0,1,2].filter(i=>s.weeds.includes(i)).length,d=s.dust.length;
   const choices=[
    ['도착한 편지','잎사귀 초대장','방 안의 편지 읽기','내 방','invitation'],
    ['새로운 만남','새싹에게 초대장 보여 주기','마당에서 새싹 만나기','학교 마당','invitation'],
    ['새싹의 부탁',w===3?'풀 아래 작은 열쇠':'풀 아래에서 열쇠 찾기',w===3?'드러난 열쇠 줍기':'화단 아래 잡초 3곳 뽑기','학교 마당',w===3?'invitation':'weed'],
    ['새싹의 부탁','찾은 열쇠로 교실 열기','학교 문에 열쇠 사용','학교 앞','school'],
-   ['교실에 첫 햇살',d===4?'창문 열기':'교실의 먼지 쓸기',d===4?'청소 완료. 창문을 열 차례.':'바닥의 먼지 4곳 쓸기','교실','school'],
+   ['교실에 첫 햇살',d===4?'교실 창문 세 곳 열기':'교실의 먼지 쓸기',d===4?'칠판 옆과 양쪽 벽의 창문.':'바닥의 먼지 4곳 쓸기','교실','school'],
    ['돌아온 친구','토리와 인사하기','교실에서 토리 만나기','교실','library'],
    ['토리의 쪽지','종 아래 글귀 읽기','토리의 쪽지 읽기','교실','invitation']
   ];
@@ -31,7 +32,7 @@ export function installLifeNotebook(api){
   if(n===7)return empty('첫 교실 복원','교실에 햇살이 들고 토리가 돌아왔다.')+'<button class="life-choice" data-memory>남긴 기억 보기</button>';
   const [label,title,body,place,icon]=choices[n];
   const wish=n>=2&&n<=4?'<p class="life-request-wish">새싹: “교실에서 다시 같이 책을 읽고 싶어.”</p>':'';
-  return `<article class="life-quest-sheet"><div class="life-quest-caption"><span>${label}</span><span class="life-status">${n===0?'도착':'진행 중'}</span></div><div class="life-quest-title">${img(icon)}<h3>${title}</h3></div>${wish}<p class="life-quest-next">${body}</p>${n===2?progress(w,3,'잡초 뽑기'):n===4?progress(d,4,'먼지 쓸기'):''}<div class="life-quest-place"><span>찾아갈 곳</span><strong>${place}</strong></div></article><button class="life-choice life-return" data-return>계속 둘러보기</button>`;
+  return `<article class="life-quest-sheet"><div class="life-quest-caption"><span>${label}</span><span class="life-status">${n===0?'도착':'진행 중'}</span></div><div class="life-quest-title">${img(icon)}<h3>${title}</h3></div>${wish}<p class="life-quest-next">${body}</p>${n===2?progress(w,3,'잡초 뽑기'):n===4?(d===4?progress(opened,3,'창문 열기'):progress(d,4,'먼지 쓸기')):''}<div class="life-quest-place"><span>찾아갈 곳</span><strong>${place}</strong></div></article><button class="life-choice life-return" data-return>계속 둘러보기</button>`;
  }
  function memories(s){
   const places=PROJECTS.filter(p=>s.projects.includes(p.id)||api.level()>=p.level);

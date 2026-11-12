@@ -2,6 +2,8 @@
 export function installSchoolOpening(api){
  const step=()=>api.state().opening.step;
  const old=()=>api.state().opening.legacy;
+ const windows=[{id:'firstWindow',index:0,x:305,y:480,face:{x:305,y:300},label:'칠판 옆 창문',rect:[158,178,273,202]},{id:'leftWindow',index:1,x:120,y:535,face:{x:35,y:375},label:'왼쪽 벽 창문',rect:[0,200,104,286]},{id:'rightWindow',index:2,x:1480,y:535,face:{x:1560,y:375},label:'오른쪽 벽 창문',rect:[1448,200,88,286]}];
+ const opened=()=>old()||step()>=5?[0,1,2]:api.state().opening.windows||[];
  const keyReady=()=>[0,1,2].every(i=>api.state().weeds.includes(i));
  const goal=()=>['','새싹에게 초대장 보여 주기','화단 아래에서 열쇠 찾기','찾은 열쇠로 교실 열기','교실에 햇살 들이기','돌아온 토리 만나기','토리가 놓은 쪽지 읽기',''][step()];
  const enterable=()=>old()||step()>=4;
@@ -16,7 +18,7 @@ export function installSchoolOpening(api){
   const n=step(),items=[];
   if(scene==='room'&&n===0)items.push({id:'invitation',x:920,y:700,label:'잎사귀 초대장',action:'집기',kind:'opening'});
   if(scene==='campus'&&n===2&&keyReady())items.push({id:'schoolKey',x:790,y:678,label:'풀 아래 작은 열쇠',action:'줍기',kind:'opening'});
-  if(scene==='classroom'&&n===4)items.push({id:'firstWindow',x:400,y:470,face:{x:400,y:350},label:'굳게 닫힌 창문',action:'열기',kind:'opening'});
+  if(scene==='classroom'&&n===4&&!old())items.push(...windows.filter(w=>!opened().includes(w.index)).map(w=>({...w,action:'열기',kind:'opening'})));
   if(scene==='classroom'&&n===6)items.push({id:'bellNote',x:950,y:740,label:'토리가 놓은 쪽지',action:'읽기',kind:'opening'});
   return items;
  }
@@ -32,9 +34,17 @@ export function installSchoolOpening(api){
   if(e.id==='schoolKey'){
    if(step()===2&&keyReady()&&advance(2,3,'잎사귀 무늬 열쇠를 찾았다.')){api.burst(e.x,e.y);api.react?.('surprise');}return true;
   }
-  if(e.id==='firstWindow'){
-   if(api.state().dust.length<4){api.talk('닫힌 창문','먼지가 날려 창문을 열 수 없다.\n먼저 바닥을 쓸어야 한다.');return true;}
-   api.talk('첫 햇살','먼지를 모두 쓸었다.\n굳은 창문 손잡이가 보인다.',[{label:'두 손으로 열기',run:()=>{if(api.state().dust.length===4&&advance(4,5,'햇살이 들어왔다. 문밖에서 발소리가 들린다.')){api.burst(e.x,e.y);api.tone(784,.4);api.react?.('joy');}}},{label:'잠깐 둘러보기'}]);return true;
+  if(windows.some(w=>w.id===e.id)){
+   const window=windows.find(w=>w.id===e.id);
+   if(step()!==4||old()||opened().includes(window.index))return true;
+   if(api.state().dust.length<4){api.talk(window.label,'먼지가 날려 창문을 열 수 없다.\n먼저 바닥을 쓸어야 한다.');return true;}
+   api.talk(window.label,'굳은 손잡이 너머로 바람 소리가 들린다.',[{label:'두 손으로 열기',run:()=>{
+    if(step()!==4||old()||api.state().dust.length!==4||opened().includes(window.index))return;
+    const next=[...opened(),window.index].sort((a,b)=>a-b),last=next.length===3;
+    if(api.mutate(s=>{s.opening.windows=next;if(last)s.opening.step=5;})){
+     api.burst(e.x,e.y);api.tone(last?784:660,.3);api.toast(last?'세 창문이 열렸다. 문밖에서 발소리가 들린다.':window.label+'을 열었다.');if(last)api.react?.('joy');
+    }
+   }},{label:'돌아가기'}]);return true;
   }
   if(e.id==='bellNote'){
    api.talk('종 아래의 글귀','“학교의 종이 잠든 날,\n우리는 작은 씨앗을 남겼다.”',[{label:'수첩에 간직하기',run:()=>advance(6,7,'수첩에 기록했다.')},{label:'조금 더 바라보기'}]);return true;
@@ -80,5 +90,11 @@ export function installSchoolOpening(api){
   }
   g.restore();
  }
- return {goal,enterable,toriVisible,entities,handle,memory,draw};
+ function drawClassroom(g,assets){
+  const done=opened();if(done.length===3){g.drawImage(assets.classroom,0,0,1600,1067);return;}
+  g.drawImage(assets.classroomClosed,0,0,1600,1067);
+  const front=[[160,188],[168,182],[416,182],[426,188],[426,350],[420,370],[164,370],[159,350]],side=[[0,272],[75,209],[86,210],[88,441],[76,462],[0,483]];
+  for(const w of windows){if(!done.includes(w.index))continue;const outline=w.index===0?front:w.index===1?side:side.map(([x,y])=>[1536-x,y]);g.save();g.beginPath();outline.forEach(([x,y],i)=>g[i?'lineTo':'moveTo'](x*1600/1536,y*1067/1024));g.closePath();g.clip();g.drawImage(assets.classroom,0,0,1600,1067);g.restore();}
+ }
+ return {goal,enterable,toriVisible,entities,handle,memory,draw,drawClassroom,opened};
 }
