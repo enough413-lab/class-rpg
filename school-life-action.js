@@ -1,3 +1,4 @@
+import {weedMotion} from './school-life-weed-pull.js?v=20261112-weed';
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{x=clamp(x);return x*x*(3-2*x);};
 export const ACTION_MS=950;
@@ -5,6 +6,7 @@ export const ACTION_MS=950;
 export function actionFrame(kind,phase,reduced=false){
  const p=clamp(phase),stage=p<.32?'prepare':p<.68?'execute':'recover';
  const reach=ease(p/.32),release=1-ease((p-.68)/.32),work=ease((p-.32)/.36);
+ if(kind==='weed'){const a=weedMotion(p,reduced);return {kind,phase:p,stage,contact:a.contact,impact:a.impact,lean:a.lean,arm:a.arm,sideArm:a.sideArm,lift:0,tilt:0,stream:false,sweep:0};}
  if(kind==='window'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.28,impact:p>=.4,lean:reduced?0:.35*hold,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
  const pull=kind==='weed'||kind==='branch'||kind==='invitation'||kind==='plant';
  const tug=ease((p-.32)/.2);
