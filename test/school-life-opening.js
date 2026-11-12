@@ -1,6 +1,8 @@
 import {drawWindow,windowFrame} from './school-life-window-motion.js?v=20261112-curtains';
+import {createWindowLight,windowLights} from './school-life-window-light.js?v=20261112-sunlight';
 // The opening is optional for existing saves; only explicit actions advance it.
 export function installSchoolOpening(api){
+ const sunlight=createWindowLight();
  const step=()=>api.state().opening.step;
  const old=()=>api.state().opening.legacy;
  const windows=[{id:'firstWindow',index:0,x:305,y:480,face:{x:305,y:300},label:'칠판 옆 창문',rect:[158,178,273,202]},{id:'leftWindow',index:1,x:120,y:535,face:{x:35,y:375},label:'왼쪽 벽 창문',rect:[0,200,104,286]},{id:'rightWindow',index:2,x:1480,y:535,face:{x:1560,y:375},label:'오른쪽 벽 창문',rect:[1448,200,88,286]}];
@@ -99,5 +101,7 @@ export function installSchoolOpening(api){
   for(const index of done)drawWindow(g,assets,index,motion?.index===index?view.curtain:1);
  }
 
- return {goal,enterable,toriVisible,entities,handle,memory,draw,drawClassroom,opened};
+ function lights(){return windowLights(opened(),api.windowMotion?.());}
+ function drawLight(g,scene){if(scene==='classroom')sunlight.draw(g,lights());}
+ return {goal,enterable,toriVisible,entities,handle,memory,draw,drawClassroom,opened,lights,drawLight};
 }
