@@ -18,10 +18,10 @@ export function createSchoolMemories(api){
   g.save();g.fillStyle='#527866';g.strokeStyle='#5b5940';g.lineWidth=w*.03;g.beginPath();g.roundRect(0,0,w,h,w*.06);g.fill();g.stroke();g.fillStyle='#e6d5a8';g.fillRect(w*.10,h*.15,w*.79,h*.75);g.fillStyle='#658b70';g.fillRect(0,0,w,h*.8);g.strokeRect(0,0,w,h*.8);g.strokeStyle='#bcd0a0';g.lineWidth=w*.02;g.strokeRect(w*.2,h*.15,w*.60,h*.48);
   g.fillStyle='#d5b26b';g.beginPath();g.moveTo(w*.65,h*.1);g.lineTo(w*.8,h*.1);g.lineTo(w*.8,h*1.08);g.lineTo(w*.725,h*.99);g.lineTo(w*.65,h*1.08);g.closePath();g.fill();g.restore();
  }
- function draw(g,scene,assets){
+ function draw(g,scene,assets,part='all'){
   if(scene!=='classroom')return;
-  g.save();g.translate(1170,190);photo(g,assets,104,78);g.restore();
-  g.save();g.translate(1053,425);g.rotate(-.08);book(g,44,32);g.restore();
+  if(part==='all'||part==='photo'){g.save();g.translate(1170,190);photo(g,assets,104,78);g.restore();}
+  if(part==='all'||part==='book'){g.save();g.translate(1053,425);g.rotate(-.08);book(g,44,32);g.restore();}
  }
  function handle(e,assets){
   if(e.kind!=='memory')return false;
