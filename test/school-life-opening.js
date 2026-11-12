@@ -30,11 +30,11 @@ export function installSchoolOpening(api){
    api.invitation(e,()=>advance(0,1,'초대장을 챙겼다.'));return true;
   }
   if(e.id==='schoolKey'){
-   if(step()===2&&keyReady()&&advance(2,3,'잎사귀 무늬 열쇠를 찾았다.'))api.burst(e.x,e.y);return true;
+   if(step()===2&&keyReady()&&advance(2,3,'잎사귀 무늬 열쇠를 찾았다.')){api.burst(e.x,e.y);api.react?.('surprise');}return true;
   }
   if(e.id==='firstWindow'){
    if(api.state().dust.length<4){api.talk('닫힌 창문','먼지가 날려 창문을 열 수 없다.\n먼저 바닥을 쓸어야 한다.');return true;}
-   api.talk('첫 햇살','먼지를 모두 쓸었다.\n굳은 창문 손잡이가 보인다.',[{label:'두 손으로 열기',run:()=>{if(api.state().dust.length===4&&advance(4,5,'햇살이 들어왔다. 문밖에서 발소리가 들린다.')){api.burst(e.x,e.y);api.tone(784,.4);}}},{label:'잠깐 둘러보기'}]);return true;
+   api.talk('첫 햇살','먼지를 모두 쓸었다.\n굳은 창문 손잡이가 보인다.',[{label:'두 손으로 열기',run:()=>{if(api.state().dust.length===4&&advance(4,5,'햇살이 들어왔다. 문밖에서 발소리가 들린다.')){api.burst(e.x,e.y);api.tone(784,.4);api.react?.('joy');}}},{label:'잠깐 둘러보기'}]);return true;
   }
   if(e.id==='bellNote'){
    api.talk('종 아래의 글귀','“학교의 종이 잠든 날,\n우리는 작은 씨앗을 남겼다.”',[{label:'수첩에 간직하기',run:()=>advance(6,7,'수첩에 기록했다.')},{label:'조금 더 바라보기'}]);return true;
