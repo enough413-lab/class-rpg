@@ -5,6 +5,7 @@ export const ACTION_MS=950;
 export function actionFrame(kind,phase,reduced=false){
  const p=clamp(phase),stage=p<.32?'prepare':p<.68?'execute':'recover';
  const reach=ease(p/.32),release=1-ease((p-.68)/.32),work=ease((p-.32)/.36);
+ if(kind==='window'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.28,impact:p>=.4,lean:reduced?0:.35*hold,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
  const pull=kind==='weed'||kind==='branch'||kind==='invitation'||kind==='plant';
  const tug=ease((p-.32)/.2);
  const sweep=kind==='dust'?Math.sin(work*Math.PI*2):0;
@@ -21,7 +22,7 @@ export function actionPose(direction,frame,facing=1){
  const side=direction==='l'||direction==='r',sign=direction==='r'?-1:1;
  const working=side?1:direction==='u'?0:facing>0?0:1;
  const arms=[-1,1].map((n,i)=>{
-  const pivot=[side?6*sign:n*12,-66],active=i===working;
+  const pivot=[side?6*sign:n*12,-66],active=frame.kind==='window'||i===working;
   const arm=side?frame.sideArm:frame.arm;
   return {pivot,x:pivot[0],y:pivot[1],angle:(active?arm:arm*.12)*(side?sign:-n)};
  });
