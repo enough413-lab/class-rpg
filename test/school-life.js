@@ -3,8 +3,8 @@ import {createReaction} from './school-life-expression.js?v=20261112-expression'
 import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {drawHeldTool,SPADE_SVG} from './school-life-tools.js?v=20261111-tools';
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
-import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261111-actions';
-import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-expression';
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261112-curtains';
+import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-curtains';
 import {createSchoolStory} from './school-life-story.js?v=20261112-depth';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261110-scenes';
@@ -15,7 +15,7 @@ import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawBroom,drawWater,drawTarget,waterTarget,lookDirection,VECTORS} from './school-life-feedback.js?v=20261111-actions';
 import {installLifeNotebook} from './school-life-notebook.js?v=20261112-windows';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261112-windows';
-import {installSchoolOpening} from './school-life-opening.js?v=20261112-windows';
+import {installSchoolOpening} from './school-life-opening.js?v=20261112-curtains';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons={leaf:'<path d="M6 25C1 9 17 3 29 4c0 15-6 27-19 23M6 29 23 11M14 21l-1-8m1 8 9-1"/>',bag:'<path d="M10 10V8a6 6 0 0 1 12 0v2M8 10h16l3 19H5zM6 17h20M12 19v4h8v-4"/>',book:'<path d="M16 8C11 4 6 4 3 5v22c4-1 8-1 13 2 5-3 9-3 13-2V5c-5-1-9-1-13 3v21M7 11h5m-5 5h5m8-5h5m-5 5h5"/>',map:'<path d="m3 7 9-3 9 3 8-3v23l-8 3-9-3-9 3zM12 4v23M21 7v23M5 20l4-5 7 4 9-8"/>',exit:'<path d="M13 4H5v25h8M14 9l8 7-8 7m-4-7h18"/>',sound:'<path d="m4 12 7 0 8-7v24l-8-8H4zM24 10c5 3 5 9 0 12"/>',flower:'<path d="M16 30V18m0 8-8-5m8 2 7-5"/><path fill="#efb4ab" d="M16 5c8-8 12 2 6 6 11 0 8 12 0 9 2 10-10 10-10 1-9 5-13-6-5-10-6-7 3-13 9-6Z"/><circle cx="16" cy="13" r="4" fill="#f5d374"/>',wood:'<path d="m6 29 6-14 0-11m0 16 12-9m-8 6 10 3M6 29l6 1 7-14"/>',fish:'<path d="M6 16c8-15 18-11 23 0-5 11-15 15-23 0L1 9v14z"/><circle cx="23" cy="14" r="1"/>'};
@@ -41,7 +41,7 @@ export function installSchoolLife(ctx){
  let look='d',queuedToast=null,queuedArrival=null,replayOrigin=null;const arrivalsSeen=new Set();
  function laterToast(text,delay=950){queuedToast={text,at:performance.now()+delay,scene};}
  let blockedNotice=null,workControlsLocked=null;
- function working(t=performance.now()){return !!gesture&&['weed','branch','dust','plant','water'].includes(gesture.kind)&&t-gesture.at<ACTION_MS;}
+ function working(t=performance.now()){return !!gesture&&['weed','branch','dust','plant','water','window'].includes(gesture.kind)&&t-gesture.at<ACTION_MS;}
  function workControls(t=performance.now()){
   const seat=seating.snapshot(),locked=working(t)||!!seat&&seat.phase!=='rest',menus=locked||!!seat,key=locked+'|'+menus;if(key!==workControlsLocked){workControlsLocked=key;host.querySelectorAll('[data-dir]').forEach(b=>b.disabled=locked);host.querySelectorAll('[data-life=bag],[data-life=journal],[data-life=map]').forEach(b=>b.disabled=menus);}
   $('lifeUse').disabled=locked||(!near&&!seat);$('lifeTool').disabled=locked||!!seat;
@@ -49,6 +49,8 @@ export function installSchoolLife(ctx){
  function seatInput(){if(!seating.active())return false;seating.stand(performance.now(),reduced.matches);keys.clear();path=[];jump=0;return true;}
  function sit(id){clearReaction();keys.clear();path=[];jump=0;gesture=null;fish=null;$('lifeFish').hidden=true;seating.start(id,pos,look,performance.now(),reduced.matches);workControls();}
  function beginGesture(data){clearReaction();keys.clear();path=[];jump=0;gesture={...data,at:performance.now()};workControls();}
+ function windowMotion(t=performance.now()){return gesture?.kind==='window'&&scene==='classroom'&&t-gesture.at<ACTION_MS?{index:gesture.index,phase:clamp((t-gesture.at)/ACTION_MS,0,1),last:gesture.last,reduced:reduced.matches}:null;}
+ function windowOpened(window,previous,last,message){beginGesture({kind:'window',index:window.index,previous,last,x:window.x,y:window.y});laterToast(message,ACTION_MS);tone(last?784:660,.3);if(last)react('joy',ACTION_MS);}
  function cannotGo(){
   if(blockedNotice?.scene===scene&&distance(blockedNotice,pos)<28)return;
   blockedNotice={scene,...pos};toast('아직 갈 수 없다.');
@@ -56,7 +58,7 @@ export function installSchoolLife(ctx){
  const level=()=>Math.max(1,Number(ctx.levelInfo(ctx.getStudent()?.xp||0).level)||1);
  const cloud=createSchoolLifeSync({host,getIdentity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_save',args),onChange:cloudChanged});
  const saveKey=()=>`classRpgSchoolLife_v1_${owner}`;
- const opening=installSchoolOpening({state:()=>state,mutate,talk,react,wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),unlock:()=>{feedback.unlock();keys.clear();path=[];tone(660,.3);laterToast('교실 문이 열렸다.',2200);}});
+ const opening=installSchoolOpening({state:()=>state,mutate,talk,react,windowMotion,windowOpened,wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),unlock:()=>{feedback.unlock();keys.clear();path=[];tone(660,.3);laterToast('교실 문이 열렸다.',2200);}});
  const wish=createSchoolWish({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_wish',args),talk,hide:hideOverlay,overlay,valid});
  const memories=createSchoolMemories({talk,book,overlay:()=>overlay});
  const story=createSchoolStory({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d,m)=>playerAvatar.draw(g,d,m),avatarHand:(d,f,m)=>playerAvatar.hand(d,f,m),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
@@ -302,5 +304,5 @@ export function installSchoolLife(ctx){
  const avatarObserver=new MutationObserver(avatarChanged);
  for(const id of SLOTS){const image=document.getElementById(id);if(image){avatarObserver.observe(image,{attributes:true,attributeFilter:['src','class']});image.addEventListener('load',avatarChanged);}}
  document.addEventListener('student-dashboard-updated',()=>{if(!host.open)return;if(!valid())close();else{avatarImages();refresh();updateTitle();}});
- const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
+ const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,windowOpening:windowMotion(),openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
 }

@@ -1,3 +1,4 @@
+import {drawWindow,windowFrame} from './school-life-window-motion.js?v=20261112-curtains';
 // The opening is optional for existing saves; only explicit actions advance it.
 export function installSchoolOpening(api){
  const step=()=>api.state().opening.step;
@@ -7,7 +8,7 @@ export function installSchoolOpening(api){
  const keyReady=()=>[0,1,2].every(i=>api.state().weeds.includes(i));
  const goal=()=>['','새싹에게 초대장 보여 주기','화단 아래에서 열쇠 찾기','찾은 열쇠로 교실 열기','교실에 햇살 들이기','돌아온 토리 만나기','토리가 놓은 쪽지 읽기',''][step()];
  const enterable=()=>old()||step()>=4;
- const toriVisible=()=>old()||step()>=5;
+ const toriVisible=()=>old()||step()>=5&&!api.windowMotion?.();
  function advance(from,to,message){
   if(step()!==from)return false;
   if(!api.mutate(s=>s.opening.step=to))return false;
@@ -40,9 +41,9 @@ export function installSchoolOpening(api){
    if(api.state().dust.length<4){api.talk(window.label,'먼지가 날려 창문을 열 수 없다.\n먼저 바닥을 쓸어야 한다.');return true;}
    api.talk(window.label,'굳은 손잡이 너머로 바람 소리가 들린다.',[{label:'두 손으로 열기',run:()=>{
     if(step()!==4||old()||api.state().dust.length!==4||opened().includes(window.index))return;
-    const next=[...opened(),window.index].sort((a,b)=>a-b),last=next.length===3;
+    const previous=[...opened()],next=[...previous,window.index].sort((a,b)=>a-b),last=next.length===3;
     if(api.mutate(s=>{s.opening.windows=next;if(last)s.opening.step=5;})){
-     api.burst(e.x,e.y);api.tone(last?784:660,.3);api.toast(last?'세 창문이 열렸다. 문밖에서 발소리가 들린다.':window.label+'을 열었다.');if(last)api.react?.('joy');
+     api.windowOpened(window,previous,last,last?'세 창문이 열렸다. 문밖에서 발소리가 들린다.':window.label+'을 열었다.');
     }
    }},{label:'돌아가기'}]);return true;
   }
@@ -91,10 +92,12 @@ export function installSchoolOpening(api){
   g.restore();
  }
  function drawClassroom(g,assets){
-  const done=opened();if(done.length===3){g.drawImage(assets.classroom,0,0,1600,1067);return;}
+  const done=opened(),motion=api.windowMotion?.(),view=motion&&windowFrame(motion.phase,motion.reduced);
+  if(done.length===3&&!motion){g.drawImage(assets.classroom,0,0,1600,1067);return;}
   g.drawImage(assets.classroomClosed,0,0,1600,1067);
-  const front=[[160,188],[168,182],[416,182],[426,188],[426,350],[420,370],[164,370],[159,350]],side=[[0,272],[75,209],[86,210],[88,441],[76,462],[0,483]];
-  for(const w of windows){if(!done.includes(w.index))continue;const outline=w.index===0?front:w.index===1?side:side.map(([x,y])=>[1536-x,y]);g.save();g.beginPath();outline.forEach(([x,y],i)=>g[i?'lineTo':'moveTo'](x*1600/1536,y*1067/1024));g.closePath();g.clip();g.drawImage(assets.classroom,0,0,1600,1067);g.restore();}
+  if(motion?.last&&view.light){g.save();g.globalAlpha=view.light;g.drawImage(assets.classroom,0,0,1600,1067);g.restore();}
+  for(const index of done)drawWindow(g,assets,index,motion?.index===index?view.curtain:1);
  }
+
  return {goal,enterable,toriVisible,entities,handle,memory,draw,drawClassroom,opened};
 }
