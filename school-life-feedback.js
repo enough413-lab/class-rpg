@@ -1,4 +1,4 @@
-import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261111-actions';
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261112-door';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const VECTORS={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
 export function lookDirection(dx,dy,previous='d'){
@@ -43,15 +43,14 @@ export function createLifeFeedback(){
  return {
   reset(){door=null;thought=null;},
   notice,
-  unlock(time=performance.now()){door={at:time};notice('!',time+1000);},
+  unlock(time=performance.now(),reduced=false){door={at:time};notice('!',time+(reduced?350:2200));},
   busy(time,reduced){return !!door&&time-door.at<(reduced?350:1600);},
   cancel(){door=null;},
   draw(g,scene,pos,time,reduced){
    if(door&&scene==='campus'){
     const age=time-door.at,p=clamp(age/2200,0,1);if(p===1)door=null;
-    else{g.save();g.globalAlpha=reduced?.65:Math.sin(p*Math.PI);const light=g.createRadialGradient(815,340,4,815,365,180);light.addColorStop(0,'#fff3bdcc');light.addColorStop(.5,'#ffe9a660');light.addColorStop(1,'#ffe9a600');g.fillStyle=light;g.fillRect(615,200,400,340);
-     if(!reduced){for(const sign of [-1,1]){g.save();g.translate(815+sign*p*55,310);g.rotate(sign*p*.8);g.fillStyle='#ad8c5d';g.strokeStyle='#6d5137';g.lineWidth=2;g.beginPath();g.roundRect(-48,-7,96,14,3);g.fill();g.stroke();g.restore();}}
-     const lift=reduced?0:p*35;g.fillStyle='#edca77';g.strokeStyle='#71583b';g.lineWidth=2;g.beginPath();g.roundRect(803,307-lift,24,24,4);g.fill();g.stroke();g.beginPath();g.arc(815,307-lift,8,Math.PI,Math.PI*2);g.stroke();g.restore();}
+    else{g.save();g.globalAlpha=reduced?.2:p<.5?0:.3*Math.sin((p-.5)*Math.PI*2);const light=g.createRadialGradient(815,340,4,815,365,180);light.addColorStop(0,'#fff3bdcc');light.addColorStop(.5,'#ffe9a660');light.addColorStop(1,'#ffe9a600');g.fillStyle=light;g.fillRect(615,200,400,340);
+     g.restore();}
    }
    if(thought){const age=time-thought.at;if(age>3200)thought=null;else if(age>=0){
     const lift=reduced?0:Math.sin(Math.min(age/350,1)*Math.PI)*5;

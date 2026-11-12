@@ -1,3 +1,4 @@
+import {drawSchoolDoor} from './school-life-door.js?v=20261112-door';
 import {drawWindow,windowFrame} from './school-life-window-motion.js?v=20261112-curtains';
 import {createWindowLight,windowLights} from './school-life-window-light.js?v=20261112-sunlight';
 // The opening is optional for existing saves; only explicit actions advance it.
@@ -76,11 +77,7 @@ export function installSchoolOpening(api){
   const note=(x,y)=>{glow(x,y+1);g.drawImage(assets.invitation,x-30,y-30,60,34);};
   if(scene==='room'&&step()===0&&!api.invitationActive())note(920,700);
   if(scene==='campus'){
-   if(!enterable()){
-    g.translate(815,330);g.lineWidth=2;g.strokeStyle='#6d5137';g.fillStyle='#a88757';
-    for(const [y,a]of [[-40,-.12],[-17,.12]]){g.save();g.rotate(a);g.beginPath();g.roundRect(-49,y,98,16,3);g.fill();g.stroke();g.beginPath();g.moveTo(-38,y+6);g.lineTo(32,y+5);g.moveTo(-24,y+11);g.lineTo(39,y+10);g.stroke();for(const x of [-42,42]){g.fillStyle='#665b49';g.fillRect(x,y+6,3,3);}g.restore();}
-    g.fillStyle='#e4bd68';g.fillRect(-8,-22,16,19);g.strokeRect(-8,-22,16,19);g.translate(-815,-330);
-   }
+   drawSchoolDoor(g,api.state().projects.includes('school')?assets.restored:assets.campus,enterable(),api.doorView?.());
    if(step()===2&&keyReady()&&!api.weedPulling?.()){
     glow(793,689);
     g.strokeStyle='#fff3bf';g.lineWidth=9;g.beginPath();g.arc(780,670,8,0,Math.PI*2);g.moveTo(787,676);g.lineTo(805,691);g.stroke();

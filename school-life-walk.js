@@ -1,5 +1,5 @@
 import {createSeatRig} from './school-life-seat.js?v=20261111-sitting';
-import {actionPose} from './school-life-action.js?v=20261112-weed';
+import {actionPose} from './school-life-action.js?v=20261112-door';
 const TAU=Math.PI*2;
 function canvas(){const c=document.createElement('canvas');c.width=256;c.height=320;return c;}
 function context(c){const g=c.getContext('2d');g.scale(2,2);g.translate(64,145);return g;}
