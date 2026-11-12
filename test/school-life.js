@@ -1,10 +1,11 @@
+import {weedMotion,drawWeedRoot,drawHeldWeed,drawWeedFragments} from './school-life-weed-pull.js?v=20261112-weed';
 import {createFurnitureDepth} from './school-life-depth.js?v=20261112-depth';
 import {createReaction} from './school-life-expression.js?v=20261112-expression';
 import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {drawHeldTool,SPADE_SVG} from './school-life-tools.js?v=20261111-tools';
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
-import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261112-curtains';
-import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-curtains';
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261112-weed';
+import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-weed';
 import {createSchoolStory} from './school-life-story.js?v=20261112-depth';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261110-scenes';
@@ -15,7 +16,7 @@ import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawBroom,drawWater,drawTarget,waterTarget,lookDirection,VECTORS} from './school-life-feedback.js?v=20261111-actions';
 import {installLifeNotebook} from './school-life-notebook.js?v=20261112-windows';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261112-windows';
-import {installSchoolOpening} from './school-life-opening.js?v=20261112-sunlight';
+import {installSchoolOpening} from './school-life-opening.js?v=20261112-weed';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons={leaf:'<path d="M6 25C1 9 17 3 29 4c0 15-6 27-19 23M6 29 23 11M14 21l-1-8m1 8 9-1"/>',bag:'<path d="M10 10V8a6 6 0 0 1 12 0v2M8 10h16l3 19H5zM6 17h20M12 19v4h8v-4"/>',book:'<path d="M16 8C11 4 6 4 3 5v22c4-1 8-1 13 2 5-3 9-3 13-2V5c-5-1-9-1-13 3v21M7 11h5m-5 5h5m8-5h5m-5 5h5"/>',map:'<path d="m3 7 9-3 9 3 8-3v23l-8 3-9-3-9 3zM12 4v23M21 7v23M5 20l4-5 7 4 9-8"/>',exit:'<path d="M13 4H5v25h8M14 9l8 7-8 7m-4-7h18"/>',sound:'<path d="m4 12 7 0 8-7v24l-8-8H4zM24 10c5 3 5 9 0 12"/>',flower:'<path d="M16 30V18m0 8-8-5m8 2 7-5"/><path fill="#efb4ab" d="M16 5c8-8 12 2 6 6 11 0 8 12 0 9 2 10-10 10-10 1-9 5-13-6-5-10-6-7 3-13 9-6Z"/><circle cx="16" cy="13" r="4" fill="#f5d374"/>',wood:'<path d="m6 29 6-14 0-11m0 16 12-9m-8 6 10 3M6 29l6 1 7-14"/>',fish:'<path d="M6 16c8-15 18-11 23 0-5 11-15 15-23 0L1 9v14z"/><circle cx="23" cy="14" r="1"/>'};
@@ -58,7 +59,7 @@ export function installSchoolLife(ctx){
  const level=()=>Math.max(1,Number(ctx.levelInfo(ctx.getStudent()?.xp||0).level)||1);
  const cloud=createSchoolLifeSync({host,getIdentity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_save',args),onChange:cloudChanged});
  const saveKey=()=>`classRpgSchoolLife_v1_${owner}`;
- const opening=installSchoolOpening({state:()=>state,mutate,talk,react,windowMotion,windowOpened,wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),unlock:()=>{feedback.unlock();keys.clear();path=[];tone(660,.3);laterToast('교실 문이 열렸다.',2200);}});
+ const opening=installSchoolOpening({state:()=>state,mutate,talk,react,windowMotion,windowOpened,weedPulling:()=>gesture?.kind==='weed'&&working(),wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),unlock:()=>{feedback.unlock();keys.clear();path=[];tone(660,.3);laterToast('교실 문이 열렸다.',2200);}});
  const wish=createSchoolWish({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_wish',args),talk,hide:hideOverlay,overlay,valid});
  const memories=createSchoolMemories({talk,book,overlay:()=>overlay});
  const story=createSchoolStory({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d,m)=>playerAvatar.draw(g,d,m),avatarHand:(d,f,m)=>playerAvatar.hand(d,f,m),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
@@ -213,7 +214,8 @@ export function installSchoolLife(ctx){
   const j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=gesture&&t-gesture.at<950?gesture:null;if(!action)gesture=null;
   const phase=action?clamp((t-action.at)/ACTION_MS,0,1):0,actionView=action?actionFrame(action.kind,phase,reduced.matches):null,bend=actionView?.lean||0;
-  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;burst(action.x,action.y,action.color);tone(660,.12);}
+  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(action.kind!=='weed')burst(action.x,action.y,action.color);tone(660,.12);}
+  const worldTransform=g.getTransform();
   ellipse(drawPos.x,seat?drawPos.y+15:pos.y+5,20,7,'#314b3b45');g.save();g.translate(drawPos.x,drawPos.y-j+(reactionView?.dy||0));g.rotate(-bend*.24*facing+(reactionView?.angle||0));
   const motion={reaction:reactionView,seated:seat&&!seat.walking?seat.amount:undefined,action:action&&!reduced.matches?actionView:null,facing,walking:seat?seat.walking&&!reduced.matches:walkMoving&&!jump&&!reduced.matches&&!action,phase:seat?seat.walkPhase:walkPhase,carry:!!(heldTool||fish||story.carrying()||invitation.active())};playerAvatar.draw(g,drawLook,motion);const hand=playerAvatar.hand(drawLook,facing,motion);
   const tool=seat?'':fish?'rod':action?.kind==='water'?'can':action?.kind==='plant'?'spade':action?'':heldTool;
@@ -221,9 +223,10 @@ export function installSchoolLife(ctx){
    const h=g.getTransform().transformPoint(hand);g.save();g.translate(hand.x,hand.y);const drawn=drawHeldTool(g,{kind:tool,asset:assets[tool],direction:drawLook,facing,action:actionView,fishing:!!fish});g.restore();
    if(drawn){const world=p=>p&&({x:p.x/(DPR*S)+camera.x,y:p.y/(DPR*S)+camera.y});toolAttachment={kind:tool,hand:world(h),grip:world(drawn.grip),tip:world(drawn.tip),spout:world(drawn.spout)};if(action?.kind==='water')action.spout=toolAttachment.spout;playerAvatar.drawGrip(g,drawLook,facing,motion);}
   }
+  if(action?.kind==='weed'&&actionView.impact){const root=g.getTransform().inverse().transformPoint(worldTransform.transformPoint({x:action.x,y:action.y}));drawHeldWeed(g,assets.weed,phase,root,hand,reduced.matches);if(!reduced.matches&&weedMotion(phase).transfer>.9)playerAvatar.drawGrip(g,drawLook,facing,motion);}
   g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
   if(action?.kind==='dust')drawBroom(g,phase,reduced.matches);
-  if((action?.kind==='weed'||action?.kind==='branch')&&actionView.impact){g.save();g.globalAlpha=phase>.8?(1-phase)*5:1;g.drawImage(assets[action.kind],-43,-61,29,31);g.restore();}
+  if(action?.kind==='branch'&&actionView.impact){g.save();g.globalAlpha=phase>.8?(1-phase)*5:1;g.drawImage(assets[action.kind],-43,-61,29,31);g.restore();}
   if(invitation.active()){const point=g.getTransform().transformPoint({x:-22,y:-45});invitation.hand({x:point.x/(DPR*S)+camera.x,y:point.y/(DPR*S)+camera.y});}
   story.held(g);g.restore();placeName($('lifePlayerName'),ctx.getStudent()?.nickname||'모험가',drawPos.x,drawPos.y+17);
  }
@@ -248,7 +251,7 @@ export function installSchoolLife(ctx){
   }else if(scene==='room'){if(state.roomPlant>=0)props.push({id:'roomPlant',y:549,draw:()=>{ellipse(1450,549,20,9,'#946b50');g.fillStyle='#c89468';g.fillRect(1435,531,30,18);flower(1450,530,state.roomPlant,3,true);}});}
   else{DUST.forEach(([x,y],i)=>{if(!state.dust.includes(i)){for(let n=0;n<5;n++)ellipse(x+(n-2)*9,y+Math.sin(n)*6,12,6,'#b5a38399');}});if(state.projects.includes('library')){props.push({id:'readingNook',y:800,draw:()=>g.drawImage(assets.readingNook,1069,650,182,150)});}}
   if(gesture&&!reduced.matches&&!actionFrame(gesture.kind,(t-gesture.at)/ACTION_MS).impact){
-   if(gesture.kind==='weed')weed(gesture.x,gesture.y);
+   if(gesture.kind==='weed')drawWeedRoot(g,assets.weed,gesture,(t-gesture.at)/ACTION_MS,reduced.matches);
    if(gesture.kind==='branch')branch(gesture.x,gesture.y);
    if(gesture.kind==='dust')for(let n=0;n<5;n++)ellipse(gesture.x+(n-2)*9,gesture.y+Math.sin(n)*6,12,6,'#b5a38399');
   }
@@ -259,6 +262,7 @@ export function installSchoolLife(ctx){
   const seatId=seating.snapshot()?.id,playerDepth=Math.max(pos.y,seatId==='bench'?596:seatId==='library'?801:0),people=[...props,{id:'player',y:playerDepth,actor:{left:pos.x-100,right:pos.x+100,top:pos.y-190,bottom:pos.y+30},draw:()=>drawPlayer(t)}];if(scene==='campus')people.push({id:'saessak',y:540,actor:{left:dialogue.actor('saessak').x-35,right:dialogue.actor('saessak').x+35,top:437,bottom:548},draw:()=>{arrival.reaction(g,bob=>sprite(dialogue.pose('saessak')||assets.saessak,dialogue.actor('saessak').x,540,69,103,bob));placeName($('lifeNpcName'),'새싹',540,557);}});if(scene==='classroom'&&opening.toriVisible())people.push({id:'tori',y:615,actor:{left:dialogue.actor('tori').x-41,right:dialogue.actor('tori').x+41,top:507,bottom:623},draw:()=>sprite(dialogue.pose('tori')||assets.tori,dialogue.actor('tori').x,615,dialogue.pose('tori')?72:81,108)});for(const p of story.people(scene))people.push({id:p.key,y:p.y,actor:{left:p.x-p.w/2,right:p.x+p.w/2,top:p.y-p.h,bottom:p.y+8},draw:()=>sprite(assets[p.key],p.x,p.y,p.w,p.h)});people.sort((a,b)=>a.y-b.y);depthOrder=people.map(p=>({id:p.id,y:p.y}));people.forEach(p=>{if(p.bounds&&!people.some(a=>a.actor&&a.y<p.y&&a.actor.left<p.bounds.right&&a.actor.right>p.bounds.left&&a.actor.top<p.bounds.bottom&&a.actor.bottom>p.bounds.top))return;p.draw();});if(fish&&toolAttachment?.tip){line([[toolAttachment.tip.x,toolAttachment.tip.y],[1280,fish.phase==='bite'?741:734]],'#f1e9c9',1.5);ellipse(1280,fish.phase==='bite'?741:734,4,5,'#f38762');}
   
   opening.drawLight(g,scene);dialogue.draw(g);invitation.drawWorld(g);
+  if(gesture?.kind==='weed')drawWeedFragments(g,gesture,(t-gesture.at)/ACTION_MS,reduced.matches);
   drawWater(g,gesture,t,reduced.matches);feedback.draw(g,scene,pos,t,reduced.matches);
   effect.forEach(e=>{g.globalAlpha=Math.max(0,e.life);ellipse(e.x,e.y,4,4,e.color);});g.globalAlpha=1;
  }
@@ -304,5 +308,5 @@ export function installSchoolLife(ctx){
  const avatarObserver=new MutationObserver(avatarChanged);
  for(const id of SLOTS){const image=document.getElementById(id);if(image){avatarObserver.observe(image,{attributes:true,attributeFilter:['src','class']});image.addEventListener('load',avatarChanged);}}
  document.addEventListener('student-dashboard-updated',()=>{if(!host.open)return;if(!valid())close();else{avatarImages();refresh();updateTitle();}});
- const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
+ const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,toolTarget:heldTool==='can'?selectedWater():null,gesture:gesture?.kind||null,seating:seating.snapshot(),toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/ACTION_MS,reduced.matches),impactShown:!!gesture.impactShown}:null,weedPull:gesture?.kind==='weed'?weedMotion((performance.now()-gesture.at)/ACTION_MS,reduced.matches):null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
 }

@@ -20,7 +20,7 @@ export function installSchoolOpening(api){
  function entities(scene){
   const n=step(),items=[];
   if(scene==='room'&&n===0)items.push({id:'invitation',x:920,y:700,label:'잎사귀 초대장',action:'집기',kind:'opening'});
-  if(scene==='campus'&&n===2&&keyReady())items.push({id:'schoolKey',x:790,y:678,label:'풀 아래 작은 열쇠',action:'줍기',kind:'opening'});
+  if(scene==='campus'&&n===2&&keyReady()&&!api.weedPulling?.())items.push({id:'schoolKey',x:790,y:678,label:'풀 아래 작은 열쇠',action:'줍기',kind:'opening'});
   if(scene==='classroom'&&n===4&&!old())items.push(...windows.filter(w=>!opened().includes(w.index)).map(w=>({...w,action:'열기',kind:'opening'})));
   if(scene==='classroom'&&n===6)items.push({id:'bellNote',x:950,y:740,label:'토리가 놓은 쪽지',action:'읽기',kind:'opening'});
   return items;
@@ -81,7 +81,7 @@ export function installSchoolOpening(api){
     for(const [y,a]of [[-40,-.12],[-17,.12]]){g.save();g.rotate(a);g.beginPath();g.roundRect(-49,y,98,16,3);g.fill();g.stroke();g.beginPath();g.moveTo(-38,y+6);g.lineTo(32,y+5);g.moveTo(-24,y+11);g.lineTo(39,y+10);g.stroke();for(const x of [-42,42]){g.fillStyle='#665b49';g.fillRect(x,y+6,3,3);}g.restore();}
     g.fillStyle='#e4bd68';g.fillRect(-8,-22,16,19);g.strokeRect(-8,-22,16,19);g.translate(-815,-330);
    }
-   if(step()===2&&keyReady()){
+   if(step()===2&&keyReady()&&!api.weedPulling?.()){
     glow(793,689);
     g.strokeStyle='#fff3bf';g.lineWidth=9;g.beginPath();g.arc(780,670,8,0,Math.PI*2);g.moveTo(787,676);g.lineTo(805,691);g.stroke();
     g.strokeStyle='#b48c48';g.lineWidth=4;g.beginPath();g.arc(780,670,8,0,Math.PI*2);g.moveTo(787,676);g.lineTo(805,691);g.lineTo(811,685);g.moveTo(798,685);g.lineTo(804,679);g.stroke();
