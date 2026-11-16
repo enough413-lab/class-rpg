@@ -35,7 +35,7 @@ select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;f
 import {levelInfo} from './rpg-progression.js?v=20261007-release';
 import {weeklyResetLabel,resetDayOptions} from './quest-schedule.js?v=20261007-release';
 import {submissionLabels,editQuestDetails} from './quest-submission.js?v=20261007-release';
-import { createQuestReviews, coalesceRefresh } from './teacher-quest-reviews.js?v=20261116-review-load';
+import { createQuestReviews, coalesceRefresh } from './teacher-quest-reviews.js?v=20261116-approval-speed';
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const URL='https://dgqtxavsymvwjeyyyjle.supabase.co';const KEY='sb_publishable_-Cdj1Dj-KY3PsZxCcpM7Lg_etojZrmL';const db=createClient(URL,KEY);window.db=db;
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));

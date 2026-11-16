@@ -159,7 +159,7 @@ export function createQuestReviews({ root, db, refresh, refreshSummary, onCount 
     find('[data-all]').checked = rows.length > 0 && count === rows.length;
     find('[data-all]').indeterminate = count > 0 && count < rows.length;
     find('[data-all]').disabled = locked || !rows.length;
-    find('[data-period]').disabled = busy;
+    find('[data-period]').disabled = locked;
     find('[data-close]').disabled = busy;
     dialog.querySelectorAll('[data-filter],[data-open-student],[data-detail-close]').forEach(el=>el.disabled=busy);
     find('[data-selection]').textContent = `${rows.length}건 중 ${count}건 선택`;
@@ -367,6 +367,29 @@ export function createQuestReviews({ root, db, refresh, refreshSummary, onCount 
     }
   }
 
+  // This runs only after the server confirms every requested approval committed.
+  // It never anticipates success or computes a reward in the browser.
+  function showConfirmedApprovals(candidates) {
+    const ids=new Set(candidates.map(r=>String(r.id)));
+    groups=groups.map(group=>{
+      const records=(group.records||[]).map(row=>ids.has(String(row.id))?{...row,status:'approved',rejection_reason:null}:row);
+      return {...group,records,rows:records.filter(row=>row.status==='submitted')};
+    });
+    for(const id of ids)evidence.delete(id);
+    ++detailRequest;
+    if(detail.open){detail.close();detail.replaceChildren();detailStudent=null;}
+    selected.clear();
+    busy=false;
+    message=candidates.length+'건 승인 완료';failed=false;
+    onCount(groups.reduce((sum,g)=>sum+g.rows.length,0));
+    renderBanners();renderDialog();
+    const last=Math.max(...candidates.map(r=>Number(r.students?.student_number||0)));
+    const remaining=visibleRows();
+    const next=remaining.find(r=>Number(r.students?.student_number||0)>last)||remaining[0];
+    const target=next?dialog.querySelector('[data-open-student="'+next.student_id+'"]'):find('[data-close]');
+    target?.focus({preventScroll:true});target?.scrollIntoView({block:'nearest'});
+  }
+
   async function review(ids, approve) {
     if (busy || loading || waitingLoads.length || !listReady || (detail.open && !evidence.has(String(detailRow()?.id)))) return;
     const scope={questId:currentId,periodKey:period};
@@ -378,25 +401,35 @@ export function createQuestReviews({ root, db, refresh, refreshSummary, onCount 
       if (reason === null) return;
       if (!reason.trim()) { message = '보완할 내용을 적어 주세요.'; failed = true; controls(); return; }
     } else if (!win.confirm(`${current().title}\n선택한 ${candidates.length}건을 승인하고 보상을 지급할까요?`)) return;
+    let confirmed=false;
     busy = true; ++request; message = '처리 중이에요…'; failed = false; controls();
     try {
-      const { error } = approve
+      const { data, error } = approve
         ? await db.rpc('teacher_bulk_review_submissions', { p_submission_ids: candidates.map(r => r.id), p_approve: true })
         : await db.rpc('review_submission_with_reason', { target_submission: candidates[0].id, approve: false, p_reason: reason.trim() });
       if (error) throw error;
       selected.clear();
       message = approve ? '승인 처리가 완료됐어요.' : '보완 요청을 보냈어요.';
+      confirmed=approve && Number.isInteger(data) && data===candidates.length;
+      if(confirmed){
+        showConfirmedApprovals(candidates);
+        if(refreshSummary)Promise.resolve().then(refreshSummary).catch(()=>{});
+      }
       reconciling=true;
       await load(scope);
-      if(refreshSummary)Promise.resolve().then(refreshSummary).catch(()=>{});
+      if(!confirmed && refreshSummary)Promise.resolve().then(refreshSummary).catch(()=>{});
     } catch (error) {
       selected.clear();
+      if(confirmed){
+        message=candidates.length+'건 승인은 완료됐습니다. 목록 갱신에 실패했습니다. 다시 불러오기를 누르세요.';
+        failed=true;controls();return;
+      }
       message = `처리 결과를 확인해 주세요. ${error?.message || '연결에 문제가 생겼어요.'}`;
       failed = true;
       // No automatic retry: refresh the pending rows before allowing another action.
       reconciling=true;
       try { await load(scope); } catch { /* load renders a safe error state */ }
-    } finally { busy = false; reconciling=false; controls(); drainLoads(); if(detail.open)ensureDetails(); }
+    } finally { busy = false; reconciling=false; controls(); drainLoads(); if(!confirmed && detail.open)ensureDetails(); }
   }
 
   root.addEventListener('click', event => {
