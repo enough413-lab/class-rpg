@@ -1,4 +1,4 @@
-import {selectedGround} from './school-life-ground-map.js?v=20261117-ground';
+import {selectedGround} from './school-life-ground-map.js?v=20261117-boundary';
 import {waterTarget,VECTORS} from './school-life-feedback.js?v=20261112-door';
 // The six retained flower anchors belong to the original 70x56 bed.
 // All tools share this compatibility selection; the surrounding lawn stays on

@@ -1,6 +1,6 @@
-import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-tools';
-import {createGroundStorage} from './school-life-ground-storage.js?v=20261117-tools';
-import {groundCell,groundAllowed,groundObstructed,selectedGround} from './school-life-ground-map.js?v=20261117-tools';
+import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-boundary';
+import {createGroundStorage} from './school-life-ground-storage.js?v=20261117-boundary';
+import {groundCell,groundAllowed,groundObstructed,retainedFlowerSite} from './school-life-ground-map.js?v=20261117-boundary';
 import {residentUse} from './school-life-residents.js?v=20261117-residents';
 import {workerScene,workerLayers} from './school-life-workers.js?v=20261112-workers';
 import {createFacilityRepair,REPAIR_MS,constructionView,constructionLayers} from './school-life-repair.js?v=20261113-construction';
@@ -10,9 +10,9 @@ import {weedMotion,drawWeedRoot,drawHeldWeed,drawWeedFragments} from './school-l
 import {createFurnitureDepth} from './school-life-depth.js?v=20261112-depth';
 import {createReaction} from './school-life-expression.js?v=20261112-expression';
 import {faceTarget} from './school-life-facing.js?v=20261111-facing';
-import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school-life-tools.js?v=20261117-tools';
+import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school-life-tools.js?v=20261117-boundary';
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
-import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-tools';
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-boundary';
 import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-door';
 import {createSchoolStory} from './school-life-story.js?v=20261112-depth';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
@@ -22,7 +22,7 @@ import {createInvitationAction} from './school-life-invitation.js?v=20261110-arr
 import {createSchoolMemories} from './school-life-memories.js?v=20261112-depth';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawWater,lookDirection,VECTORS} from './school-life-feedback.js?v=20261112-door';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261117-tools';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261117-boundary';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261113-construction';
 import {installSchoolOpening} from './school-life-opening.js?v=20261117-residents';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
@@ -238,7 +238,7 @@ export function installSchoolLife(ctx){
   if(e.kind==='exit'){const firstArrival=scene==='room'&&e.target==='campus'&&!state.opening.legacy&&state.opening.step===1&&!arrivalSeen();const target=e.target;const dest=target==='campus'?(scene==='room'?{x:295,y:575}:{x:815,y:485}):{x:800,y:860};if(mutate(s=>{s.scene=target;s.position=dest;if(target==='classroom'&&s.opening.step===3)s.opening.step=4})){scene=target;pos=dest;refresh();if(firstArrival)queuedArrival={owner,token:ownerToken,state,position:{...dest}};else toast(names[scene]);}return;}
   if(e.kind==='npc'){if(e.id==='saessak'){const text=residents().saessak?'이제 삐걱거리지 않네.\n옆자리 비어 있어.':state.weeds.length<6?'여기, 작은 초록빛이 숨어 있어.\n마당의 잡초를 뽑고 빈 흙에 꽃을 심어 볼래?\n나뭇가지는 벤치를 고칠 때 쓸 수 있어.':state.flowers.slice(0,3).some(f=>f.stage<3)?'마당이 훨씬 환해졌어!\n씨앗을 심고 두 번 물을 주면 꽃이 피어.\n어떤 꽃을 심을지는 주머니에서 골라 봐.':'우리가 돌본 학교에 꽃이 피었네!\n네가 고른 꽃이 학교와 참 잘 어울려.\n가끔 연못에서 쉬어 가는 것도 좋아.';talk('새싹',wish.remember('saessak',text),[{label:'둘러볼게'},{label:'이 학교 말인데',run:()=>wish.open('saessak')}],'saessak');}else talk('토리',wish.remember('tori',state.projects.includes('library')?'우리 교실에 책쉼터가 생겼네!\n여기 앉아서 한숨 돌려도 좋아.':'네가 들어오니 교실에 생기가 도네.\n여기서 다시 책을 읽을 수 있어 기뻐.'),[{label:'다녀올게'},{label:'이 학교 말인데',run:()=>wish.open('tori')}],'tori');return;}
   if(['weed','branch','dust'].includes(e.kind)){const field={weed:'weeds',branch:'branches',dust:'dust'}[e.kind];if(mutate(s=>{if(!s[field].includes(e.index)){s[field].push(e.index);if(e.kind==='branch')s.wood++;}})){beginGesture({kind:e.kind,x:e.x,y:e.y,direction:look});gesture.color=e.kind==='dust'?'#d8c9ab':'#fbe3a1';laterToast(e.kind==='weed'?'잡초를 뽑았다.':e.kind==='branch'?'나뭇가지 +1':'먼지를 쓸었다.');}return;}
-  if(e.kind==='flower'){const f=state.flowers[e.index];if(f.stage===3){talk(FLOWER_NAMES[f.kind],'꽃이 활짝 피었다.\n같은 꽃 모양의 화분을 방에 놓을 수 있다.',[{label:'내 방에 놓기',run:()=>{if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}},{label:'여기서 바라보기'}]);}else if(mutate(s=>{const f=s.flowers[e.index];if(!f.stage)f.kind=s.seed;f.stage++;})){beginGesture({kind:f.stage>0?'water':'plant',x:e.x,y:e.y,from:{...pos},spout:waterSpout()});burst(e.x,e.y,f.stage===2?'#ffeaaa':'#b9dfed');tone(880,.15);if(f.stage===2)react('joy',ACTION_MS);laterToast(state.flowers[e.index].stage===1?'씨앗을 심었다.':state.flowers[e.index].stage===2?'새싹이 돋았다.':'꽃이 피었다.');}return;}
+  if(e.kind==='flower'){if(!retainedFlowerSite(e,state.projects)){toast('여기에는 심을 수 없다.');return;}const f=state.flowers[e.index];if(f.stage===3){talk(FLOWER_NAMES[f.kind],'꽃이 활짝 피었다.\n같은 꽃 모양의 화분을 방에 놓을 수 있다.',[{label:'내 방에 놓기',run:()=>{if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}},{label:'여기서 바라보기'}]);}else if(mutate(s=>{const f=s.flowers[e.index];if(!f.stage)f.kind=s.seed;f.stage++;})){beginGesture({kind:f.stage>0?'water':'plant',x:e.x,y:e.y,from:{...pos},spout:waterSpout()});burst(e.x,e.y,f.stage===2?'#ffeaaa':'#b9dfed');tone(880,.15);if(f.stage===2)react('joy',ACTION_MS);laterToast(state.flowers[e.index].stage===1?'씨앗을 심었다.':state.flowers[e.index].stage===2?'새싹이 돋았다.':'꽃이 피었다.');}return;}
   if(e.kind==='plant'){if(state.roomPlant<0)talk('작은 선반','학교에서 키운 꽃 모양의 화분을 놓는 자리.');else talk('나의 작은 화분',FLOWER_NAMES[state.roomPlant]+' 화분. 학교에서 키운 꽃과 같은 모양이다.');return;}
   if(e.kind==='project'){const p=PROJECTS.find(p=>p.id===e.id);if(e.id==='school'&&schoolConstruction())return;if(state.projects.includes(e.id)){if(e.id==='bench'||e.id==='library'){sit(e.id);}else talk(p.name,'수리가 끝났다.');return;}const reason=projectRequirement(state,p.id,level());if(reason){talk(p.name,reason+`\n${p.description}`,[{label:'확인'},{label:'학교 수첩',run:journal}]);return;}if(p.id==='school'){talk('학교 외관','지붕과 벽을 고친다. 내일 완공.\n나뭇가지 5개 필요',[{label:'공사 시작',run:()=>{if(!projectRequirement(state,'school',level()))buildSchool('start_school');}},{label:'돌아가기'}]);return;}talk(p.name,p.description+(p.wood?`\n나뭇가지 ${p.wood}개 필요`:''),[{label:'함께 고치기',run:()=>{if(projectRequirement(state,p.id,level()))return;if(mutate(s=>{s.projects.push(p.id);s.wood-=p.wood;})){clearReaction();gesture=null;keys.clear();path=[];jump=0;repair.start(p);workControls();const duration=reduced.matches?1000:REPAIR_MS;laterToast(p.name+' 완성',duration);react('joy',duration);}}},{label:'조금 이따가'}]);return;}
   if(e.kind==='pond'){heldTool='rod';look='r';facing=-1;fish={phase:'wait',at:performance.now(),bite:performance.now()+1700+Math.random()*1600};$('lifeFish').hidden=false;tone(440,.1);}

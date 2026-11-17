@@ -26,4 +26,10 @@ export const GROUND_CELLS=Object.freeze(Array.from({length:560},(_,i)=>groundCel
 const allowed=new Set(GROUND_CELLS);
 export function groundAllowed(id){return allowed.has(id);}
 export function selectedGround(pos,look){const vector={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]}[look]||[0,1],col=Math.floor(pos.x/56)+vector[0],row=Math.floor(pos.y/56)+vector[1];if(col<0||col>=28||row<0||row>=20)return null;return groundCell(row*28+col);}
+// Legacy flower anchors are retained separately from freely dug ground.
+// Only their exact original positions and unlocked indexes can accept a seed.
+export function retainedFlowerSite(target,projects=[]){
+ if(!target||!Number.isInteger(target.index)||target.index<0||target.index>=(projects.includes('garden')?6:3))return false;
+ const point=FLOWERS[target.index];return !!point&&target.x===point[0]&&target.y===point[1];
+}
 export function groundObstructed(id,state){const c=groundCell(id);if(!c||!groundAllowed(id))return true;return [[WEEDS,state.weeds],[BRANCHES,state.branches]].some(([points,cleared])=>points.some(([x,y],i)=>!cleared.includes(i)&&Math.abs(x-c.x)<50&&Math.abs(y-c.y)<40));}
