@@ -60,7 +60,7 @@ export function installSchoolOpening(api){
    else if(step()===3)api.talk('새싹','찾았다! 그게 교실 열쇠야.',[{label:'문을 열어 볼게!'},api.wishChoice()],'saessak');
    else if(step()===4)api.talk('새싹','문이 열렸네!\n안은 먼지투성이야. 바닥을 쓸고 창문부터 열자.',[{label:'다녀올게!'},api.wishChoice()],'saessak');
    else if(step()===5&&!old())api.talk('새싹','방금 누가 교실로 들어갔어.\n저 뒷모습… 토리인가?',[{label:'가서 볼게'},api.wishChoice()],'saessak');
-   else if(step()>=6&&!old())api.talk('새싹',api.remember('saessak','토리가 돌아왔다고?\n그럼 그 책, 끝까지 읽을 수 있겠네.'),[{label:'교실에서 만나자'},api.wishChoice()],'saessak');
+   else if(step()>=6&&!old())api.talk('새싹',api.remember('saessak',api.residentGreeting?.()||'토리가 돌아왔다고?\n그럼 그 책, 끝까지 읽을 수 있겠네.'),[{label:api.residentGreeting?.()?'좀 쉬고 있어':'교실에서 만나자'},api.wishChoice()],'saessak');
    else return false;
    return true;
   }
