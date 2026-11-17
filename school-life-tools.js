@@ -8,7 +8,7 @@ export const TOOL_SHAPES={
 export const SPADE_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="56" height="92" viewBox="0 0 56 92"><path d="M28 15V63" stroke="#6e5137" stroke-width="9" stroke-linecap="round"/><path d="M28 16V61" stroke="#c9a372" stroke-width="4" stroke-linecap="round"/><path d="M20 7Q28 3 36 7L33 18H23Z" fill="#a0b7a0" stroke="#536f60" stroke-width="3"/><path d="M17 54Q28 49 39 54L40 71Q38 82 28 88 18 82 16 71Z" fill="#b9c9bb" stroke="#536f60" stroke-width="3"/><path d="M28 57V80" stroke="#e8e6c9" stroke-width="3" stroke-linecap="round"/></svg>';
 export function toolTransform(kind,direction,facing=1,action=null){
  const mirror=direction==='r'?1:direction==='l'||direction==='u'?-1:-facing;
- const angle=kind==='can'? (direction==='u'?-mirror*.65:direction==='d'?mirror*.65:0)+(action?.kind==='water'?mirror*action.tilt:0):kind==='spade'?-mirror*.12:0;
+ const angle=kind==='can'? (direction==='u'?-mirror*.65:direction==='d'?mirror*.65:0)+(action?.kind==='water'?mirror*action.tilt:0):kind==='spade'?(action?.kind==='dig'?({d:0,u:0,l:Math.PI/2,r:-Math.PI/2}[direction]||0):-mirror*.12):0;
  return {mirror,angle};
 }
 function rod(g,fishing){
