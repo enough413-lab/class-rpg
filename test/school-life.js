@@ -1,4 +1,4 @@
-import {createGardenStorage} from './school-life-garden-storage.js?v=20261117-calendar';
+import {createGardenStorage} from './school-life-garden-storage.js?v=20261117-harvest';
 import {PLANT_MS,plantingFrame,drawPlanting} from './school-life-planting.js?v=20261117-plant';
 import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-plant';
 import {createGroundStorage} from './school-life-ground-storage.js?v=20261117-plant';
@@ -24,7 +24,7 @@ import {createInvitationAction} from './school-life-invitation.js?v=20261110-arr
 import {createSchoolMemories} from './school-life-memories.js?v=20261112-depth';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawWater,lookDirection,VECTORS} from './school-life-feedback.js?v=20261112-door';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261117-seed-days';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261117-harvest';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261113-construction';
 import {installSchoolOpening} from './school-life-opening.js?v=20261117-residents';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
@@ -89,7 +89,7 @@ export function installSchoolLife(ctx){
   if(s.status==='ready'&&gardenIntent&&s.command?.id===gardenIntent.id){
    const request=gardenIntent;gardenIntent=null;
    if(mode==='play'&&scene===request.scene&&!stopped&&!document.hidden){
-    const f=s.plants[request.slot],text=({enrolled:null,already_enrolled:null,planted:'씨앗을 심고 물을 줬다.',occupied:'이미 심은 꽃이 있다.',watered:f?.stage===3?'꽃이 피었다.':f?.stage===2?'새싹에 물을 줬다.':'씨앗에 물을 줬다.',empty:'아직 심은 꽃이 없다.',mature:'꽃이 활짝 피었다.',already_watered_today:'오늘은 이미 물을 줬다.',clock_backwards:'날짜 확인 뒤 다시 물을 줄 수 있다.'})[s.command.outcome];
+    const f=s.plants[request.slot],text=({enrolled:null,already_enrolled:null,planted:'씨앗을 심고 물을 줬다.',occupied:'이미 심은 꽃이 있다.',watered:f?.stage===3?'꽃이 피었다.':f?.stage===2?'새싹에 물을 줬다.':'씨앗에 물을 줬다.',empty:'아직 심은 꽃이 없다.',mature:'꽃이 활짝 피었다.',already_watered_today:'오늘은 이미 물을 줬다.',clock_backwards:'날짜 확인 뒤 다시 물을 줄 수 있다.',harvested:'꽃 1개 · 씨앗 1개',not_mature:'아직 수확할 꽃이 없다.',bag_full:'주머니에 자리가 없다. 꽃은 그대로 남았다.'})[s.command.outcome];
     if(text)laterToast(text,Math.max(0,(gesture?.at||0)+gestureDuration()-performance.now()));
    }
   }else if(!['ready','saving'].includes(s.status)){gardenIntent=null;if(['plant','water'].includes(gesture?.kind)){gesture=null;actionUntil=0;queuedToast=null;}}
@@ -114,7 +114,11 @@ export function installSchoolLife(ctx){
   if(!retainedFlowerSite(e,state.projects)){toast('여기에는 심을 수 없다.');return;}
   const s=garden.snapshot();if(s.status!=='ready'||!s.enrolled){gardenPanel();return;}
   const f=s.plants[e.index];
-  if(!watering&&f.stage===3){talk(FLOWER_NAMES[f.kind],'꽃이 활짝 피었다.\n같은 꽃 모양의 화분을 방에 놓을 수 있다.',[{label:'내 방에 놓기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||!now.enrolled||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}},{label:'여기서 바라보기'}]);return;}
+  if(!watering&&f.stage===3){talk(FLOWER_NAMES[f.kind],'수확하면 꽃 1개와 씨앗 1개.',[
+   {label:'수확하기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;gardenIntent={scene,slot:e.index,id:null};if(garden.harvest(e.index,String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;}else gardenIntent=null;}},
+   {label:'그대로 두기'},
+   {label:'내 방에 놓기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||!now.enrolled||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}}
+  ]);return;}
   const planting=!watering&&f.stage===0;gardenIntent={scene,slot:e.index,id:null};
   const accepted=planting?garden.plant(e.index,state.seed,String(cloud.store.snapshot().revision)):garden.water(e.index,String(cloud.store.snapshot().revision));
   if(!accepted){gardenIntent=null;return;}
@@ -145,7 +149,7 @@ export function installSchoolLife(ctx){
  }
  const names={room:'나의 작은 방',campus:'봄빛 학교',classroom:'우리 교실'};
  const manifest={saessakSeated:'maps/npcs/saessak-seated-v1.webp',workers:'maps/npcs/squirrel-workers-v1.webp',woods:'maps/life/woods-v1.webp',bellFrame:'maps/life/bell-frame-v1.webp',saessakPoint:'maps/npcs/saessak-point-v1.webp',toriNote:'maps/npcs/tori-note-v1.webp',duri:'maps/npcs/duri-anime-v2.webp',prologueBell:'maps/life/prologue-bell-v1.webp',invitation:'maps/life/invitation-harmony-v2.webp',campus:'maps/life/campus-harmony-v2.webp',restored:'maps/life/restored-harmony-v2.webp',room:'maps/life/room-harmony-v2.webp',classroom:'maps/life/classroom-harmony-v2.webp',classroomClosed:'maps/life/classroomClosed-harmony-v2.webp',saessak:'maps/npcs/saessak-anime-v2.webp',tori:'maps/npcs/tori-anime-v2.webp',bench:'maps/life/bench-harmony-v2.webp',weed:'maps/life/weed-harmony-v2.webp',branch:'maps/life/branch-harmony-v2.webp',soil:'maps/life/soil-harmony-v2.webp',sprout:'maps/life/sprout-harmony-v2.webp',flower:'maps/life/flower-harmony-v2.webp',flowerPink:'maps/life/flowerPink-harmony-v2.webp',flowerBlue:'maps/life/flowerBlue-harmony-v2.webp',brokenBench:'maps/life/brokenBench-harmony-v2.webp',readingNook:'maps/life/readingNook-harmony-v2.webp',lantern:'maps/life/lantern-harmony-v2.webp'};
- const notebook=installLifeNotebook({state:lifeView,construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
+ const notebook=installLifeNotebook({state:lifeView,garden:()=>garden.snapshot(),construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
  const arrival=createSchoolArrival({overlay,hide:hideOverlay,reduced:()=>reduced.matches,tone,toggleSound,soundEnabled:()=>sound});
  const dialogue=createSchoolConversations({overlay,hide:hideOverlay,reduced:()=>reduced.matches,assets:()=>assets});
  const invitation=createInvitationAction({overlay,hide:hideOverlay,reduced:()=>reduced.matches});
