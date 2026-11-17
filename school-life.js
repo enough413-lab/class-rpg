@@ -1,3 +1,4 @@
+import {HARVEST_MS,harvestFrame,drawHarvest} from './school-life-harvest.js?v=20261117-harvest-motion';
 import {createGardenStorage} from './school-life-garden-storage.js?v=20261117-harvest';
 import {PLANT_MS,plantingFrame,drawPlanting} from './school-life-planting.js?v=20261117-plant';
 import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-plant';
@@ -14,7 +15,7 @@ import {createReaction} from './school-life-expression.js?v=20261112-expression'
 import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school-life-tools.js?v=20261117-plant';
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
-import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-plant';
+import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-avatar.js?v=20261112-door';
 import {createSchoolStory} from './school-life-story.js?v=20261112-depth';
 import {createSchoolWish} from './school-life-wish.js?v=20261110-memory';
@@ -54,8 +55,8 @@ export function installSchoolLife(ctx){
  let look='d',queuedToast=null,queuedArrival=null,replayOrigin=null;const arrivalsSeen=new Set();
  function laterToast(text,delay=950){queuedToast={text,at:performance.now()+delay,scene};}
  let blockedNotice=null,workControlsLocked=null;
- const gestureDuration=()=>gesture?.kind==='plant'?PLANT_MS:ACTION_MS;
- function working(t=performance.now()){return garden.snapshot().status==='saving'||cloudStatus==='saving'&&!!buildIntent||repair.active(t,reduced.matches)||doorAction.active(t,reduced.matches)||!!gesture&&['weed','branch','dust','plant','water','window','dig'].includes(gesture.kind)&&t-gesture.at<gestureDuration();}
+ const gestureDuration=()=>gesture?.kind==='plant'?PLANT_MS:gesture?.kind==='harvest'?HARVEST_MS:ACTION_MS;
+ function working(t=performance.now()){return garden.snapshot().status==='saving'||cloudStatus==='saving'&&!!buildIntent||repair.active(t,reduced.matches)||doorAction.active(t,reduced.matches)||!!gesture&&['weed','branch','dust','plant','water','window','dig','harvest'].includes(gesture.kind)&&t-gesture.at<gestureDuration();}
  function workControls(t=performance.now()){
   const seat=seating.snapshot(),locked=working(t)||!!seat&&seat.phase!=='rest',menus=locked||!!seat,key=locked+'|'+menus;if(key!==workControlsLocked){workControlsLocked=key;host.querySelectorAll('[data-dir]').forEach(b=>b.disabled=locked);host.querySelectorAll('[data-life=bag],[data-life=journal],[data-life=map]').forEach(b=>b.disabled=menus);}
   $('lifeUse').disabled=locked||(!near&&!seat);$('lifeTool').disabled=locked||!!seat;
@@ -89,6 +90,7 @@ export function installSchoolLife(ctx){
   if(s.status==='ready'&&gardenIntent&&s.command?.id===gardenIntent.id){
    const request=gardenIntent;gardenIntent=null;
    if(mode==='play'&&scene===request.scene&&!stopped&&!document.hidden){
+    if(s.command.outcome==='harvested'&&!s.command.replay&&request.target){clearTimeout(toastTimer);$('lifeToast').hidden=true;queuedToast=null;beginGesture({...request.target,kind:'harvest',from:{...pos},direction:look});actionUntil=performance.now()+HARVEST_MS;}
     const f=s.plants[request.slot],text=({enrolled:null,already_enrolled:null,planted:'씨앗을 심고 물을 줬다.',occupied:'이미 심은 꽃이 있다.',watered:f?.stage===3?'꽃이 피었다.':f?.stage===2?'새싹에 물을 줬다.':'씨앗에 물을 줬다.',empty:'아직 심은 꽃이 없다.',mature:'꽃이 활짝 피었다.',already_watered_today:'오늘은 이미 물을 줬다.',clock_backwards:'날짜 확인 뒤 다시 물을 줄 수 있다.',harvested:'꽃 1개 · 씨앗 1개',not_mature:'아직 수확할 꽃이 없다.',bag_full:'주머니에 자리가 없다. 꽃은 그대로 남았다.'})[s.command.outcome];
     if(text)laterToast(text,Math.max(0,(gesture?.at||0)+gestureDuration()-performance.now()));
    }
@@ -115,7 +117,7 @@ export function installSchoolLife(ctx){
   const s=garden.snapshot();if(s.status!=='ready'||!s.enrolled){gardenPanel();return;}
   const f=s.plants[e.index];
   if(!watering&&f.stage===3){talk(FLOWER_NAMES[f.kind],'수확하면 꽃 1개와 씨앗 1개.',[
-   {label:'수확하기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;gardenIntent={scene,slot:e.index,id:null};if(garden.harvest(e.index,String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;}else gardenIntent=null;}},
+   {label:'수확하기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;gardenIntent={scene,slot:e.index,id:null,target:{x:e.x,y:e.y,index:e.index,flowerKind:f.kind}};if(garden.harvest(e.index,String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;}else gardenIntent=null;}},
    {label:'그대로 두기'},
    {label:'내 방에 놓기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||!now.enrolled||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}}
   ]);return;}
@@ -315,13 +317,13 @@ export function installSchoolLife(ctx){
  function branch(x,y){g.drawImage(assets.branch,x-31,y-27,62,52);}
  function flag(x,y,text){line([[x,y],[x,y-42]],'#85734c',4);g.fillStyle='#e9d7a4';g.beginPath();g.roundRect(x-22,y-55,44,25,4);g.fill();g.strokeStyle='#8c8053';g.lineWidth=2;g.stroke();g.font='14px SchoolLife';g.textAlign='center';g.fillStyle='#695b3b';g.fillText(text,x,y-37);}
  function sprite(img,x,y,w,h,bob=0){if(!img?.complete||!img.naturalWidth)return;ellipse(x,y+4,w*.26,8,'#364e3930');g.drawImage(img,x-w/2,y-h+bob,w,h);}
- let toolAttachment=null,plantingAttachment=null;
+ let toolAttachment=null,plantingAttachment=null,harvestAttachment=null;
  function drawPlayer(t){
-  toolAttachment=null;plantingAttachment=null;
+  toolAttachment=null;plantingAttachment=null;harvestAttachment=null;
   const doorView=doorAction.view(t,reduced.matches),seat=seating.view(t,reduced.matches),drawLook=doorView?'u':seat?.look||look;let drawPos=doorView?.position||seat||pos;
   const j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=doorView&&!doorView.walking&&!reduced.matches?{kind:'unlock'}:gesture&&t-gesture.at<gestureDuration()?gesture:null;if(!action)gesture=null;
-  const phase=doorView?doorView.keyPhase:action?clamp((t-action.at)/(action.kind==='plant'?PLANT_MS:ACTION_MS),0,1):0,actionView=action?actionFrame(action.kind,phase,reduced.matches):null,bend=actionView?.lean||0;
+  const phase=doorView?doorView.keyPhase:action?clamp((t-action.at)/(action.kind==='plant'?PLANT_MS:action.kind==='harvest'?HARVEST_MS:ACTION_MS),0,1):0,actionView=action?actionFrame(action.kind,phase,reduced.matches):null,bend=actionView?.lean||0;
   if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(!['weed','dust'].includes(action.kind))burst(action.x,action.y,action.color);tone(660,.12);}
   const motion={reaction:reactionView,seated:seat&&!seat.walking?seat.amount:undefined,action:action&&!reduced.matches?actionView:null,facing,walking:doorView?doorView.walking&&!reduced.matches:seat?seat.walking&&!reduced.matches:walkMoving&&!jump&&!reduced.matches&&!action,phase:doorView?doorView.walkPhase:seat?seat.walkPhase:walkPhase,carry:!!(doorView||heldTool||fish||story.carrying()||invitation.active())};const hand=playerAvatar.hand(drawLook,facing,motion);
   if(action?.kind==='dig'&&!reduced.matches){
@@ -331,6 +333,7 @@ export function installSchoolLife(ctx){
    drawPos={x:pos.x+(action.x-pos.x-rx)*reach,y:pos.y+(action.y-pos.y-ry)*reach};
   }
   if(action?.kind==='plant'&&!reduced.matches){const q=plantingFrame(phase).reach,a=-bend*.24*facing,rx=hand.x*Math.cos(a)-hand.y*Math.sin(a),ry=hand.x*Math.sin(a)+hand.y*Math.cos(a);drawPos={x:pos.x+(action.x-pos.x-rx)*q,y:pos.y+(action.y-pos.y-ry)*q};}
+  if(action?.kind==='harvest'&&!reduced.matches){const q=harvestFrame(phase).reach,a=-bend*.24*facing,rx=hand.x*Math.cos(a)-hand.y*Math.sin(a),ry=hand.x*Math.sin(a)+hand.y*Math.cos(a);drawPos={x:pos.x+(action.x-pos.x-rx)*q,y:pos.y+(action.y-10-pos.y-ry)*q};}
   const worldTransform=g.getTransform();
   ellipse(drawPos.x,drawPos.y+(seat?15:5),20,7,'#314b3b45');g.save();g.translate(drawPos.x,drawPos.y-j+(reactionView?.dy||0));g.rotate(-bend*.24*facing+(reactionView?.angle||0));
 
@@ -345,13 +348,14 @@ export function installSchoolLife(ctx){
    if(drawn){const world=p=>p&&({x:p.x/(DPR*S)+camera.x,y:p.y/(DPR*S)+camera.y});toolAttachment={kind:tool,hand:world(h),grip:world(drawn.grip),tip:world(drawn.tip),spout:world(drawn.spout)};if(action?.kind==='water')action.spout=toolAttachment.spout;playerAvatar.drawGrip(g,drawLook,facing,motion);}
   }
   if(action?.kind==='plant'){const h=worldTransform.inverse().transformPoint(g.getTransform().transformPoint(hand));plantingAttachment={hand:{x:h.x,y:h.y},spout:toolAttachment?.spout||null};}
+  if(action?.kind==='harvest'){const world=v=>worldTransform.inverse().transformPoint(g.getTransform().transformPoint(v));const h=world(hand),b=world({x:14*facing,y:-28});harvestAttachment={hand:{x:h.x,y:h.y},pocket:{x:b.x,y:b.y}};}
   if(action?.kind==='weed'&&actionView.impact){const root=g.getTransform().inverse().transformPoint(worldTransform.transformPoint({x:action.x,y:action.y}));drawHeldWeed(g,assets.weed,phase,root,hand,reduced.matches);if(!reduced.matches&&weedMotion(phase).transfer>.9)playerAvatar.drawGrip(g,drawLook,facing,motion);}
   if(action?.kind==='dust'){if(!broomBehind)broomAtHand();playerAvatar.drawGrip(g,drawLook,facing,motion);}
   if(doorView){const h=worldTransform.inverse().transformPoint(g.getTransform().transformPoint(hand));g.save();g.setTransform(worldTransform);const key=drawDoorKey(g,h,doorView);g.restore();toolAttachment={kind:'key',hand:{x:h.x,y:h.y},...key};playerAvatar.drawGrip(g,drawLook,facing,motion);}
   g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);
   if(action?.kind==='branch'&&actionView.impact){g.save();g.globalAlpha=phase>.8?(1-phase)*5:1;g.drawImage(assets[action.kind],-43,-61,29,31);g.restore();}
   if(invitation.active()){const point=g.getTransform().transformPoint({x:-22,y:-45});invitation.hand({x:point.x/(DPR*S)+camera.x,y:point.y/(DPR*S)+camera.y});}
-  story.held(g);g.restore();placeName($('lifePlayerName'),ctx.getStudent()?.nickname||'모험가',drawPos.x,drawPos.y+17);
+  if(action?.kind!=='harvest')story.held(g);g.restore();placeName($('lifePlayerName'),ctx.getStudent()?.nickname||'모험가',drawPos.x,drawPos.y+17);
  }
  function placeName(el,text,x,y){const scale=dialogue.view(W,H,S,camera,pos)?.scale||arrival.view(W,H,S)?.scale||S;if(el.textContent!==text)el.textContent=text;el.style.left=Math.round((x-camera.x)*scale)+'px';el.style.top=Math.round((y-camera.y)*scale)+'px';}
  function drawWorld(t){
@@ -366,7 +370,7 @@ export function installSchoolLife(ctx){
   g.scale(worldScale,worldScale);g.translate(-camera.x,-camera.y);const visibleState=construction()?.status==='ready'?[...new Set([...state.projects,'school'])]:state.projects;const visualProjects=visibleState.filter(id=>repair.visible(id,visibleState,t,reduced.matches));const backdrop=assets[scene==='campus'?(visualProjects.includes('school')?'restored':'campus'):scene==='classroom'&&!state.opening.legacy&&state.opening.step<5?'classroomClosed':scene];if(scene==='classroom')opening.drawClassroom(g,assets);else g.drawImage(backdrop,0,0,1600,1067);const props=furnitureDepth.layers(scene,backdrop).map(p=>({...p,draw:()=>p.draw(g)}));
   if(scene==='campus'){
    for(const plot of ground.snapshot().plots){const beforeContact=gesture?.kind==='dig'&&gesture.id===plot.cell&&!actionFrame('dig',(t-gesture.at)/gestureDuration(),reduced.matches).impact;if(!plot.tilled&&!(gesture?.cover&&beforeContact))continue;if(beforeContact&&!gesture.cover)continue;const c=groundCell(plot.cell);g.drawImage(assets.soil,c.x-26,c.y-16,52,34);}
-   for(let i=0;i<6;i++){const [x,y]=FLOWERS[i];if(i<3||visualProjects.includes('garden')){flower(x,y,flowers()[i].kind,flowers()[i].stage);}}
+   for(let i=0;i<6;i++){const [x,y]=FLOWERS[i];if(i<3||visualProjects.includes('garden')){const held=gesture?.kind==='harvest'&&gesture.index===i&&!harvestFrame((t-gesture.at)/HARVEST_MS,reduced.matches).contact&&!reduced.matches;flower(x,y,held?gesture.flowerKind:flowers()[i].kind,held?3:flowers()[i].stage);}}
    WEEDS.forEach(([x,y],i)=>{if(!state.weeds.includes(i))weed(x,y);else{ellipse(x,y,22,7,'#b7c47d55');}});BRANCHES.forEach(([x,y],i)=>{if(!state.branches.includes(i))branch(x,y);});
    props.push(visualProjects.includes('bench')?{id:'bench',y:595,draw:()=>sprite(assets.bench,945,595,150,105)}:{id:'brokenBench',y:619,draw:()=>g.drawImage(assets.brokenBench,872,490,146,129)});
    if(visualProjects.includes('lights')){for(let i=0;i<5;i++){const x=630+i*105,y=931;props.push({id:'lantern'+i,y:y+7,draw:()=>g.drawImage(assets.lantern,x-32,y-103,64,110)});}}
@@ -397,6 +401,7 @@ export function installSchoolLife(ctx){
   opening.drawLight(g,scene);dialogue.draw(g);invitation.drawWorld(g);
   if(gesture?.kind==='weed')drawWeedFragments(g,gesture,(t-gesture.at)/gestureDuration(),reduced.matches);
   if(gesture?.kind==='plant')drawPlanting(g,gesture,plantingFrame((t-gesture.at)/PLANT_MS,reduced.matches),plantingAttachment,reduced.matches);
+  if(gesture?.kind==='harvest')drawHarvest(g,assets[['flower','flowerPink','flowerBlue'][gesture.flowerKind]],gesture,harvestFrame((t-gesture.at)/HARVEST_MS,reduced.matches),harvestAttachment);
   drawWater(g,gesture,t,reduced.matches);feedback.draw(g,scene,pos,t,reduced.matches);
   effect.forEach(e=>{g.globalAlpha=Math.max(0,e.life);ellipse(e.x,e.y,4,4,e.color);});g.globalAlpha=1;
  }
@@ -444,5 +449,5 @@ export function installSchoolLife(ctx){
  const avatarObserver=new MutationObserver(avatarChanged);
  for(const id of SLOTS){const image=document.getElementById(id);if(image){avatarObserver.observe(image,{attributes:true,attributeFilter:['src','class']});image.addEventListener('load',avatarChanged);}}
  document.addEventListener('student-dashboard-updated',()=>{if(!host.open)return;if(!valid())close();else{avatarImages();refresh();updateTitle();}});
- const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,residents:structuredClone(residents()),position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,garden:garden.snapshot(),flowers:structuredClone(flowers()),ground:ground.snapshot(),toolTarget:heldTool==='can'?selectedToolCell():['spade','hoe'].includes(heldTool)?selectedToolCell():null,gesture:gesture?.kind||null,seating:seating.snapshot(),planting:gesture?.kind==='plant'?plantingFrame((performance.now()-gesture.at)/PLANT_MS,reduced.matches):null,plantingAttachment:gesture?.kind==='plant'&&plantingAttachment?structuredClone(plantingAttachment):null,toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/gestureDuration(),reduced.matches),impactShown:!!gesture.impactShown}:null,workers:workerScene(repair.view(performance.now(),reduced.matches)),repair:repair.view(performance.now(),reduced.matches),doorOpening:doorAction.view(performance.now(),reduced.matches),dustSweep:gesture?.kind==='dust'?dustFrame((performance.now()-gesture.at)/gestureDuration(),gesture.direction,reduced.matches):null,weedPull:gesture?.kind==='weed'?weedMotion((performance.now()-gesture.at)/gestureDuration(),reduced.matches):null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,construction:construction(),constructionView:!repair.view(performance.now(),reduced.matches)&&scene==='campus'?constructionView(construction(),performance.now(),reduced.matches||stopped||document.hidden):null,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
+ const api={open,close,snapshot:()=>({mode,prologue:prologue.snapshot(),invitation:invitation.snapshot(),arrival:arrival.snapshot(),conversation:dialogue.snapshot(),wish:wish.snapshot(),story:story.snapshot(),sound,scene,residents:structuredClone(residents()),position:{...pos},look,avatar:playerAvatar.snapshot(),heldTool,garden:garden.snapshot(),flowers:structuredClone(flowers()),ground:ground.snapshot(),toolTarget:heldTool==='can'?selectedToolCell():['spade','hoe'].includes(heldTool)?selectedToolCell():null,gesture:gesture?.kind||null,seating:seating.snapshot(),planting:gesture?.kind==='plant'?plantingFrame((performance.now()-gesture.at)/PLANT_MS,reduced.matches):null,harvesting:gesture?.kind==='harvest'?harvestFrame((performance.now()-gesture.at)/HARVEST_MS,reduced.matches):null,harvestAttachment:gesture?.kind==='harvest'&&harvestAttachment?structuredClone(harvestAttachment):null,plantingAttachment:gesture?.kind==='plant'&&plantingAttachment?structuredClone(plantingAttachment):null,toolAttachment:toolAttachment&&structuredClone(toolAttachment),depthOrder:depthOrder.map(p=>({...p})),reaction:reactionView&&{...reactionView},reactionPending:reactions.snapshot().pending,working:working(),jumping:!!jump,action:gesture?{...actionFrame(gesture.kind,(performance.now()-gesture.at)/gestureDuration(),reduced.matches),impactShown:!!gesture.impactShown}:null,workers:workerScene(repair.view(performance.now(),reduced.matches)),repair:repair.view(performance.now(),reduced.matches),doorOpening:doorAction.view(performance.now(),reduced.matches),dustSweep:gesture?.kind==='dust'?dustFrame((performance.now()-gesture.at)/gestureDuration(),gesture.direction,reduced.matches):null,weedPull:gesture?.kind==='weed'?weedMotion((performance.now()-gesture.at)/gestureDuration(),reduced.matches):null,windowOpening:windowMotion(),windowLight:scene==='classroom'?opening.lights():[],openingEffect:feedback.busy(performance.now(),reduced.matches),level:level(),near:near?.id||null,entities:entities().map(e=>({id:e.id,x:e.x,y:e.y,kind:e.kind})),goal:opening.goal()||story.goal(),saveError,readError,cloudStatus,cloudRevision:cloud.store.snapshot()?.revision||0,construction:construction(),constructionView:!repair.view(performance.now(),reduced.matches)&&scene==='campus'?constructionView(construction(),performance.now(),reduced.matches||stopped||document.hidden):null,state:structuredClone(state),assetsReady})};window.schoolLife=api;return api;
 }
