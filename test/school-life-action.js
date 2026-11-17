@@ -9,7 +9,7 @@ export function actionFrame(kind,phase,reduced=false){
  if(kind==='weed'){const a=weedMotion(p,reduced);return {kind,phase:p,stage,contact:a.contact,impact:a.impact,lean:a.lean,arm:a.arm,sideArm:a.sideArm,lift:0,tilt:0,stream:false,sweep:0};}
  if(kind==='unlock'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.22,impact:p>=.44,lean:0,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
  if(kind==='window'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.28,impact:p>=.4,lean:reduced?0:.35*hold,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
- const pull=kind==='weed'||kind==='branch'||kind==='invitation'||kind==='plant';
+ const pull=kind==='weed'||kind==='branch'||kind==='invitation'||kind==='plant'||kind==='dig';
  const tug=ease((p-.32)/.2);
  const sweep=kind==='dust'?Math.sin(work*Math.PI*2):0;
  return {kind,phase:p,stage,contact:p>=.32,impact:p>=.44,
