@@ -11,7 +11,7 @@ export const HOE_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="64" height=
 export function toolTransform(kind,direction,facing=1,action=null){
  const mirror=direction==='r'?1:direction==='l'||direction==='u'?-1:-facing;
  const angle=kind==='can'? (direction==='u'?-mirror*.65:direction==='d'?mirror*.65:0)+(action?.kind==='water'?mirror*action.tilt:0):(kind==='spade'||kind==='hoe')?(action?.kind==='dig'?({d:0,u:0,l:Math.PI/2,r:-Math.PI/2}[direction]||0):-mirror*.12):0;
- return {mirror,angle};
+ return {mirror,angle:kind==='can'&&Number.isFinite(action?.aimAngle)?action.aimAngle:angle};
 }
 function rod(g,fishing){
  g.lineCap='round';g.lineJoin='round';g.strokeStyle='#795744';g.lineWidth=6;g.beginPath();g.moveTo(20,75);g.lineTo(56,16);g.stroke();
