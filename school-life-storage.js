@@ -2,15 +2,26 @@ import {freshLife,readLife} from './school-life-state.js?v=20261112-windows';
 const clone=x=>structuredClone(x);
 const stable=x=>JSON.stringify(x,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,v[k]])):v);
 const uuidPattern=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+const buildActions=['start_school','finish_school'];
+const buildOutcomes=['started','completed','already_complete','already_started','not_started','not_ready','level_required','materials_required'];
+function construction(value){
+ if(value==null)return null;
+ if(value.project!=='school'||!['building','ready','complete'].includes(value.status)||
+ !Number.isFinite(Date.parse(value.started_at))||!Number.isFinite(Date.parse(value.due_at))||
+ Date.parse(value.due_at)<=Date.parse(value.started_at)||
+ (value.status==='complete'?!Number.isFinite(Date.parse(value.completed_at))||Date.parse(value.completed_at)<Date.parse(value.due_at):value.completed_at!==null))throw Error('unsupported construction');
+ return clone(value);
+}
 export function strictLifeSnapshot(value){
  const normalized=readLife(JSON.stringify(value));
  if(stable(value)!==stable(normalized))throw Error('unsupported snapshot');
  return normalized;
 }
 function validPending(p){
- return p&&Object.keys(p).every(k=>['p_state','p_expected_revision','p_request_id','p_local_source'].includes(k))&&Number.isSafeInteger(p.p_expected_revision)&&p.p_expected_revision>=0&&
+ return p&&Object.keys(p).every(k=>['p_state','p_expected_revision','p_request_id','p_local_source','p_action'].includes(k))&&Number.isSafeInteger(p.p_expected_revision)&&p.p_expected_revision>=0&&
  p.p_expected_revision<Number.MAX_SAFE_INTEGER&&uuidPattern.test(p.p_request_id)&&
  (p.p_local_source===undefined||typeof p.p_local_source==='string')&&
+ (p.p_action===undefined||buildActions.includes(p.p_action)&&p.p_expected_revision>0&&p.p_local_source===undefined)&&
  !!strictLifeSnapshot(p.p_state);
 }
 function response(d){
@@ -20,7 +31,8 @@ function response(d){
  (d.revision===0?d.state!==null:!d.state)||
  (d.ack_revision!==null&&(!Number.isSafeInteger(d.ack_revision)||d.ack_revision<1||d.ack_revision>d.revision)))
  throw Error('unsupported response');
- return {...d,state:d.state===null?null:strictLifeSnapshot(d.state)};
+ if(d.build_outcome!=null&&!buildOutcomes.includes(d.build_outcome))throw Error('unsupported build result');
+ return {...d,construction:construction(d.construction),state:d.state===null?null:strictLifeSnapshot(d.state)};
 }
 // This adapter never writes or removes classRpgSchoolLife_v1_<owner>.
 // Explicit import preserves that exact source; no merging or commerce authority.
@@ -62,7 +74,7 @@ export function createLifeStorage({storage,rpc,getIdentity,onChange=()=>{},uuid=
    if(storage.getItem(key)===raw)storage.removeItem(key);
   }catch{/* A retained acknowledged intent is safe to retry; never discard another value. */}
  }
- function snapshot(){const e=active;return e?clone({owner:e.owner,status:e.status,state:e.value,revision:e.revision,pending:e.pending,server:e.server,sourceAvailable:!!e.source,serverTime:e.serverTime,durable:e.durable,error:e.error||null}):null;}
+ function snapshot(){const e=active;return e?clone({owner:e.owner,status:e.status,state:e.value,revision:e.revision,pending:e.pending,server:e.server,construction:e.construction,commandResult:e.commandResult,sourceAvailable:!!e.source,serverTime:e.serverTime,durable:e.durable,error:e.error||null}):null;}
  function checkCache(e){
   if(storage.getItem(e.key)!==e.cacheRaw){e.status='local-conflict';e.error='another-tab';return false;}
   return true;
@@ -94,7 +106,7 @@ export function createLifeStorage({storage,rpc,getIdentity,onChange=()=>{},uuid=
   try{
    const r=await request(e,{});if(!current(e))return;
    if(r.error)throw Error('read failed');const d=response(r.data);
-   e.serverTime=d.server_time;e.server=d;
+   e.serverTime=d.server_time;e.server=d;e.construction=d.construction;e.commandResult=null;
    if(e.pending){e.value=clone(e.pending.p_state);e.status=d.conflict?'conflict':'pending';}
    else if(d.revision){e.value=d.state;e.revision=d.revision;e.status=readyStatus(e);}
    else{e.value=e.source?readLife(e.source):freshLife();e.revision=0;e.status=e.source?'import':'ready';}
@@ -110,8 +122,9 @@ export function createLifeStorage({storage,rpc,getIdentity,onChange=()=>{},uuid=
   try{
    const r=await request(e,sent);if(!current(e))return;
    if(r.error)throw Error('save failed');const d=response(r.data);
-   if(!d.conflict&&(d.ack_revision!==sent.p_expected_revision+1||d.revision<d.ack_revision))throw Error('invalid acknowledgement');
-   e.serverTime=d.server_time;e.server=d;
+   const ackOK=sent.p_action?buildOutcomes.includes(d.build_outcome)&&[sent.p_expected_revision,sent.p_expected_revision+1].includes(d.ack_revision):d.ack_revision===sent.p_expected_revision+1;
+   if(!d.conflict&&(!ackOK||d.revision<d.ack_revision))throw Error('invalid acknowledgement');
+   e.serverTime=d.server_time;e.server=d;e.construction=d.construction;
    if(d.conflict){
     // Retain the proposed save until a durable backup and explicit server choice.
     e.status='conflict';
@@ -119,30 +132,31 @@ export function createLifeStorage({storage,rpc,getIdentity,onChange=()=>{},uuid=
    }else{
     const oldValue=e.value,oldRevision=e.revision;
     e.value=d.state;e.revision=d.revision;e.pending=null;e.server=null;
-    if(persist(e)){removeIntent(e,sent);e.status=readyStatus(e);}
+    if(persist(e)){removeIntent(e,sent);e.status=readyStatus(e);e.commandResult=sent.p_action?{requestId:sent.p_request_id,action:sent.p_action,outcome:d.build_outcome,replay:d.replay}:null;}
     else{e.pending=sent;e.value=oldValue;e.revision=oldRevision;}
    }
   }catch{if(current(e)){e.status='error';e.error='server-save';}}
   finally{e.running=false;notify(e);}
  }
- function prepare(next,source){
+ function prepare(next,source,action){
   const e=active;
   if(!e||!current(e)||e.running||e.pending||!['ready','import'].includes(e.status))return false;
   if(e.status==='import'&&source===undefined)return false;
+  if(action!==undefined&&(!buildActions.includes(action)||e.revision<1||e.status!=='ready'))return false;
   try{
    if(!checkCache(e)){notify(e);return false;}
    if(source!==undefined&&storage.getItem('classRpgSchoolLife_v1_'+e.owner)!==source){e.status='local-conflict';e.error='legacy-changed';notify(e);return false;}
    const value=strictLifeSnapshot(next);
-   if(e.status==='ready'&&e.revision>0&&stable(value)===stable(e.value))return true;
-   e.pending={p_state:value,p_expected_revision:e.revision,p_request_id:uuid(),...(source===undefined?{}:{p_local_source:source})};
-   e.value=value;e.server=null;e.status='saving';notify(e);void flush(e);return true;
+   if(!action&&e.status==='ready'&&e.revision>0&&stable(value)===stable(e.value))return true;
+   e.pending={p_state:value,p_expected_revision:e.revision,p_request_id:uuid(),...(source===undefined?{}:{p_local_source:source}),...(action?{p_action:action}:{})};
+   e.value=value;e.server=null;e.commandResult=null;e.status='saving';notify(e);void flush(e);return true;
   }catch{e.status='storage-error';e.error='prepare';notify(e);return false;}
  }
  return {
   async activate(id,token){
    generation++;
    const owner=String(id),previous=entries.get(owner);
-   const e={owner,token:String(token||''),generation,key:cacheKey(owner),cacheRaw:null,source:null,value:freshLife(),revision:0,pending:null,server:null,serverTime:null,status:'loading',running:false,durable:true};
+   const e={owner,token:String(token||''),generation,key:cacheKey(owner),cacheRaw:null,source:null,value:freshLife(),revision:0,pending:null,server:null,serverTime:null,construction:null,commandResult:null,status:'loading',running:false,durable:true};
    active=e;entries.set(owner,e);
    try{
     e.source=storage.getItem('classRpgSchoolLife_v1_'+owner);
@@ -180,6 +194,7 @@ export function createLifeStorage({storage,rpc,getIdentity,onChange=()=>{},uuid=
    }catch{return null;}
   },
   save(next){return prepare(next);},
+  command(action,next){return prepare(next,undefined,action);},
   importLocal(){
    const e=active;if(!e||e.status!=='import'||!e.source)return false;
    return prepare(readLife(e.source),e.source);

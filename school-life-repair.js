@@ -34,6 +34,15 @@ function workScene(g,assets,view){
   for(let i=0;i<5;i++){const lx=630+i*105,ly=931;plank(g,lx,ly,5,25);if(work>(i+1)*.14){g.save();g.filter='saturate(.45) brightness(.85)';g.drawImage(assets.lantern,lx-32,ly-103,64,110);g.restore();}}
  }
 }
+// This view is decorative only. The server owns the due date and completion.
+export function constructionView(record,time,reduced=false){
+ if(record?.status!=='building')return null;
+ return {...repairFrame('school',reduced?.7:.48+(time%1800)/1800*.32,reduced),wood:5};
+}
+export function constructionLayers(scene,assets,record,time,reduced=false){
+ const view=constructionView(record,time,reduced);if(!view||scene!=='campus')return [];
+ return [{id:'school-construction',y:REPAIR_PLACES.school.y+16,draw(g){parts(g,assets,'school',5,.55);workScene(g,assets,view);}}];
+}
 export function createFacilityRepair(){
  let current=null;
  function view(time=performance.now(),reduced=false){if(!current)return null;const duration=reduced?1000:REPAIR_MS,p=(time-current.at)/duration;if(p>=1){current=null;return null;}return {...repairFrame(current.id,p,reduced),wood:current.wood};}
