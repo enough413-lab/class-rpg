@@ -3,12 +3,14 @@
 export const TOOL_SHAPES={
  can:{width:104,height:72,scale:47/104,grip:[4,40],spout:[96,23]},
  rod:{width:90,height:90,scale:76/90,grip:[24,68],tip:[56,16]},
- spade:{width:56,height:92,scale:.62,grip:[28,24],tip:[28,87]}
+ spade:{width:56,height:92,scale:.62,grip:[28,24],tip:[28,87]},
+ hoe:{width:64,height:92,scale:.62,grip:[28,24],tip:[52,83]}
 };
 export const SPADE_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="56" height="92" viewBox="0 0 56 92"><path d="M28 15V63" stroke="#6e5137" stroke-width="9" stroke-linecap="round"/><path d="M28 16V61" stroke="#c9a372" stroke-width="4" stroke-linecap="round"/><path d="M20 7Q28 3 36 7L33 18H23Z" fill="#a0b7a0" stroke="#536f60" stroke-width="3"/><path d="M17 54Q28 49 39 54L40 71Q38 82 28 88 18 82 16 71Z" fill="#b9c9bb" stroke="#536f60" stroke-width="3"/><path d="M28 57V80" stroke="#e8e6c9" stroke-width="3" stroke-linecap="round"/></svg>';
+export const HOE_SVG='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="92" viewBox="0 0 64 92"><path d="M28 10V66" stroke="#6e5137" stroke-width="9" stroke-linecap="round"/><path d="M28 10V64" stroke="#c9a372" stroke-width="4" stroke-linecap="round"/><path d="M24 57L58 69L52 83L26 72Z" fill="#b9c9bb" stroke="#536f60" stroke-width="3" stroke-linejoin="round"/><path d="M30 62L51 71" stroke="#e8e6c9" stroke-width="3" stroke-linecap="round"/></svg>';
 export function toolTransform(kind,direction,facing=1,action=null){
  const mirror=direction==='r'?1:direction==='l'||direction==='u'?-1:-facing;
- const angle=kind==='can'? (direction==='u'?-mirror*.65:direction==='d'?mirror*.65:0)+(action?.kind==='water'?mirror*action.tilt:0):kind==='spade'?(action?.kind==='dig'?({d:0,u:0,l:Math.PI/2,r:-Math.PI/2}[direction]||0):-mirror*.12):0;
+ const angle=kind==='can'? (direction==='u'?-mirror*.65:direction==='d'?mirror*.65:0)+(action?.kind==='water'?mirror*action.tilt:0):(kind==='spade'||kind==='hoe')?(action?.kind==='dig'?({d:0,u:0,l:Math.PI/2,r:-Math.PI/2}[direction]||0):-mirror*.12):0;
  return {mirror,angle};
 }
 function rod(g,fishing){
