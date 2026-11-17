@@ -1,6 +1,7 @@
 import {SPADE_SVG,HOE_SVG} from './school-life-tools.js?v=20261117-tools';
 import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261112-windows';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const flowerWaterDays=Object.freeze([3,3,3]);
 const art={invitation:'invitation',weed:'weed',branch:'branch',flower:'flower',flowerPink:'flowerPink',flowerBlue:'flowerBlue',sprout:'sprout',bench:'bench',school:'restored',garden:'flowerPink',library:'readingNook',lights:'lantern'};
 const img=(name,cls='')=>`<img class="${cls}" src="maps/life/${art[name]||name}-harmony-v2.webp" alt="">`;
 const can='<svg viewBox="0 0 104 72" aria-hidden="true"><path d="M24 26C-2 11-3 64 26 55" fill="none" stroke="#536f60" stroke-width="7"/><path d="M57 43 84 17 96 23 65 58" fill="#9fbea1" stroke="#536f60" stroke-width="3"/><path d="m85 15 14 7-4 7-14-8Z" fill="#dbcf99" stroke="#637b61" stroke-width="2"/><path d="M23 24Q43 16 64 25L66 58Q43 72 21 57Z" fill="#90b897" stroke="#536f60" stroke-width="3"/><ellipse cx="43" cy="25" rx="20" ry="7" fill="#d4dcc0" stroke="#536f60" stroke-width="3"/><path d="M28 36V53" stroke="#c3dbb8" stroke-width="4" stroke-linecap="round"/></svg>';
@@ -46,7 +47,7 @@ export function installLifeNotebook(api){
  function bag(page='tools'){
   const s=api.state();let html='';
   if(page==='tools')html='<h3 class="life-section-title">도구</h3><div class="life-item-grid">'+[['can','물뿌리개',can],['rod','낚싯대',rod],['spade','삽',SPADE_SVG],['hoe','호미',HOE_SVG]].map(([id,name,icon])=>`<button class="life-item" data-tool="${id}" aria-pressed="${api.held()===id}">${icon}<strong>${name}</strong><span>${api.held()===id?'들고 있음':'손에 들기'}</span></button>`).join('')+'</div><p class="life-page-note">선택: 들기 / 넣기 · E: 도구 사용</p>';
-  if(page==='seeds')html='<h3 class="life-section-title">오늘 심을 꽃</h3><div class="life-item-grid life-seed-grid">'+FLOWER_NAMES.map((n,i)=>`<button class="life-item life-swatch" data-seed="${i}" aria-pressed="${s.seed===i}">${img(['flower','flowerPink','flowerBlue'][i])}<strong>${n}</strong><span>${s.seed===i?'선택한 씨앗':'씨앗 고르기'}</span></button>`).join('')+'</div><p class="life-page-note">빈 흙에서 심기</p>';
+  if(page==='seeds')html='<h3 class="life-section-title">오늘 심을 꽃</h3><div class="life-item-grid life-seed-grid">'+FLOWER_NAMES.map((n,i)=>`<button class="life-item life-swatch" data-seed="${i}" aria-pressed="${s.seed===i}">${img(['flower','flowerPink','flowerBlue'][i])}<strong>${n}</strong><span class="life-seed-days">물 준 날 ${flowerWaterDays[i]}일 · 개화</span><span>${s.seed===i?'선택한 씨앗':'씨앗 고르기'}</span></button>`).join('')+'</div><p class="life-page-note">심을 때 준 물부터 1일. 같은 날에는 한 번만 센다.</p>';
   if(page==='materials')html=s.wood>0?'<h3 class="life-section-title">모은 재료</h3><div class="life-item-grid"><div class="life-item">'+img('branch')+`<strong>나뭇가지</strong><span>${s.wood}개</span></div></div><p class="life-page-note">시설 수리 재료</p>`:empty('재료 없음','');
   if(page==='food')html=empty('음식 없음','');
   api.book('작은 도구 주머니',html);tabs('bag',[['tools','도구'],['seeds','씨앗'],['materials','재료'],['food','음식']],page,bag);const o=api.overlay();
