@@ -6,6 +6,7 @@ export const ACTION_MS=950;
 export function actionFrame(kind,phase,reduced=false){
  const p=clamp(phase),stage=p<.32?'prepare':p<.68?'execute':'recover';
  const reach=ease(p/.32),release=1-ease((p-.68)/.32),work=ease((p-.32)/.36);
+ if(kind==='plant'){const seedHold=ease(p/.22)*(1-ease((p-.5)/.18)),waterHold=ease((p-.62)/.12)*(1-ease((p-.9)/.1));return {kind,phase:p,stage:p<.22?'prepare':p<.91?'execute':'recover',contact:p>=.23,impact:p>=.42,lean:reduced?0:seedHold*.8+waterHold*.35,arm:reduced?0:seedHold*.45+waterHold*.48,sideArm:reduced?0:seedHold*.55+waterHold*.48,lift:0,tilt:reduced?0:waterHold*.48,stream:p>=.64&&p<.91,sweep:0};}
  if(kind==='weed'){const a=weedMotion(p,reduced);return {kind,phase:p,stage,contact:a.contact,impact:a.impact,lean:a.lean,arm:a.arm,sideArm:a.sideArm,lift:0,tilt:0,stream:false,sweep:0};}
  if(kind==='unlock'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.22,impact:p>=.44,lean:0,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
  if(kind==='window'){const hold=reach*release;return {kind,phase:p,stage,contact:p>=.28,impact:p>=.4,lean:reduced?0:.35*hold,arm:reduced?0:2.1*hold,sideArm:reduced?0:2.1*hold,lift:0,tilt:0,stream:false,sweep:0};}
