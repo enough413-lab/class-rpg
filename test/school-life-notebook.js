@@ -1,6 +1,6 @@
-import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-crops';
+import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-seeds';
 import {SPADE_SVG,HOE_SVG} from './school-life-tools.js?v=20261117-tools';
-import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-crops';
+import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-seeds';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const flowerWaterDays=Object.freeze([3,3,3]);
 const art={invitation:'invitation',weed:'weed',branch:'branch',flower:'flower',flowerPink:'flowerPink',flowerBlue:'flowerBlue',sprout:'sprout',bench:'bench',school:'restored',garden:'flowerPink',library:'readingNook',lights:'lantern'};
@@ -51,7 +51,8 @@ export function installLifeNotebook(api){
   if(page==='tools')html='<h3 class="life-section-title">도구</h3><div class="life-item-grid">'+[['can','물뿌리개',can],['rod','낚싯대',rod],['spade','삽',SPADE_SVG],['hoe','호미',HOE_SVG]].map(([id,name,icon])=>`<button class="life-item" data-tool="${id}" aria-pressed="${api.held()===id}">${icon}<strong>${name}</strong><span>${api.held()===id?'들고 있음':'손에 들기'}</span></button>`).join('')+'</div><p class="life-page-note">선택: 들기 / 넣기 · E: 도구 사용</p>';
   if(page==='seeds'){
    const g=api.garden?.(),selected=api.selectedCrop?.()??s.seed,available=CROPS.filter(c=>cropPolicy(c.kind,g?.policies));
-   html='<h3 class="life-section-title">심을 씨앗</h3><div class="life-item-grid life-seed-grid">'+available.map(c=>{const rule=cropPolicy(c.kind,g.policies),count=g.inventory?.[c.kind]?.seeds;return '<button class="life-item life-swatch" data-seed="'+c.kind+'" aria-pressed="'+(selected===c.kind)+'">'+img(c.itemArt)+'<strong>'+c.name+'</strong><span class="life-seed-days">물 준 날 '+rule.waterDays+'일 · '+(c.category==='vegetable'?'수확':'개화')+'</span>'+(c.kind>=3?'<span>'+count+'개</span>':'')+'<span>'+(selected===c.kind?'선택한 씨앗':'씨앗 고르기')+'</span></button>';}).join('')+'</div><p class="life-page-note">심을 때 준 물부터 1일. 같은 날에는 한 번만 센다.</p>';
+   html='<h3 class="life-section-title">심을 씨앗</h3><div class="life-item-grid life-seed-grid">'+available.map(c=>{const rule=cropPolicy(c.kind,g.policies),count=g.inventory?.[c.kind]?.seeds;return '<button class="life-item life-swatch" data-seed="'+c.kind+'" aria-pressed="'+(selected===c.kind)+'">'+img(c.itemArt)+'<strong>'+c.name+'</strong><span class="life-seed-days">물 준 날 '+rule.waterDays+'일 · '+(c.category==='vegetable'?'수확':'개화')+'</span>'+('<span>'+count+'개</span>')+'<span>'+(selected===c.kind?'선택한 씨앗':'씨앗 고르기')+'</span></button>';}).join('')+'</div><p class="life-page-note">심을 때 준 물부터 1일. 같은 날에는 한 번만 센다.</p>';
+   if(g?.status==='ready'&&!g.flowerSeedsClaimed)html+='<button class="life-choice" data-flower-seeds>꽃 씨앗 받기</button><p class="life-page-note">꽃 3종 각 5개. 처음 한 번.</p>';
    if(g?.status==='ready'&&!g.vegetableSeedsClaimed)html+='<button class="life-choice" data-vegetable-seeds>채소 씨앗 받기</button><p class="life-page-note">당근·무 씨앗 각 5개. 처음 한 번.</p>';
   }
   if(page==='materials')html=s.wood>0?'<h3 class="life-section-title">모은 재료</h3><div class="life-item-grid"><div class="life-item">'+img('branch')+`<strong>나뭇가지</strong><span>${s.wood}개</span></div></div><p class="life-page-note">시설 수리 재료</p>`:empty('재료 없음','');
@@ -59,6 +60,7 @@ export function installLifeNotebook(api){
   if(page==='food'){const crops=api.garden?.()?.inventory?.filter(v=>v.kind>=3&&Number(v.flowers)>0)||[];html=crops.length?'<h3 class="life-section-title">수확한 채소</h3><div class="life-item-grid">'+crops.map(v=>'<div class="life-item">'+img(cropOf(v.kind).itemArt)+'<strong>'+cropOf(v.kind).name+'</strong><span>'+v.flowers+'개</span></div>').join('')+'</div>':empty('음식 없음','');}
   api.book('작은 도구 주머니',html);tabs('bag',[['tools','도구'],['seeds','씨앗'],['materials','재료'],['food','음식']],page,bag);const o=api.overlay();
   o.querySelectorAll('[data-seed]').forEach(b=>b.onclick=()=>{if(!api.valid()||!o.contains(b))return;const kind=Number(b.dataset.seed);if(api.chooseCrop(kind)){bag('seeds');api.toast(cropOf(kind).name+' 씨앗 선택');}});
+  const flowerSupply=o.querySelector('[data-flower-seeds]');if(flowerSupply)flowerSupply.onclick=()=>{if(api.valid()&&o.contains(flowerSupply))api.claimFlowers();};
   const supply=o.querySelector('[data-vegetable-seeds]');if(supply)supply.onclick=()=>{if(api.valid()&&o.contains(supply))api.claimVegetables();};
   o.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{if(!api.valid()||!o.contains(b))return;api.hold(api.held()===b.dataset.tool?'':b.dataset.tool);bag('tools');});
  }
