@@ -1,6 +1,6 @@
-import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-crops';
+import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-seeds';
 import {HARVEST_MS,harvestFrame,drawHarvest} from './school-life-harvest.js?v=20261117-harvest-motion';
-import {createGardenStorage} from './school-life-garden-storage.js?v=20261118-crops';
+import {createGardenStorage} from './school-life-garden-storage.js?v=20261118-seeds';
 import {PLANT_MS,plantingFrame,drawPlanting} from './school-life-planting.js?v=20261117-plant';
 import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-plant';
 import {createGroundStorage} from './school-life-ground-storage.js?v=20261117-plant';
@@ -26,10 +26,10 @@ import {createInvitationAction} from './school-life-invitation.js?v=20261110-arr
 import {createSchoolMemories} from './school-life-memories.js?v=20261112-depth';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawWater,lookDirection,VECTORS} from './school-life-feedback.js?v=20261112-door';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261118-crops';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261118-seeds';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261113-construction';
 import {installSchoolOpening} from './school-life-opening.js?v=20261117-residents';
-import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-crops';
+import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-seeds';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icons={leaf:'<path d="M6 25C1 9 17 3 29 4c0 15-6 27-19 23M6 29 23 11M14 21l-1-8m1 8 9-1"/>',bag:'<path d="M10 10V8a6 6 0 0 1 12 0v2M8 10h16l3 19H5zM6 17h20M12 19v4h8v-4"/>',book:'<path d="M16 8C11 4 6 4 3 5v22c4-1 8-1 13 2 5-3 9-3 13-2V5c-5-1-9-1-13 3v21M7 11h5m-5 5h5m8-5h5m-5 5h5"/>',map:'<path d="m3 7 9-3 9 3 8-3v23l-8 3-9-3-9 3zM12 4v23M21 7v23M5 20l4-5 7 4 9-8"/>',exit:'<path d="M13 4H5v25h8M14 9l8 7-8 7m-4-7h18"/>',sound:'<path d="m4 12 7 0 8-7v24l-8-8H4zM24 10c5 3 5 9 0 12"/>',flower:'<path d="M16 30V18m0 8-8-5m8 2 7-5"/><path fill="#efb4ab" d="M16 5c8-8 12 2 6 6 11 0 8 12 0 9 2 10-10 10-10 1-9 5-13-6-5-10-6-7 3-13 9-6Z"/><circle cx="16" cy="13" r="4" fill="#f5d374"/>',wood:'<path d="m6 29 6-14 0-11m0 16 12-9m-8 6 10 3M6 29l6 1 7-14"/>',fish:'<path d="M6 16c8-15 18-11 23 0-5 11-15 15-23 0L1 9v14z"/><circle cx="23" cy="14" r="1"/>'};
 const svg=name=>`<svg viewBox="0 0 32 34" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]||icons.leaf}</svg>`;
@@ -84,7 +84,8 @@ export function installSchoolLife(ctx){
  let gardenIntent=null,selectedCrop=null;
  const chosenCrop=()=>selectedCrop??state.seed;
  function chooseCrop(kind){if(!cropOf(kind)||!cropPolicy(kind,garden.snapshot().policies))return false;if(kind<3&&!mutate(s=>s.seed=kind))return false;selectedCrop=kind;return true;}
- function claimVegetables(){const s=garden.snapshot();if(s.status!=='ready'||!s.enrolled){gardenPanel();return;}gardenIntent={scene,slot:null,id:null};if(garden.claimVegetables(String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;hideOverlay();}else gardenIntent=null;}
+ function claimSeeds(type){const s=garden.snapshot();if(s.status!=='ready'||!s.enrolled){gardenPanel();return;}gardenIntent={scene,slot:null,id:null};if((type==='flowers'?garden.claimFlowers:garden.claimVegetables)(String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;hideOverlay();}else gardenIntent=null;}
+ const claimVegetables=()=>claimSeeds('vegetables'),claimFlowers=()=>claimSeeds('flowers');
  const garden=createGardenStorage({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_crops',args),onChange:gardenChanged});
  const flowers=()=>garden.snapshot().enrolled?garden.snapshot().plants:state.flowers;
  const lifeView=()=>({...state,flowers:flowers()});
@@ -95,7 +96,7 @@ export function installSchoolLife(ctx){
    const request=gardenIntent;gardenIntent=null;
    if(mode==='play'&&scene===request.scene&&!stopped&&!document.hidden){
     if(s.command.outcome==='harvested'&&!s.command.replay&&request.target){clearTimeout(toastTimer);$('lifeToast').hidden=true;queuedToast=null;beginGesture({...request.target,kind:'harvest',from:{...pos},direction:look});actionUntil=performance.now()+HARVEST_MS;}
-    const f=s.plants[request.slot],crop=cropOf(f?.kind),text=({enrolled:null,already_enrolled:null,planted:'씨앗을 심고 물을 줬다.',occupied:'이미 심은 식물이 있다.',watered:f?.stage===3?(crop?.category==='vegetable'?'수확할 만큼 자랐다.':'꽃이 피었다.'):f?.stage===2?'새싹에 물을 줬다.':'씨앗에 물을 줬다.',empty:'아직 심은 식물이 없다.',mature:crop?.category==='vegetable'?'수확할 만큼 자랐다.':'꽃이 활짝 피었다.',already_watered_today:'오늘은 이미 물을 줬다.',clock_backwards:'날짜 확인 뒤 다시 물을 줄 수 있다.',harvested:(crop?.category==='vegetable'?crop.name:'꽃')+' '+(f?.yield_items||1)+'개 · 씨앗 '+(f?.yield_seeds??1)+'개',not_mature:'아직 수확할 수 없다.',bag_full:'주머니에 자리가 없다.',no_seeds:'이 씨앗은 다 썼다.',seeds_supplied:'당근 씨앗 5개 · 무 씨앗 5개',already_supplied:'처음 씨앗은 이미 받았다.'})[s.command.outcome];
+    const f=s.plants[request.slot],crop=cropOf(f?.kind),text=({enrolled:null,already_enrolled:null,planted:'씨앗을 심고 물을 줬다.',occupied:'이미 심은 식물이 있다.',watered:f?.stage===3?(crop?.category==='vegetable'?'수확할 만큼 자랐다.':'꽃이 피었다.'):f?.stage===2?'새싹에 물을 줬다.':'씨앗에 물을 줬다.',empty:'아직 심은 식물이 없다.',mature:crop?.category==='vegetable'?'수확할 만큼 자랐다.':'꽃이 활짝 피었다.',already_watered_today:'오늘은 이미 물을 줬다.',clock_backwards:'날짜 확인 뒤 다시 물을 줄 수 있다.',harvested:(crop?.category==='vegetable'?crop.name:'꽃')+' '+(f?.yield_items||1)+'개 · 씨앗 '+(f?.yield_seeds??1)+'개',not_mature:'아직 수확할 수 없다.',bag_full:'주머니에 자리가 없다.',no_seeds:'이 씨앗은 다 썼다.',seeds_supplied:s.command.action==='flowers'?'꽃 씨앗 3종 · 각 5개':'당근 씨앗 5개 · 무 씨앗 5개',already_supplied:'처음 씨앗은 이미 받았다.'})[s.command.outcome];
     if(text)laterToast(text,Math.max(0,(gesture?.at||0)+gestureDuration()-performance.now()));
    }
   }else if(!['ready','saving'].includes(s.status)){gardenIntent=null;if(['plant','water'].includes(gesture?.kind)){gesture=null;actionUntil=0;queuedToast=null;}}
@@ -155,7 +156,7 @@ export function installSchoolLife(ctx){
  }
  const names={room:'나의 작은 방',campus:'봄빛 학교',classroom:'우리 교실'};
  const manifest={carrot:'maps/life/carrot-v1.webp',radish:'maps/life/radish-v1.webp',carrotPlanted:'maps/life/carrot-planted-v1.webp',radishPlanted:'maps/life/radish-planted-v1.webp',saessakSeated:'maps/npcs/saessak-seated-v1.webp',workers:'maps/npcs/squirrel-workers-v1.webp',woods:'maps/life/woods-v1.webp',bellFrame:'maps/life/bell-frame-v1.webp',saessakPoint:'maps/npcs/saessak-point-v1.webp',toriNote:'maps/npcs/tori-note-v1.webp',duri:'maps/npcs/duri-anime-v2.webp',prologueBell:'maps/life/prologue-bell-v1.webp',invitation:'maps/life/invitation-harmony-v2.webp',campus:'maps/life/campus-harmony-v2.webp',restored:'maps/life/restored-harmony-v2.webp',room:'maps/life/room-harmony-v2.webp',classroom:'maps/life/classroom-harmony-v2.webp',classroomClosed:'maps/life/classroomClosed-harmony-v2.webp',saessak:'maps/npcs/saessak-anime-v2.webp',tori:'maps/npcs/tori-anime-v2.webp',bench:'maps/life/bench-harmony-v2.webp',weed:'maps/life/weed-harmony-v2.webp',branch:'maps/life/branch-harmony-v2.webp',soil:'maps/life/soil-harmony-v2.webp',sprout:'maps/life/sprout-harmony-v2.webp',flower:'maps/life/flower-harmony-v2.webp',flowerPink:'maps/life/flowerPink-harmony-v2.webp',flowerBlue:'maps/life/flowerBlue-harmony-v2.webp',brokenBench:'maps/life/brokenBench-harmony-v2.webp',readingNook:'maps/life/readingNook-harmony-v2.webp',lantern:'maps/life/lantern-harmony-v2.webp'};
- const notebook=installLifeNotebook({state:lifeView,selectedCrop:chosenCrop,chooseCrop,claimVegetables,garden:()=>garden.snapshot(),construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
+ const notebook=installLifeNotebook({state:lifeView,selectedCrop:chosenCrop,chooseCrop,claimVegetables,claimFlowers,garden:()=>garden.snapshot(),construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
  const arrival=createSchoolArrival({overlay,hide:hideOverlay,reduced:()=>reduced.matches,tone,toggleSound,soundEnabled:()=>sound});
  const dialogue=createSchoolConversations({overlay,hide:hideOverlay,reduced:()=>reduced.matches,assets:()=>assets});
  const invitation=createInvitationAction({overlay,hide:hideOverlay,reduced:()=>reduced.matches});
