@@ -33,7 +33,7 @@ export function projectRequirement(state,id,level){
  if(state.projects.includes(id))return '수리 완료';
  if(level<p.level)return `학교생활로 Lv. ${p.level} 필요`;
  if(state.wood<p.wood)return `마당의 나뭇가지를 ${p.wood-state.wood}개 부족`;
- if(id==='garden'&&state.flowers.slice(0,3).some(f=>f.stage!==3))return '작은 화단의 꽃 3송이 개화 필요';
+ if(id==='garden'&&state.flowers.slice(0,3).some(f=>f.stage!==3||f.kind>=3))return '작은 화단의 꽃 3송이 개화 필요';
  if(id==='library'&&state.dust.length<4)return '교실 먼지 4곳 청소 필요';
  if(id==='lights'&&!state.projects.includes('school'))return '학교 외관 수리 필요';
  return '';
