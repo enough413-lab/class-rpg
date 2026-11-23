@@ -1,6 +1,6 @@
 export const KINDNESS_MILESTONE={level:15,label:'🤝 새 친구 나루의 길 안내',activity:'kindness-chapter',description:'나루의 이야기를 듣고 도서관 길을 함께 찾아요. 다정한 길잡이 핀이 남아요.'};
 export const KINDNESS_PINS={leaf:{name:'새싹 핀',symbol:'🌱'},sun:{name:'햇살 핀',symbol:'☀️'},star:{name:'별빛 핀',symbol:'⭐'}};
-const MEMORY={listen:'나루의 말을 끝까지 들었어요.',ask:'어떤 도움이 필요한지 먼저 물었어요.',library:'책 모양의 파란 도서관 표지판을 찾았어요.',walk:'나루와 천천히 함께 걸었어요.',introduce:'책지기 토리에게 나루를 소개했어요.'};
+const MEMORY={listen:'나루의 말을 끝까지 들었어요.',ask:'어떤 도움이 필요한지 먼저 물었어요.',library:'책 모양의 파란 도서관 표지판을 찾았어요.',walk:'나루와 천천히 함께 걸었어요.',introduce:'책지기 부옹에게 나루를 소개했어요.'};
 export function kindnessProfile(state){if(state?.phase!==4||!state.wearing||!KINDNESS_PINS[state.pin])return '';const pin=KINDNESS_PINS[state.pin];return '<button class="sa-profile-memento kindness-profile" data-workshop="kindness-chapter" aria-label="다정한 길잡이 핀과 나루 이야기 보기"><span aria-hidden="true">'+pin.symbol+'</span><span>다정한 길잡이<br><small>'+pin.name+' · 나루와의 학교 기억</small></span></button>'}
 export function installKindnessChapter(c){
  const {dialog,esc,open,button}=c,$=id=>dialog.ownerDocument.getElementById(id);let owner=null,token=null,phase=0,chosen=null,confirmed=false;
@@ -13,13 +13,13 @@ export function installKindnessChapter(c){
   if(phase>4){finish();return}
   const story=[null,
    ['담임선생님의 부탁','담임선생님: “새 친구 나루가 도서관에서 열리는 책 나눔에 가고 싶대. 처음 온 길이라 조금 막막한가 봐. 무엇이 필요한지 먼저 들어 줄래?”','나루: “책은 가져왔는데… 어느 문으로 가야 할지 잘 모르겠어.”'],
-   ['표지판 속 작은 단서',s.choices[0]==='ask'?'나루: “먼저 물어봐 줘서 고마워! 책지기 토리가 있는 곳으로 가고 싶어.”':'나루: “천천히 들어 줘서 고마워. 책지기 토리를 만나고 싶어.”','나루의 메모: “책 그림이 있는 파란 표지판을 따라가면 도서관이 보여.” 메모와 같은 문을 찾아요.'],
+   ['표지판 속 작은 단서',s.choices[0]==='ask'?'나루: “먼저 물어봐 줘서 고마워! 책지기 부옹이 있는 곳으로 가고 싶어.”':'나루: “천천히 들어 줘서 고마워. 책지기 부옹을 만나고 싶어.”','나루의 메모: “책 그림이 있는 파란 표지판을 따라가면 도서관이 보여.” 메모와 같은 문을 찾아요.'],
    ['함께 갈 방법을 물어봐요','나루: “이제 어느 문인지 알겠어. 그래도 처음 만나는 사람에게 인사하려니 살짝 떨려.”','어떤 도움을 주고 싶은지 물어보고, 나루가 고른 속도에 맞춰 함께해요. 두 방법 모두 괜찮아요.'],
-   ['나루와 함께 남기는 학교 기억',s.choices[2]==='introduce'?'토리: “나루구나! 가져온 책 이야기를 들려줄래?” 나루가 웃으며 책을 펼쳤어요.':'나루와 천천히 걸어 도서관에 도착했어요. 토리가 먼저 인사하자 나루도 웃으며 책을 펼쳤어요.','나루: “혼자 헤매지 않도록 함께해 줘서 고마워. 오늘 기억을 작은 핀으로 남기자!”']
+   ['나루와 함께 남기는 학교 기억',s.choices[2]==='introduce'?'부옹: “나루구나! 가져온 책 이야기를 들려줄래?” 나루가 웃으며 책을 펼쳤어요.':'나루와 천천히 걸어 도서관에 도착했어요. 부옹이 먼저 인사하자 나루도 웃으며 책을 펼쳤어요.','나루: “혼자 헤매지 않도록 함께해 줘서 고마워. 오늘 기억을 작은 핀으로 남기자!”']
   ][phase];
   const opts=phase===1?option('listen','천천히 이야기 듣기','나루가 말할 수 있도록 내 차례를 기다려요.')+option('ask','필요한 도움부터 물어보기','“어디에 가고 싶어? 함께 찾아볼까?”'):
-   phase===2?option('classroom','주황 교실 문','담임선생님의 교실이에요.',door('#dda16c','🏫'))+option('library','파란 도서관 문','책지기 토리가 있는 곳이에요.',door('#86b7c9','📖'))+option('shop','초록 문구 상점','모모의 문구 상점이에요.',door('#abc59c','✏️')):
-   phase===3?option('walk','같이 걸어갈까?','나루: “응! 천천히 같이 가고 싶어.”')+option('introduce','토리에게 함께 인사할까?','나루: “좋아! 처음 인사를 함께 해 줘.”'):
+   phase===2?option('classroom','주황 교실 문','담임선생님의 교실이에요.',door('#dda16c','🏫'))+option('library','파란 도서관 문','책지기 부옹이 있는 곳이에요.',door('#86b7c9','📖'))+option('shop','초록 문구 상점','모모의 문구 상점이에요.',door('#abc59c','✏️')):
+   phase===3?option('walk','같이 걸어갈까?','나루: “응! 천천히 같이 가고 싶어.”')+option('introduce','부옹에게 함께 인사할까?','나루: “좋아! 처음 인사를 함께 해 줘.”'):
    Object.entries(KINDNESS_PINS).map(([id,p])=>option(id,p.symbol+' '+p.name,'능력치가 없는 학교 기억 장식이에요.')).join('');
   open('🤝 새 친구 나루의 길 안내',story[0]+' · 이야기 '+phase+' / 4',
    '<section class="kindness-scene"><img src="maps/npcs/teacher-v1.webp" alt="의뢰를 맡긴 담임선생님"><div><span class="sa-eyebrow">다정한 길잡이 · 학교 의뢰</span><h3>'+esc(story[0])+'</h3><p>'+esc(story[1])+'</p></div></section><div class="kindness-dialogue"><span aria-hidden="true">💬</span><p>'+esc(story[2])+'</p></div><ol class="kindness-progress" aria-label="이야기 네 단계">'+['마음 듣기','길 찾기','함께 가기','기억 남기기'].map((t,i)=>'<li class="'+(i+1===phase?'current':'')+'">'+(i+1<phase?'✓':i+1)+' '+t+'</li>').join('')+'</ol><div class="kindness-choices" role="group" aria-label="나루와 함께 할 선택">'+opts+'</div><p id="kindnessSelection" class="sa-small" role="status">아직 고르지 않았어요.</p><button class="sa-button primary" data-kind-save>이 선택으로 이어 가기</button><div id="kindnessFeedback" class="sa-feedback" role="status" aria-live="polite"></div><p class="sa-note">대화와 탐험은 연습 이야기예요. 한 단계를 마칠 때 수첩에 저장돼요. 시간제한·감점·추가 경험치는 없어요.</p><p>'+button('map','← 탐험 지도')+'</p>');
@@ -35,7 +35,7 @@ export function installKindnessChapter(c){
    if(!Number.isInteger(data.phase)||data.phase<0||data.phase>4||!Array.isArray(data.choices)||step.startsWith('kindness-')&&data.phase<phase||data.phase===4&&!KINDNESS_PINS[data.pin])throw Error('Unconfirmed chapter');
    c.getJournal().kindness=data;c.markLoaded();c.render();
    if(step==='pin'||step==='wear'){finish();$('kindnessFeedback').textContent='✓ 핀 모양과 착용 상태를 저장했어요.';return}
-   confirmed=true;feedback.innerHTML='<b>✓ 이야기 '+phase+' / 4를 저장했어요.</b><p>'+esc(phase===1?(value==='ask'?'나루: “먼저 물어봐 줘서 마음이 놓였어.”':'나루: “내 이야기를 천천히 들어 줘서 고마워.”'):phase===2?'나루: “메모와 같은 문이야! 길을 찾았어.”':phase===3?(value==='walk'?'나루: “우리 천천히 같이 걸어가자.”':'나루: “토리에게 함께 인사하면 덜 떨릴 것 같아.”'):'나루: “오늘의 기억이 우리 수첩에 남았어!”')+'</p><button class="sa-button primary" data-kind-next>'+(phase===4?'나루와의 기억 보기':'다음 이야기 →')+'</button>';feedback.querySelector('button').focus({preventScroll:true});
+   confirmed=true;feedback.innerHTML='<b>✓ 이야기 '+phase+' / 4를 저장했어요.</b><p>'+esc(phase===1?(value==='ask'?'나루: “먼저 물어봐 줘서 마음이 놓였어.”':'나루: “내 이야기를 천천히 들어 줘서 고마워.”'):phase===2?'나루: “메모와 같은 문이야! 길을 찾았어.”':phase===3?(value==='walk'?'나루: “우리 천천히 같이 걸어가자.”':'나루: “부옹에게 함께 인사하면 덜 떨릴 것 같아.”'):'나루: “오늘의 기억이 우리 수첩에 남았어!”')+'</p><button class="sa-button primary" data-kind-next>'+(phase===4?'나루와의 기억 보기':'다음 이야기 →')+'</button>';feedback.querySelector('button').focus({preventScroll:true});
   }catch{if(requestedOwner===c.getStudent().id&&requestedToken===c.getToken())feedback.textContent='아직 저장을 확인하지 못했어요. 선택은 그대로예요. 연결을 확인하고 다시 눌러 주세요.'}
   finally{c.setSaving(false);buttons.forEach(([b,disabled])=>{if(b.isConnected)b.disabled=disabled||confirmed&&b.matches('[data-kind-choice],[data-kind-save]')})}
  }

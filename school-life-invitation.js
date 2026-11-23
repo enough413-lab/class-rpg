@@ -14,7 +14,7 @@ export function createInvitationAction({overlay,hide,reduced}){
   const title=document.createElement('h2');title.textContent=phase==='lift'?'초대장':'잎사귀 초대장';section.append(title);
   if(phase!=='lift'){
    const canvas=document.createElement('canvas');canvas.className='life-letter-envelope';canvas.width=600;canvas.height=330;canvas.setAttribute('role','img');canvas.setAttribute('aria-label',phase==='closed'?'잎사귀 봉인이 붙은 봉투':'열린 봉투와 편지');section.append(canvas);
-   if(phase==='read'){const p=document.createElement('p');p.className='life-letter-message';p.textContent='이 학교에서 다시 웃음소리가 나면 좋겠어.\n마당에서 기다릴게.\n— 새싹';section.append(p);}
+   if(phase==='read'){const p=document.createElement('p');p.className='life-letter-message';p.textContent='이 학교에서 다시 웃음소리가 나면 좋겠어.\n마당에서 기다릴게.\n— 키토';section.append(p);}
    else{const p=document.createElement('p');p.className='life-letter-hint';p.setAttribute('role','status');p.textContent=phase==='closed'?'잎사귀 봉인.':'편지를 펼치는 중…';section.append(p);}
   }
   const controls=document.createElement('div');controls.className='life-letter-actions';

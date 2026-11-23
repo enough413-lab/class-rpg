@@ -6,8 +6,8 @@ export function createSchoolArrival({overlay,hide,reduced,tone,toggleSound,sound
  function button(text,fn,primary=false){const b=document.createElement('button'),token=epoch;b.type='button';b.className='life-arrival-button'+(primary?' life-arrival-primary':'');b.textContent=text;b.onclick=()=>{if(token!==epoch||!allowed()||!overlay.contains(b)||performance.now()-current.changedAt<300)return;fn();};return b;}
  function render(){
   if(!current)return;const welcome=current.phase==='welcome';overlay.dataset.arrival=current.phase;overlay.replaceChildren();
-  const section=document.createElement('section');section.className='life-arrival-panel';section.setAttribute('role','dialog');section.setAttribute('aria-label',welcome?'새싹의 인사':'첫 등교');
-  const title=document.createElement('h2');title.textContent=welcome?'새싹':'봄빛 학교';section.append(title);
+  const section=document.createElement('section');section.className='life-arrival-panel';section.setAttribute('role','dialog');section.setAttribute('aria-label',welcome?'키토의 인사':'첫 등교');
+  const title=document.createElement('h2');title.textContent=welcome?'키토':'봄빛 학교';section.append(title);
   if(welcome){const p=document.createElement('p');p.textContent='어? 초대장 받았구나.\n이쪽이야!';section.append(p);}
   const controls=document.createElement('div');controls.className='life-arrival-actions';
   controls.append(button(welcome?'둘러보기':'계속',()=>{if(welcome)hide();else{current.phase='welcome';current.elapsed=0;current.last=0;current.changedAt=performance.now();render();}},true));

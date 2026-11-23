@@ -1,5 +1,5 @@
 const PEOPLE={
- quests:{name:'담임선생님',role:'담임선생님',art:'teacher',greeting:'토리에게 전할 책 꾸러미가 있어. 표식을 따라 찾아줄래?',note:'',choices:[['parcel','책 꾸러미 찾으러 갈게요'],['quests','다른 의뢰를 볼래요'],['teacher','내가 해낸 일 보기'],['kindness','나루 길 안내 · Lv.15'],['art','엽서 만들기 · Lv.17'],['frame','액자 꾸미기 · Lv.18'],['finale','기억 가랜드 · Lv.20']]},
+ quests:{name:'담임선생님',role:'담임선생님',art:'teacher',greeting:'부옹에게 전할 책 꾸러미가 있어. 표식을 따라 찾아줄래?',note:'',choices:[['parcel','책 꾸러미 찾으러 갈게요'],['quests','다른 의뢰를 볼래요'],['teacher','내가 해낸 일 보기'],['kindness','나루 길 안내 · Lv.15'],['art','엽서 만들기 · Lv.17'],['frame','액자 꾸미기 · Lv.18'],['finale','기억 가랜드 · Lv.20']]},
  shop:{name:'문구지기 모모',role:'우리 교실 상점',art:'shopkeeper',greeting:'어서 와! 차곡차곡 모은 골드로 무엇을 골라볼까?',note:'마음에 드는 물건과 필요한 골드를 살펴봐. 구경만 해도 좋아!',choices:[['shop','상점 둘러보기']]}
 };
 export function installCampusNpcs({hub,getParcelStatus,getStudent,getToken,levelInfo,getMomo,onMomoAction,onVisitMomo}){
@@ -11,7 +11,7 @@ export function installCampusNpcs({hub,getParcelStatus,getStudent,getToken,level
   const wasOpen=dialog.open,notebookOpen=dialog.querySelector('.npc-notebook')?.open;
   current=person;if(!wasOpen)opener=doc.activeElement;owner=getStudent?.()?.id;token=getToken?.();dialog.dataset.person=kind;
   const progress=getParcelStatus?.(),phase=progress?.loaded?progress.phase:0;
-  const parcelWords=phase===1?['꾸러미를 챙겼구나! 복도 안내판에서 같은 표식을 찾아보렴.','표식 안내판으로 갈게요']:phase===2?['책지기 토리가 기다리고 있단다. 꾸러미를 직접 전해줄래?','토리에게 전하러 갈게요']:phase===3?['토리에게 잘 전해 줬구나! 네 덕분에 책 나눔을 준비했대. 고마워.','배달 기억을 볼래요']:null;
+  const parcelWords=phase===1?['꾸러미를 챙겼구나! 복도 안내판에서 같은 표식을 찾아보렴.','표식 안내판으로 갈게요']:phase===2?['책지기 부옹이 기다리고 있단다. 꾸러미를 직접 전해줄래?','부옹에게 전하러 갈게요']:phase===3?['부옹에게 잘 전해 줬구나! 네 덕분에 책 나눔을 준비했대. 고마워.','배달 기억을 볼래요']:null;
   const parcelReady=phase>0||levelInfo?.(getStudent?.()?.xp||0)?.level>=16;
   const momo=getMomo?.(),shop=kind==='shop'?momo:null;
   const momoWords=momo?.action==='momo-return'?['찾은 연필을 모모에게 직접 건네줄래? 모모가 기다리고 있어.','모모에게 연필 전하러 가기']:momo?.action==='momo-go'?['모모의 연필을 찾고 있구나. 옷장 왼쪽 바닥을 살펴보렴.','모모에게 다시 물어보기']:momo?.action==='momo-thanks'?['모모가 네가 찾아준 연필로 가격표를 썼대. 고마워!','모모에게 인사하러 가기']:['모모가 연필을 잃어버렸대. 오른쪽 모모에게 가서 무슨 일인지 물어봐 줄래?','모모의 부탁 들으러 가기'];

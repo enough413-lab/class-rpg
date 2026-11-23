@@ -1,5 +1,5 @@
 export const FINALE_MILESTONE={level:20,label:'🎏 우리들의 기억 가랜드',activity:'school-finale',description:'끝낸 이야기 세 가지를 골라 가랜드에 걸어요. 함께 자란 모험가 리본이 남아요.'};
-const MEMORIES={melody:{icon:'🎵',name:'환영 멜로디',text:'루미와 흩어진 악보를 이었어요.',activity:'music-sequence'},kindness:{icon:'🤝',name:'나루와의 길',text:'나루가 원하는 도움을 물어봤어요.',activity:'kindness-chapter'},parcel:{icon:'📦',name:'책 나눔 배달',text:'표식을 따라 토리의 꾸러미를 찾았어요.',activity:'parcel-adventure'},art:{icon:'🎨',name:'나만의 그림',text:'직접 그린 엽서에 액자를 꾸몄어요.',activity:'art-frame'},letter:{icon:'🌿',name:'초록 편지',text:'새싹을 살펴 토리에게 편지를 전했어요.',activity:'garden-letter'}};
+const MEMORIES={melody:{icon:'🎵',name:'환영 멜로디',text:'루미와 흩어진 악보를 이었어요.',activity:'music-sequence'},kindness:{icon:'🤝',name:'나루와의 길',text:'나루가 원하는 도움을 물어봤어요.',activity:'kindness-chapter'},parcel:{icon:'📦',name:'책 나눔 배달',text:'표식을 따라 부옹의 꾸러미를 찾았어요.',activity:'parcel-adventure'},art:{icon:'🎨',name:'나만의 그림',text:'직접 그린 엽서에 액자를 꾸몄어요.',activity:'art-frame'},letter:{icon:'🌿',name:'초록 편지',text:'새싹을 살펴 부옹에게 편지를 전했어요.',activity:'garden-letter'}};
 const RIBBONS={meadow:'초록 숲',sunset:'살구 노을',sky:'맑은 하늘'};
 const empty=()=>({earned:[],memories:[],ribbon:'meadow',wearing:false,completed_at:null});
 const known=id=>Object.hasOwn(MEMORIES,id),validSlots=a=>Array.isArray(a)&&a.length===3&&a.every(x=>x===null||known(x))&&new Set(a.filter(Boolean)).size===a.filter(Boolean).length;

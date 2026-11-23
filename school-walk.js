@@ -1,10 +1,10 @@
-import {decorateFlowerbed} from './campus-flowerbed.js?v=20261026-flowerbed-keys';
-import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261026-duri-replay';
+import {decorateFlowerbed} from './campus-flowerbed.js?v=20261123-residents';
+import {decorateTrioObject,TRIO_SEARCH_PLACES} from './npc-trio.js?v=20261123-residents';
 import {HALLWAY_BACKGROUND,HALLWAY_PLACES,decorateHallwayObject} from './hallway-art.js?v=20261012-graphics';
 import {PAINTED_PLACES,decoratePlaceProp} from './school-place-art.js?v=20261014-notebook';
 import {roomDoors,decorateRoomDoor} from './school-connections.js?v=20261008-paths';
 import {EXTRA_ROOMS} from './school-walking-places.js?v=20261008-nature';
-import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261020-anime';
+import {decorateCampusObject,markCampusObject} from './campus-objects.js?v=20261123-residents';
 import {installCampusWaypoint} from './campus-waypoint.js?v=20261007-journey';
 import {installCampusNameplates} from './campus-nameplates.js?v=20261020-alert';
 import {decorateMomoPencil} from './momo-favor.js?v=20261019-controls';
@@ -12,11 +12,11 @@ import {decorateMomoPencil} from './momo-favor.js?v=20261019-controls';
 const PLACES={
  classroom:[{kind:'pencil',x:16,label:'모모의 연필'},{kind:'titles',x:8,label:'🏅 칭호 진열장'},{kind:'inventory',x:25,label:'🎒 내 옷장'},{kind:'parcel',x:38,label:'📦 도서 꾸러미'},{kind:'quests',x:54,label:'📋 선생님 의뢰'},{kind:'teacher',x:68,label:'🌟 해낸 일'},{kind:'shop',x:82,label:'🛍️ 상점'},{kind:'hallway',x:94,label:'🚪 복도'}],
  hallway:HALLWAY_PLACES,
- library:[roomDoors('library')[0],{kind:'reading',x:20,label:'독서 기록대'},{kind:'tori',x:55,label:'책지기 토리'},{kind:'portfolio',x:75,label:'📖 독후감 책장'},{kind:'nook',x:84,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
+ library:[roomDoors('library')[0],{kind:'reading',x:20,label:'독서 기록대'},{kind:'tori',x:55,label:'책지기 부옹'},{kind:'portfolio',x:75,label:'📖 독후감 책장'},{kind:'nook',x:84,label:'🌿 창가 쉼터'},roomDoors('library')[1]]
 };
 for(const [room,info] of Object.entries(EXTRA_ROOMS))PLACES[room]=[...roomDoors(room),...info.props.map((label,i)=>({kind:'look-'+i,x:27+i*26,label})),{kind:'story',x:87,label:'📖 이곳의 이야기'}];
-PLACES.library.push(...TRIO_SEARCH_PLACES,{kind:'trio-shelf',x:32,label:'토리의 작은 책장'});
-PLACES.garden.push({kind:'flowerbed',x:65,label:'내 꽃밭 · 씨앗 심고 꾸미기'},{kind:'trio-garden',x:41,label:'새싹 · 말 걸기'});
+PLACES.library.push(...TRIO_SEARCH_PLACES,{kind:'trio-shelf',x:32,label:'부옹의 작은 책장'});
+PLACES.garden.push({kind:'flowerbed',x:65,label:'내 꽃밭 · 씨앗 심고 꾸미기'},{kind:'trio-garden',x:41,label:'키토 · 말 걸기'});
 PLACES.playground.push({kind:'trio-duri',x:41,label:'두리 · 공 던지기'});
 export function installSchoolWalk(ctx){
  // CSS pixels per second, shared by keys, touch buttons and destination walking.

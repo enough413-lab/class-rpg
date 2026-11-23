@@ -1,4 +1,4 @@
-import {freshStory,validStory,validStoryAction} from './school-life-story-state.js?v=20261110-story';
+import {freshStory,validStory,validStoryAction} from './school-life-story-state.js?v=20261123-residents';
 const copy=value=>structuredClone(value);
 const validIntent=d=>d&&Object.keys(d).length===5&&d.v===1&&validStoryAction(d.action,d.payload)&&Number.isSafeInteger(d.expected)&&d.expected>=0&&d.expected<Number.MAX_SAFE_INTEGER&&/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(d.id);
 // Separate action receipts. Original snapshots never carry or overwrite narrative progress.

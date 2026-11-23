@@ -1,17 +1,17 @@
 import {schoolMapView} from './school-map-ui.js?v=20261008-game-ui';
-import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261012-dialogue';
-import {LETTER_MILESTONE} from './garden-letter.js?v=20261007-letter';
+import {FINALE_MILESTONE,installSchoolFinale} from './school-finale.js?v=20261123-residents';
+import {LETTER_MILESTONE} from './garden-letter.js?v=20261123-residents';
 import {FRAME_MILESTONE,installArtFrame} from './art-frame.js?v=20261007-frame';
 import {ART_MILESTONE,installArtPostcard} from './art-postcard.js?v=20261007-frame';
-import {PARCEL_MILESTONE} from './parcel-adventure.js?v=20261007-parcel';
-import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261007-world';
+import {PARCEL_MILESTONE} from './parcel-adventure.js?v=20261123-residents';
+import {KINDNESS_MILESTONE,installKindnessChapter,kindnessProfile} from './kindness-chapter.js?v=20261123-residents';
 import {SEQUENCE_MILESTONE,installMusicSequence} from './music-sequence.js?v=20261007-sequence';
-import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20260930-workshop';
+import {SCHOOL_CHAPTERS,GROWTH_AREAS} from './school-adventure-data.js?v=20261123-residents';
 import {weeklyResetLabel,nextResetLabel} from './quest-schedule.js?v=20261013-quests';
 import {LEVEL_GIFTS,experienceUntil} from './rpg-progression.js?v=20260930-progression';
-import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20260930-workshop';
+import {NOTEBOOK_COVERS,WORKSHOP_MILESTONES,GARDEN_OBJECTS,gardenView,coverView} from './school-workshop.js?v=20261123-residents';
 import {CHAPTER_PROMISES,CHAPTER_ONE_MILESTONE,chapterOneView,profileMemento} from './school-chapter.js?v=20260930-chapter';
-import {LIBRARY_MILESTONE,LIBRARY_CASES,evidenceView,libraryBookmarkView} from './library-evidence.js?v=20260930-evidence';
+import {LIBRARY_MILESTONE,LIBRARY_CASES,evidenceView,libraryBookmarkView} from './library-evidence.js?v=20261123-residents';
 import {MUSIC_MILESTONE,MUSIC_STEPS,musicView,musicBadgeView,createMusicPlayer} from './music-room.js?v=20260930-music';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -179,7 +179,7 @@ export function installStudentAdventure(ctx){
  function showChapterOne(){
   open('첫 모험 기념식','학교에서 배운 마음을 다음 모험으로 가져가요.',chapterOneView({chapters:SCHOOL_CHAPTERS,completed:completed(),workshop:journal.workshop,nickname:student().nickname||'모험가',promise:endingPromise},esc)+'<p>'+button('map','← 탐험 지도')+'</p>');
  }
- function letterLabel(level){const n=['letter-1','letter-2','letter-3'].filter(id=>completed().has(id)).length;return n===3?'✓ 초록 편지 · 기억 보기':n?n+' / 3 발자국 · 이어 걷기':level<19?'🔒 Lv.19에 시작해요':'토리의 관찰 편지 의뢰'}
+ function letterLabel(level){const n=['letter-1','letter-2','letter-3'].filter(id=>completed().has(id)).length;return n===3?'✓ 초록 편지 · 기억 보기':n?n+' / 3 발자국 · 이어 걷기':level<19?'🔒 Lv.19에 시작해요':'부옹의 관찰 편지 의뢰'}
  function parcelLabel(level){const n=['parcel-1','parcel-2','parcel-3'].filter(id=>completed().has(id)).length;return n===3?'✓ 책 나눔 책갈피 · 기억 보기':n?n+' / 3 발자국 · 이어 걷기':level<16?'🔒 Lv.16에 시작해요':'교실의 꾸러미 살펴보기'}
  function musicLabel(level){
   const n=MUSIC_STEPS.filter(s=>completed().has(s.id)).length;
