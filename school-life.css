@@ -218,3 +218,12 @@
 @media(max-height:450px){.life-seed-checkout{position:static}.life-seed-products{gap:4px}}
 
 #schoolLife .life-seed-shop{width:min(540px,100%);height:auto;max-height:calc(100dvh - 80px)}#schoolLife .life-seed-shop .life-seed-shop-status:empty{display:none}#schoolLife .life-seed-shop .life-seed-order-name{font-size:15px;margin:3px 0 7px}#schoolLife .life-seed-shop .life-seed-shop-status{font-size:14px;line-height:1.4;margin:3px 0 6px}@media(max-height:450px){#schoolLife .life-seed-shop{max-height:calc(100dvh - 48px)}}
+
+#schoolLife .life-flower-display{width:min(100%,500px)}
+#schoolLife .life-cooking{width:min(100%,440px)}
+#schoolLife .life-cooking-result{display:flex;align-items:center;justify-content:center;gap:18px}
+#schoolLife .life-cooking-result svg{width:90px;height:78px;flex:none}
+#schoolLife .life-cooking-result h3,#schoolLife .life-cooking-result p{margin:4px 0}
+#schoolLife .life-cooking-ingredients{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+#schoolLife .life-cooking-status:empty{display:none}
+.life-vase-current{display:flex;align-items:center;justify-content:center;gap:14px;min-height:74px}.life-vase-current img{width:46px;height:68px;object-fit:contain}.life-vase-empty{width:28px;height:34px;background:#83a69b;border:2px solid #506e5b;border-radius:8px 8px 12px 12px}.life-vase-status:empty{display:none}.life-vase-flowers .life-item[aria-pressed=true]{background:#e8edce;border-color:#71885d}

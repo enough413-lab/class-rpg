@@ -1,3 +1,4 @@
+import {SOUP_SVG} from './school-life-cooking-art.js?v=20261123-harvest-uses';
 import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-seeds';
 import {SPADE_SVG,HOE_SVG} from './school-life-tools.js?v=20261117-tools';
 import {PROJECTS,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-seeds';
@@ -59,6 +60,7 @@ export function installLifeNotebook(api){
   if(page==='materials')html=s.wood>0?'<h3 class="life-section-title">모은 재료</h3><div class="life-item-grid"><div class="life-item">'+img('branch')+`<strong>나뭇가지</strong><span>${s.wood}개</span></div></div><p class="life-page-note">시설 수리 재료</p>`:empty('재료 없음','');
   if(page==='materials'){const g=api.garden?.();const kept=g?.inventory?.filter(v=>v.kind<3&&Number(v.flowers)>0)||[];if(kept.length){if(!s.wood)html='';html+='<h3 class="life-section-title">수확한 꽃</h3><div class="life-item-grid">'+kept.map(v=>'<div class="life-item">'+img(['flower','flowerPink','flowerBlue'][v.kind])+'<strong>'+FLOWER_NAMES[v.kind]+'</strong><span>'+v.flowers+'개</span></div>').join('')+'</div>';}}
   if(page==='food'){const crops=api.garden?.()?.inventory?.filter(v=>v.kind>=3&&Number(v.flowers)>0)||[];html=crops.length?'<h3 class="life-section-title">수확한 채소</h3><div class="life-item-grid">'+crops.map(v=>'<div class="life-item">'+img(cropOf(v.kind).itemArt)+'<strong>'+cropOf(v.kind).name+'</strong><span>'+v.flowers+'개</span></div>').join('')+'</div>':empty('음식 없음','');}
+  if(page==='food'){const food=api.cooking?.();if(food&&Number(food.soup)>0){if(!api.garden?.()?.inventory?.some(v=>v.kind>=3&&Number(v.flowers)>0))html='';html+='<h3 class="life-section-title">만든 음식</h3><div class="life-item-grid"><div class="life-item">'+SOUP_SVG+'<strong>채소 수프</strong><span>'+food.soup+'개</span></div></div>';}}
   api.book('작은 도구 주머니',html);tabs('bag',[['tools','도구'],['seeds','씨앗'],['materials','재료'],['food','음식']],page,bag);const o=api.overlay();
   o.querySelectorAll('[data-seed]').forEach(b=>b.onclick=()=>{if(!api.valid()||!o.contains(b))return;const kind=Number(b.dataset.seed);if(api.chooseCrop(kind)){bag('seeds');api.toast(cropOf(kind).name+' 씨앗 선택');}});
   const shop=o.querySelector('[data-seed-shop]');if(shop)shop.onclick=()=>{if(api.valid()&&o.contains(shop))api.seedShop();};
