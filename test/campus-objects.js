@@ -16,7 +16,7 @@ const HALLWAY_SPRITES={notice:{art:'records',x:51,width:19,height:28}};
 const LIBRARY_SPRITES={
  reading:{art:'reading-desk',x:22,width:24,height:32},
  portfolio:{art:'journal-shelf',x:62,width:25,height:46},
- tori:{art:'tori',x:44,width:17,height:35,name:'책지기 토리'}
+ tori:{art:'tori',x:44,width:17,height:35,name:'책지기 부옹'}
 };
 export function decorateCampusObject(button,place,room,tori){
  const doc=button.ownerDocument,caption=doc.createElement('span');caption.className='campus-object-caption';

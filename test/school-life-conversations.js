@@ -3,15 +3,15 @@ export function createSchoolConversations({overlay,hide,reduced,assets}){
  let current=null,epoch=0,lastView=null,returning=null;
  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
  const scripts={
-  wish:[{text:'저 교실에서 토리랑 두리랑\n다시 책을 읽고 싶어.',next:'계속'},{text:'열쇠가 저 화단 어딘가에 있을 텐데…',next:'같이 찾자'}],
+  wish:[{text:'저 교실에서 부옹이랑 두리랑\n다시 책을 읽고 싶어.',next:'계속'},{text:'열쇠가 저 화단 어딘가에 있을 텐데…',next:'같이 찾자'}],
   reunion:[{text:'불빛이 보여서 돌아왔어.\n이 교실이 그리웠거든.',next:'다시 만나서 반가워!'},{text:'책 사이에 이게 끼어 있었어.',next:'쪽지를 본다'},{text:'여기 둘게.',next:'고마워'}]
  };
  function stop(immediate=false){if(immediate)returning=null;else if(current)returning={kind:current.kind,offset:offset(),elapsed:0,last:0};current=null;lastView=null;epoch++;overlay.classList.remove('life-conversation-overlay');delete overlay.dataset.conversation;}
  const allowed=()=>!!current&&current.guard()&&!overlay.hidden;
  function render(){
   const s=current,phase=scripts[s.kind][s.index],token=++epoch;overlay.replaceChildren();overlay.dataset.conversation=s.kind+'-'+s.index;
-  const box=document.createElement('section');box.className='life-conversation-panel';box.setAttribute('role','dialog');box.setAttribute('aria-label',s.kind==='wish'?'새싹의 이야기':'토리의 이야기');
-  const name=document.createElement('h2');name.textContent=s.kind==='wish'?'새싹':'토리';const text=document.createElement('p');text.textContent=phase.text;box.append(name,text);
+  const box=document.createElement('section');box.className='life-conversation-panel';box.setAttribute('role','dialog');box.setAttribute('aria-label',s.kind==='wish'?'키토의 이야기':'부옹의 이야기');
+  const name=document.createElement('h2');name.textContent=s.kind==='wish'?'키토':'부옹';const text=document.createElement('p');text.textContent=phase.text;box.append(name,text);
   const actions=document.createElement('div');actions.className='life-conversation-actions';
   for(const[caption,primary]of [[phase.next,true],[s.kind==='wish'?'나중에':'대화 마치기',false]]){const b=document.createElement('button');b.type='button';b.className='life-conversation-button'+(primary?' life-conversation-primary':'');b.textContent=caption;b.disabled=primary&&!reduced();b.onclick=()=>{if(token!==epoch||!allowed()||!overlay.contains(b)||s.paused||performance.now()-s.changedAt<250)return;if(!primary){hide();return;}if(s.elapsed<750&&!reduced())return;if(s.index<scripts[s.kind].length-1){s.index++;s.from=lastView;s.elapsed=0;s.last=0;s.changedAt=performance.now();render();}else{const finish=s.finish;hide();finish();}};actions.append(b);}
   box.append(actions);box.addEventListener('keydown',e=>{if(e.repeat&&['Enter',' '].includes(e.key)){e.preventDefault();e.stopPropagation();}});overlay.append(box);box.setAttribute('tabindex','-1');box.focus({preventScroll:true});

@@ -17,5 +17,5 @@ export function validStoryAction(action,payload){
  const key=action==='place_display'?'layout':action==='thread_rope'?'eyes':null;
  return !!key&&exact(payload,[key])&&Array.isArray(payload[key])&&payload[key].length===3&&payload[key].every(n=>Number.isInteger(n)&&n>=0&&n<=2);
 }
-export const STORY_GOALS=['','교실에서 책꾸러미 챙기기','마당의 두리에게 책 전하기','토리에게 뒤숲 이야기 듣기','뒤숲 문에 새겨진 기호 맞추기','뒤숲의 다리 놓기','빈 나무에서 종의 추 찾기','토리에게 종의 추 가져가기','새싹과 재개교 준비하기','학교 앞 전시 꾸미기','학교 종에 추 달기','종의 줄 잇기','학교 종 울리기',''];
+export const STORY_GOALS=['','교실에서 책꾸러미 챙기기','마당의 두리에게 책 전하기','부옹에게 뒤숲 이야기 듣기','뒤숲 문에 새겨진 기호 맞추기','뒤숲의 다리 놓기','빈 나무에서 종의 추 찾기','부옹에게 종의 추 가져가기','키토와 재개교 준비하기','학교 앞 전시 꾸미기','학교 종에 추 달기','종의 줄 잇기','학교 종 울리기',''];
 export const storyChapter=s=>s.phase<3?2:s.phase<8?3:s.phase<10?4:5;

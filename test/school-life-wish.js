@@ -49,11 +49,11 @@ export function createWishStorage({rpc,identity,storage=localStorage,onChange=()
 }
 
 const label=choice=>choice==='flowers'?'꽃이 많은 학교':choice==='books'?'책이 많은 학교':'아직 고른 학교 없음';
-const reactions={saessak:{flowers:'꽃이 많은 학교랬지.\n난 노란 꽃을 좋아해. 그 옆에 앉으면 햇볕 냄새가 나.',books:'책이 많은 학교랬지.\n토리한테 읽어 달라고 해야겠다. 난 듣는 게 좋거든.'},tori:{flowers:'꽃이 많은 학교. 기억하고 있어.\n책을 읽다 창밖을 보면 꽃이 보이겠군.',books:'책이 많은 학교랬지.\n책장 하나는 비워 둘게. 네가 좋아하는 책도 꽂아야 하니까.'}};
+const reactions={saessak:{flowers:'꽃이 많은 학교랬지.\n난 노란 꽃을 좋아해. 그 옆에 앉으면 햇볕 냄새가 나.',books:'책이 많은 학교랬지.\n부옹한테 읽어 달라고 해야겠다. 난 듣는 게 좋거든.'},tori:{flowers:'꽃이 많은 학교. 기억하고 있어.\n책을 읽다 창밖을 보면 꽃이 보이겠군.',books:'책이 많은 학교랬지.\n책장 하나는 비워 둘게. 네가 좋아하는 책도 꽂아야 하니까.'}};
 export function createSchoolWish({identity,rpc,talk,hide,overlay,valid}){
  let active=null;
  const store=createWishStorage({identity,rpc,onChange:()=>{if(active&&valid()&&overlay.querySelector('.life-wish'))render();}});
- function render(){if(!active||!valid())return;const s=store.snapshot(),npc=active.npc,name=npc==='tori'?'토리':'새싹';
+ function render(){if(!active||!valid())return;const s=store.snapshot(),npc=active.npc,name=npc==='tori'?'부옹':'키토';
   let text='';const answers=[],origin=active;
   const add=(label,run,disabled=false)=>answers.push({label,disabled,run:()=>{active=origin;run();render();}});
   if(s.status==='ready'){

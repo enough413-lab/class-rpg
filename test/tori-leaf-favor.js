@@ -16,7 +16,7 @@ export function installToriLeafFavor(c){
  }
  function save(){if(owner==null||owner!==c.getStudent()?.id)return;try{localStorage.setItem(key(owner),JSON.stringify({v:1,phase,cells}));stored=true}catch{stored=false}}
  function goal(){
-  if(phase===2)return c.getScene()==='library'?'토리에게 잎 그림을 건네요.':c.getScene()==='pond'?'정원 문으로 · 토리에게 돌아가요.':c.getScene()==='garden'?'도서관 문으로 · 토리가 기다려요.':'도서관의 토리에게 잎 그림을 가져가요.';
+  if(phase===2)return c.getScene()==='library'?'부옹에게 잎 그림을 건네요.':c.getScene()==='pond'?'정원 문으로 · 부옹에게 돌아가요.':c.getScene()==='garden'?'도서관 문으로 · 부옹이 기다려요.':'도서관의 부옹에게 잎 그림을 가져가요.';
   return c.getScene()==='library'?'오른쪽 정원 문 → 연못의 질문 노트':c.getScene()==='garden'?'오른쪽 연못 문 → 질문 노트':c.getScene()==='pond'?'질문 노트에서 잎 무늬를 문질러요.':'도서관 → 정원 → 연못의 질문 노트';
  }
  function renderDialogue(){
@@ -27,7 +27,7 @@ export function installToriLeafFavor(c){
   const parcel=choices.querySelector(':scope > [data-guide=parcel]');if(primary&&parcel)book.append(parcel);
   guide.dataset.leafStory=primary?'active':'none';
   answer.querySelector('b').textContent=['잎 그림을 가져올게!','어느 길로 가면 돼?','잎 그림 건네기','함께 만든 잎 그림'][phase];
-  answer.querySelector('span').textContent=['연못의 노트에서 만든 그림을 토리에게 줘요.','받은 부탁 · 정원을 지나 연못의 질문 노트로 가요.','받은 부탁 · 손에 든 그림을 토리에게 전해요.','도서관에 남겨 둔 내 그림이에요.'][phase];
+  answer.querySelector('span').textContent=['연못의 노트에서 만든 그림을 부옹에게 줘요.','받은 부탁 · 정원을 지나 연못의 질문 노트로 가요.','받은 부탁 · 손에 든 그림을 부옹에게 전해요.','도서관에 남겨 둔 내 그림이에요.'][phase];
   if(!primary||guide.dataset.inspection==='true')return;
   guide.querySelector('#campusGuideTitle').textContent=['그림책에 잎 한 장!','천천히 다녀와!','잎 그림을 가져왔구나!','네 잎 그림을 간직할게!'][phase];
   guide.querySelector('.campus-greeting p').textContent=[
@@ -43,7 +43,7 @@ export function installToriLeafFavor(c){
   help.dataset.requestState=phase===3?'completed':phase>0?'accepted':'available';
   help.hidden=!open()||owner==null||atNotebook&&stored||stored&&parcelPhase>0&&parcelPhase<3&&!acceptedIn||!(phase===1||phase===2||!stored&&phase===3);
   take.hidden=!(phase===1&&atNotebook);take.disabled=snapshot.owner!==owner||!snapshot.cells.length||snapshot.busy||player.hasAttribute('data-jumping');retry.hidden=stored;
-  const text=(phase===1||phase===2?'받은 부탁 · 토리의 잎 그림 · ':'')+(message||goal())+(stored?'':' 이 기기에 저장하지 못했어요. 다시 저장해 주세요.');if(hint.textContent!==text)hint.textContent=text;
+  const text=(phase===1||phase===2?'받은 부탁 · 부옹의 잎 그림 · ':'')+(message||goal())+(stored?'':' 이 기기에 저장하지 못했어요. 다시 저장해 주세요.');if(hint.textContent!==text)hint.textContent=text;
   const rig=player.querySelector('.campus-rig');let held=player.querySelector('.tori-leaf-held');
   if(rig&&!held){held=doc.createElement('span');held.className='tori-leaf-held';held.setAttribute('aria-hidden','true');rig.append(held)}
   const signature=owner+':'+phase+':'+cells.join(',');
@@ -55,7 +55,7 @@ export function installToriLeafFavor(c){
  }
  answer.onclick=()=>{
   activate();if(owner==null||!playable()||!guide.open||guide.dataset.inspection==='true')return;
-  if(!nearTori()){guide.close();message='토리 곁으로 걸어가요.';sync();return}
+  if(!nearTori()){guide.close();message='부옹 곁으로 걸어가요.';sync();return}
   c.stop();message='';if(phase===0){phase=1;acceptedIn=c.getScene();save();guide.close()}else if(phase===1){guide.close()}else if(phase===2){phase=3;save();c.refreshStory()}else{guide.close()}
   sync();c.refresh();c.onRequestAction?.();
  };
@@ -68,6 +68,6 @@ export function installToriLeafFavor(c){
  doc.addEventListener('student-dashboard-updated',()=>{activate();c.refreshStory();sync()});
  new MutationObserver(sync).observe(player,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
  new MutationObserver(sync).observe(c.hub,{attributes:true,attributeFilter:['class']});
- function request(){activate();return {id:'leaf',title:'토리의 잎 그림',loaded:true,active:phase===1||phase===2,text:goal(),error:!stored?'이 기기에 저장하지 못했어요.':null,retry:()=>{save();sync();c.refresh()}}}
+ function request(){activate();return {id:'leaf',title:'부옹의 잎 그림',loaded:true,active:phase===1||phase===2,text:goal(),error:!stored?'이 기기에 저장하지 못했어요.':null,retry:()=>{save();sync();c.refresh()}}}
  sync();renderDialogue();return {sync,request};
 }

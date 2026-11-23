@@ -26,23 +26,23 @@ export function installLifeNotebook(api){
   const n=s.opening.step,w=[0,1,2].filter(i=>s.weeds.includes(i)).length,d=s.dust.length;
   const choices=[
    ['도착한 편지','잎사귀 초대장','방 안의 편지 읽기','내 방','invitation'],
-   ['새로운 만남','새싹에게 초대장 보여 주기','마당에서 새싹 만나기','학교 마당','invitation'],
-   ['새싹의 부탁',w===3?'풀 아래 작은 열쇠':'풀 아래에서 열쇠 찾기',w===3?'드러난 열쇠 줍기':'화단 아래 잡초 3곳 뽑기','학교 마당',w===3?'invitation':'weed'],
-   ['새싹의 부탁','찾은 열쇠로 교실 열기','학교 문에 열쇠 사용','학교 앞','school'],
+   ['새로운 만남','키토에게 초대장 보여 주기','마당에서 키토 만나기','학교 마당','invitation'],
+   ['키토의 부탁',w===3?'풀 아래 작은 열쇠':'풀 아래에서 열쇠 찾기',w===3?'드러난 열쇠 줍기':'화단 아래 잡초 3곳 뽑기','학교 마당',w===3?'invitation':'weed'],
+   ['키토의 부탁','찾은 열쇠로 교실 열기','학교 문에 열쇠 사용','학교 앞','school'],
    ['교실에 첫 햇살',d===4?'교실 창문 세 곳 열기':'교실의 먼지 쓸기',d===4?'칠판 옆과 양쪽 벽의 창문.':'바닥의 먼지 4곳 쓸기','교실','school'],
-   ['돌아온 친구','토리와 인사하기','교실에서 토리 만나기','교실','library'],
-   ['토리의 쪽지','종 아래 글귀 읽기','토리의 쪽지 읽기','교실','invitation']
+   ['돌아온 친구','부옹과 인사하기','교실에서 부옹 만나기','교실','library'],
+   ['부옹의 쪽지','종 아래 글귀 읽기','부옹의 쪽지 읽기','교실','invitation']
   ];
   if(n===7&&api.storyPage?.())return api.storyPage()+'<button class="life-choice life-return" data-return>계속 둘러보기</button>';
-  if(n===7)return empty('첫 교실 복원','교실에 햇살이 들고 토리가 돌아왔다.')+'<button class="life-choice" data-memory>남긴 기억 보기</button>';
+  if(n===7)return empty('첫 교실 복원','교실에 햇살이 들고 부옹이 돌아왔다.')+'<button class="life-choice" data-memory>남긴 기억 보기</button>';
   const [label,title,body,place,icon]=choices[n];
-  const wish=n>=2&&n<=4?'<p class="life-request-wish">새싹: “교실에서 다시 같이 책을 읽고 싶어.”</p>':'';
+  const wish=n>=2&&n<=4?'<p class="life-request-wish">키토: “교실에서 다시 같이 책을 읽고 싶어.”</p>':'';
   return `<article class="life-quest-sheet"><div class="life-quest-caption"><span>${label}</span><span class="life-status">${n===0?'도착':'진행 중'}</span></div><div class="life-quest-title">${img(icon)}<h3>${title}</h3></div>${wish}<p class="life-quest-next">${body}</p>${n===2?progress(w,3,'잡초 뽑기'):n===4?(d===4?progress(opened,3,'창문 열기'):progress(d,4,'먼지 쓸기')):''}<div class="life-quest-place"><span>찾아갈 곳</span><strong>${place}</strong></div></article><button class="life-choice life-return" data-return>계속 둘러보기</button>`;
  }
  function memories(s){
   const b=api.construction?.(),building=b?.status==='building',ready=b?.status==='ready';
   const places=PROJECTS.filter(p=>s.projects.includes(p.id)||api.level()>=p.level);
-  const stamps=[['초대장',1,'invitation'],['열쇠 발견',3,'weed'],['교실 문 개방',4,'school'],['첫 햇살',5,'school'],['토리의 귀환',6,'library'],['종 아래 글귀',7,'invitation']].filter(x=>s.opening.step>=x[1]);
+  const stamps=[['초대장',1,'invitation'],['열쇠 발견',3,'weed'],['교실 문 개방',4,'school'],['첫 햇살',5,'school'],['부옹의 귀환',6,'library'],['종 아래 글귀',7,'invitation']].filter(x=>s.opening.step>=x[1]);
   return `<button class="life-choice life-replay" data-replay>처음 이야기 다시 보기</button><h3 class="life-section-title">복원 기록</h3><div class="life-stat-grid">${[['weed','잡초',s.weeds.length,'/ 6곳'],['flower','피운 꽃',s.flowers.filter(f=>f.stage===3&&f.kind<3).length,'송이'],['school','교실 청소',s.dust.length,'/ 4곳']].map(([a,b,c,d])=>`<div>${img(a)}<span>${b}</span><strong>${c} <small>${d}</small></strong></div>`).join('')}</div>${stamps.length?'<h3 class="life-section-title">함께한 기억</h3><ul class="life-memory-list">'+stamps.map(([t,n,a])=>`<li><span aria-hidden="true">✓</span>${t}</li>`).join('')+'</ul>':''}${s.opening.step===7?'<blockquote>“학교의 종이 잠든 날,<br>우리는 작은 씨앗을 남겼다.”</blockquote>':''}${places.length?'<h3 class="life-section-title">가꾸는 학교</h3><div class="life-place-list">'+places.map(p=>`<details><summary>${img(p.id)}<span><strong>${p.name}</strong><small>${p.id==='school'&&building?'공사 중':p.id==='school'&&ready?'완공 확인':s.projects.includes(p.id)?'✓ 완성':'수리 가능'}</small></span></summary><p>${esc(p.id==='school'&&building?api.constructionDate(b)+' 완공':p.id==='school'&&ready?'학교 앞에서 완공 확인':s.projects.includes(p.id)?'수리 완료':projectRequirement(s,p.id,api.level())||'수리 재료 준비 완료')}</p></details>`).join('')+'</div>':''}<details class="life-record-details"><summary>이전 기록과 나가기</summary><p>이전 탐험 기록</p><div class="life-choices"><button class="life-choice" data-old>이전 탐험 수첩</button><button class="life-choice" data-title>타이틀로</button></div></details>`;
  }
  function discoveries(s){const known=s.fish.map((v,i)=>({v,i})).filter(x=>x.v>0);return `<h3 class="life-section-title">낚시 기록</h3>${known.length?'<div class="life-item-grid">'+known.map(({v,i})=>`<div class="life-item">${fish}<strong>${FISH_NAMES[i]}</strong><span>${v}회</span></div>`).join('')+'</div>':empty('기록 없음','잡은 물고기의 종류와 횟수.')}<p class="life-page-note">방생한 물고기의 기록.</p>`;}
