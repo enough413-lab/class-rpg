@@ -1,6 +1,7 @@
-import {createCooking,drawCookingTable,COOK_TARGET} from './school-life-cooking.js?v=20261123-harvest-uses';
-import {createFlowerDisplay,drawClassroomVase,VASE_TARGET} from './school-life-flower-display.js?v=20261123-harvest-uses';
-import {createSeedShop} from './school-life-seed-shop.js?v=20261123-harvest-uses';
+import {harvestCapacity} from './school-life-harvest-capacity.js?v=20261123-harvest-capacity';
+import {createCooking,drawCookingTable,COOK_TARGET} from './school-life-cooking.js?v=20261123-harvest-capacity';
+import {createFlowerDisplay,drawClassroomVase,VASE_TARGET} from './school-life-flower-display.js?v=20261123-harvest-capacity';
+import {createSeedShop} from './school-life-seed-shop.js?v=20261123-harvest-capacity';
 import {CROPS,cropOf,cropPolicy} from './school-life-crops.js?v=20261118-seeds';
 import {HARVEST_MS,harvestFrame,drawHarvest} from './school-life-harvest.js?v=20261117-harvest-motion';
 import {createGardenStorage} from './school-life-garden-storage.js?v=20261118-seeds';
@@ -29,7 +30,7 @@ import {createInvitationAction} from './school-life-invitation.js?v=20261110-arr
 import {createSchoolMemories} from './school-life-memories.js?v=20261112-depth';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawWater,lookDirection,VECTORS} from './school-life-feedback.js?v=20261112-door';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261123-harvest-uses';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261123-harvest-capacity';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261113-construction';
 import {installSchoolOpening} from './school-life-opening.js?v=20261117-residents';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-seeds';
@@ -40,7 +41,7 @@ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function installSchoolLife(ctx){
  if(window.schoolLife)return window.schoolLife;
- const css=document.createElement('link');css.rel='stylesheet';css.href='./school-life.css?v=20261123-harvest-uses';document.head.append(css);
+ const css=document.createElement('link');css.rel='stylesheet';css.href='./school-life.css?v=20261123-harvest-capacity';document.head.append(css);
  const host=document.createElement('dialog');host.id='schoolLife';host.setAttribute('aria-label','우리학교 다시, 봄');
  host.innerHTML=`<canvas id="lifeCanvas" aria-label="직접 걸어 다니는 학교 마을" tabindex="-1"></canvas><section class="life-title" id="lifeTitle"><div class="life-logo"><small>우리학교</small><h1>다시, <i>봄</i></h1></div><button class="life-start" id="lifeStart" disabled>불러오는 중…</button><p class="life-title-profile" id="lifeTitleProfile"></p><div class="life-title-note" id="lifeTitleNote">저장 기록 불러오는 중</div><div class="life-corner"><button class="life-round" data-life="sound" aria-label="소리 켜기" aria-pressed="false">${svg('sound')}</button><button class="life-round" data-life="exit" aria-label="학교생활 화면으로 나가기">${svg('exit')}</button></div></section><div class="life-hud" id="lifeHud" hidden><div class="life-place"><strong id="lifePlace"></strong><span id="lifeClock"></span></div><div class="life-level" id="lifeLevel"></div><button class="life-task" id="lifeTask" data-life="journal" aria-label="받은 부탁 펼치기"></button><div class="life-corner"><button class="life-round" data-life="bag" aria-label="도구 주머니">${svg('bag')}</button><button class="life-round" data-life="journal" aria-label="학교 수첩">${svg('book')}</button><button class="life-round" data-life="map" aria-label="학교 지도">${svg('map')}</button></div><div class="life-controls" aria-label="걷기"><button class="life-dir" data-dir="u" aria-label="위로 걷기">↑</button><button class="life-dir" data-dir="l" aria-label="왼쪽으로 걷기">←</button><button class="life-dir" data-dir="d" aria-label="아래로 걷기">↓</button><button class="life-dir" data-dir="r" aria-label="오른쪽으로 걷기">→</button></div><span class="life-name" id="lifePlayerName"></span><span class="life-name" id="lifeNpcName" hidden></span><div class="life-prompt" id="lifePrompt"></div><button class="life-use" id="lifeUse" hidden disabled aria-label="가까운 대상의 행동"><span id="lifeUseText"></span><small>E / Enter</small></button><button class="life-tool" id="lifeTool" hidden aria-label="물뿌리개 사용"><span>물 주기</span><small>E</small></button><div class="life-toast" id="lifeToast" role="status" hidden></div><div class="life-save-error" id="lifeSaveError" role="alert" hidden><span></span><button data-life="retry">다시 저장</button></div><div class="life-fish" id="lifeFish" hidden></div></div><div class="life-overlay" id="lifeOverlay" hidden></div><div class="life-sr" id="lifeAnnounce" role="status" aria-live="polite"></div>`;
  document.body.append(host);
@@ -124,12 +125,20 @@ export function installSchoolLife(ctx){
   else {text=s.pending?'꽃 돌보기의 저장을 확인하지 못했다.':'꽃 기록을 불러오지 못했다.';answers.push({label:s.pending?'저장 확인':'다시 불러오기',run:()=>{garden.retry();gardenPanel();}});}
   answers.push({label:'돌아가기'});talk('꽃 돌보기',text,answers);overlay.querySelector('.life-dialog').classList.add('life-garden-status');
  }
+ function fullHarvest(crop,capacity,e,f){
+  const names=[capacity.items?crop.name:null,capacity.seeds?crop.name+' 씨앗':null].filter(Boolean).join(' · ');
+  talk(crop.name,names+'\n더 담을 자리가 없다. 수확물은 그대로 남는다.',[
+   {label:'주머니 보기',run:()=>notebook.bag(capacity.seeds?'seeds':crop.category==='flower'?'materials':'food')},
+   {label:'그대로 두기'},
+   ...(crop.category==='flower'?[{label:'내 방에 놓기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||!now.enrolled||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}}]:[])
+  ]);
+ }
  function tendFlower(e,watering=false){
   if(!retainedFlowerSite(e,state.projects)){toast('여기에는 심을 수 없다.');return;}
   const s=garden.snapshot();if(s.status!=='ready'||!s.enrolled){gardenPanel();return;}
   const f=s.plants[e.index],crop=cropOf(f.kind);
-  if(!watering&&f.stage===3){talk(crop.name,'수확: '+(crop.category==='vegetable'?crop.name:'꽃')+' '+f.yield_items+'개 · 씨앗 '+f.yield_seeds+'개',[
-   {label:'수확하기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;gardenIntent={scene,slot:e.index,id:null,target:{x:e.x,y:e.y,index:e.index,flowerKind:f.kind}};if(garden.harvest(e.index,String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;}else gardenIntent=null;}},
+  if(!watering&&f.stage===3){const capacity=harvestCapacity(s,e.index);if(!capacity.ready){gardenPanel();return;}if(!capacity.fits){fullHarvest(crop,capacity,e,f);return;}talk(crop.name,'수확: '+(crop.category==='vegetable'?crop.name:'꽃')+' '+f.yield_items+'개 · 씨앗 '+f.yield_seeds+'개',[
+   {label:'수확하기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;const capacity=harvestCapacity(now,e.index);if(!capacity.ready)return;if(!capacity.fits){fullHarvest(crop,capacity,e,f);return;}gardenIntent={scene,slot:e.index,id:null,target:{x:e.x,y:e.y,index:e.index,flowerKind:f.kind}};if(garden.harvest(e.index,String(cloud.store.snapshot().revision))){gardenIntent.id=garden.snapshot().pending?.id;}else gardenIntent=null;}},
    {label:'그대로 두기'},
    ...(crop.category==='flower'?[{label:'내 방에 놓기',run:()=>{const now=garden.snapshot();if(now.status!=='ready'||!now.enrolled||now.plants[e.index].generation!==f.generation||now.plants[e.index].stage!==3)return;if(mutate(s=>s.roomPlant=f.kind))toast('방에 화분을 놓았다.');}}]:[])
   ]);return;}
