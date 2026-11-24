@@ -1,9 +1,9 @@
 // Facility use is a view of the existing completed projects, never saved progress.
-export function residentUse(state,repairing=null){
+export function residentUse(state,repairing=null,daylight=null){
  const settled=state?.opening?.legacy||state?.opening?.step>=7;
  const completed=id=>settled&&state.projects.includes(id)&&repairing?.id!==id;
  return {
-  saessak:completed('bench')?{activity:'bench',x:986,y:580,depth:596,w:57,h:102,target:{x:997,y:616}}:null,
-  tori:completed('library')?{activity:'reading',x:1097,y:803,depth:801,w:75,h:100,target:{x:1097,y:824}}:null
+  saessak:daylight==='morning'&&completed('garden')?{activity:'garden',x:802,y:517,depth:517,w:69,h:103,target:{x:803,y:533}}:completed('bench')?{activity:'bench',x:986,y:580,depth:596,w:57,h:102,target:{x:997,y:616}}:null,
+  tori:daylight!=='evening'&&completed('library')?{activity:'reading',x:1097,y:803,depth:801,w:75,h:100,target:{x:1097,y:824}}:null
  };
 }
