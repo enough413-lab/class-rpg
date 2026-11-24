@@ -23,7 +23,7 @@ import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
 import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-pixel-avatar.js?v=20261123-pixel-v2';
-import {createSchoolStory} from './school-life-story.js?v=20261124-school-woods';
+import {createSchoolStory} from './school-life-story.js?v=20261124-obstacles';
 import {createSchoolWish} from './school-life-wish.js?v=20261123-residents';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261123-residents';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261123-residents';
@@ -335,7 +335,7 @@ export function installSchoolLife(ctx){
   return [doors.home,doors.school,{id:'saessak',x:540,y:540,label:'키토',action:'대화',kind:'npc'},{id:'pond',x:1155,y:786,label:'연못 낚시',action:'낚시하기',kind:'pond'},{id:'bench',x:945,y:610,label:'나무 벤치',action:state.projects.includes('bench')?'쉬기':'살피기',kind:'project'},{id:'school',x:935,y:457,label:'학교에 새 봄빛',action:construction()?.status==='building'?'공사 확인':construction()?.status==='ready'?'완공 확인':'살피기',kind:'project'},{id:'garden',x:805,y:591,label:'넓어진 꽃밭',action:'살피기',kind:'project'},{id:'lights',x:970,y:946,label:'등굣길 꽃등',action:'살피기',kind:'project'},...WEEDS.map(([x,y],i)=>({id:'weed'+i,x,y,index:i,label:'잡초 뽑기',action:'뽑기',kind:'weed'})).filter(o=>!state.weeds.includes(o.index)),...BRANCHES.map(([x,y],i)=>({id:'branch'+i,x,y,index:i,label:'나뭇가지 줍기',action:'줍기',kind:'branch'})).filter(o=>!state.branches.includes(o.index)),...FLOWERS.slice(0,state.projects.includes('garden')?6:3).map(([x,y],i)=>({id:'flower'+i,x,y,index:i,label:flowers()[i].stage===0?'빈 흙':cropOf(flowers()[i].kind).name,action:flowers()[i].stage===0?'심기':flowers()[i].stage<3?'물 주기':'살피기',kind:'flower'}))];
  }
  function entities(){return [...baseEntities().map(residentTarget).filter(e=>e.id!=='tori'||opening.toriVisible()).filter(e=>e.kind!=='project'||state.projects.includes(e.id)||level()>=PROJECTS.find(p=>p.id===e.id).level),...opening.entities(scene),...memories.entities(scene),...story.entities(scene)];}
- function blocked(x,y){if(x<80||x>1520||y<410||y>1000)return true;if(scene==='campus'){if(x<440&&y<535)return true;if(x>405&&x<1220&&y<405)return true;if(((x-1360)/208)**2+((y-650)/172)**2<1.07)return true;return false;}if(y<470)return true;if(scene==='room'&&((x<430&&y<550)||(x>1150&&y<510)))return true;return false;}
+ function blocked(x,y){if(x<80||x>1520||y<410||y>1000)return true;if(scene==='campus'){if(story.blocksGate(x,y))return true;if(x<440&&y<535)return true;if(x>405&&x<1220&&y<405)return true;if(((x-1360)/208)**2+((y-650)/172)**2<1.07)return true;return false;}if(y<470)return true;if(scene==='room'&&((x<430&&y<550)||(x>1150&&y<510)))return true;return false;}
  function navigate(tx,ty){
   if(seating.active()||working()||stopped||document.hidden)return;
   const step=32,cols=50,rows=34,cell=(x,y)=>[clamp(Math.round(x/step),3,47),clamp(Math.round(y/step),13,31)],start=cell(pos.x,pos.y),end=cell(tx,ty),key=(x,y)=>y*cols+x;

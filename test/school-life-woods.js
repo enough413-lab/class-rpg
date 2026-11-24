@@ -31,7 +31,16 @@ export function createSchoolWoods(api){
  }
  function paintBoard(x,y,w=180){g.save();g.translate(x,y);g.fillStyle='#bf955f';g.strokeStyle='#6d5137';g.lineWidth=2;g.beginPath();g.roundRect(-w/2,-13,w,26,3);g.fill();g.stroke();g.beginPath();g.moveTo(-w*.4,-5);g.lineTo(w*.42,-4);g.moveTo(-w*.3,5);g.lineTo(w*.35,6);g.stroke();g.restore();}
  function draw(t,moving){const a=api.assets(),s=api.state(),dpr=.5;g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#7e9c6e';g.fillRect(0,0,size.w,size.h);camera.x=clamp(position.x-size.w/(2*scale),0,Math.max(0,1600-size.w/scale));camera.y=clamp(position.y-size.h*.54/scale,0,Math.max(0,1067-size.h/scale));if(size.h/scale>1067)camera.y=(1067-size.h/scale)/2;g.scale(scale,scale);g.translate(-camera.x,-camera.y);g.drawImage(a.woods,0,0,1600,1067);
-  for(let i=0;i<3;i++)if(s.bridge&(1<<i))paintBoard(795,727+i*34,250);else if(s.phase===5){g.save();g.setLineDash([6,5]);g.strokeStyle='#f7e7b4';g.lineWidth=2;g.strokeRect(670,714+i*34,250,26);g.restore();}
+  for(let i=0;i<3;i++){
+   const y=727+i*34;
+   if(s.bridge&(1<<i))paintBoard(795,y,250);
+   else if(s.phase===5){
+    paintBoard(691,y,42);
+    paintBoard(899,y,42);
+    g.save();g.setLineDash([6,5]);g.strokeStyle='#f7e7b4';g.lineWidth=2;
+    g.strokeRect(713,y-13,164,26);g.restore();
+   }
+  }
   if(s.phase===5&&!carried)for(let i=0;i<3;i++)if(!(s.bridge&(1<<i)))paintBoard(540+i*5,826+i*8,92);
   if(s.phase===6)api.drawClapper(g,1290,506,1);
   const people=[{y:position.y,draw:()=>{g.save();g.fillStyle='#314b3b45';g.beginPath();g.ellipse(position.x,position.y+5,20,7,0,0,Math.PI*2);g.fill();g.translate(position.x,position.y-(jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0));const motion={walking:moving&&!jump&&!api.reduced(),phase:walkPhase,carry:carried||s.phase===7};api.drawAvatar(g,look,motion);const hand=api.avatarHand(look,facing,motion);g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);if(carried){g.save();g.translate(-20,-42);g.rotate(-.12);paintBoard(0,0,85);g.restore();}else if(s.phase===7)api.drawClapper(g,-23,-43,.6);g.restore();}}];
