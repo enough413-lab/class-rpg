@@ -23,7 +23,7 @@ import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
 import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-pixel-avatar.js?v=20261123-pixel-v2';
-import {createSchoolStory} from './school-life-story.js?v=20261123-pixel-v2';
+import {createSchoolStory} from './school-life-story.js?v=20261124-school-woods';
 import {createSchoolWish} from './school-life-wish.js?v=20261123-residents';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261123-residents';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261123-residents';
@@ -306,9 +306,18 @@ export function installSchoolLife(ctx){
  function map(){if(seating.active()||working()||stopped||document.hidden)return;book('우리 학교 산책 지도','<canvas class="life-map-canvas" id="lifeMapCanvas" width="750" height="500" aria-label="왼쪽 내 방, 위쪽 학교, 가운데 화단, 오른쪽 연못"></canvas><p>집 → 앞마당 → 학교 · 오른쪽에는 연못<br>바닥 클릭: 이동 · 가까운 대상: 행동</p><p class="life-remember">방향키 / WASD 걷기 · E / Enter 표시된 행동 · Space 폴짝 · Esc 수첩 닫기</p>');const c=$('lifeMapCanvas').getContext('2d');c.drawImage(assets.campus,0,0,750,500);c.font='17px SchoolLife';c.textAlign='center';for(const [text,x,y]of[['내 방',120,265],['학교',390,205],['꽃밭',310,320],['연못',625,430]]){c.fillStyle='#fff6dc';c.fillRect(x-35,y-18,70,26);c.fillStyle='#405d3f';c.fillText(text,x,y);}if(scene==='campus'){c.fillStyle='#e17d59';c.beginPath();c.arc(pos.x/1600*750,pos.y/1067*500,6,0,Math.PI*2);c.fill();}}
  function residents(){const use=residentUse(state,repair.view(performance.now(),reduced.matches));if(!assets.saessakSeated?.naturalWidth)use.saessak=null;return use;}
  function residentTarget(e){const p=residents()[e.id];return p?{...e,...p.target}:e;}
+ const classroomShelf={id:'classroomShelf',x:1305,y:510,label:'교실 책장',action:'책 고르기',kind:'classroomShelf'};
+ function readClassroomShelf(){
+  const list=[
+   {title:'뒤숲 관찰 수첩',text:'개울은 길 바로 옆을 흐른다.\n 돌에 부딪힌 물은 잠깐 하얘졌다가 다시 투명해진다.'},
+   {title:'빈 나무의 한 해',text:'큰 나무의 빈 자리는 비를 피하기 좋다.\n 비가 그치면 뿌리 곁에 작은 잎들이 돋는다.'}
+  ];
+  const browse=()=>talk('교실 책장','두 권이 나란히 꽂혀 있다.',list.map(entry=>({label:entry.title,run:()=>talk(entry.title,entry.text,[{label:'책장으로',run:browse},{label:'책 덮기'}])})).concat({label:'닫기'}));
+  browse();
+ }
  function baseEntities(){
   if(scene==='room')return [COOK_TARGET,{id:'door',x:800,y:965,label:'학교로 나가기',action:'나가기',kind:'exit',target:'campus'},{id:'plant',x:1400,y:630,label:'내 방의 작은 화분',action:'꾸미기',kind:'plant'}];
-  if(scene==='classroom')return [VASE_TARGET,{id:'door',x:800,y:965,label:'마당으로 나가기',action:'나가기',kind:'exit',target:'campus'},{id:'tori',x:1060,y:615,label:'부옹',action:'대화',kind:'npc'},...DUST.map(([x,y],i)=>({id:'dust'+i,x,y,index:i,label:'먼지 쓸기',action:'쓸기',kind:'dust'})).filter(o=>!state.dust.includes(o.index)),{id:'library',x:1160,y:775,label:'작은 책쉼터',action:state.projects.includes('library')?'쉬기':'살피기',kind:'project'}];
+  if(scene==='classroom')return [VASE_TARGET,...(state.opening.legacy||state.opening.step===7?[classroomShelf]:[]),{id:'door',x:800,y:965,label:'마당으로 나가기',action:'나가기',kind:'exit',target:'campus'},{id:'tori',x:1060,y:615,label:'부옹',action:'대화',kind:'npc'},...DUST.map(([x,y],i)=>({id:'dust'+i,x,y,index:i,label:'먼지 쓸기',action:'쓸기',kind:'dust'})).filter(o=>!state.dust.includes(o.index)),{id:'library',x:1160,y:775,label:'작은 책쉼터',action:state.projects.includes('library')?'쉬기':'살피기',kind:'project'}];
   return [{id:'home',x:260,y:548,label:'내 방으로',action:'들어가기',kind:'exit',target:'room'},{id:'schoolDoor',x:815,y:435,label:'교실로',action:'들어가기',kind:'exit',target:'classroom'},{id:'saessak',x:540,y:540,label:'키토',action:'대화',kind:'npc'},{id:'pond',x:1155,y:786,label:'연못 낚시',action:'낚시하기',kind:'pond'},{id:'bench',x:945,y:610,label:'나무 벤치',action:state.projects.includes('bench')?'쉬기':'살피기',kind:'project'},{id:'school',x:935,y:457,label:'학교에 새 봄빛',action:construction()?.status==='building'?'공사 확인':construction()?.status==='ready'?'완공 확인':'살피기',kind:'project'},{id:'garden',x:805,y:591,label:'넓어진 꽃밭',action:'살피기',kind:'project'},{id:'lights',x:970,y:946,label:'등굣길 꽃등',action:'살피기',kind:'project'},...WEEDS.map(([x,y],i)=>({id:'weed'+i,x,y,index:i,label:'잡초 뽑기',action:'뽑기',kind:'weed'})).filter(o=>!state.weeds.includes(o.index)),...BRANCHES.map(([x,y],i)=>({id:'branch'+i,x,y,index:i,label:'나뭇가지 줍기',action:'줍기',kind:'branch'})).filter(o=>!state.branches.includes(o.index)),...FLOWERS.slice(0,state.projects.includes('garden')?6:3).map(([x,y],i)=>({id:'flower'+i,x,y,index:i,label:flowers()[i].stage===0?'빈 흙':cropOf(flowers()[i].kind).name,action:flowers()[i].stage===0?'심기':flowers()[i].stage<3?'물 주기':'살피기',kind:'flower'}))];
  }
  function entities(){return [...baseEntities().map(residentTarget).filter(e=>e.id!=='tori'||opening.toriVisible()).filter(e=>e.kind!=='project'||state.projects.includes(e.id)||level()>=PROJECTS.find(p=>p.id===e.id).level),...opening.entities(scene),...memories.entities(scene),...story.entities(scene)];}
@@ -340,6 +349,7 @@ export function installSchoolLife(ctx){
   if(e.kind==='flower'){tendFlower(e);return;}
   if(e.kind==='cook'){cooking.open();return;}
   if(e.kind==='vase'){flowerDisplay.open();return;}
+  if(e.kind==='classroomShelf'){readClassroomShelf();return;}
   if(e.kind==='plant'){if(state.roomPlant<0)talk('작은 선반','학교에서 키운 꽃 모양의 화분을 놓는 자리.');else talk('나의 작은 화분',FLOWER_NAMES[state.roomPlant]+' 화분. 학교에서 키운 꽃과 같은 모양이다.');return;}
   if(e.kind==='project'){if(e.id==='garden'&&(!garden.snapshot().enrolled||garden.snapshot().status!=='ready')){gardenPanel();return;}const p=PROJECTS.find(p=>p.id===e.id);if(e.id==='school'&&schoolConstruction())return;if(state.projects.includes(e.id)){if(e.id==='bench'||e.id==='library'){sit(e.id);}else talk(p.name,'수리가 끝났다.');return;}const reason=projectRequirement(lifeView(),p.id,level());if(reason){talk(p.name,reason+`\n${p.description}`,[{label:'확인'},{label:'학교 수첩',run:journal}]);return;}if(p.id==='school'){talk('학교 외관','지붕과 벽을 고친다. 내일 완공.\n나뭇가지 5개 필요',[{label:'공사 시작',run:()=>{if(!projectRequirement(lifeView(),'school',level()))buildSchool('start_school');}},{label:'돌아가기'}]);return;}talk(p.name,p.description+(p.wood?`\n나뭇가지 ${p.wood}개 필요`:''),[{label:'함께 고치기',run:()=>{if(projectRequirement(lifeView(),p.id,level()))return;if(mutate(s=>{s.projects.push(p.id);s.wood-=p.wood;})){clearReaction();gesture=null;keys.clear();path=[];jump=0;repair.start(p);workControls();const duration=reduced.matches?1000:REPAIR_MS;laterToast(p.name+' 완성',duration);react('joy',duration);}}},{label:'조금 이따가'}]);return;}
   if(e.kind==='pond'){heldTool='rod';look='r';facing=-1;fish={phase:'wait',at:performance.now(),bite:performance.now()+1700+Math.random()*1600};$('lifeFish').hidden=false;tone(440,.1);}
