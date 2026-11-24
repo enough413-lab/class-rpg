@@ -1,6 +1,7 @@
 import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {lookDirection} from './school-life-feedback.js?v=20261110-field-feedback';
 import {paintSchoolLight,paintSchoolShadow} from './school-life-daylight.js?v=20261125-daylight';
+import {paintWoodsLeaves} from './school-life-nature.js?v=20261125-nature';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function createSchoolWoods(api){
  let active=false,canvas,g,position={x:260,y:940},keys=new Set(),path=null,near=null,carried=false,frame=0,last=0,facing=1,look='d',paused=false,scale=1,camera={x:0,y:0},size={w:1,h:1},jump=0,spaceHeld=false,walkPhase=0;
@@ -38,6 +39,7 @@ export function createSchoolWoods(api){
  }
  function paintBoard(x,y,w=180){g.save();g.translate(x,y);g.fillStyle='#bf955f';g.strokeStyle='#6d5137';g.lineWidth=2;g.beginPath();g.roundRect(-w/2,-13,w,26,3);g.fill();g.stroke();g.beginPath();g.moveTo(-w*.4,-5);g.lineTo(w*.42,-4);g.moveTo(-w*.3,5);g.lineTo(w*.35,6);g.stroke();g.restore();}
  function draw(t,moving){const a=api.assets(),s=api.state(),dpr=.5;g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#7e9c6e';g.fillRect(0,0,size.w,size.h);camera.x=clamp(position.x-size.w/(2*scale),0,Math.max(0,1600-size.w/scale));camera.y=clamp(position.y-size.h*.54/scale,0,Math.max(0,1067-size.h/scale));if(size.h/scale>1067)camera.y=(1067-size.h/scale)/2;g.scale(scale,scale);g.translate(-camera.x,-camera.y);g.drawImage(a.woods,0,0,1600,1067);
+  paintWoodsLeaves(g,t,api.reduced());
   const rainy=api.isRainy(),daylight=api.daylight();if(rainy)api.rain.puddles(g,'woods',t,api.reduced());
   for(let i=0;i<3;i++){
    const y=727+i*34;
