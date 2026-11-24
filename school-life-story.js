@@ -1,6 +1,6 @@
 import {createStoryStorage} from './school-life-story-store.js?v=20261123-residents';
 import {STORY_GOALS,storyChapter} from './school-life-story-state.js?v=20261123-residents';
-import {createSchoolWoods} from './school-life-woods.js?v=20261124-school-woods';
+import {createSchoolWoods} from './school-life-woods.js?v=20261124-obstacles';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function createSchoolStory(api){
  let view=null,serial=0,endingFrame=0;
@@ -21,6 +21,13 @@ export function createSchoolStory(api){
  }
  function send(action,payload={},done){if(!api.valid())return;if(store.snapshot().status!=='ready'){view={kind:'status',done};statusView();return;}view={kind:'status',done};if(!store.act(action,payload)){statusView();return;}if(view)statusView();}
  function ensure(){if(store.snapshot().status==='ready')return true;view={kind:'status'};statusView();return false;}
+ function blocksGate(x,y){
+  if(x<126||x>234||y<850||y>900)return false;
+  const phase=state().phase;
+  if(phase<4)return false;
+  if(phase===4&&x>=132&&x<=228&&y<=875)return true;
+  return y>=875&&(Math.abs(x-132)<=6||Math.abs(x-228)<=6);
+ }
  function entities(scene){if(!eligible()&&state().phase===0)return[];const s=state(),out=[];
   if(scene==='classroom'&&s.phase===1)out.push({id:'storyBooks',x:980,y:560,label:'두리에게 줄 책',action:'챙기기',kind:'story'});
   if(scene==='campus'){
@@ -70,5 +77,5 @@ export function createSchoolStory(api){
   const drawFrame=()=>{if(view?.id!==run||!api.valid()||!o.contains(c))return;const w=o.clientWidth,h=o.clientHeight,dpr=.5;if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);const scale=Math.max(w/900,(h*.7)/650);g.fillStyle='#a8be81';g.fillRect(0,0,w,h);g.save();g.translate(w/2-800*scale,Math.max(60,(h-o.querySelector('.life-ending-copy').offsetHeight-40)*.42)-525*scale);g.scale(scale,scale);g.drawImage(api.assets()[api.original().projects.includes('school')?'restored':'campus'],0,0,1600,1067);for(const[k,x,y,ww,hh]of[['saessak',675,640,69,103],['tori',775,640,81,108],['duri',875,640,70,105]])g.drawImage(api.assets()[k],x-ww/2,y-hh,ww,hh);g.save();g.translate(975,640);api.drawAvatar(g,'d');g.restore();g.restore();endingFrame=requestAnimationFrame(drawFrame);};drawFrame();
  }
  function journal(){const s=state();if(!s.phase)return null;return '<article class="life-quest-sheet"><div class="life-quest-caption"><span>'+storyChapter(s)+'장</span><span>'+(s.phase===13?'완료':'진행 중')+'</span></div><h3>'+(s.phase===13?'다시 울리는 종':esc(STORY_GOALS[s.phase]))+'</h3><p>'+(s.phase===13?'학교가 다시 열렸다. 꽃과 책, 주민들의 이야기는 이곳에 남아 있다.':esc(({1:'교실의 책꾸러미',2:'마당 오른쪽의 두리',3:'교실의 부옹',4:'마당 왼쪽 뒤숲 문',5:'뒤숲의 끊어진 다리',6:'다리 건너 빈 나무',7:'교실의 부옹',8:'마당의 키토',9:'마당 왼쪽 전시 자리',10:'마당 아래 학교 종',11:'학교 종의 줄',12:'학교 종'})[s.phase]))+'</p></article>';}
- return {isView:()=>!!view,store,handle,entities,draw,depth,people,held,carrying:()=>[2,7].includes(state().phase),decorateMemory,cancelView,woods,goal:()=>eligible()?STORY_GOALS[state().phase]:'',journal,snapshot:()=>({...store.snapshot(),woods:woods.snapshot(),view:view?.kind||null})};
+ return {isView:()=>!!view,store,handle,entities,blocksGate,draw,depth,people,held,carrying:()=>[2,7].includes(state().phase),decorateMemory,cancelView,woods,goal:()=>eligible()?STORY_GOALS[state().phase]:'',journal,snapshot:()=>({...store.snapshot(),woods:woods.snapshot(),view:view?.kind||null})};
 }
