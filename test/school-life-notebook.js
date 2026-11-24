@@ -47,6 +47,33 @@ export function installLifeNotebook(api){
  }
  function discoveries(s){const known=s.fish.map((v,i)=>({v,i})).filter(x=>x.v>0);return `<h3 class="life-section-title">낚시 기록</h3>${known.length?'<div class="life-item-grid">'+known.map(({v,i})=>`<div class="life-item">${fish}<strong>${FISH_NAMES[i]}</strong><span>${v}회</span></div>`).join('')+'</div>':empty('기록 없음','잡은 물고기의 종류와 횟수.')}<p class="life-page-note">방생한 물고기의 기록.</p>`;}
  function journal(page='quest'){const s=api.state();api.book('학교 수첩',page==='quest'?quest(s):page==='memory'?memories(s):discoveries(s));tabs('journal',[['quest','받은 부탁'],['memory','학교 모습'],['discovery','발견 기록']],page,journal);const o=api.overlay();const replay=o.querySelector('[data-replay]');replay?.addEventListener('click',()=>{if(api.valid()&&o.contains(replay))api.replay();});o.querySelector('[data-return]')?.addEventListener('click',api.hide);o.querySelector('[data-memory]')?.addEventListener('click',()=>journal('memory'));o.querySelector('[data-title]')?.addEventListener('click',api.title);o.querySelector('[data-old]')?.addEventListener('click',api.legacy);}
+ function harvestCollection(){
+  const garden=api.garden();
+  const crops=garden.inventory.filter(item=>Number(item.flowers)>0);
+  const display=api.flowerDisplay().displayed;
+  const soup=api.cooking().soup;
+  let html='';
+  if(garden.status!=='ready')html+='<p class="life-page-note" role="status">수확물 기록 확인 중</p>';
+  if(crops.length){
+   html+='<h3 class="life-section-title">보관 중</h3><div class="life-item-grid">'+crops.map(item=>{
+    const crop=cropOf(item.kind);
+    return `<div class="life-item">${img(crop.itemArt)}<strong>${crop.name}</strong><span>${item.flowers}개</span></div>`;
+   }).join('')+'</div>';
+  }else if(garden.status==='ready')html+=empty('아직 수확물이 없다','거둔 꽃과 채소는 주머니에 보관한다.');
+  if(display!==null||Number(soup)>0){
+   html+='<h3 class="life-section-title">만들고 꾸민 것</h3><div class="life-item-grid">';
+   if(display!==null){
+    const flower=cropOf(display);
+    html+=`<div class="life-item">${img(flower.itemArt)}<strong>${flower.name}</strong><span>교실 꽃병</span></div>`;
+   }
+   if(Number(soup)>0)html+=`<div class="life-item">${SOUP_SVG}<strong>채소 수프</strong><span>${soup}개</span></div>`;
+   html+='</div>';
+  }
+  html+='<p class="life-page-note">꽃은 교실 꽃병에 꽂고, 당근과 무는 내 방 요리대에서 수프로 만든다.</p>';
+  if(api.harvestUse('vase'))html+='<button class="life-choice" data-harvest-use="vase">교실 꽃병 열기</button>';
+  if(api.harvestUse('cook'))html+='<button class="life-choice" data-harvest-use="cook">작은 요리대 열기</button>';
+  return html;
+ }
  function bag(page='tools'){
   const s=api.state();let html='';
   if(page==='tools')html='<h3 class="life-section-title">도구</h3><div class="life-item-grid">'+[['can','물뿌리개',can],['rod','낚싯대',rod],['spade','삽',SPADE_SVG],['hoe','호미',HOE_SVG]].map(([id,name,icon])=>`<button class="life-item" data-tool="${id}" aria-pressed="${api.held()===id}">${icon}<strong>${name}</strong><span>${api.held()===id?'들고 있음':'손에 들기'}</span></button>`).join('')+'</div><p class="life-page-note">선택: 들기 / 넣기 · E: 도구 사용</p>';
@@ -61,9 +88,12 @@ export function installLifeNotebook(api){
   if(page==='materials'){const g=api.garden?.();const kept=g?.inventory?.filter(v=>v.kind<3&&Number(v.flowers)>0)||[];if(kept.length){if(!s.wood)html='';html+='<h3 class="life-section-title">수확한 꽃</h3><div class="life-item-grid">'+kept.map(v=>'<div class="life-item">'+img(['flower','flowerPink','flowerBlue'][v.kind])+'<strong>'+FLOWER_NAMES[v.kind]+'</strong><span>'+v.flowers+'개</span></div>').join('')+'</div>';}}
   if(page==='food'){const crops=api.garden?.()?.inventory?.filter(v=>v.kind>=3&&Number(v.flowers)>0)||[];html=crops.length?'<h3 class="life-section-title">수확한 채소</h3><div class="life-item-grid">'+crops.map(v=>'<div class="life-item">'+img(cropOf(v.kind).itemArt)+'<strong>'+cropOf(v.kind).name+'</strong><span>'+v.flowers+'개</span></div>').join('')+'</div>':empty('음식 없음','');}
   if(page==='food'){const food=api.cooking?.();if(food&&Number(food.soup)>0){if(!api.garden?.()?.inventory?.some(v=>v.kind>=3&&Number(v.flowers)>0))html='';html+='<h3 class="life-section-title">만든 음식</h3><div class="life-item-grid"><div class="life-item">'+SOUP_SVG+'<strong>채소 수프</strong><span>'+food.soup+'개</span></div></div>';}}
+  if(page==='harvest')html=harvestCollection();
   if(page==='materials'||page==='food')html+='<button class="life-choice" data-market-open>수확물 팔기</button>';
-  api.book('작은 도구 주머니',html);tabs('bag',[['tools','도구'],['seeds','씨앗'],['materials','재료'],['food','음식']],page,bag);const o=api.overlay();
+  api.book('작은 도구 주머니',html);tabs('bag',[['tools','도구'],['seeds','씨앗'],['materials','재료'],['food','음식'],['harvest','수확물']],page,bag);const o=api.overlay();
   o.querySelectorAll('[data-seed]').forEach(b=>b.onclick=()=>{if(!api.valid()||!o.contains(b))return;const kind=Number(b.dataset.seed);if(api.chooseCrop(kind)){bag('seeds');api.toast(cropOf(kind).name+' 씨앗 선택');}});
+  const harvestUse=o.querySelector('[data-harvest-use]');
+  if(harvestUse)harvestUse.onclick=()=>{if(api.valid()&&o.contains(harvestUse))api.harvestUse(harvestUse.dataset.harvestUse,true);};
   const market=o.querySelector('[data-market-open]');
   if(market)market.onclick=()=>{if(api.valid()&&o.contains(market))api.market();};
   const shop=o.querySelector('[data-seed-shop]');if(shop)shop.onclick=()=>{if(api.valid()&&o.contains(shop))api.seedShop();};

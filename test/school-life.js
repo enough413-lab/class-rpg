@@ -31,7 +31,7 @@ import {createInvitationAction} from './school-life-invitation.js?v=20261123-res
 import {createSchoolMemories} from './school-life-memories.js?v=20261123-residents';
 import {createLifePrologue} from './school-life-prologue.js?v=20261110-replay';
 import {createLifeFeedback,drawWater,lookDirection,VECTORS} from './school-life-feedback.js?v=20261112-door';
-import {installLifeNotebook} from './school-life-notebook.js?v=20261124-market';
+import {installLifeNotebook} from './school-life-notebook.js?v=20261124-collection';
 import {createSchoolLifeSync} from './school-life-sync.js?v=20261113-construction';
 import {installSchoolOpening} from './school-life-opening.js?v=20261123-residents';
 import {freshLife,readLife,PROJECTS,WEEDS,BRANCHES,FLOWERS,DUST,FLOWER_NAMES,FISH_NAMES,projectRequirement} from './school-life-state.js?v=20261118-seeds';
@@ -190,7 +190,14 @@ export function installSchoolLife(ctx){
  }
  const names={room:'나의 작은 방',campus:'봄빛 학교',classroom:'우리 교실'};
  const manifest={carrot:'maps/life/carrot-v1.webp',radish:'maps/life/radish-v1.webp',carrotPlanted:'maps/life/carrot-planted-v1.webp',radishPlanted:'maps/life/radish-planted-v1.webp',saessakSeated:'maps/npcs/saessak-seated-v1.webp',workers:'maps/npcs/squirrel-workers-v1.webp',woods:'maps/life/woods-pixel-v1.webp',bellFrame:'maps/life/bell-frame-v1.webp',saessakPoint:'maps/npcs/saessak-point-v1.webp',toriNote:'maps/npcs/tori-note-v1.webp',duri:'maps/npcs/duri-anime-v2.webp',prologueBell:'maps/life/prologue-bell-v1.webp',invitation:'maps/life/invitation-harmony-v2.webp',campus:'maps/life/campus-pixel-v1.webp',restored:'maps/life/restored-pixel-v1.webp',room:'maps/life/room-pixel-v1.webp',classroom:'maps/life/classroom-pixel-v1.webp',classroomClosed:'maps/life/classroomClosed-pixel-v1.webp',saessak:'maps/npcs/saessak-anime-v2.webp',tori:'maps/npcs/tori-anime-v2.webp',bench:'maps/life/bench-harmony-v2.webp',weed:'maps/life/weed-harmony-v2.webp',branch:'maps/life/branch-harmony-v2.webp',soil:'maps/life/soil-harmony-v2.webp',sprout:'maps/life/sprout-harmony-v2.webp',flower:'maps/life/flower-harmony-v2.webp',flowerPink:'maps/life/flowerPink-harmony-v2.webp',flowerBlue:'maps/life/flowerBlue-harmony-v2.webp',brokenBench:'maps/life/brokenBench-harmony-v2.webp',readingNook:'maps/life/readingNook-harmony-v2.webp',lantern:'maps/life/lantern-harmony-v2.webp'};
- const notebook=installLifeNotebook({market:()=>market.open(),cooking:()=>cooking.store.snapshot(),seedShop:()=>seedShop.open(),state:lifeView,selectedCrop:chosenCrop,chooseCrop,claimVegetables,claimFlowers,garden:()=>garden.snapshot(),construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
+ function harvestUse(kind,open=false){
+  if(!valid()||mode!=='play'||working()||stopped||document.hidden)return false;
+  const vase=kind==='vase';
+  if(scene!==(vase?'classroom':'room')||distance(pos,vase?VASE_TARGET:COOK_TARGET)>=76)return false;
+  if(open)(vase?flowerDisplay:cooking).open();
+  return true;
+ }
+ const notebook=installLifeNotebook({harvestUse,flowerDisplay:()=>flowerDisplay.store.snapshot(),market:()=>market.open(),cooking:()=>cooking.store.snapshot(),seedShop:()=>seedShop.open(),state:lifeView,selectedCrop:chosenCrop,chooseCrop,claimVegetables,claimFlowers,garden:()=>garden.snapshot(),construction,constructionDate,level,book,overlay:()=>overlay,valid,mutate,toast,hide:hideOverlay,title,replay:replayPrologue,storyPage:()=>story.journal(),legacy:()=>{close();ctx.openLegacy?.();},held:()=>heldTool,hold:id=>{heldTool=id;nearId=null;}});
  const arrival=createSchoolArrival({overlay,hide:hideOverlay,reduced:()=>reduced.matches,tone,toggleSound,soundEnabled:()=>sound});
  const dialogue=createSchoolConversations({overlay,hide:hideOverlay,reduced:()=>reduced.matches,assets:()=>assets});
  const invitation=createInvitationAction({overlay,hide:hideOverlay,reduced:()=>reduced.matches});
