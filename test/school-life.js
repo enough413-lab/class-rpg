@@ -48,6 +48,7 @@ export function installSchoolLife(ctx){
  document.body.append(host);
  const $=id=>host.querySelector('#'+id),canvas=$('lifeCanvas'),g=canvas.getContext('2d'),overlay=$('lifeOverlay');
  let mode='title',state=freshLife(),owner='',ownerToken='',readError=false,saveError=false,cloudStatus='loading',ownWrite=false,pos={x:800,y:725},keys=new Set(),path=[],near=null,nearId='',frame=0,lastTime=0,clock=0,scene='room',facing=1,jump=0,moving=false,fish=null,effect=[],toastTimer=0,actionUntil=0,focusBack=null,audio=null,sound=false,audioTimer=0,stopped=false,heldTool='',gesture=null;
+ let doorArrivalAt=null;
  let W=1,H=1,DPR=1,S=1,viewScale=1,avatarScale=1,camera={x:0,y:0},assets={},assetsReady=false,assetError=false,avatar=[];
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),feedback=createLifeFeedback(),playerAvatar=createLifeAvatar(),doorAction=createDoorAction(),repair=createFacilityRepair();
  const reactions=createReaction();let reactionView=null;
@@ -268,7 +269,7 @@ export function installSchoolLife(ctx){
   }
  }
  function avatarImages(){avatar=SLOTS.map(id=>document.getElementById(id)).filter(el=>el&&el.getAttribute('src')&&!el.classList.contains('hidden'));const next=owner+'|'+ownerToken+'|'+avatar.map(i=>i.id+':'+i.src).join('|');if(next!==seatedAvatarKey){clearReaction();seating.cancel();seatedAvatarKey=next;}playerAvatar.update(avatar,owner+'|'+ownerToken);}
- function open(){selectedCrop=null;clearReaction();toolAttachment=null;seating.cancel();if(!ctx.getStudent()?.id)return;replayOrigin=null;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void ground.activate(owner,ownerToken);void garden.activate(owner,ownerToken);void flowerDisplay.store.activate(owner,ownerToken);void cooking.store.activate(owner,ownerToken);void wish.store.activate(owner,ownerToken);void story.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
+ function open(){doorArrivalAt=null;selectedCrop=null;clearReaction();toolAttachment=null;seating.cancel();if(!ctx.getStudent()?.id)return;replayOrigin=null;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void ground.activate(owner,ownerToken);void garden.activate(owner,ownerToken);void flowerDisplay.store.activate(owner,ownerToken);void cooking.store.activate(owner,ownerToken);void wish.store.activate(owner,ownerToken);void story.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
  function close(){market.store.deactivate();cooking.store.deactivate();flowerDisplay.store.deactivate();seedShop.store.deactivate();selectedCrop=null;gardenIntent=null;garden.deactivate();ground.deactivate();clearReaction();toolAttachment=null;seating.cancel();if(!host.open)return;replayOrigin=null;story.cancelView();story.store.deactivate();wish.close();wish.store.deactivate();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;gesture=null;heldTool='';if(mode==='play'&&!saveError&&!readError&&valid())mutate(s=>{s.position={...pos};s.scene=scene;});keys.clear();path=[];fish=null;host.close();playerAvatar.reset();cancelAnimationFrame(frame);stopSound();focusBack?.focus?.({preventScroll:true});}
  function finishPrologue(){
   if(!valid()||mode!=='intro')return;
@@ -313,6 +314,12 @@ export function installSchoolLife(ctx){
  function map(){if(seating.active()||working()||stopped||document.hidden)return;book('우리 학교 산책 지도','<canvas class="life-map-canvas" id="lifeMapCanvas" width="750" height="500" aria-label="왼쪽 내 방, 위쪽 학교, 가운데 화단, 오른쪽 연못"></canvas><p>집 → 앞마당 → 학교 · 오른쪽에는 연못<br>바닥 클릭: 이동 · 가까운 대상: 행동</p><p class="life-remember">방향키 / WASD 걷기 · E / Enter 표시된 행동 · Space 폴짝 · Esc 수첩 닫기</p>');const c=$('lifeMapCanvas').getContext('2d');c.drawImage(assets.campus,0,0,750,500);c.font='17px SchoolLife';c.textAlign='center';for(const [text,x,y]of[['내 방',120,265],['학교',390,205],['꽃밭',310,320],['연못',625,430]]){c.fillStyle='#fff6dc';c.fillRect(x-35,y-18,70,26);c.fillStyle='#405d3f';c.fillText(text,x,y);}if(scene==='campus'){c.fillStyle='#e17d59';c.beginPath();c.arc(pos.x/1600*750,pos.y/1067*500,6,0,Math.PI*2);c.fill();}}
  function residents(){const use=residentUse(state,repair.view(performance.now(),reduced.matches));if(!assets.saessakSeated?.naturalWidth)use.saessak=null;return use;}
  function residentTarget(e){const p=residents()[e.id];return p?{...e,...p.target}:e;}
+ const doors={
+  room:{id:'door',x:800,y:965,label:'앞마당으로',action:'나가기',kind:'exit',target:'campus',landing:{x:260,y:570},look:'d'},
+  classroom:{id:'door',x:800,y:965,label:'학교 마당으로',action:'나가기',kind:'exit',target:'campus',landing:{x:815,y:460},look:'d'},
+  home:{id:'home',x:260,y:548,label:'내 방으로',action:'들어가기',kind:'exit',target:'room',landing:{x:800,y:920},look:'u'},
+  school:{id:'schoolDoor',x:815,y:435,label:'교실로',action:'들어가기',kind:'exit',target:'classroom',landing:{x:800,y:915},look:'u'}
+ };
  const classroomShelf={id:'classroomShelf',x:1305,y:510,label:'교실 책장',action:'책 고르기',kind:'classroomShelf'};
  function readClassroomShelf(){
   const list=[
@@ -323,9 +330,9 @@ export function installSchoolLife(ctx){
   browse();
  }
  function baseEntities(){
-  if(scene==='room')return [COOK_TARGET,{id:'door',x:800,y:965,label:'학교로 나가기',action:'나가기',kind:'exit',target:'campus'},{id:'plant',x:1400,y:630,label:'내 방의 작은 화분',action:'꾸미기',kind:'plant'}];
-  if(scene==='classroom')return [VASE_TARGET,...(state.opening.legacy||state.opening.step===7?[classroomShelf]:[]),{id:'door',x:800,y:965,label:'마당으로 나가기',action:'나가기',kind:'exit',target:'campus'},{id:'tori',x:1060,y:615,label:'부옹',action:'대화',kind:'npc'},...DUST.map(([x,y],i)=>({id:'dust'+i,x,y,index:i,label:'먼지 쓸기',action:'쓸기',kind:'dust'})).filter(o=>!state.dust.includes(o.index)),{id:'library',x:1160,y:775,label:'작은 책쉼터',action:state.projects.includes('library')?'쉬기':'살피기',kind:'project'}];
-  return [{id:'home',x:260,y:548,label:'내 방으로',action:'들어가기',kind:'exit',target:'room'},{id:'schoolDoor',x:815,y:435,label:'교실로',action:'들어가기',kind:'exit',target:'classroom'},{id:'saessak',x:540,y:540,label:'키토',action:'대화',kind:'npc'},{id:'pond',x:1155,y:786,label:'연못 낚시',action:'낚시하기',kind:'pond'},{id:'bench',x:945,y:610,label:'나무 벤치',action:state.projects.includes('bench')?'쉬기':'살피기',kind:'project'},{id:'school',x:935,y:457,label:'학교에 새 봄빛',action:construction()?.status==='building'?'공사 확인':construction()?.status==='ready'?'완공 확인':'살피기',kind:'project'},{id:'garden',x:805,y:591,label:'넓어진 꽃밭',action:'살피기',kind:'project'},{id:'lights',x:970,y:946,label:'등굣길 꽃등',action:'살피기',kind:'project'},...WEEDS.map(([x,y],i)=>({id:'weed'+i,x,y,index:i,label:'잡초 뽑기',action:'뽑기',kind:'weed'})).filter(o=>!state.weeds.includes(o.index)),...BRANCHES.map(([x,y],i)=>({id:'branch'+i,x,y,index:i,label:'나뭇가지 줍기',action:'줍기',kind:'branch'})).filter(o=>!state.branches.includes(o.index)),...FLOWERS.slice(0,state.projects.includes('garden')?6:3).map(([x,y],i)=>({id:'flower'+i,x,y,index:i,label:flowers()[i].stage===0?'빈 흙':cropOf(flowers()[i].kind).name,action:flowers()[i].stage===0?'심기':flowers()[i].stage<3?'물 주기':'살피기',kind:'flower'}))];
+  if(scene==='room')return [COOK_TARGET,doors.room,{id:'plant',x:1400,y:630,label:'내 방의 작은 화분',action:'꾸미기',kind:'plant'}];
+  if(scene==='classroom')return [VASE_TARGET,...(state.opening.legacy||state.opening.step===7?[classroomShelf]:[]),doors.classroom,{id:'tori',x:1060,y:615,label:'부옹',action:'대화',kind:'npc'},...DUST.map(([x,y],i)=>({id:'dust'+i,x,y,index:i,label:'먼지 쓸기',action:'쓸기',kind:'dust'})).filter(o=>!state.dust.includes(o.index)),{id:'library',x:1160,y:775,label:'작은 책쉼터',action:state.projects.includes('library')?'쉬기':'살피기',kind:'project'}];
+  return [doors.home,doors.school,{id:'saessak',x:540,y:540,label:'키토',action:'대화',kind:'npc'},{id:'pond',x:1155,y:786,label:'연못 낚시',action:'낚시하기',kind:'pond'},{id:'bench',x:945,y:610,label:'나무 벤치',action:state.projects.includes('bench')?'쉬기':'살피기',kind:'project'},{id:'school',x:935,y:457,label:'학교에 새 봄빛',action:construction()?.status==='building'?'공사 확인':construction()?.status==='ready'?'완공 확인':'살피기',kind:'project'},{id:'garden',x:805,y:591,label:'넓어진 꽃밭',action:'살피기',kind:'project'},{id:'lights',x:970,y:946,label:'등굣길 꽃등',action:'살피기',kind:'project'},...WEEDS.map(([x,y],i)=>({id:'weed'+i,x,y,index:i,label:'잡초 뽑기',action:'뽑기',kind:'weed'})).filter(o=>!state.weeds.includes(o.index)),...BRANCHES.map(([x,y],i)=>({id:'branch'+i,x,y,index:i,label:'나뭇가지 줍기',action:'줍기',kind:'branch'})).filter(o=>!state.branches.includes(o.index)),...FLOWERS.slice(0,state.projects.includes('garden')?6:3).map(([x,y],i)=>({id:'flower'+i,x,y,index:i,label:flowers()[i].stage===0?'빈 흙':cropOf(flowers()[i].kind).name,action:flowers()[i].stage===0?'심기':flowers()[i].stage<3?'물 주기':'살피기',kind:'flower'}))];
  }
  function entities(){return [...baseEntities().map(residentTarget).filter(e=>e.id!=='tori'||opening.toriVisible()).filter(e=>e.kind!=='project'||state.projects.includes(e.id)||level()>=PROJECTS.find(p=>p.id===e.id).level),...opening.entities(scene),...memories.entities(scene),...story.entities(scene)];}
  function blocked(x,y){if(x<80||x>1520||y<410||y>1000)return true;if(scene==='campus'){if(x<440&&y<535)return true;if(x>405&&x<1220&&y<405)return true;if(((x-1360)/208)**2+((y-650)/172)**2<1.07)return true;return false;}if(y<470)return true;if(scene==='room'&&((x<430&&y<550)||(x>1150&&y<510)))return true;return false;}
@@ -350,7 +357,17 @@ export function installSchoolLife(ctx){
   if(cloudStatus!=='ready'){toast(cloudStatus==='saving'?'저장 중…':'저장 확인 필요');if(cloudStatus!=='saving')cloud.show();return;}
   if(performance.now()<actionUntil)return;nearest();if(heldTool==='can'&&near?.kind==='flower'){useTool();return;}if(!near){toast('너무 멀다.');return;}const e={...near};actionUntil=performance.now()+400;clearReaction();path=[];keys.clear();face(e);
   if(memories.handle(e,assets)){story.decorateMemory(e);return;}if(story.handle(e)||opening.handle(e))return;
-  if(e.kind==='exit'){const firstArrival=scene==='room'&&e.target==='campus'&&!state.opening.legacy&&state.opening.step===1&&!arrivalSeen();const target=e.target;const dest=target==='campus'?(scene==='room'?{x:295,y:575}:{x:815,y:485}):{x:800,y:860};if(mutate(s=>{s.scene=target;s.position=dest;if(target==='classroom'&&s.opening.step===3)s.opening.step=4})){scene=target;pos=dest;refresh();if(firstArrival)queuedArrival={owner,token:ownerToken,state,position:{...dest}};else toast(names[scene]);}return;}
+  if(e.kind==='exit'){
+   const {target}=e;
+   const firstArrival=scene==='room'&&target==='campus'&&!state.opening.legacy&&state.opening.step===1&&!arrivalSeen();
+   const dest=firstArrival?{x:295,y:575}:{...e.landing};
+   if(mutate(s=>{s.scene=target;s.position=dest;if(target==='classroom'&&s.opening.step===3)s.opening.step=4})){
+    scene=target;pos=dest;look=e.look;jump=0;refresh();
+    if(firstArrival)queuedArrival={owner,token:ownerToken,state,position:{...dest}};
+    else{doorArrivalAt=performance.now();toast(names[scene]);}
+   }
+   return;
+  }
   if(e.kind==='npc'){if(e.id==='saessak'){const text=residents().saessak?'이제 삐걱거리지 않네.\n옆자리 비어 있어.':state.weeds.length<6?'여기, 작은 초록빛이 숨어 있어.\n마당의 잡초를 뽑고 빈 흙에 꽃을 심어 볼래?\n나뭇가지는 벤치를 고칠 때 쓸 수 있어.':flowers().slice(0,3).some(f=>f.stage<3)?'마당이 훨씬 환해졌어!\n물을 준 날마다 조금씩 자라.\n어떤 꽃을 심을지는 주머니에서 골라 봐.':'우리가 돌본 학교에 꽃이 피었네!\n네가 고른 꽃이 학교와 참 잘 어울려.\n가끔 연못에서 쉬어 가는 것도 좋아.';talk('키토',wish.remember('saessak',text),[{label:'둘러볼게'},{label:'이 학교 말인데',run:()=>wish.open('saessak')}],'saessak');}else talk('부옹',wish.remember('tori',state.projects.includes('library')?'우리 교실에 책쉼터가 생겼네!\n여기 앉아서 한숨 돌려도 좋아.':'네가 들어오니 교실에 생기가 도네.\n여기서 다시 책을 읽을 수 있어 기뻐.'),[{label:'다녀올게'},{label:'이 학교 말인데',run:()=>wish.open('tori')}],'tori');return;}
   if(['weed','branch','dust'].includes(e.kind)){const field={weed:'weeds',branch:'branches',dust:'dust'}[e.kind];if(mutate(s=>{if(!s[field].includes(e.index)){s[field].push(e.index);if(e.kind==='branch')s.wood++;}})){beginGesture({kind:e.kind,x:e.x,y:e.y,direction:look});gesture.color=e.kind==='dust'?'#d8c9ab':'#fbe3a1';laterToast(e.kind==='weed'?'잡초를 뽑았다.':e.kind==='branch'?'나뭇가지 +1':'먼지를 쓸었다.');}return;}
   if(e.kind==='flower'){tendFlower(e);return;}
@@ -478,6 +495,15 @@ export function installSchoolLife(ctx){
   if(gesture?.kind==='harvest')drawHarvest(g,assets[cropOf(gesture.flowerKind).itemArt],gesture,harvestFrame((t-gesture.at)/HARVEST_MS,reduced.matches),harvestAttachment);
   drawWater(g,gesture,t,reduced.matches);feedback.draw(g,scene,pos,t,reduced.matches);
   effect.forEach(e=>{g.globalAlpha=Math.max(0,e.life);ellipse(e.x,e.y,4,4,e.color);});g.globalAlpha=1;
+  if(doorArrivalAt!==null){
+   const age=t-doorArrivalAt;
+   if(reduced.matches||age>=180){doorArrivalAt=null;}
+   else{
+    g.save();g.setTransform(DPR,0,0,DPR,0,0);
+    g.fillStyle='rgba(46,35,27,'+(.4*(1-clamp(age/180,0,1)))+')';
+    g.fillRect(0,0,W,H);g.restore();
+   }
+  }
  }
  function tick(t){if(!host.open)return;const dt=Math.min(.05,(t-(lastTime||t))/1000);lastTime=t;
   if(!valid()){close();return;}
