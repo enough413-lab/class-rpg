@@ -23,7 +23,7 @@ import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
 import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-pixel-avatar.js?v=20261123-pixel-v2';
-import {createSchoolStory} from './school-life-story.js?v=20261124-obstacles';
+import {createSchoolStory} from './school-life-story.js?v=20261124-clues';
 import {createSchoolWish} from './school-life-wish.js?v=20261123-residents';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261123-residents';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261123-residents';
@@ -475,7 +475,7 @@ export function installSchoolLife(ctx){
   }
   if(gesture?.kind==='dust'&&scene==='classroom')drawSweptDust(g,gesture,(t-gesture.at)/gestureDuration(),reduced.matches);
   for(const p of repair.layers(scene,assets,level(),state.projects,t,reduced.matches))props.push({...p,draw:()=>p.draw(g)});const repairing=repair.view(t,reduced.matches),building=construction();if(!repairing)for(const p of constructionLayers(scene,assets,building,t,reduced.matches||stopped||document.hidden))props.push({...p,draw:()=>p.draw(g)});for(const p of workerLayers(repairing||(scene==='campus'?constructionView(building,t,reduced.matches||stopped||document.hidden):null),assets))props.push({...p,draw:()=>p.draw(g)});
-  memories.draw(g,scene,assets,'photo');if(scene==='classroom')props.push({id:'waitingBook',y:527,draw:()=>memories.draw(g,scene,assets,'book')});opening.draw(g,scene,assets,t,reduced.matches);for(const part of story.depth(scene))props.push({...part,draw:()=>story.draw(g,scene,part.id)});
+  memories.draw(g,scene,assets,'photo');story.drawPhotoMarks(g,scene);if(scene==='classroom')props.push({id:'waitingBook',y:527,draw:()=>memories.draw(g,scene,assets,'book')});opening.draw(g,scene,assets,t,reduced.matches);for(const part of story.depth(scene))props.push({...part,draw:()=>story.draw(g,scene,part.id)});
   if(!working(t)&&!seating.active()&&['can','spade','hoe'].includes(heldTool)&&!fish&&overlay.hidden&&scene==='campus'){
    const c=selectedToolCell(),usable=heldTool==='can'||groundAllowed(c.id)&&(ground.snapshot().plots.some(p=>p.cell===c.id&&p.tilled)||!groundObstructed(c.id,state));drawToolTarget(g,c,usable);
   }
