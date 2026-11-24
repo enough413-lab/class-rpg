@@ -8,7 +8,8 @@ export function createSchoolWoods(api){
  function blocked(x,y){if(x<150||x>1460||y<330||y>1000)return true;if(x>1110&&y<525)return true;return x>680&&x<910&&!(api.state().bridge===7&&y>=720&&y<=815);}
  const creek={id:'creekBank',x:630,y:578,label:'개울가 돌무더기',action:'물살 보기'};
  const hollow={id:'oldHollow',x:1290,y:530,label:'빈 나무',action:'들여다보기'};
- function targets(){const s=api.state(),a=[{id:'return',x:260,y:955,label:'학교로',action:'돌아가기'}];if(s.phase===5){if(!carried)a.push({id:'boards',x:540,y:840,label:'남겨 둔 판자',action:'들기'});else for(let i=0;i<3;i++)if(!(s.bridge&(1<<i)))a.push({id:'slot'+i,slot:i,x:660,y:727+i*34,label:'다리 '+(i+1)+'번째 자리',action:'판자 놓기'});}if(s.phase===6)a.push({id:'clapper',x:1290,y:530,label:'나무 안의 종추',action:'챙기기'});if(!carried)a.push(creek);if(s.phase>=7)a.push(hollow);if(s.phase>=5&&s.phase<=7)a.push({id:'duri',x:570,y:650,label:'두리',action:'대화'});return a;}
+ const note={id:'woodsNote',x:1410,y:552,label:'돌 곁에 접힌 쪽지',action:'읽기'};
+ function targets(){const s=api.state(),a=[{id:'return',x:260,y:955,label:'학교로',action:'돌아가기'}];if(s.phase===5){if(!carried)a.push({id:'boards',x:540,y:840,label:'남겨 둔 판자',action:'들기'});else for(let i=0;i<3;i++)if(!(s.bridge&(1<<i)))a.push({id:'slot'+i,slot:i,x:660,y:727+i*34,label:'다리 '+(i+1)+'번째 자리',action:'판자 놓기'});}if(s.phase===6)a.push({id:'clapper',x:1290,y:530,label:'나무 안의 종추',action:'챙기기'});if(!carried)a.push(creek);if(s.phase>=6)a.push(note);if(s.phase>=7)a.push(hollow);if(s.phase>=5&&s.phase<=7)a.push({id:'duri',x:570,y:650,label:'두리',action:'대화'});return a;}
  function use(){if(!own()||paused||!near)return;const e={...near};keys.clear();path=null;({look,facing}=faceTarget(position,e,look,facing));
   if(e.id==='return'){stop();api.exit();return;}
   if(e.id==='boards'){carried=true;api.announce('판자를 들었다.');return;}
@@ -18,6 +19,11 @@ export function createSchoolWoods(api){
    const at={...position};
    stop();
    api.say(e.label,e.id===creek.id?'물살이 둥근 돌을 만나 둘로 갈라진다.\n 돌 뒤에서 작은 물결이 다시 만난다.':'빈 자리 아래로 뿌리가 드러나 있다.\n 뿌리 사이에서 작은 잎이 올라왔다.',()=>open(at));
+   return;
+  }
+  if(e.id===note.id){
+   const at={...position};stop();
+   api.say(note.label,'나무에 새잎이 폈다. 학교 종이 다시 울리면 셋이 같이 보러 오자. — 두리',()=>open(at));
    return;
   }
   if(e.id==='duri'){const at={...position};stop();api.say('두리',api.state().bridge<7?'이 판자들은 아직 튼튼해.\n내가 받치고 있을게. 빈자리에 하나씩 올려.':'이제 건널 수 있어.\n종추는 저 빈 나무 안에 있을 거야.',()=>open(at));}
@@ -42,6 +48,13 @@ export function createSchoolWoods(api){
    }
   }
   if(s.phase===5&&!carried)for(let i=0;i<3;i++)if(!(s.bridge&(1<<i)))paintBoard(540+i*5,826+i*8,92);
+  if(s.phase>=6){
+   g.save();g.translate(note.x,note.y-5);g.rotate(-.19);
+   g.fillStyle='#675744';g.fillRect(-9,-5,20,12);
+   g.fillStyle='#e8d8a7';g.fillRect(-8,-5,15,9);
+   g.fillStyle='#ad996f';g.fillRect(-8,1,15,1);
+   g.restore();
+  }
   if(s.phase===6)api.drawClapper(g,1290,506,1);
   const people=[{y:position.y,draw:()=>{g.save();g.fillStyle='#314b3b45';g.beginPath();g.ellipse(position.x,position.y+5,20,7,0,0,Math.PI*2);g.fill();g.translate(position.x,position.y-(jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0));const motion={walking:moving&&!jump&&!api.reduced(),phase:walkPhase,carry:carried||s.phase===7};api.drawAvatar(g,look,motion);const hand=api.avatarHand(look,facing,motion);g.scale(facing,1);g.translate(hand.x/facing+22,hand.y+40);if(carried){g.save();g.translate(-20,-42);g.rotate(-.12);paintBoard(0,0,85);g.restore();}else if(s.phase===7)api.drawClapper(g,-23,-43,.6);g.restore();}}];
   if(s.phase>=5&&s.phase<=7)people.push({y:650,draw:()=>g.drawImage(a.duri,535,545,70,105)});people.sort((a,b)=>a.y-b.y).forEach(p=>p.draw());
