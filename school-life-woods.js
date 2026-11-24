@@ -2,6 +2,7 @@ import {faceTarget} from './school-life-facing.js?v=20261111-facing';
 import {lookDirection} from './school-life-feedback.js?v=20261110-field-feedback';
 import {paintSchoolLight,paintSchoolShadow} from './school-life-daylight.js?v=20261125-daylight';
 import {paintWoodsLeaves} from './school-life-nature.js?v=20261125-nature';
+import {crossedFootfall} from './school-life-foley.js?v=20261125-sound';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function createSchoolWoods(api){
  let active=false,canvas,g,position={x:260,y:940},keys=new Set(),path=null,near=null,carried=false,frame=0,last=0,facing=1,look='d',paused=false,scale=1,camera={x:0,y:0},size={w:1,h:1},jump=0,spaceHeld=false,walkPhase=0;
@@ -70,7 +71,12 @@ export function createSchoolWoods(api){
  }
  function tick(t){if(!own()){stop();return;}const dt=Math.min(.05,(t-(last||t))/1000);last=t;const priorPosition={...position};let dx=0,dy=0;if(!paused&&!document.hidden){dx=(keys.has('r')?1:0)-(keys.has('l')?1:0);dy=(keys.has('d')?1:0)-(keys.has('u')?1:0);if(dx||dy){const d=Math.hypot(dx,dy);dx/=d;dy/=d;path=null;}else if(path){const d=distance(position,path);if(d<5)path=null;else{dx=(path.x-position.x)/d;dy=(path.y-position.y)/d;}}
   const x=position.x+dx*100/scale*dt,y=position.y+dy*100/scale*dt;if(!blocked(x,position.y))position.x=x;else if(path)path=null;if(!blocked(position.x,y))position.y=y;else if(path)path=null;look=lookDirection(dx,dy,look);if(dx)facing=dx<0?1:-1;}
-  const walked=distance(priorPosition,position)*scale,moving=walked>.001;walkPhase=moving?(walkPhase+walked/56)%1:0;
+  const walked=distance(priorPosition,position)*scale,moving=walked>.001;
+  if(moving&&!jump&&crossedFootfall(walkPhase,walked)){
+   const bridge=api.state().bridge===7&&position.x>680&&position.x<910;
+   api.playFoley(bridge?'wood':'dirt');
+  }
+  walkPhase=moving?(walkPhase+walked/56)%1:0;
   near=targets().filter(e=>distance(e,position)<=76).sort((a,b)=>distance(a,position)-distance(b,position))[0]||null;const o=api.overlay(),b=o.querySelector('.life-woods-use');b.hidden=!near;b.textContent=near?.action||'행동';b.setAttribute('aria-label',near?near.label+' · '+near.action:'가까운 대상의 행동');o.querySelector('.life-woods-prompt').textContent=near?.label||'';o.querySelector('.life-woods-goal').textContent=carried?'다리의 빈자리':api.state().phase===5?'다리 놓기':api.state().phase===6?'빈 나무 살펴보기':api.state().phase===7?'학교로 돌아가기':'';if(jump&&t-jump>=550)jump=0;if(spaceHeld&&!jump&&!paused)jump=t;draw(t,moving);const label=o.querySelector('.life-woods-player');label.textContent=api.nickname();label.style.left=Math.round((position.x-camera.x)*scale)+'px';label.style.top=Math.round((position.y-camera.y)*scale+17)+'px';frame=requestAnimationFrame(tick);
  }
  function key(e,down){if(!own()||e.target.closest('input,textarea,select'))return false;const d={ArrowUp:'u',ArrowDown:'d',ArrowLeft:'l',ArrowRight:'r',w:'u',a:'l',s:'d',d:'r'}[e.key];if(d){e.preventDefault();e.stopImmediatePropagation();if(down){keys.add(d);path=null;}else keys.delete(d);return true;}if(e.key===' '&&!e.target.closest('input,textarea,select')){e.preventDefault();e.stopImmediatePropagation();spaceHeld=down;if(down&&!jump)jump=performance.now();return true;}if(['e','E','Enter'].includes(e.key)&&!e.target.closest('button')){e.preventDefault();e.stopImmediatePropagation();if(down&&!e.repeat&&e.key!==' ')use();return true;}if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();if(down&&!e.repeat){stop();api.exit();}return true;}return false;}

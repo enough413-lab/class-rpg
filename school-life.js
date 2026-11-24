@@ -23,10 +23,11 @@ import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
 import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-pixel-avatar.js?v=20261123-pixel-v2';
-import {createSchoolStory} from './school-life-story.js?v=20261125-nature';
+import {createSchoolStory} from './school-life-story.js?v=20261125-sound';
 import {createSchoolRain,createRainAmbience,rainySchoolDay} from './school-life-rain.js?v=20261125-weather';
 import {schoolDaylight,paintSchoolLight,paintSchoolShadow} from './school-life-daylight.js?v=20261125-daylight';
 import {paintCourtyardNature} from './school-life-nature.js?v=20261125-nature';
+import {crossedFootfall,makeSchoolFoley} from './school-life-foley.js?v=20261125-sound';
 import {createSchoolWish} from './school-life-wish.js?v=20261123-residents';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261123-residents';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261123-residents';
@@ -59,7 +60,7 @@ export function installSchoolLife(ctx){
  function react(kind,delay=0){reactions.schedule(kind,performance.now(),delay);}
  const furnitureDepth=createFurnitureDepth();let depthOrder=[];
  const seating=createSeating();let seatedAvatarKey=null;
- let walkPhase=0,walkMoving=false,buildIntent=null;
+ let walkPhase=0,walkMoving=false,buildIntent=null,nextPondSound=0;
  const construction=()=>cloud.store.snapshot()?.construction||null;
  const constructionDate=b=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'long',day:'numeric'}).format(new Date(b.due_at));
  let look='d',queuedToast=null,queuedArrival=null,replayOrigin=null;const arrivalsSeen=new Set();
@@ -75,7 +76,7 @@ export function installSchoolLife(ctx){
  function sit(id){clearReaction();keys.clear();path=[];jump=0;gesture=null;fish=null;$('lifeFish').hidden=true;seating.start(id,pos,look,performance.now(),reduced.matches);workControls();}
  function beginGesture(data){clearReaction();keys.clear();path=[];jump=0;gesture={...data,at:performance.now()};workControls();}
  function windowMotion(t=performance.now()){return gesture?.kind==='window'&&scene==='classroom'&&t-gesture.at<gestureDuration()?{index:gesture.index,phase:clamp((t-gesture.at)/gestureDuration(),0,1),last:gesture.last,reduced:reduced.matches}:null;}
- function windowOpened(window,previous,last,message){beginGesture({kind:'window',index:window.index,previous,last,x:window.x,y:window.y});laterToast(message,ACTION_MS);tone(last?784:660,.3);if(last)react('joy',ACTION_MS);}
+ function windowOpened(window,previous,last,message){beginGesture({kind:'window',index:window.index,previous,last,x:window.x,y:window.y});laterToast(message,ACTION_MS);playFoley('window');if(last)tone(784,.3);if(last)react('joy',ACTION_MS);}
  function cannotGo(){
   if(blockedNotice?.scene===scene&&distance(blockedNotice,pos)<28)return;
   blockedNotice={scene,...pos};toast('아직 갈 수 없다.');
@@ -88,9 +89,9 @@ export function installSchoolLife(ctx){
  const opening=installSchoolOpening({state:()=>state,residentGreeting:()=>residents().saessak?'이제 삐걱거리지 않네.\n옆자리 비어 있어.':null,mutate,talk,react,windowMotion,windowOpened,weedPulling:()=>gesture?.kind==='weed'&&working(),wishChoice:()=>({label:'이 학교 말인데',run:()=>wish.open('saessak')}),remember:(npc,text)=>wish.remember(npc,text),conversation:showConversation,toast,burst,tone,invitation:readInvitation,invitationActive:()=>invitation.active(),thought:mark=>feedback.notice(mark),doorView:()=>doorAction.view(performance.now(),reduced.matches),unlock:()=>{clearReaction();gesture=null;doorAction.start(pos);feedback.unlock(performance.now(),reduced.matches);keys.clear();path=[];jump=0;workControls();tone(660,.3);laterToast('교실 문이 열렸다.',reduced.matches?350:DOOR_MS);}});
  const wish=createSchoolWish({identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_wish',args),talk,hide:hideOverlay,overlay,valid});
  const memories=createSchoolMemories({talk,book,overlay:()=>overlay});
- const rain=createSchoolRain(),rainAmbience=createRainAmbience();
+ const rain=createSchoolRain(),rainAmbience=createRainAmbience(),foley=makeSchoolFoley();
  let rainy=false,daylight=schoolDaylight(),nextWeatherCheck=0;
- const story=createSchoolStory({rain,isRainy:()=>rainy,daylight:()=>daylight,identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d,m)=>playerAvatar.draw(g,d,m),avatarHand:(d,f,m)=>playerAvatar.hand(d,f,m),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
+ const story=createSchoolStory({rain,playFoley,isRainy:()=>rainy,daylight:()=>daylight,identity:()=>({id:ctx.getStudent()?.id,token:ctx.getToken?.()}),rpc:args=>ctx.db.rpc('student_school_life_story',args),original:()=>state,overlay:()=>overlay,assets:()=>assets,avatars:()=>avatar,drawAvatar:(g,d,m)=>playerAvatar.draw(g,d,m),avatarHand:(d,f,m)=>playerAvatar.hand(d,f,m),reduced:()=>reduced.matches,nickname:()=>ctx.getStudent()?.nickname||'모험가',valid:()=>valid()&&mode==='play'&&cloudStatus==='ready'&&!syncVisible(),changed:()=>{refresh();},talk,book,hide:hideOverlay,toast,tone,wishMemory:npc=>wish.remember(npc,''),wish:npc=>wish.open(npc)});
 
  let gardenIntent=null,selectedCrop=null;
  const chosenCrop=()=>selectedCrop??state.seed;
@@ -274,7 +275,7 @@ export function installSchoolLife(ctx){
   }
  }
  function avatarImages(){avatar=SLOTS.map(id=>document.getElementById(id)).filter(el=>el&&el.getAttribute('src')&&!el.classList.contains('hidden'));const next=owner+'|'+ownerToken+'|'+avatar.map(i=>i.id+':'+i.src).join('|');if(next!==seatedAvatarKey){clearReaction();seating.cancel();seatedAvatarKey=next;}playerAvatar.update(avatar,owner+'|'+ownerToken);}
- function open(){nextWeatherCheck=0;doorArrivalAt=null;drawerOpen=false;pumpUntil=0;selectedCrop=null;clearReaction();toolAttachment=null;seating.cancel();if(!ctx.getStudent()?.id)return;replayOrigin=null;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void ground.activate(owner,ownerToken);void garden.activate(owner,ownerToken);void flowerDisplay.store.activate(owner,ownerToken);void cooking.store.activate(owner,ownerToken);void wish.store.activate(owner,ownerToken);void story.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
+ function open(){nextWeatherCheck=0;nextPondSound=0;doorArrivalAt=null;drawerOpen=false;pumpUntil=0;selectedCrop=null;clearReaction();toolAttachment=null;seating.cancel();if(!ctx.getStudent()?.id)return;replayOrigin=null;prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;look='d';focusBack=document.activeElement;owner=String(ctx.getStudent().id);ownerToken=String(ctx.getToken?.()||'');cloud.reset();heldTool='';gesture=null;state=freshLife();scene='room';pos={x:800,y:725};cloudStatus='loading';readError=false;saveError=false;avatarImages();mode='title';stopped=false;host.showModal();startMusic();loadState();void ground.activate(owner,ownerToken);void garden.activate(owner,ownerToken);void flowerDisplay.store.activate(owner,ownerToken);void cooking.store.activate(owner,ownerToken);void wish.store.activate(owner,ownerToken);void story.store.activate(owner,ownerToken);$('lifeTitle').hidden=false;$('lifeHud').hidden=true;overlay.hidden=true;keys.clear();path=[];resize();if(!assetsReady)loadAssets();updateTitle();lastTime=0;cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);$('lifeStart').focus();}
  function close(){market.store.deactivate();cooking.store.deactivate();flowerDisplay.store.deactivate();seedShop.store.deactivate();selectedCrop=null;gardenIntent=null;garden.deactivate();ground.deactivate();clearReaction();toolAttachment=null;seating.cancel();if(!host.open)return;replayOrigin=null;story.cancelView();story.store.deactivate();wish.close();wish.store.deactivate();prologue.stop();invitation.stop();arrival.stop();dialogue.stop(true);queuedArrival=null;queuedToast=null;feedback.reset();doorAction.stop();repair.stop();buildIntent=null;blockedNotice=null;gesture=null;heldTool='';if(mode==='play'&&!saveError&&!readError&&valid())mutate(s=>{s.position={...pos};s.scene=scene;});keys.clear();path=[];fish=null;host.close();playerAvatar.reset();cancelAnimationFrame(frame);stopSound();focusBack?.focus?.({preventScroll:true});}
  function finishPrologue(){
   if(!valid()||mode!=='intro')return;
@@ -398,7 +399,7 @@ export function installSchoolLife(ctx){
   }
   if(e.kind==='plant'){if(state.roomPlant<0)talk('작은 선반','학교에서 키운 꽃 모양의 화분을 놓는 자리.');else talk('나의 작은 화분',FLOWER_NAMES[state.roomPlant]+' 화분. 학교에서 키운 꽃과 같은 모양이다.');return;}
   if(e.kind==='project'){if(e.id==='garden'&&(!garden.snapshot().enrolled||garden.snapshot().status!=='ready')){gardenPanel();return;}const p=PROJECTS.find(p=>p.id===e.id);if(e.id==='school'&&schoolConstruction())return;if(state.projects.includes(e.id)){if(e.id==='bench'||e.id==='library'){sit(e.id);}else talk(p.name,'수리가 끝났다.');return;}const reason=projectRequirement(lifeView(),p.id,level());if(reason){talk(p.name,reason+`\n${p.description}`,[{label:'확인'},{label:'학교 수첩',run:journal}]);return;}if(p.id==='school'){talk('학교 외관','지붕과 벽을 고친다. 내일 완공.\n나뭇가지 5개 필요',[{label:'공사 시작',run:()=>{if(!projectRequirement(lifeView(),'school',level()))buildSchool('start_school');}},{label:'돌아가기'}]);return;}talk(p.name,p.description+(p.wood?`\n나뭇가지 ${p.wood}개 필요`:''),[{label:'함께 고치기',run:()=>{if(projectRequirement(lifeView(),p.id,level()))return;if(mutate(s=>{s.projects.push(p.id);s.wood-=p.wood;})){clearReaction();gesture=null;keys.clear();path=[];jump=0;repair.start(p);workControls();const duration=reduced.matches?1000:REPAIR_MS;laterToast(p.name+' 완성',duration);react('joy',duration);}}},{label:'조금 이따가'}]);return;}
-  if(e.kind==='pond'){heldTool='rod';look='r';facing=-1;fish={phase:'wait',at:performance.now(),bite:performance.now()+1700+Math.random()*1600};$('lifeFish').hidden=false;tone(440,.1);}
+  if(e.kind==='pond'){heldTool='rod';look='r';facing=-1;fish={phase:'wait',at:performance.now(),bite:performance.now()+1700+Math.random()*1600};$('lifeFish').hidden=false;playFoley('pond');nextPondSound=performance.now()+3800;}
  }
  function selectedToolCell(){return selectedToolTarget(pos,look,scene==='campus'?FLOWERS.slice(0,state.projects.includes('garden')?6:3):[]);}
  function waterSpout(){const [dx,dy]=VECTORS[look],hand=playerAvatar.hand(look,facing);return {x:pos.x+hand.x+dx*28,y:pos.y+hand.y+dy*28};}
@@ -409,7 +410,8 @@ export function installSchoolLife(ctx){
   if(flower){tendFlower({...target,index:target.index},true);return;}
   actionUntil=performance.now()+950;keys.clear();path=[];beginGesture({...target,kind:'water',from:{...pos},spout:waterSpout()});if(flower?.stage===2)react('joy',ACTION_MS);tone(660,.12);
  }
- function reel(){if(!fish)return;const good=fish.phase==='bite';fish=null;nearId=null;$('lifeFish').hidden=true;if(good){const n=state.fish.reduce((a,b)=>a+b,0)%3,first=!state.fish[n];if(mutate(s=>s.fish[n]=Math.min(999,s.fish[n]+1))){burst(1165,786,'#d6eff0');toast(FISH_NAMES[n]+' 발견. 낚시 기록에 남기고 방생했다.');tone(880,.3);react(first?'surprise':'joy');}}else{toast('너무 일찍 낚싯대를 올렸다.');react('sad');}}
+ function reel(){if(!fish)return;playFoley('pond');nextPondSound=performance.now()+3800;const good=fish.phase==='bite';fish=null;nearId=null;$('lifeFish').hidden=true;if(good){const n=state.fish.reduce((a,b)=>a+b,0)%3,first=!state.fish[n];if(mutate(s=>s.fish[n]=Math.min(999,s.fish[n]+1))){burst(1165,786,'#d6eff0');toast(FISH_NAMES[n]+' 발견. 낚시 기록에 남기고 방생했다.');tone(880,.3);react(first?'surprise':'joy');}}else{toast('너무 일찍 낚싯대를 올렸다.');react('sad');}}
+ function playFoley(kind){if(sound&&!stopped&&!document.hidden)foley.play(audio,kind);}
  function tone(freq,duration){if(!sound||!audio||stopped||document.hidden)return;const o=audio.createOscillator(),v=audio.createGain();o.type='sine';o.frequency.value=freq;v.gain.setValueAtTime(0,audio.currentTime);v.gain.linearRampToValueAtTime(.035,audio.currentTime+.025);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.03);}
  function stopSound(){rainAmbience.stop();clearInterval(audioTimer);audio?.suspend?.();}
  function startMusic(){clearInterval(audioTimer);if(!sound||!host.open||stopped||document.hidden)return;audio?.resume?.();let n=0;audioTimer=setInterval(()=>{if(!host.open||document.hidden||stopped||mode==='intro'||mode==='replay'||arrival.active())return;tone([523,659,784,659,587,440,523,0][n++%8],1.1);},2300);}
@@ -428,7 +430,7 @@ export function installSchoolLife(ctx){
   const j=jump?Math.sin(clamp((t-jump)/550,0,1)*Math.PI)*26:0;if(jump&&t-jump>550)jump=0;
   const action=doorView&&!doorView.walking&&!reduced.matches?{kind:'unlock'}:gesture&&t-gesture.at<gestureDuration()?gesture:null;if(!action)gesture=null;
   const phase=doorView?doorView.keyPhase:action?clamp((t-action.at)/(action.kind==='plant'?PLANT_MS:action.kind==='harvest'?HARVEST_MS:ACTION_MS),0,1):0,actionView=action?actionFrame(action.kind,phase,reduced.matches):null,bend=actionView?.lean||0;
-  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(!['weed','dust'].includes(action.kind))burst(action.x,action.y,action.color);tone(660,.12);}
+  if(action?.color&&actionView.impact&&!action.impactShown){action.impactShown=true;if(!['weed','dust'].includes(action.kind))burst(action.x,action.y,action.color);if(action.kind==='dust')playFoley('broom');else tone(660,.12);}
   const motion={reaction:reactionView,seated:seat&&!seat.walking?seat.amount:undefined,action:action&&!reduced.matches?actionView:null,facing,walking:doorView?doorView.walking&&!reduced.matches:seat?seat.walking&&!reduced.matches:walkMoving&&!jump&&!reduced.matches&&!action,phase:doorView?doorView.walkPhase:seat?seat.walkPhase:walkPhase,carry:!!(doorView||heldTool||fish||story.carrying()||invitation.active())};const hand=playerAvatar.hand(drawLook,facing,motion);
   if(action?.kind==='dig'&&!reduced.matches){
    const shape=TOOL_SHAPES[action.tool||'spade'],pose=toolTransform(action.tool||'spade',drawLook,facing,actionView),bodyAngle=-bend*.24*facing,dx=(shape.tip[0]-shape.grip[0])*shape.scale*pose.mirror,dy=(shape.tip[1]-shape.grip[1])*shape.scale;
@@ -596,7 +598,11 @@ export function installSchoolLife(ctx){
   reactionView=reactions.sample(t,{active:mode==='play'&&overlay.hidden&&!syncVisible()&&!document.hidden&&!stopped&&!seating.active()&&!moving&&!jump&&['ready','saving'].includes(cloudStatus),ready:cloudStatus==='ready'&&!working(t),reduced:reduced.matches});
   $('lifeToast').style.visibility=reactionView?'hidden':'';
   workControls(t);
+  if(walkMoving&&!jump&&crossedFootfall(walkPhase,walked))playFoley(scene==='campus'?'dirt':'wood');
   walkPhase=walkMoving?(walkPhase+walked/56)%1:0;
+  if(mode==='play'&&scene==='campus'&&overlay.hidden&&!stopped&&sound&&Math.hypot(pos.x-1155,pos.y-786)<90&&t>=nextPondSound){
+   playFoley('pond');nextPondSound=t+3800;
+  }
   if(queuedArrival){const q=queuedArrival;if(!valid()||q.owner!==owner||q.token!==ownerToken||mode!=='play'||scene!=='campus'||state!==q.state||distance(pos,q.position)>1||!['saving','ready'].includes(cloudStatus))queuedArrival=null;else if(cloudStatus==='ready'&&overlay.hidden&&!syncVisible())startArrival();}
   if(queuedToast&&t>=queuedToast.at){const message=queuedToast;queuedToast=null;if(message.scene===scene&&overlay.hidden&&mode==='play')toast(message.text);}
   effect.forEach(e=>{e.x+=e.vx*dt;e.y+=e.vy*dt;e.life-=dt;});effect=effect.filter(e=>e.life>0);invitation.tick(t,stopped||document.hidden);arrival.tick(t,stopped||document.hidden);dialogue.tick(t,stopped||document.hidden);drawWorld(t);
