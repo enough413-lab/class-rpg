@@ -23,9 +23,10 @@ import {drawHeldTool,SPADE_SVG,HOE_SVG,toolTransform,TOOL_SHAPES} from './school
 import {createSeating} from './school-life-seat.js?v=20261111-sitting';
 import {actionFrame,ACTION_MS} from './school-life-action.js?v=20261117-harvest-motion';
 import {createLifeAvatar,SLOTS} from './school-life-pixel-avatar.js?v=20261123-pixel-v2';
-import {createSchoolStory} from './school-life-story.js?v=20261125-daylight';
+import {createSchoolStory} from './school-life-story.js?v=20261125-nature';
 import {createSchoolRain,createRainAmbience,rainySchoolDay} from './school-life-rain.js?v=20261125-weather';
 import {schoolDaylight,paintSchoolLight,paintSchoolShadow} from './school-life-daylight.js?v=20261125-daylight';
+import {paintCourtyardNature} from './school-life-nature.js?v=20261125-nature';
 import {createSchoolWish} from './school-life-wish.js?v=20261123-residents';
 import {createSchoolConversations} from './school-life-conversations.js?v=20261123-residents';
 import {createSchoolArrival} from './school-life-arrival.js?v=20261123-residents';
@@ -512,7 +513,9 @@ export function installSchoolLife(ctx){
   if(scene==='campus'){
    if(rainy)rain.puddles(g,'campus',t,reduced.matches);
    for(const plot of ground.snapshot().plots){const beforeContact=gesture?.kind==='dig'&&gesture.id===plot.cell&&!actionFrame('dig',(t-gesture.at)/gestureDuration(),reduced.matches).impact;if(!plot.tilled&&!(gesture?.cover&&beforeContact))continue;if(beforeContact&&!gesture.cover)continue;const c=groundCell(plot.cell);g.drawImage(assets.soil,c.x-26,c.y-16,52,34);}
-   for(let i=0;i<6;i++){const [x,y]=FLOWERS[i];if(i<3||visualProjects.includes('garden')){const held=gesture?.kind==='harvest'&&gesture.index===i&&!harvestFrame((t-gesture.at)/HARVEST_MS,reduced.matches).contact&&!reduced.matches;flower(x,y,held?gesture.flowerKind:flowers()[i].kind,held?3:flowers()[i].stage);}}
+   const plants=flowers(),blooming=plants.findIndex((flower,i)=>flower.stage===3&&(i<3||visualProjects.includes('garden')));
+   for(let i=0;i<6;i++){const [x,y]=FLOWERS[i];if(i<3||visualProjects.includes('garden')){const held=gesture?.kind==='harvest'&&gesture.index===i&&!harvestFrame((t-gesture.at)/HARVEST_MS,reduced.matches).contact&&!reduced.matches;flower(x,y,held?gesture.flowerKind:plants[i].kind,held?3:plants[i].stage);}}
+   paintCourtyardNature(g,t,{flower:FLOWERS[blooming],rain:rainy,daylight,reducedMotion:reduced.matches});
    WEEDS.forEach(([x,y],i)=>{if(!state.weeds.includes(i))weed(x,y);else{ellipse(x,y,22,7,'#b7c47d55');}});BRANCHES.forEach(([x,y],i)=>{if(!state.branches.includes(i))branch(x,y);});
    props.push({id:pump.id,y:pump.y,draw:()=>drawPump(t)});
    props.push(visualProjects.includes('bench')?{id:'bench',y:595,draw:()=>sprite(assets.bench,945,595,150,105)}:{id:'brokenBench',y:619,draw:()=>g.drawImage(assets.brokenBench,872,490,146,129)});
