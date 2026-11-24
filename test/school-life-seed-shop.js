@@ -3,7 +3,7 @@ import {CROPS} from './school-life-crops.js?v=20261118-seeds';
 const art=['flower-harmony-v2.webp','flowerPink-harmony-v2.webp','flowerBlue-harmony-v2.webp','carrot-v1.webp','radish-v1.webp'];
 export function createSeedShop(api){
  let selected=0,handled=null;
- const visible=()=>!!api.overlay().querySelector('.life-seed-shop');
+ const visible=()=>!!api.overlay().querySelector('.life-seed-shop:not(.life-market)');
  const store=createSeedShopStorage({identity:api.identity,rpc:api.rpc,onChange:s=>{
   if(!api.valid())return;
   if(s.command&&s.command.id!==handled){handled=s.command.id;void api.finished();}
