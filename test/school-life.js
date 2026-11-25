@@ -10,7 +10,7 @@ import {PLANT_MS,plantingFrame,drawPlanting} from './school-life-planting.js?v=2
 import {selectedToolTarget,drawToolTarget} from './school-life-tool-target.js?v=20261117-plant';
 import {createGroundStorage} from './school-life-ground-storage.js?v=20261117-plant';
 import {groundCell,groundAllowed,groundObstructed,retainedFlowerSite} from './school-life-ground-map.js?v=20261117-plant';
-import {residentUse} from './school-life-residents.js?v=20261125-resident-routines';
+import {residentUse,paintResidentActivity} from './school-life-residents.js?v=20261125-resident-activity';
 import {workerScene,workerLayers} from './school-life-workers.js?v=20261112-workers';
 import {createFacilityRepair,REPAIR_MS,constructionView,constructionLayers} from './school-life-repair.js?v=20261113-construction';
 import {createDoorAction,drawDoorKey,DOOR_MS} from './school-life-door.js?v=20261112-door';
@@ -548,10 +548,10 @@ export function installSchoolLife(ctx){
   if(near&&!repair.active(t,reduced.matches)&&!doorAction.active(t,reduced.matches)&&!seating.active()&&!fish&&!arrival.active()&&!dialogue.active()){g.strokeStyle='#fff5b5';g.lineWidth=3;g.beginPath();g.ellipse(near.x,near.y+8,29,10,0,0,Math.PI*2);g.stroke();}
   const seatId=seating.snapshot()?.id,playerDepth=Math.max(pos.y,seatId==='bench'?596:seatId==='library'?801:0),people=[...props,{id:'player',y:playerDepth,actor:{left:pos.x-100*avatarScale,right:pos.x+100*avatarScale,top:pos.y-190*avatarScale,bottom:pos.y+30*avatarScale},draw:()=>drawPlayer(t)}];if(scene==='campus'){
    const use=residents().saessak,a=use||{...dialogue.actor('saessak'),w:69,h:103},depth=use?.depth||a.y;
-   people.push({id:'saessak',y:depth,actor:{left:a.x-a.w/2,right:a.x+a.w/2,top:a.y-a.h,bottom:a.y+8},draw:()=>{if(use?.activity==='bench')g.drawImage(assets.saessakSeated,a.x-a.w/2,a.y-a.h,a.w,a.h);else arrival.reaction(g,bob=>sprite(dialogue.pose('saessak')||assets.saessak,a.x,a.y,a.w,a.h,bob));placeName($('lifeNpcName'),'키토',a.x,use?.activity==='bench'?622:use?a.y+17:557);}});
+   people.push({id:'saessak',y:depth,actor:{left:a.x-a.w/2,right:a.x+a.w/2,top:a.y-a.h,bottom:a.y+8},draw:()=>{if(use?.activity==='bench')g.drawImage(assets.saessakSeated,a.x-a.w/2,a.y-a.h,a.w,a.h);else arrival.reaction(g,bob=>sprite(dialogue.pose('saessak')||assets.saessak,a.x,a.y,a.w,a.h,bob));paintResidentActivity(g,use,t,reduced.matches,assets.can);placeName($('lifeNpcName'),'키토',a.x,use?.activity==='bench'?622:use?a.y+17:557);}});
   }if(scene==='classroom'&&opening.toriVisible()){
    const use=residents().tori,a=use||{...dialogue.actor('tori'),w:dialogue.pose('tori')?72:81,h:108};
-   people.push({id:'tori',y:use?.depth||a.y,actor:{left:a.x-a.w/2,right:a.x+a.w/2,top:a.y-a.h,bottom:a.y+8},draw:()=>sprite(dialogue.pose('tori')||assets.tori,a.x,a.y,a.w,a.h)});
+   people.push({id:'tori',y:use?.depth||a.y,actor:{left:a.x-a.w/2,right:a.x+a.w/2,top:a.y-a.h,bottom:a.y+8},draw:()=>{sprite(dialogue.pose('tori')||assets.tori,a.x,a.y,a.w,a.h);paintResidentActivity(g,use,t,reduced.matches);}});
   }for(const p of story.people(scene))people.push({id:p.key,y:p.y,actor:{left:p.x-p.w/2,right:p.x+p.w/2,top:p.y-p.h,bottom:p.y+8},draw:()=>sprite(assets[p.key],p.x,p.y,p.w,p.h)});people.sort((a,b)=>a.y-b.y);depthOrder=people.map(p=>({id:p.id,y:p.y}));people.forEach(p=>{if(p.bounds&&!people.some(a=>a.actor&&a.y<p.y&&a.actor.left<p.bounds.right&&a.actor.right>p.bounds.left&&a.actor.top<p.bounds.bottom&&a.actor.bottom>p.bounds.top))return;p.draw();});if(fish&&toolAttachment?.tip){line([[toolAttachment.tip.x,toolAttachment.tip.y],[1280,fish.phase==='bite'?741:734]],'#f1e9c9',1.5);ellipse(1280,fish.phase==='bite'?741:734,4,5,'#f38762');}
   
   opening.drawLight(g,scene);dialogue.draw(g);invitation.drawWorld(g);
